@@ -1,0 +1,43 @@
+/* TAG */
+H3 {
+    margin-top: 40px;
+}
+
+img {
+    outline: 1px solid rgba(7, 7, 7, 0.2);
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+table {
+    font-size: 0.9em;
+}
+
+iframe {
+    width: 100vw;
+    height: 300px;
+    border-color: grey;
+    border-width: 1px;
+}
+
+
+/* CLASS */
+.admonition.note{
+    font-size: 0.95em;
+}
+
+.md-typeset details.note {
+    font-size: 0.95em;
+}
+
+.hljs-string{
+    color: black
+}
+
+.md-header{
+    background-color: black;
+}
+
+.md-typeset .tabbed-labels>label{
+    font-size: 1.1em
+}
