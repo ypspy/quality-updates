@@ -1,60 +1,22 @@
-site_name: 정책과 절차
-site_url: https://seonjin-qualitycontrol.github.io/policy/
+site_name: Quality-Updates
+site_url: https://quality-updates.onrender.com/
 
 theme:
   name: material
   custom_dir: overrides
   favicon: ./assets/images/clip.png
 
-nav:
-    - 내규:
-      - 정관(조회용, 개정 2023년 6월 23일): ./internalPolicy/00-정관.md
-      - 10 운영위원회 규정: ./internalPolicy/10-운영위원회 규정.md
-      - 20 감사운영에 관한 규정: ./internalPolicy/20-감사 운영에 관한 규정.md
-      - 30 회계 및 자금관리 규정: ./internalPolicy/30-회계 및 자금관리규정.md
-      - 회계 및 자금관리 규정 관련 시행세칙:
-        - 31 자금지출 전결 지침: ./internalPolicy/31-자금지출 전결지침.md
-        - 32 법인카드 사용 지침: ./internalPolicy/32-법인카드 사용지침.md
-      - 40 인사규정: ./internalPolicy/40-인사규정.md
-      - 인사규정 관련 시행세칙:
-        - 41 성과평가 지침: ./internalPolicy/41-성과평가지침.md 
-        - 42 재택근무 지침: ./internalPolicy/42-재택근무지침.md 
-      - 50 법인내부 윤리규정: ./internalPolicy/50-법인내부 윤리규정.md
-      - 60 상벌 규정: ./internalPolicy/60-상벌규정.md
-      - 70 감사조서관리 규정: ./internalPolicy/70-감사조서관리 규정.md
-      - 80 교육훈련규정: ./internalPolicy/80-교육훈련규정.md   
-      - 90 품질관리규정: ./internalPolicy/90-품질관리규정.md
-      - 품질관리규정 관련 시행세칙:
-        - 91 품질관리규정(부록): ./internalPolicy/91-품질관리규정(부록).md
-        - 92 법인내부 윤리규정 및 품질관리규정 징계 지침 : ./internalPolicy/92-법인내부 윤리규정 및 품질관리규정 징계 지침.md
-        - 93 업무수임과 유지에 관한 Policy: ./internalPolicy/93-업무수임과 유지에 관한 Policy.md
-        - 94 심리방침: ./internalPolicy/94-심리방침.md
-        - 95 감사보수지침: ./internalPolicy/95-감사보수지침.md
-      - 100 외부감사업무 중요성 관리규정: ./internalPolicy/100-외부감사업무 중요성 관리규정.md
-      - 개정사항: ./internalPolicy/개정사항.md
-    # - 정책 공지:
-      # - TBD: index.md
-    - 품질관리절차:
-      - 계약: './qualityProcedure/contract.md'
-      - 업무품질관리검토:
-        - 외부감사법 감사업무: './qualityProcedure/qualityReview.md'        
-      - 발행: ./qualityProcedure/goPublic.md
-      - 업무의 수행:
-        - 시간: ./under-construction.md
-        - 자문: ./qualityProcedure/consultation.md
-        - 조서: ./qualityProcedure/workingPaper.md
-        - 기타: ./under-construction.md
-      - 성과평가: ./qualityProcedure/performanceReview.md
-      - 징계: ./qualityProcedure/punishment.md
-    - 기타 절차: ./under-construction.md
-    - 품질관리감리 결과:
-      - 2022년 개선권고사항: ./fssReview/fr2022.md
-    - (참고) Quality Update:
-      - 2022.12.15. - 2023. 4. 3.: ./qualityUpdate/221215-230403.md
-      - 2023. 4. 3. - 2023. 5. 8.: ./qualityUpdate/230403-230508.md
-      - 2023. 5. 8. - 2023. 7. 14.: ./qualityUpdate/230508-230714.md
-      - 2023. 7. 14. - 2023. 8. 31.: ./qualityUpdate/230714-230831.md
-      - 2023. 8. 31. - 2023. 9. 30.: ./qualityUpdate/230831-230930.md
+nav:    
+    - 관련 정보:
+      - 2022:
+          - '12.15. - 4.3.': ./qualityUpdate/221215-230403.md
+      - 2023:
+          - '4.3. - 5.8.': ./qualityUpdate/230403-230508.md
+          - '5.8. - 7.14.': ./qualityUpdate/230508-230714.md
+          - '7.14. - 8.31.': ./qualityUpdate/230714-230831.md
+          - '8.31. - 9.30.': ./qualityUpdate/230831-230930.md
+    - 품질관리감리: ./fssReview/fr2022.md
+
 
 markdown_extensions:
     - toc:
