@@ -1,43 +1,57 @@
-site_name: Quality-Updates
+site_name: Quality Updates
 site_url: https://quality-updates.onrender.com/
 
 theme:
   name: material
-  custom_dir: overrides
-  favicon: ./assets/images/clip.png
+  language: ko
+  logo: assets/images/clip.png
+  favicon: assets/images/clip.png
+  features:
+    - navigation.instant
+    - navigation.tabs
+    - navigation.top
+    - navigation.sections
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - toc.follow
 
-nav:    
-    - 관련 정보:
-      - 2022:
-          - '12.15. - 4.3.': ./qualityUpdate/221215-230403.md
+nav:
+  - 홈: index.md
+
+  - 규제 업데이트:
       - 2023:
-          - '4.3. - 5.8.': ./qualityUpdate/230403-230508.md
-          - '5.8. - 7.14.': ./qualityUpdate/230508-230714.md
-          - '7.14. - 8.31.': ./qualityUpdate/230714-230831.md
-          - '8.31. - 9.30.': ./qualityUpdate/230831-230930.md
-    - 품질관리감리: ./fssReview/fr2022.md
+          - quality-updates/2023/2023-09-30_to_2023-12-31.md
+          - quality-updates/2023/2023-08-31_to_2023-09-30.md
+          - quality-updates/2023/2023-07-14_to_2023-08-31.md
+          - quality-updates/2023/2023-05-08_to_2023-07-14.md
+          - quality-updates/2023/2023-04-03_to_2023-05-08.md
 
+      - 2022:
+          - quality-updates/2022/2022-12-15_to_2023-04-03.md
+
+  - 품질관리감리:
+      - fss-review/fr2022.md
 
 markdown_extensions:
-    - toc:
-        permalink: '#'
-        baselevel: 1
-        toc_depth: 2-6
-    - attr_list
-    - footnotes
-    - admonition
-    - pymdownx.details
-    - pymdownx.superfences
-    - md_in_html
-    - pymdownx.tabbed:
-        alternate_style: true     
-  
+  - toc:
+      permalink: '#'
+      toc_depth: 2-6
+  - admonition
+  - footnotes
+  - pymdownx.superfences
+  - pymdownx.details
+  - attr_list
+  - pymdownx.tabbed:
+      alternate_style: true
+
 plugins:
   - search
+  - git-revision-date-localized:
+      fallback_to_build_date: true
 
 extra_css:
-  - stylesheets/extra.css
+  - assets/stylesheets/extra.css
 
 extra_javascript:
-  - javascripts/extra.js
-  
+  - assets/javascripts/extra.js
