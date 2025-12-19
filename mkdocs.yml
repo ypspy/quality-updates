@@ -14,6 +14,8 @@ theme:
     - search.suggest
     - search.highlight
     - content.code.copy
+    - content.action.edit
+    - content.action.view
     - toc.follow
 
 nav:
@@ -21,6 +23,9 @@ nav:
 
   - 규제 업데이트:
       - 2024:
+          - quality-updates/2024/2024-10-01_to_2024-12-31.md
+          - quality-updates/2024/2024-07-01_to_2024-09-30.md
+          - quality-updates/2024/2024-04-01_to_2024-06-30.md
           - quality-updates/2024/2024-01-01_to_2024-03-31.md
       
       - 2023:
@@ -51,7 +56,7 @@ markdown_extensions:
 plugins:
   - search
   - git-revision-date-localized:
-      fallback_to_build_date: true
+      enable_creation_date: true
 
 extra_css:
   - assets/stylesheets/extra.css
