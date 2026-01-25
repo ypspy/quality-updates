@@ -1,2 +1,37 @@
+# MkDocs 빌드 결과
 site/
-.py
+.cache/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+*.egg
+*.egg-info/
+*.egg-info
+dist/
+build/
+eggs/
+.pytest_cache/
+.coverage
+htmlcov/
+*.py
+
+# IDE / 에디터
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# 기타
+*.log
+.env
+.env.local

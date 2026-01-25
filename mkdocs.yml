@@ -1,19 +1,43 @@
 site_name: Quality Updates
 site_url: https://quality-updates.onrender.com/
+copyright: Copyright &copy; 2025 Quality Updates. 회계·감사 규제 모니터링 문서 사이트.
 
 theme:
   name: material
   language: ko
+  custom_dir: overrides
   logo: assets/images/clip.png
   favicon: assets/images/clip.png
+  palette:
+    - scheme: default
+      primary: black
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: 다크 모드로 전환
+    - scheme: slate
+      primary: black
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: 라이트 모드로 전환
+  font:
+    text: Noto Sans KR
+    code: Roboto Mono
   features:
     - navigation.instant
     - navigation.tabs
     - navigation.top
     - navigation.sections
+    - navigation.footer
+    - navigation.indexes
+    - navigation.tracking
     - search.suggest
     - search.highlight
+    - search.share
     - content.code.copy
+    - content.code.annotate
+    - content.tooltips
     - content.action.edit
     - content.action.view
     - toc.follow
@@ -22,24 +46,24 @@ nav:
   - 홈: index.md
 
   - 규제 업데이트:
-      - 2024:
-          - quality-updates/2024/2024-10-01_to_2024-12-31.md
-          - quality-updates/2024/2024-07-01_to_2024-09-30.md
-          - quality-updates/2024/2024-04-01_to_2024-06-30.md
-          - quality-updates/2024/2024-01-01_to_2024-03-31.md
-      
-      - 2023:
-          - quality-updates/2023/2023-10-01_to_2023-12-31.md
-          - quality-updates/2023/2023-08-31_to_2023-09-30.md
-          - quality-updates/2023/2023-07-14_to_2023-08-31.md
-          - quality-updates/2023/2023-05-08_to_2023-07-14.md
-          - quality-updates/2023/2023-04-03_to_2023-05-08.md
-
-      - 2022:
-          - quality-updates/2022/2022-12-15_to_2023-04-03.md
+      - 규제 업데이트 개요: quality-updates/index.md
+      - 2024년:
+          - 4분기 (10–12월): quality-updates/2024/2024-10-01_to_2024-12-31.md
+          - 3분기 (07–09월): quality-updates/2024/2024-07-01_to_2024-09-30.md
+          - 2분기 (04–06월): quality-updates/2024/2024-04-01_to_2024-06-30.md
+          - 1분기 (01–03월): quality-updates/2024/2024-01-01_to_2024-03-31.md
+      - 2023년:
+          - 4분기 (10–12월): quality-updates/2023/2023-10-01_to_2023-12-31.md
+          - 3분기 후반 (08–09월): quality-updates/2023/2023-08-31_to_2023-09-30.md
+          - 3분기 전반 (07–08월): quality-updates/2023/2023-07-14_to_2023-08-31.md
+          - 2분기 (05–07월): quality-updates/2023/2023-05-08_to_2023-07-14.md
+          - 2분기 전반 (04–05월): quality-updates/2023/2023-04-03_to_2023-05-08.md
+      - 2022년:
+          - 2022-12 ~ 2023-04: quality-updates/2022/2022-12-15_to_2023-04-03.md
 
   - 품질관리감리:
-      - fss-review/fr2022.md
+      - 품질관리감리 개요: fss-review/index.md
+      - 2022년 품질관리감리: fss-review/fr2022.md
 
 markdown_extensions:
   - toc:
@@ -54,9 +78,25 @@ markdown_extensions:
       alternate_style: true
 
 plugins:
-  - search
-  - git-revision-date-localized:
-      enable_creation_date: true
+  - search:
+      lang: ko
+      separator: '[\s\-\.]+'
+  # Git이 PATH에 있을 때만 주석 해제 (문서 수정일 표시)
+  # - git-revision-date-localized:
+  #     enable_creation_date: true
+  #     timezone: Asia/Seoul
+  #     locale: ko
+  - minify:
+      minify_html: true
+  - glightbox
+
+extra:
+  social:
+    - icon: fontawesome/solid/building
+      link: https://quality-updates.onrender.com
+  analytics:
+    feedback:
+      title: 페이지 도움 여부 평가
 
 extra_css:
   - assets/stylesheets/extra.css

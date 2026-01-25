@@ -1,0 +1,12 @@
+{
+  "name": "quality-updates",
+  "private": true,
+  "scripts": {
+    "start": "mkdocs serve",
+    "build": "mkdocs build",
+    "build:watch": "nodemon --watch docs --ext md,yml --exec \"mkdocs build\""
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  }
+}
