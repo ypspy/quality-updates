@@ -1,12 +1,32 @@
 {
   "name": "quality-updates",
+  "description": "회계·감사 분야 규제 모니터링 문서 사이트. 금융위·금감원·회계기준원 등 시기별 업데이트 허브.",
+  "version": "0.1.0",
   "private": true,
+  "keywords": [
+    "mkdocs",
+    "documentation",
+    "regulation",
+    "accounting",
+    "audit",
+    "korea"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/quality-updates.git"
+  },
   "scripts": {
     "start": "mkdocs serve",
+    "dev": "mkdocs serve",
     "build": "mkdocs build",
-    "build:watch": "nodemon --watch docs --ext md,yml --exec \"mkdocs build\""
+    "build:strict": "mkdocs build --strict",
+    "build:watch": "nodemon --watch docs --ext md,yml --exec \"mkdocs build\"",
+    "clean": "rimraf site .cache",
+    "lint:md": "markdownlint \"docs/**/*.md\" -c .markdownlint.json"
   },
   "devDependencies": {
-    "nodemon": "^3.0.0"
+    "nodemon": "^3.0.0",
+    "markdownlint-cli": "^0.38.0",
+    "rimraf": "^5.0.0"
   }
 }
