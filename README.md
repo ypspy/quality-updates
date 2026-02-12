@@ -41,7 +41,7 @@
 ### 1. 저장소 복제
 
 ```bash
-git clone https://github.com/YOUR_ORG/quality-updates.git
+git clone https://github.com/ypspy/quality-updates.git
 cd quality-updates
 ```
 
@@ -112,7 +112,8 @@ quality-updates/
 │   │   ├── index.md               # 규제 업데이트 개요
 │   │   ├── 2022/
 │   │   ├── 2023/
-│   │   └── 2024/
+│   │   ├── 2024/
+│   │   └── 2025/
 │   └── fss-review/                # 품질관리감리
 │       ├── index.md
 │       └── fr2022.md

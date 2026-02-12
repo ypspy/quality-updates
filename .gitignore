@@ -25,6 +25,7 @@ htmlcov/
 # IDE / 에디터
 .vscode/
 .idea/
+.cursor/
 *.swp
 *.swo
 *~
