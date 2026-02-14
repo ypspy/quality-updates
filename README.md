@@ -28,6 +28,7 @@
 - **검색**: MkDocs Material 검색 (한국어 구분자 지원)
 - **이미지 라이트박스**: glightbox 플러그인
 - **HTML/CSS/JS 최소화**: minify 플러그인으로 출력 최적화
+- **CI**: GitHub Actions (markdownlint, MkDocs 빌드, 콘텐츠 검증)
 
 ---
 
@@ -77,14 +78,27 @@ Node.js가 설치되어 있다면:
 
 ```bash
 npm install
-npm run dev        # mkdocs serve (동일)
-npm run build      # mkdocs build
-npm run build:strict  # mkdocs build --strict (경고 시 실패)
-npm run lint:md    # markdownlint-cli (docs 기준)
-npm run clean      # site, .cache 등 빌드 산출물 삭제
+npm run dev          # mkdocs serve (동일)
+npm run build        # mkdocs build
+npm run build:strict # mkdocs build --strict (경고 시 실패)
+npm run lint:md      # markdownlint-cli (docs 기준, AGENT_INSTRUCTION 제외)
+npm run clean        # site, .cache 등 빌드 산출물 삭제
 ```
 
-### 5. 엄격 빌드 검증
+### 5. 스크립트 (콘텐츠 작업용)
+
+```bash
+# HWP 문서 추출
+python scripts/extract_hwp.py --help
+
+# 분기 문서 시계열 정렬
+python scripts/reorder_chronological.py docs/quality-updates/2025/2025-01-01_to_2025-03-31.md
+
+# 콘텐츠 검증 (admonition, YAML, 날짜 형식 등)
+python scripts/validate_content.py
+```
+
+### 6. 엄격 빌드 검증
 
 배포 전 로컬에서 다음을 권장합니다.
 
@@ -126,9 +140,17 @@ quality-updates/
 ├── package.json                   # npm 스크립트 및 devDependencies
 ├── .editorconfig                  # 에디터 포맷 규칙
 ├── .markdownlint.json             # Markdown 린트 설정
+├── .github/
+│   ├── workflows/ci.yml           # CI (lint, build, validate)
+│   └── dependabot.yml             # 의존성 자동 업데이트
+├── scripts/                       # 유틸리티 스크립트
+│   ├── extract_hwp.py             # HWP 문서 추출
+│   ├── reorder_chronological.py   # 콘텐츠 시계열 정렬
+│   ├── validate_content.py        # 콘텐츠 스키마 검증
+│   └── HWP_EXTRACT_INSTRUCTION.md # HWP 추출 가이드
 ├── README.md                      # 이 파일
 ├── CONTRIBUTING.md                # 기여 가이드
-└── IMPROVEMENT_PLAN.md            # 종합 개선 계획
+└── IMPLEMENTATION_LOG.md          # 개선 작업 실행 로그
 ```
 
 - **탐색 구조**: `mkdocs.yml`의 `nav`에서 메뉴·레이블·파일 매핑을 정의합니다.
@@ -203,5 +225,5 @@ Render 대시보드에서 환경 변수·브랜치·빌드 명령을 변경할 �
 
 ## 라이선스·저작권
 
-© 2025 Quality Updates.  
+© 2026 Quality Updates.  
 사이트 내 저작권 문구는 `mkdocs.yml`의 `copyright` 및 푸터 오버라이드에 정의되어 있습니다.

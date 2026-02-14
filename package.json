@@ -13,7 +13,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/quality-updates.git"
+    "url": "https://github.com/ypspy/quality-updates.git"
   },
   "scripts": {
     "start": "mkdocs serve",
