@@ -25,6 +25,8 @@ htmlcov/
 # scripts/ 출력 아티팩트
 scripts/hwp_extracted.txt
 scripts/hwp_path.txt
+scripts/pdf_extracted.txt
+scripts/pdf_path.txt
 
 # IDE / 에디터
 .vscode/

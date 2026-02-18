@@ -11,7 +11,8 @@
 |------|------|------|
 | Task 1: scripts/ Git 추적 | ✅ 완료 | .gitignore 수정, scripts 추가 |
 | Task 2: read_hwp.py 정리 | ✅ 완료 | 파일 삭제 |
-| Task 3: HWP_EXTRACT_INSTRUCTION 현행화 | ✅ 완료 | extract_hwp_temp.py 제거, CLI 갱신 |
+| Task 2b: extract_hwp.py 제거 | ✅ 완료 | extract_hwp.py → convert_hwp_to_pdf.py 대체 |
+| Task 3: HWP_EXTRACT_INSTRUCTION 현행화 | ✅ 완료 | convert_hwp_to_pdf.py 기준으로 재작성 |
 | Task 4: reorder CLI 인자 | ✅ 완료 | argparse, --dry-run, 파일 존재 검증 |
 | Task 5: validate_content.py | ✅ 완료 | admonition, YAML, 날짜, 테이블 스키마 검증 |
 | Task 6: GitHub Actions CI | ✅ 완료 | lint, build, validate jobs |

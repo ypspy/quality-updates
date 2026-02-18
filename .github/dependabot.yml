@@ -8,6 +8,14 @@ updates:
       - dependencies
       - python
 
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    labels:
+      - dependencies
+      - javascript
+
   - package-ecosystem: github-actions
     directory: /
     schedule:

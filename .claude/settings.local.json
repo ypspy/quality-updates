@@ -3,7 +3,8 @@
     "allow": [
       "Bash(git -C \"C:\\\\Users\\\\yoont\\\\Documents\\\\sideProjects\\\\quality-updates\" diff --stat HEAD)",
       "Bash(git -C \"C:\\\\Users\\\\yoont\\\\Documents\\\\sideProjects\\\\quality-updates\" status --short)",
-      "Bash(git -C \"C:\\\\Users\\\\yoont\\\\Documents\\\\sideProjects\\\\quality-updates\" log --format=\"%h %ai %s\" -10)"
+      "Bash(git -C \"C:\\\\Users\\\\yoont\\\\Documents\\\\sideProjects\\\\quality-updates\" log --format=\"%h %ai %s\" -10)",
+      "WebFetch(domain:developer.hancom.com)"
     ]
   }
 }

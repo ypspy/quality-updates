@@ -88,8 +88,12 @@ npm run clean        # site, .cache 등 빌드 산출물 삭제
 ### 5. 스크립트 (콘텐츠 작업용)
 
 ```bash
-# HWP 문서 추출
-python scripts/extract_hwp.py --help
+# PDF 텍스트 추출
+python scripts/extract_pdf.py
+
+# HWP 텍스트 추출 (경로 지정 또는 최근 수정 .hwp 자동 탐색)
+python scripts/extract_hwp.py
+python scripts/extract_hwp.py --path "경로/파일.hwp"
 
 # 분기 문서 시계열 정렬
 python scripts/reorder_chronological.py docs/quality-updates/2025/2025-01-01_to_2025-03-31.md
@@ -144,10 +148,11 @@ quality-updates/
 │   ├── workflows/ci.yml           # CI (lint, build, validate)
 │   └── dependabot.yml             # 의존성 자동 업데이트
 ├── scripts/                       # 유틸리티 스크립트
-│   ├── extract_hwp.py             # HWP 문서 추출
+│   ├── extract_pdf.py             # PDF 텍스트 추출
+│   ├── extract_hwp.py             # HWP 텍스트 추출
 │   ├── reorder_chronological.py   # 콘텐츠 시계열 정렬
 │   ├── validate_content.py        # 콘텐츠 스키마 검증
-│   └── HWP_EXTRACT_INSTRUCTION.md # HWP 추출 가이드
+│   └── tests/                     # 스크립트 단위 테스트
 ├── README.md                      # 이 파일
 ├── CONTRIBUTING.md                # 기여 가이드
 └── IMPLEMENTATION_LOG.md          # 개선 작업 실행 로그
