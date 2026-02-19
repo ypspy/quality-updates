@@ -112,7 +112,7 @@ py scripts/reorder_chronological.py nonexistent.md   # → 에러 메시지 + ex
 
 **Jobs**
 
-- **lint**: markdownlint로 `docs/**/*.md` 검사 (AGENT_INSTRUCTION 제외)
+- **lint**: markdownlint로 `docs/**/*.md` 검사 (루트 AGENT_INSTRUCTION.md는 docs 밖이라 대상 아님)
 - **build**: `mkdocs build --strict`
 - **validate**: `python scripts/validate_content.py`
 

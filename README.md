@@ -81,7 +81,7 @@ npm install
 npm run dev          # mkdocs serve (동일)
 npm run build        # mkdocs build
 npm run build:strict # mkdocs build --strict (경고 시 실패)
-npm run lint:md      # markdownlint-cli (docs 기준, AGENT_INSTRUCTION 제외)
+npm run lint:md      # markdownlint-cli (docs 내 .md 검사)
 npm run clean        # site, .cache 등 빌드 산출물 삭제
 ```
 
@@ -153,6 +153,7 @@ quality-updates/
 │   ├── reorder_chronological.py   # 콘텐츠 시계열 정렬
 │   ├── validate_content.py        # 콘텐츠 스키마 검증
 │   └── tests/                     # 스크립트 단위 테스트
+├── AGENT_INSTRUCTION.md           # 에이전트 요약·포맷 지침 (Phase 1/2)
 ├── README.md                      # 이 파일
 ├── CONTRIBUTING.md                # 기여 가이드
 └── IMPLEMENTATION_LOG.md          # 개선 작업 실행 로그
