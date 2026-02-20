@@ -38,6 +38,10 @@ scripts/pdf_path.txt
 .DS_Store
 Thumbs.db
 
+# 프로젝트 다운로드 폴더 (PDF·HWP 등 원문 — 커밋 제외)
+downloads/*.pdf
+downloads/*.hwp
+
 # 기타
 *.log
 .env

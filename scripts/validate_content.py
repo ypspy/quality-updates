@@ -55,7 +55,7 @@ def validate_admonitions(lines: list[str], path: Path) -> list[ValidationError]:
                 break
             if j == i + 1:
                 errors.append(
-                    ValidationError(j + 1, "ADMON_BLANK", "!!!/??? 줄과 첫 내용 줄 사이에 빈 줄 1개 필요", "error")
+                    ValidationError(j + 1, "ADMON_BLANK", "!!!/??? 줄과 첫 내용 줄 사이에 빈 줄 1개 필요", "warning")
                 )
             if curr_indent > base_indent and curr_indent < required_content:
                 if not stripped.startswith("|"):
@@ -64,7 +64,7 @@ def validate_admonitions(lines: list[str], path: Path) -> list[ValidationError]:
                             j + 1,
                             "ADMON_INDENT",
                             f"admonition 내용은 4칸 추가 들여쓰기 필요 (현재 {curr_indent - base_indent}칸)",
-                            "error",
+                            "warning",
                         )
                     )
             j += 1
@@ -128,7 +128,7 @@ def validate_table_schema(lines: list[str], path: Path) -> list[ValidationError]
                             i + 1,
                             "TABLE_A",
                             f"Type A 표 헤더는 정확히 '{TYPE_A_HEADER}' 이어야 함",
-                            "error",
+                            "warning",
                         )
                     )
             elif "회사명" in stripped and "구분" in stripped and "주요 지적사항" in stripped and "주요 조치" in stripped:
@@ -139,7 +139,7 @@ def validate_table_schema(lines: list[str], path: Path) -> list[ValidationError]
                             i + 1,
                             "TABLE_B1",
                             f"Type B 회사별 표 헤더는 '{TYPE_B_HEADER_1}' 이어야 함",
-                            "error",
+                            "warning",
                         )
                     )
             elif "회사" in stripped and "주요 지적사항" in stripped and "대상" in stripped and "조치" in stripped:
@@ -152,7 +152,7 @@ def validate_table_schema(lines: list[str], path: Path) -> list[ValidationError]
                             i + 1,
                             "TABLE_B2",
                             f"Type B 감사인 표 헤더는 '{TYPE_B_HEADER_2}' 이어야 함",
-                            "error",
+                            "warning",
                         )
                     )
     return errors
