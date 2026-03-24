@@ -70,6 +70,18 @@ pip install -r requirements.txt
 mkdocs serve
 ```
 
+(Git Bash 등에서 `mkdocs: command not found`가 나오면 `python -m mkdocs serve` 로 실행하세요.)
+
+**alias로 고정하려면** (가상환경 활성화 후에만 동작하도록):
+
+```bash
+# 현재 셸에서만
+alias mkdocs='python -m mkdocs'
+
+# 매 터미널마다 적용: ~/.bashrc 맨 아래에 위 한 줄 추가
+echo "alias mkdocs='python -m mkdocs'" >> ~/.bashrc
+```
+
 브라우저에서 [http://127.0.0.1:8000](http://127.0.0.1:8000) 로 접속합니다.
 
 ### 4. npm 스크립트 (선택)
