@@ -32,6 +32,21 @@
 
 ---
 
+## 큐레이션 편집 도구
+
+크롤러 생성 `.md` 파일의 링크를 선별하고 PDF를 연결하는 로컬 편집 도구.
+
+```bash
+pip install flask   # 최초 1회
+python scripts/editor.py
+```
+
+- 파일 선택 → 링크 목록에서 요약 필요 / 스킵 결정
+- PDF 다운로드 후 드롭다운에서 연결
+- 저장 → Claude Code에서 SKILL.md Phase 0·1 수행
+
+---
+
 ## 로컬 개발 환경 설정
 
 ### 요구사항
