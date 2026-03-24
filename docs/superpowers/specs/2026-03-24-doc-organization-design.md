@@ -90,10 +90,23 @@ downloads/
 
 ## 구현 단계
 
-1. `.claude/skills/quality-updates-writer/` 디렉터리 생성
+1. `.claude/skills/quality-updates-writer/` 디렉터리 생성 (`mkdir -p`)
+
 2. `SKILL.md` 작성 (AGENT_INSTRUCTION + AGENT_PDF 통합)
-3. `boilerplate.md` 작성 (AGENT_BOILERPLATE 이동)
-4. 루트 `AGENT_*.md` 3개 삭제
-5. `bash.exe.stackdump`, `nul` 삭제
-6. `.gitignore` 업데이트
-7. 커밋
+   - `AGENT_INSTRUCTION.md` Phase 0 섹션의 `> 인코딩·HWP 변환 등 예외 처리는 AGENT_PDF.md 참조.` 줄을 **제거**하고 `AGENT_PDF.md` 전체 내용을 Phase 0에 인라인 통합
+   - `AGENT_INSTRUCTION.md` line 185의 `> 상세 지침은 AGENT_BOILERPLATE.md 참조.`를 `> 보일러플레이트 생성은 boilerplate.md 참조.`로 **교체**
+
+3. `boilerplate.md` 작성 (AGENT_BOILERPLATE 내용 그대로 이동)
+
+4. **검증**: `SKILL.md`와 `boilerplate.md`가 완성되었는지 확인
+   - `SKILL.md` 섹션 헤더 확인: Phase 0/1/2, 공통 규칙, 품질 체크리스트 모두 존재
+   - `boilerplate.md` 비어있지 않음 확인
+   - `SKILL.md` 내 `AGENT_PDF.md`, `AGENT_BOILERPLATE.md` 참조가 없음 확인
+
+5. 루트 `AGENT_*.md` 3개 삭제 (Git Bash `rm` 사용)
+
+6. `bash.exe.stackdump`, `nul` 삭제 (Git Bash `rm` 사용; cmd.exe `del` 사용 금지 — Windows 예약어 `nul` 처리 불안정)
+
+7. `.gitignore` 업데이트: 기존 `downloads/*.pdf`, `downloads/*.hwp` 두 줄을 **제거**하고 `downloads/` 전체 제외 패턴으로 교체
+
+8. 커밋
