@@ -1,0 +1,39 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', sans-serif; font-size: 13px; height: 100vh; display: flex; flex-direction: column; }
+
+#header { display: flex; align-items: center; justify-content: space-between; padding: 6px 12px; background: #1a1a2e; color: #fff; gap: 12px; flex-shrink: 0; }
+#header select, #header button { font-size: 12px; padding: 3px 8px; }
+#header button { cursor: pointer; }
+#btn-save { background: #4caf50; color: #fff; border: none; border-radius: 4px; padding: 4px 14px; font-weight: bold; }
+#header-center { flex: 1; text-align: center; font-size: 12px; }
+
+#main { display: flex; flex: 1; overflow: hidden; }
+#left-panel { width: 55%; overflow-y: auto; border-right: 2px solid #ccc; }
+#divider { width: 4px; background: #ddd; cursor: col-resize; }
+#right-panel { flex: 1; display: flex; flex-direction: column; }
+#iframe-container { flex: 1; display: flex; flex-direction: column; }
+#preview-iframe { flex: 1; border: none; width: 100%; height: 100%; }
+#iframe-fallback { padding: 40px; text-align: center; }
+#iframe-fallback a { color: #1976d2; font-size: 15px; }
+
+/* Table */
+#link-table { width: 100%; border-collapse: collapse; }
+#link-table th { background: #f0f0f0; padding: 6px 8px; text-align: left; position: sticky; top: 0; border-bottom: 2px solid #ccc; }
+#link-table td { padding: 5px 8px; border-bottom: 1px solid #eee; vertical-align: middle; }
+.section-header td { background: #e8eaf6; font-weight: bold; padding: 4px 8px; }
+
+/* Row states */
+tr.state-skip td { color: #aaa; }
+tr.state-needs td { background: #e3f2fd; }
+tr.state-done td { color: #888; font-style: italic; }
+
+/* State badge */
+.state-badge { cursor: pointer; padding: 2px 8px; border-radius: 12px; font-size: 11px; user-select: none; white-space: nowrap; }
+.badge-undecided { background: #eeeeee; }
+.badge-needs { background: #1976d2; color: #fff; }
+.badge-skip { background: #757575; color: #fff; }
+.badge-done { background: #388e3c; color: #fff; cursor: default; }
+
+/* Title link */
+.title-link { color: #1976d2; text-decoration: none; cursor: pointer; }
+.title-link:hover { text-decoration: underline; }

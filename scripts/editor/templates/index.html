@@ -1,1 +1,60 @@
-<!DOCTYPE html><html><body>placeholder</body></html>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Quality Updates Editor</title>
+  <link rel="stylesheet" href="/static/editor.css">
+</head>
+<body>
+  <!-- Header -->
+  <header id="header">
+    <div id="header-left">
+      <label>파일:
+        <select id="file-select"><option value="">선택...</option></select>
+      </label>
+      <span id="dl-folder-display"></span>
+      <button id="btn-change-folder">폴더 변경</button>
+    </div>
+    <div id="header-center">
+      전체 <span id="cnt-total">0</span> |
+      요약 필요 <span id="cnt-needs">0</span> |
+      스킵 <span id="cnt-skip">0</span> |
+      미결정 <span id="cnt-undecided">0</span> |
+      완료 <span id="cnt-done">0</span>
+    </div>
+    <div id="header-right">
+      <button id="btn-save">저장</button>
+    </div>
+  </header>
+
+  <!-- Main: split pane -->
+  <div id="main">
+    <div id="left-panel">
+      <table id="link-table">
+        <thead>
+          <tr>
+            <th>날짜</th>
+            <th>제목</th>
+            <th>기관</th>
+            <th>상태</th>
+            <th>PDF</th>
+          </tr>
+        </thead>
+        <tbody id="link-tbody"></tbody>
+      </table>
+    </div>
+    <div id="divider"></div>
+    <div id="right-panel">
+      <div id="iframe-container">
+        <iframe id="preview-iframe" src="about:blank" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+        <div id="iframe-fallback" style="display:none">
+          <p>이 사이트는 분할 화면을 지원하지 않습니다.</p>
+          <a id="fallback-link" href="#" target="_blank">새 탭에서 열기 →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/editor.js"></script>
+</body>
+</html>
