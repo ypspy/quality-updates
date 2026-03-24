@@ -49,9 +49,14 @@ def apply_curation(content: str, curation: list[dict]) -> str:
             i += 1
 
             # Skip blank lines + old comments immediately after link
+            # Track whether we consumed a blank line (to restore it after)
+            consumed_blank = False
             while i < len(lines):
                 next_stripped = lines[i].rstrip('\n')
-                if next_stripped == '' or _is_comment(next_stripped):
+                if next_stripped == '':
+                    consumed_blank = True
+                    i += 1
+                elif _is_comment(next_stripped):
                     i += 1
                 else:
                     break
@@ -62,7 +67,11 @@ def apply_curation(content: str, curation: list[dict]) -> str:
                 result.append('<!-- skip -->\n')
             elif state == 'needs_summary' and entry.get('pdf_path'):
                 result.append(f"<!-- pdf: {entry['pdf_path']} -->\n")
-            # undecided / done → no comment
+            # undecided → no comment
+
+            # Restore blank line separator between items
+            if consumed_blank:
+                result.append('\n')
 
             continue
 

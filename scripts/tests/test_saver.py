@@ -76,3 +76,21 @@ def test_bak_created(tmp_path):
     from editor.saver import save_with_backup
     save_with_backup(str(md_file), ORIGINAL, CURATION)
     assert (tmp_path / "test.md.bak").exists()
+
+
+def test_blank_line_preserved_between_items():
+    content = "- (25-01-10) [A](https://a.com)\n<!-- skip -->\n\n- (25-01-11) [B](https://b.com)\n"
+    curation = [{'line_index': 0, 'state': 'undecided', 'pdf_path': None}]
+    result = apply_curation(content, curation)
+    lines = result.splitlines()
+    idx_a = next(i for i, l in enumerate(lines) if '[A]' in l)
+    idx_b = next(i for i, l in enumerate(lines) if '[B]' in l)
+    assert idx_b - idx_a == 2, f"expected blank line between items, got idx_a={idx_a}, idx_b={idx_b}"
+
+
+def test_needs_summary_no_pdf_saves_as_undecided():
+    content = "- (25-01-10) [A](https://a.com)\n\n"
+    curation = [{'line_index': 0, 'state': 'needs_summary', 'pdf_path': None}]
+    result = apply_curation(content, curation)
+    assert '<!-- pdf:' not in result
+    assert '<!-- skip -->' not in result

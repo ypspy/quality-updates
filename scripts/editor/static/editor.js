@@ -61,6 +61,14 @@
         state: l.state,
         pdf_path: l.pdf_path || null,
       }));
+
+    // Warn if any needs_summary entries have no PDF (they'll save as undecided)
+    const unresolved = curation.filter(l => l.state === 'needs_summary' && !l.pdf_path);
+    if (unresolved.length > 0) {
+      const ok = confirm(`${unresolved.length}개 항목이 "요약 필요"이지만 PDF가 선택되지 않았습니다.\n저장하면 미결정으로 처리됩니다. 계속할까요?`);
+      if (!ok) return;
+    }
+
     const res = await fetch('/api/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
