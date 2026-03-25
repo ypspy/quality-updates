@@ -45,7 +45,7 @@ def test_pdf_updated():
     result = apply_curation(ORIGINAL, CURATION)
     lines = result.splitlines()
     idx = next(i for i, l in enumerate(lines) if '제목B' in l)
-    assert lines[idx + 1] == '<!-- pdf: downloads/250115.pdf -->'
+    assert lines[idx + 1] == '<!-- source: pdf|downloads/250115.pdf -->'
 
 
 def test_old_skip_removed():
@@ -93,4 +93,5 @@ def test_needs_summary_no_pdf_saves_as_undecided():
     curation = [{'line_index': 0, 'state': 'needs_summary', 'pdf_path': None}]
     result = apply_curation(content, curation)
     assert '<!-- pdf:' not in result
+    assert '<!-- source:' not in result
     assert '<!-- skip -->' not in result

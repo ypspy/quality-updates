@@ -5,12 +5,12 @@ import shutil
 
 SKIP_RE = re.compile(r'^<!-- skip -->$')
 PDF_RE = re.compile(r'^<!-- pdf: .+ -->$')
+SOURCE_RE = re.compile(r'^<!-- source:\s*[a-zA-Z0-9_-]+\|.+ -->$')
 APPENDIX_RE = re.compile(r'^## Appendix')
-NOTE_RE = re.compile(r'^\s+[!?]{3} note')
 
 
 def _is_comment(line: str) -> bool:
-    return bool(SKIP_RE.match(line) or PDF_RE.match(line))
+    return bool(SKIP_RE.match(line) or PDF_RE.match(line) or SOURCE_RE.match(line))
 
 
 def apply_curation(content: str, curation: list[dict]) -> str:
@@ -51,12 +51,18 @@ def apply_curation(content: str, curation: list[dict]) -> str:
             # Skip blank lines + old comments immediately after link
             # Track whether we consumed a blank line (to restore it after)
             consumed_blank = False
+            preserved_marker_line = None
             while i < len(lines):
                 next_stripped = lines[i].rstrip('\n')
                 if next_stripped == '':
                     consumed_blank = True
                     i += 1
                 elif _is_comment(next_stripped):
+                    # Preserve an existing marker if the incoming curation doesn't
+                    # provide enough info to re-write it. This prevents losing
+                    # source markers until the frontend sends `source`.
+                    if preserved_marker_line is None and (SOURCE_RE.match(next_stripped) or PDF_RE.match(next_stripped)):
+                        preserved_marker_line = lines[i]
                     i += 1
                 else:
                     break
@@ -65,8 +71,16 @@ def apply_curation(content: str, curation: list[dict]) -> str:
             state = entry['state']
             if state == 'skip':
                 result.append('<!-- skip -->\n')
-            elif state == 'needs_summary' and entry.get('pdf_path'):
-                result.append(f"<!-- pdf: {entry['pdf_path']} -->\n")
+            elif state == 'needs_summary':
+                src = entry.get('source')
+                if isinstance(src, dict) and src.get('type') and src.get('ref'):
+                    result.append(f"<!-- source: {src['type']}|{src['ref']} -->\n")
+                elif entry.get('pdf_path'):
+                    # Migration/normalization: even if the UI only sends `pdf_path`,
+                    # write the unified source marker.
+                    result.append(f"<!-- source: pdf|{entry['pdf_path']} -->\n")
+                elif preserved_marker_line is not None:
+                    result.append(preserved_marker_line)
             # undecided → no comment
 
             # Restore blank line separator between items

@@ -10,7 +10,10 @@ SECTION_RE = re.compile(r'^#{1,4}\s+(.+)')
 APPENDIX_RE = re.compile(r'^## Appendix')
 SKIP_RE = re.compile(r'^<!-- skip -->')
 PDF_RE = re.compile(r'^<!-- pdf: (.+?) -->')
+SOURCE_RE = re.compile(r'^<!-- source:\s*([a-zA-Z0-9_-]+)\|(.+?)\s*-->')
 NOTE_RE = re.compile(r'^\s+[!?]{3} note')
+
+ALLOWED_SOURCE_TYPES = {'pdf', 'web', 'clip', 'url'}
 
 AGENCY_KEYWORDS = {
     '금융감독원': '금융감독원',
@@ -30,7 +33,7 @@ def _detect_agency(header: str) -> Optional[str]:
 def parse_links(content: str) -> list[dict]:
     """Parse .md content and return list of link dicts.
 
-    Each dict: {date, title, url, state, pdf_path, agency, line_index}
+    Each dict: {date, title, url, state, pdf_path, source, agency, line_index}
     state: 'undecided' | 'skip' | 'needs_summary' | 'done'
     """
     lines = content.splitlines()
@@ -58,6 +61,7 @@ def parse_links(content: str) -> list[dict]:
             date, title, url = link_match.groups()
             state = 'undecided'
             pdf_path = None
+            source = None
 
             # Look ahead for state markers
             j = i + 1
@@ -68,9 +72,27 @@ def parse_links(content: str) -> list[dict]:
                 next_line = lines[j]
                 if SKIP_RE.match(next_line):
                     state = 'skip'
+                elif SOURCE_RE.match(next_line):
+                    src_type, src_ref = SOURCE_RE.match(next_line).groups()
+                    src_type = src_type.strip()
+                    src_ref = src_ref.strip()
+                    if src_type not in ALLOWED_SOURCE_TYPES:
+                        # Unknown marker type → treat as undecided to avoid
+                        # silently persisting invalid state.
+                        src_type = None
+                    if src_type == 'url':
+                        src_type = 'web'
+                    if src_type:
+                        state = 'needs_summary'
+                        source = {'type': src_type, 'ref': src_ref}
+                    # Backward compatibility: existing UI logic still uses pdf_path.
+                    # If source type is pdf, populate pdf_path as well.
+                    if source and source['type'] == 'pdf':
+                        pdf_path = source['ref']
                 elif PDF_RE.match(next_line):
                     state = 'needs_summary'
                     pdf_path = PDF_RE.match(next_line).group(1).strip()
+                    source = {'type': 'pdf', 'ref': pdf_path}
                 elif NOTE_RE.match(next_line):
                     state = 'done'
 
@@ -80,6 +102,7 @@ def parse_links(content: str) -> list[dict]:
                 'url': url,
                 'state': state,
                 'pdf_path': pdf_path,
+                'source': source,
                 'agency': current_agency,
                 'line_index': i,
             })
