@@ -48,6 +48,22 @@ def test_pdf_state():
     b = next(l for l in links if l['title'] == '제목B')
     assert b['state'] == 'needs_summary'
     assert b['pdf_path'] == 'downloads/250115.pdf'
+    assert b['source'] == {'type': 'pdf', 'ref': 'downloads/250115.pdf'}
+
+
+def test_clip_source_marker_parsed():
+    md = """
+### 금융감독원
+
+- (25-01-10) [클립항목](https://kasb.or.kr/x)
+<!-- source: clip|clip_1700000000_a1b2c3d4 -->
+"""
+    links = parse_links(md)
+    assert len(links) == 1
+    x = links[0]
+    assert x['state'] == 'needs_summary'
+    assert x['source'] == {'type': 'clip', 'ref': 'clip_1700000000_a1b2c3d4'}
+    assert x.get('pdf_path') in (None, '')
 
 
 def test_done_state():

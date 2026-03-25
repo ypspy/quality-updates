@@ -95,3 +95,31 @@ def test_needs_summary_no_pdf_saves_as_undecided():
     assert '<!-- pdf:' not in result
     assert '<!-- source:' not in result
     assert '<!-- skip -->' not in result
+
+
+def test_needs_summary_web_writes_source_marker():
+    content = "- (25-01-10) [A](https://a.com)\n\n"
+    curation = [
+        {
+            'line_index': 0,
+            'state': 'needs_summary',
+            'pdf_path': None,
+            'source': {'type': 'web', 'ref': 'https://example.com/doc'},
+        }
+    ]
+    result = apply_curation(content, curation)
+    assert '<!-- source: web|https://example.com/doc -->' in result
+
+
+def test_needs_summary_clip_writes_source_marker():
+    content = "- (25-01-10) [A](https://a.com)\n\n"
+    curation = [
+        {
+            'line_index': 0,
+            'state': 'needs_summary',
+            'pdf_path': None,
+            'source': {'type': 'clip', 'ref': 'clip_1700000000_a1b2c3d4'},
+        }
+    ]
+    result = apply_curation(content, curation)
+    assert '<!-- source: clip|clip_1700000000_a1b2c3d4 -->' in result

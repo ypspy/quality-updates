@@ -7,8 +7,9 @@
   // Each link:
   // - source: null | { type: 'pdf'|'web'|'clip', ref: string }
   // - pdf_path: kept for backward-compatible save payload (derived from source when type==='pdf')
-  // sourcePanel: 'pdf'|'web' — editor-only; which SOURCE tab is shown (not sent to API).
-  let linksData = [];   // [{date, title, url, state, source, pdf_path, sourcePanel, agency, line_index}]
+  // sourcePanel: 'pdf'|'web'|'clip' — editor-only; which SOURCE tab is shown (not sent to API).
+  // clipDraft: optional string — unsaved CLIP textarea (not sent to API).
+  let linksData = [];   // [{date, title, url, state, source, pdf_path, sourcePanel, clipDraft?, agency, line_index}]
   let pdfFiles = [];    // string[] (Option A)
 
   const RECENTS_KEY_PDF = 'quality-updates-editor:recentSources:pdf';
@@ -67,10 +68,16 @@
     return !!(s && s.type === 'web' && String(s.ref || '').trim());
   }
 
-  /** needs_summary rows that still need a PDF path (PDF or null source only; WEB with URL is OK). */
+  function hasResolvedClipSource(entry) {
+    const s = entry.source;
+    return !!(s && s.type === 'clip' && String(s.ref || '').trim());
+  }
+
+  /** needs_summary rows that still need a PDF path (WEB/CLIP with ref counts as resolved). */
   function isUnresolvedNeedsPdf(entry) {
     if (entry.state !== 'needs_summary') return false;
     if (hasResolvedWebSource(entry)) return false;
+    if (hasResolvedClipSource(entry)) return false;
     return !entry.pdf_path;
   }
 
@@ -218,13 +225,19 @@
   }
 
   function sourceKind(link) {
-    return link.sourcePanel === 'web' ? 'web' : 'pdf';
+    if (link.source && link.source.type === 'web') return 'web';
+    if (link.source && link.source.type === 'clip') return 'clip';
+    if (link.sourcePanel === 'web') return 'web';
+    if (link.sourcePanel === 'clip') return 'clip';
+    return 'pdf';
   }
 
   function sourceCell(link, idx) {
     if (link.state === 'done') return '';
     const kind = sourceKind(link);
     const webUrl = link.source && link.source.type === 'web' ? String(link.source.ref || '') : '';
+    const clipId = link.source && link.source.type === 'clip' ? String(link.source.ref || '') : '';
+    const clipDraft = link.clipDraft != null ? String(link.clipDraft) : '';
 
     const selectedPath = link.source && link.source.type === 'pdf' ? link.source.ref : (link.pdf_path || '');
     const fileName = selectedPath ? basename(selectedPath) : '';
@@ -254,11 +267,16 @@
       </div>
     `;
 
+    const clipLinked = clipId
+      ? `<div class="clip-linked">연결됨: <code>${escHtml(clipId)}</code></div>`
+      : '';
+
     return `
       <div class="source-cell" data-idx="${idx}">
         <div class="source-kind-row" role="tablist" aria-label="출처 유형">
           <button type="button" class="source-tab${kind === 'pdf' ? ' is-active' : ''}" data-kind="pdf" role="tab" aria-selected="${kind === 'pdf' ? 'true' : 'false'}">PDF</button>
           <button type="button" class="source-tab${kind === 'web' ? ' is-active' : ''}" data-kind="web" role="tab" aria-selected="${kind === 'web' ? 'true' : 'false'}">WEB</button>
+          <button type="button" class="source-tab${kind === 'clip' ? ' is-active' : ''}" data-kind="clip" role="tab" aria-selected="${kind === 'clip' ? 'true' : 'false'}">CLIP</button>
         </div>
         <div class="source-panel source-panel-pdf" data-panel="pdf" style="display:${kind === 'pdf' ? 'block' : 'none'}">${pdfBlock}</div>
         <div class="source-panel source-panel-web" data-panel="web" style="display:${kind === 'web' ? 'block' : 'none'}">
@@ -266,6 +284,15 @@
             <input class="web-url-input" type="url" inputmode="url" placeholder="https://…" value="${escHtml(webUrl)}" />
             <button class="source-btn web-btn-preview" type="button">미리보기/새로고침</button>
             <button class="source-btn web-btn-clear" type="button"${webUrl.trim() ? '' : ' disabled'}>비우기</button>
+          </div>
+        </div>
+        <div class="source-panel source-panel-clip" data-panel="clip" style="display:${kind === 'clip' ? 'block' : 'none'}">
+          ${clipLinked}
+          <textarea class="clip-draft" placeholder="붙여넣은 텍스트…" rows="4">${escHtml(clipDraft)}</textarea>
+          <div class="clip-toolbar">
+            <button class="source-btn clip-btn-save" type="button"${clipDraft.trim() ? '' : ' disabled'}>저장 및 연결</button>
+            <button class="source-btn clip-btn-preview" type="button"${clipId ? '' : ' disabled'}>미리보기</button>
+            <button class="source-btn clip-btn-clear" type="button"${clipId ? '' : ' disabled'}>연결 해제</button>
           </div>
         </div>
       </div>
@@ -283,6 +310,7 @@
       link.pdf_path = null;
       link.source = null;
       link.sourcePanel = 'pdf';
+      link.clipDraft = null;
     }
     updateCounter();
     renderTable(); // simple full re-render
@@ -302,16 +330,31 @@
   // ── Preview (iframe + fallback) ──────────────────────────────────────────────
   let previewSeq = 0;
 
-  function openPreview(url) {
+  function showPreviewIframe(srcUrl) {
     previewSeq += 1;
     const seq = previewSeq;
     const iframe = document.getElementById('preview-iframe');
     const fallback = document.getElementById('iframe-fallback');
-    const fallbackLink = document.getElementById('fallback-link');
 
     fallback.style.display = 'none';
     iframe.style.display = 'block';
-    iframe.src = '/api/source/preview?url=' + encodeURIComponent(url);
+    iframe.src = srcUrl;
+    return seq;
+  }
+
+  function openClipPreview(clipId) {
+    const id = String(clipId || '').trim();
+    if (!id) return;
+    showPreviewIframe('/api/clips/' + encodeURIComponent(id));
+    const iframe = document.getElementById('preview-iframe');
+    iframe.onload = null;
+    iframe.onerror = null;
+  }
+
+  function openPreview(url) {
+    const seq = showPreviewIframe('/api/source/preview?url=' + encodeURIComponent(url));
+    const iframe = document.getElementById('preview-iframe');
+    const fallbackLink = document.getElementById('fallback-link');
     fallbackLink.href = isSafeHttpUrl(url) ? url : '#';
 
     iframe.onload = () => {
@@ -363,7 +406,7 @@
     document.addEventListener('mouseup', () => { dragging = false; });
   }
 
-  // ── SOURCE cell (PDF | WEB) ─────────────────────────────────────────────────
+  // ── SOURCE cell (PDF | WEB | CLIP) ───────────────────────────────────────────
   function wireSourceCell(tr, idx) {
     const cell = tr.querySelector('.source-cell');
     if (!cell) return;
@@ -371,7 +414,7 @@
     cell.querySelectorAll('.source-tab').forEach((tab) => {
       tab.addEventListener('click', () => {
         const kind = tab.getAttribute('data-kind');
-        if (kind === 'pdf' || kind === 'web') setSourceKind(idx, kind);
+        if (kind === 'pdf' || kind === 'web' || kind === 'clip') setSourceKind(idx, kind);
       });
     });
 
@@ -398,6 +441,55 @@
       });
     }
 
+    const clipTa = cell.querySelector('.clip-draft');
+    const clipSave = cell.querySelector('.clip-btn-save');
+    const clipPrev = cell.querySelector('.clip-btn-preview');
+    const clipClr = cell.querySelector('.clip-btn-clear');
+    if (clipTa && clipSave && clipPrev && clipClr) {
+      clipTa.addEventListener('input', () => {
+        linksData[idx].clipDraft = clipTa.value;
+        clipSave.disabled = !String(clipTa.value || '').trim();
+      });
+      clipSave.addEventListener('click', async () => {
+        const raw = String(clipTa.value || '').trim();
+        if (!raw) return;
+        const res = await fetch('/api/clips', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ raw }),
+        });
+        let data = null;
+        try {
+          data = await res.json();
+        } catch (e) {
+          data = null;
+        }
+        if (!res.ok) {
+          alert((data && data.error) ? data.error : '클립 저장 실패');
+          return;
+        }
+        const link = linksData[idx];
+        link.sourcePanel = 'clip';
+        link.source = { type: 'clip', ref: data.id };
+        link.pdf_path = null;
+        link.state = 'needs_summary';
+        link.clipDraft = null;
+        updateCounter();
+        renderTable();
+      });
+      clipPrev.addEventListener('click', () => {
+        const link = linksData[idx];
+        const id = link.source && link.source.type === 'clip' ? String(link.source.ref || '').trim() : '';
+        if (!id) return;
+        openClipPreview(id);
+      });
+      clipClr.addEventListener('click', () => {
+        clearClipSource(idx);
+        updateCounter();
+        renderTable();
+      });
+    }
+
     wireSourcePicker(tr, idx);
   }
 
@@ -408,18 +500,23 @@
 
     link.sourcePanel = kind;
 
-    if (kind === 'pdf') {
-      if (link.source && link.source.type === 'web') {
-        link.source = null;
-        link.pdf_path = null;
-        link.state = 'undecided';
-      }
-    } else {
-      if (link.source && link.source.type === 'pdf') {
-        link.source = null;
-        link.pdf_path = null;
-        link.state = 'undecided';
-      }
+    if (kind !== 'pdf' && link.source && link.source.type === 'pdf') {
+      link.source = null;
+      link.pdf_path = null;
+      link.state = 'undecided';
+    }
+    if (kind !== 'web' && link.source && link.source.type === 'web') {
+      link.source = null;
+      link.pdf_path = null;
+      link.state = 'undecided';
+    }
+    if (kind !== 'clip' && link.source && link.source.type === 'clip') {
+      link.source = null;
+      link.pdf_path = null;
+      link.state = 'undecided';
+    }
+    if (kind !== 'clip') {
+      link.clipDraft = null;
     }
     closeOpenPicker();
     updateCounter();
@@ -429,6 +526,7 @@
   function applyWebUrlFromInput(idx, raw) {
     const link = linksData[idx];
     link.sourcePanel = 'web';
+    link.clipDraft = null;
     const u = String(raw || '').trim();
     if (u) {
       link.source = { type: 'web', ref: u };
@@ -446,6 +544,17 @@
     link.sourcePanel = 'web';
     link.source = null;
     link.pdf_path = null;
+    link.clipDraft = null;
+    link.state = 'undecided';
+    closeOpenPicker();
+  }
+
+  function clearClipSource(idx) {
+    const link = linksData[idx];
+    link.sourcePanel = 'clip';
+    link.source = null;
+    link.pdf_path = null;
+    link.clipDraft = null;
     link.state = 'undecided';
     closeOpenPicker();
   }
@@ -719,6 +828,7 @@
     link.source = { type: 'pdf', ref: fullPath };
     link.state = 'needs_summary';
     link.pdf_path = fullPath; // keep legacy payload behavior
+    link.clipDraft = null;
     pushRecentPdfPath(fullPath);
     closeOpenPicker();
   }
@@ -728,6 +838,7 @@
     link.sourcePanel = 'pdf';
     link.source = null;
     link.pdf_path = null;
+    link.clipDraft = null;
     link.state = 'undecided';
     closeOpenPicker();
   }
@@ -807,10 +918,16 @@
     if (l.source && l.source.type === 'web') {
       l.pdf_path = null;
     }
+    if (l.source && l.source.type === 'clip') {
+      l.pdf_path = null;
+    }
     if (!l.source) l.source = null;
     if (!l.pdf_path) l.pdf_path = null;
 
-    l.sourcePanel = l.source && l.source.type === 'web' ? 'web' : 'pdf';
+    l.sourcePanel =
+      l.source && l.source.type === 'web' ? 'web'
+        : l.source && l.source.type === 'clip' ? 'clip'
+          : 'pdf';
 
     return l;
   }

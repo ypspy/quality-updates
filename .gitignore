@@ -22,6 +22,9 @@ eggs/
 htmlcov/
 /*.py
 
+# 에디터 클립 저장소 (로컬 붙여넣기 원문)
+scripts/editor/clips/
+
 # scripts/ 출력 아티팩트
 scripts/hwp_extracted.txt
 scripts/hwp_path.txt
