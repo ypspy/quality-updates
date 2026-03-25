@@ -266,8 +266,8 @@
 
     fallback.style.display = 'none';
     iframe.style.display = 'block';
-    iframe.src = url;
-    fallbackLink.href = url;
+    iframe.src = '/api/source/preview?url=' + encodeURIComponent(url);
+    fallbackLink.href = isSafeHttpUrl(url) ? url : '#';
 
     iframe.onload = () => {
       if (seq !== previewSeq) return;
@@ -298,7 +298,7 @@
     document.getElementById('preview-iframe').style.display = 'none';
     const fallback = document.getElementById('iframe-fallback');
     fallback.style.display = 'block';
-    document.getElementById('fallback-link').href = url;
+    document.getElementById('fallback-link').href = isSafeHttpUrl(url) ? url : '#';
   }
 
   // ── Divider drag ─────────────────────────────────────────────────────────────
@@ -685,11 +685,28 @@
   // ── Utils ────────────────────────────────────────────────────────────────────
   async function fetchJSON(url) {
     const res = await fetch(url);
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(`Request failed (${res.status}): ${text || url}`);
+    }
     return res.json();
   }
 
   function escHtml(str) {
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    return String(str ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function isSafeHttpUrl(u) {
+    try {
+      const url = new URL(String(u || ''), window.location.origin);
+      return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch (e) {
+      return false;
+    }
   }
 
   // ── Start ────────────────────────────────────────────────────────────────────
