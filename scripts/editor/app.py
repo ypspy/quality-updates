@@ -26,8 +26,16 @@ def load_config() -> dict:
     if CONFIG_PATH.exists():
         with open(CONFIG_PATH, encoding='utf-8') as f:
             cfg = json.load(f)
-        return {**DEFAULT_CONFIG, **cfg}
-    return dict(DEFAULT_CONFIG)
+        merged = {**DEFAULT_CONFIG, **cfg}
+    else:
+        merged = dict(DEFAULT_CONFIG)
+
+    # Defensive normalization so a stale/hand-edited config can't escape policy.
+    try:
+        merged["downloads_folder"] = _normalize_downloads_folder(merged.get("downloads_folder"), root=repo_root())
+    except Exception:
+        merged["downloads_folder"] = DEFAULT_CONFIG["downloads_folder"]
+    return merged
 
 
 def save_config(cfg: dict) -> None:
@@ -38,6 +46,39 @@ def save_config(cfg: dict) -> None:
 def repo_root() -> Path:
     """Return repository root (parent of scripts/)."""
     return Path(__file__).parent.parent.parent
+
+
+def _normalize_downloads_folder(folder_value: object, *, root: Path) -> str:
+    """Return normalized downloads folder as a repo-root-relative posix path ending with '/'.
+
+    Policy:
+    - must be a relative path (no absolute paths, no drive roots)
+    - must not contain path traversal ("..")
+    - resolved path must be under repo_root/downloads/
+    """
+    if not isinstance(folder_value, str) or not folder_value.strip():
+        raise ValueError("downloads_folder must be a non-empty string")
+
+    raw = folder_value.strip()
+    p = Path(raw)
+
+    if p.is_absolute():
+        raise ValueError("downloads_folder must be relative")
+    if any(part == ".." for part in p.parts):
+        raise ValueError("downloads_folder must not contain '..'")
+
+    root_resolved = root.resolve()
+    base = (root_resolved / "downloads").resolve()
+    full = (root_resolved / p).resolve()
+
+    if not full.is_relative_to(base):
+        raise ValueError("downloads_folder must be under downloads/")
+
+    rel = full.relative_to(root_resolved).as_posix().rstrip("/") + "/"
+    if not rel.startswith("downloads/"):
+        # Defensive: should be guaranteed by is_relative_to(base) check.
+        raise ValueError("downloads_folder must be under downloads/")
+    return rel
 
 
 def _is_pdf_bytes(data: bytes) -> bool:
@@ -102,11 +143,18 @@ def get_links():
 @app.route('/api/downloads')
 def list_downloads():
     cfg = load_config()
-    folder = repo_root() / cfg['downloads_folder']
-    if not folder.exists():
+    root = repo_root()
+    try:
+        downloads_folder = _normalize_downloads_folder(cfg.get("downloads_folder"), root=root)
+    except ValueError:
+        downloads_folder = _normalize_downloads_folder(DEFAULT_CONFIG["downloads_folder"], root=root)
+
+    folder = (root / downloads_folder)
+    if not folder.exists() or not folder.is_dir():
         return jsonify([])
-    files = sorted(folder.glob('*.pdf'))
-    rel = [str(Path(cfg['downloads_folder']) / f.name) for f in files]
+
+    files = sorted(folder.glob("*.pdf"))
+    rel = [f.relative_to(root).as_posix() for f in files]
     return jsonify(rel)
 
 
@@ -137,6 +185,11 @@ def config():
     cfg = load_config()
     payload = request.get_json(silent=True) or {}
     incoming = {k: v for k, v in payload.items() if k in ALLOWED_CONFIG_KEYS}
+    if "downloads_folder" in incoming:
+        try:
+            incoming["downloads_folder"] = _normalize_downloads_folder(incoming["downloads_folder"], root=repo_root())
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 400
     cfg.update(incoming)
     save_config(cfg)
     return jsonify(cfg)
@@ -173,9 +226,9 @@ def source_preview():
     if not is_html:
         return _preview_html("Unsupported content type for preview.", status=415)
 
-    html = body.decode("utf-8", errors="replace")
+    html_text = body.decode("utf-8", errors="replace")
     try:
-        cleaned = sanitize_html_for_web_preview(html, base_url=final_url)
+        cleaned = sanitize_html_for_web_preview(html_text, base_url=final_url)
     except Exception as e:
         return _preview_html(f"Sanitization failed: {str(e)}", status=500)
 
@@ -185,11 +238,26 @@ def source_preview():
 
 
 @app.route("/api/source/proxy")
-def source_proxy_stub():
-    # Stub for Task 3D. Exists so /api/source/preview redirects resolve.
-    resp = Response(
-        "<!doctype html><meta charset='utf-8'><p>Not implemented: /api/source/proxy (Task 3D)</p>",
-        status=501,
-        mimetype="text/html",
-    )
+def source_proxy():
+    url = request.args.get("url")
+    if not url:
+        return _preview_html("Missing required query param: url", status=400)
+
+    try:
+        final_url, body, content_type = fetch_url(url)
+    except ValueError as e:
+        return _preview_html(f"Fetch blocked: {str(e)}", status=400)
+    except Exception as e:
+        return _preview_html(f"Fetch failed: {str(e)}", status=502)
+
+    ct = (content_type or "").split(";", 1)[0].strip().lower()
+    allowed_ct = ct in {"application/pdf", "application/octet-stream"}
+    if not allowed_ct or not _is_pdf_bytes(body):
+        return _preview_html("Unsupported content type.", status=415)
+
+    resp = Response(body, status=200, mimetype="application/pdf")
+    # Minimal safe header set: do not forward hop-by-hop / arbitrary upstream headers.
+    resp.headers["Content-Type"] = "application/pdf"
+    resp.headers["Content-Length"] = str(len(body))
+    resp.headers["Content-Disposition"] = 'inline; filename="document.pdf"'
     return _apply_preview_security_headers(resp)
