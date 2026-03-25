@@ -37,3 +37,72 @@ tr.state-done td { color: #888; font-style: italic; }
 /* Title link */
 .title-link { color: #1976d2; text-decoration: none; cursor: pointer; }
 .title-link:hover { text-decoration: underline; }
+.title-link:focus { outline: 2px solid rgba(25, 118, 210, 0.6); outline-offset: 2px; border-radius: 3px; }
+
+.state-badge:focus { outline: 2px solid rgba(0, 0, 0, 0.35); outline-offset: 2px; }
+
+/* SOURCE picker (PDF combobox) */
+.source-picker { position: relative; min-width: 260px; }
+.source-picker-top { display: flex; gap: 4px; align-items: center; }
+.source-input {
+  flex: 1;
+  min-width: 160px;
+  font-size: 12px;
+  padding: 3px 8px;
+  border: 1px solid #c7c7c7;
+  border-radius: 6px;
+  background: #fff;
+}
+.source-input:focus { outline: none; border-color: #1976d2; box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.12); }
+
+.source-btn {
+  font-size: 12px;
+  padding: 3px 8px;
+  border: 1px solid #c7c7c7;
+  border-radius: 6px;
+  background: #fafafa;
+  cursor: pointer;
+  line-height: 1;
+}
+.source-btn:hover { background: #f0f0f0; }
+.source-btn:disabled { opacity: 0.45; cursor: default; }
+
+.source-dropdown {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 520px;
+  max-width: 70vw;
+  max-height: 320px;
+  overflow: auto;
+  background: #fff;
+  border: 1px solid #d5d5d5;
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+  padding: 6px;
+}
+
+.source-section-title {
+  font-size: 11px;
+  color: #666;
+  padding: 6px 8px 4px;
+  text-transform: none;
+}
+
+.source-empty {
+  padding: 8px;
+  color: #999;
+  font-size: 12px;
+}
+
+.source-option {
+  padding: 6px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.source-option:hover { background: #f5f8ff; }
+.source-option.is-active { background: #e3f2fd; }
+
+.source-option-main { font-size: 12px; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.source-option-sub { font-size: 11px; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
