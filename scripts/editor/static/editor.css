@@ -41,6 +41,56 @@ tr.state-done td { color: #888; font-style: italic; }
 
 .state-badge:focus { outline: 2px solid rgba(0, 0, 0, 0.35); outline-offset: 2px; }
 
+/* SOURCE cell: PDF | WEB */
+.source-cell { min-width: 280px; }
+.source-kind-row {
+  display: flex;
+  gap: 0;
+  margin-bottom: 6px;
+}
+.source-tab {
+  font-size: 11px;
+  padding: 4px 10px;
+  border: 1px solid #c7c7c7;
+  background: #f5f5f5;
+  cursor: pointer;
+  border-radius: 6px 0 0 6px;
+}
+.source-tab + .source-tab {
+  border-radius: 0 6px 6px 0;
+  margin-left: -1px;
+}
+.source-tab.is-active {
+  background: #e3f2fd;
+  border-color: #1976d2;
+  color: #0d47a1;
+  font-weight: 600;
+  z-index: 1;
+  position: relative;
+}
+.source-panel { margin-top: 2px; }
+.source-no-pdf { color: #aaa; font-size: 12px; }
+
+.web-source-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.web-url-input {
+  flex: 1;
+  min-width: 140px;
+  font-size: 12px;
+  padding: 4px 8px;
+  border: 1px solid #c7c7c7;
+  border-radius: 6px;
+}
+.web-url-input:focus {
+  outline: none;
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.12);
+}
+
 /* SOURCE picker (PDF combobox) */
 .source-picker { position: relative; min-width: 260px; }
 .source-picker-top { display: flex; gap: 4px; align-items: center; }

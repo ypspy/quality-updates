@@ -7,7 +7,8 @@
   // Each link:
   // - source: null | { type: 'pdf'|'web'|'clip', ref: string }
   // - pdf_path: kept for backward-compatible save payload (derived from source when type==='pdf')
-  let linksData = [];   // [{date, title, url, state, source, pdf_path, agency, line_index}]
+  // sourcePanel: 'pdf'|'web' — editor-only; which SOURCE tab is shown (not sent to API).
+  let linksData = [];   // [{date, title, url, state, source, pdf_path, sourcePanel, agency, line_index}]
   let pdfFiles = [];    // string[] (Option A)
 
   const RECENTS_KEY_PDF = 'quality-updates-editor:recentSources:pdf';
@@ -61,29 +62,41 @@
     if (currentFile) await loadLinks(currentFile);
   }
 
+  function hasResolvedWebSource(entry) {
+    const s = entry.source;
+    return !!(s && s.type === 'web' && String(s.ref || '').trim());
+  }
+
+  /** needs_summary rows that still need a PDF path (PDF or null source only; WEB with URL is OK). */
+  function isUnresolvedNeedsPdf(entry) {
+    if (entry.state !== 'needs_summary') return false;
+    if (hasResolvedWebSource(entry)) return false;
+    return !entry.pdf_path;
+  }
+
   async function onSave() {
     if (!currentFile) return alert('파일을 선택하세요.');
     const curation = linksData
       .filter(l => l.state !== 'done')
-      .map(l => ({
-        title: l.title,
-        line_index: l.line_index,
-        state: l.state,
-        // Keep legacy payload for now. If PDF source is set, ensure pdf_path is populated.
-        pdf_path: getPdfPathForSave(l),
-      }));
+      .map(l => {
+        const row = {
+          title: l.title,
+          line_index: l.line_index,
+          state: l.state,
+          pdf_path: getPdfPathForSave(l),
+        };
+        if (l.source) row.source = l.source;
+        return row;
+      });
 
-    // Warn if any needs_summary entries have no PDF (they'll save as undecided)
-    const unresolved = curation.filter(l => l.state === 'needs_summary' && !l.pdf_path);
+    const unresolved = curation.filter(isUnresolvedNeedsPdf);
     if (unresolved.length > 0) {
       const ok = confirm(`${unresolved.length}개 항목이 "요약 필요"이지만 PDF가 선택되지 않았습니다.\n저장하면 미결정으로 처리됩니다. 계속할까요?`);
       if (!ok) return;
     }
 
-    // Align payload with the warning: if needs_summary has no PDF selected,
-    // save it as undecided so we don't accidentally drop/flip markers.
     curation.forEach((c) => {
-      if (c.state === 'needs_summary' && !c.pdf_path) c.state = 'undecided';
+      if (isUnresolvedNeedsPdf(c)) c.state = 'undecided';
     });
 
     const res = await fetch('/api/save', {
@@ -143,9 +156,9 @@
       tr.className = stateClass(link.state);
 
       tr.innerHTML = `
-        <td>${link.date}</td>
+        <td>${escHtml(link.date)}</td>
         <td><span class="title-link" role="link" tabindex="0" data-url="${escHtml(link.url)}">${escHtml(link.title)}</span></td>
-        <td>${link.agency || ''}</td>
+        <td>${escHtml(link.agency || '')}</td>
         <td>${stateBadge(link, idx)}</td>
         <td>${sourceCell(link, idx)}</td>
       `;
@@ -172,7 +185,7 @@
         });
       }
 
-      wireSourcePicker(tr, idx);
+      wireSourceCell(tr, idx);
 
       tbody.appendChild(tr);
     });
@@ -183,7 +196,14 @@
     tr.className = stateClass(link.state);
     tr.querySelector('td:nth-child(4)').innerHTML = stateBadge(link, idx);
     if (link.state !== 'done') {
-      tr.querySelector('.state-badge').addEventListener('click', () => cycleState(idx));
+      const badge = tr.querySelector('.state-badge');
+      badge.addEventListener('click', () => cycleState(idx));
+      badge.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          cycleState(idx);
+        }
+      });
     }
   }
 
@@ -197,16 +217,23 @@
     return `<span class="state-badge ${cls[link.state]}" data-idx="${idx}" role="button" tabindex="0">${labels[link.state]}</span>`;
   }
 
+  function sourceKind(link) {
+    return link.sourcePanel === 'web' ? 'web' : 'pdf';
+  }
+
   function sourceCell(link, idx) {
     if (link.state === 'done') return '';
-    if (pdfFiles.length === 0) return '<span style="color:#aaa">폴더 없음</span>';
+    const kind = sourceKind(link);
+    const webUrl = link.source && link.source.type === 'web' ? String(link.source.ref || '') : '';
 
     const selectedPath = link.source && link.source.type === 'pdf' ? link.source.ref : (link.pdf_path || '');
     const fileName = selectedPath ? basename(selectedPath) : '';
     const inputValue = selectedPath ? fileName : '';
 
     const listId = `source-list-${idx}`;
-    return `
+    const pdfBlock = pdfFiles.length === 0
+      ? '<span class="source-no-pdf">폴더 없음</span>'
+      : `
       <div class="source-picker" data-idx="${idx}">
         <div class="source-picker-top">
           <input
@@ -226,6 +253,23 @@
         <div class="source-dropdown" id="${listId}" role="listbox" style="display:none"></div>
       </div>
     `;
+
+    return `
+      <div class="source-cell" data-idx="${idx}">
+        <div class="source-kind-row" role="tablist" aria-label="출처 유형">
+          <button type="button" class="source-tab${kind === 'pdf' ? ' is-active' : ''}" data-kind="pdf" role="tab" aria-selected="${kind === 'pdf' ? 'true' : 'false'}">PDF</button>
+          <button type="button" class="source-tab${kind === 'web' ? ' is-active' : ''}" data-kind="web" role="tab" aria-selected="${kind === 'web' ? 'true' : 'false'}">WEB</button>
+        </div>
+        <div class="source-panel source-panel-pdf" data-panel="pdf" style="display:${kind === 'pdf' ? 'block' : 'none'}">${pdfBlock}</div>
+        <div class="source-panel source-panel-web" data-panel="web" style="display:${kind === 'web' ? 'block' : 'none'}">
+          <div class="web-source-row">
+            <input class="web-url-input" type="url" inputmode="url" placeholder="https://…" value="${escHtml(webUrl)}" />
+            <button class="source-btn web-btn-preview" type="button">미리보기/새로고침</button>
+            <button class="source-btn web-btn-clear" type="button"${webUrl.trim() ? '' : ' disabled'}>비우기</button>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   // ── State cycling ────────────────────────────────────────────────────────────
@@ -238,6 +282,7 @@
     if (link.state !== 'needs_summary') {
       link.pdf_path = null;
       link.source = null;
+      link.sourcePanel = 'pdf';
     }
     updateCounter();
     renderTable(); // simple full re-render
@@ -318,9 +363,96 @@
     document.addEventListener('mouseup', () => { dragging = false; });
   }
 
+  // ── SOURCE cell (PDF | WEB) ─────────────────────────────────────────────────
+  function wireSourceCell(tr, idx) {
+    const cell = tr.querySelector('.source-cell');
+    if (!cell) return;
+
+    cell.querySelectorAll('.source-tab').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const kind = tab.getAttribute('data-kind');
+        if (kind === 'pdf' || kind === 'web') setSourceKind(idx, kind);
+      });
+    });
+
+    const webInput = cell.querySelector('.web-url-input');
+    const webPreview = cell.querySelector('.web-btn-preview');
+    const webClear = cell.querySelector('.web-btn-clear');
+    if (webInput && webPreview && webClear) {
+      webInput.addEventListener('input', () => {
+        applyWebUrlFromInput(idx, webInput.value);
+        webClear.disabled = !String(webInput.value || '').trim();
+        const row = cell.closest('tr');
+        if (row) reRenderRow(row, idx);
+        updateCounter();
+      });
+      webPreview.addEventListener('click', () => {
+        const u = String(webInput.value || '').trim();
+        if (!u) return;
+        openPreview(u);
+      });
+      webClear.addEventListener('click', () => {
+        clearWebSource(idx);
+        updateCounter();
+        renderTable();
+      });
+    }
+
+    wireSourcePicker(tr, idx);
+  }
+
+  function setSourceKind(idx, kind) {
+    const link = linksData[idx];
+    const cur = sourceKind(link);
+    if (cur === kind) return;
+
+    link.sourcePanel = kind;
+
+    if (kind === 'pdf') {
+      if (link.source && link.source.type === 'web') {
+        link.source = null;
+        link.pdf_path = null;
+        link.state = 'undecided';
+      }
+    } else {
+      if (link.source && link.source.type === 'pdf') {
+        link.source = null;
+        link.pdf_path = null;
+        link.state = 'undecided';
+      }
+    }
+    closeOpenPicker();
+    updateCounter();
+    renderTable();
+  }
+
+  function applyWebUrlFromInput(idx, raw) {
+    const link = linksData[idx];
+    link.sourcePanel = 'web';
+    const u = String(raw || '').trim();
+    if (u) {
+      link.source = { type: 'web', ref: u };
+      link.pdf_path = null;
+      link.state = 'needs_summary';
+    } else {
+      link.source = null;
+      link.pdf_path = null;
+      link.state = 'undecided';
+    }
+  }
+
+  function clearWebSource(idx) {
+    const link = linksData[idx];
+    link.sourcePanel = 'web';
+    link.source = null;
+    link.pdf_path = null;
+    link.state = 'undecided';
+    closeOpenPicker();
+  }
+
   // ── SOURCE (PDF) picker ──────────────────────────────────────────────────────
   function wireSourcePicker(tr, idx) {
-    const root = tr.querySelector('.source-picker');
+    const root = tr.querySelector('.source-panel-pdf .source-picker');
     if (!root) return;
 
     const input = root.querySelector('.source-input');
@@ -354,7 +486,7 @@
     });
 
     input.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowDown') {
+      if (e.key === 'ArrowDown' && !isPickerOpenFor(idx)) {
         e.preventDefault();
         openPdfPicker(idx, root, input, list, { focusFirst: true });
         return;
@@ -583,6 +715,7 @@
 
   function selectPdfSource(idx, fullPath) {
     const link = linksData[idx];
+    link.sourcePanel = 'pdf';
     link.source = { type: 'pdf', ref: fullPath };
     link.state = 'needs_summary';
     link.pdf_path = fullPath; // keep legacy payload behavior
@@ -592,6 +725,7 @@
 
   function clearPdfSource(idx) {
     const link = linksData[idx];
+    link.sourcePanel = 'pdf';
     link.source = null;
     link.pdf_path = null;
     link.state = 'undecided';
@@ -670,8 +804,13 @@
     if (l.source && l.source.type === 'pdf' && !l.pdf_path) {
       l.pdf_path = l.source.ref;
     }
+    if (l.source && l.source.type === 'web') {
+      l.pdf_path = null;
+    }
     if (!l.source) l.source = null;
     if (!l.pdf_path) l.pdf_path = null;
+
+    l.sourcePanel = l.source && l.source.type === 'web' ? 'web' : 'pdf';
 
     return l;
   }
