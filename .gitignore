@@ -44,6 +44,10 @@ Thumbs.db
 # 프로젝트 다운로드 폴더 (PDF·HWP 등 원문 — 커밋 제외)
 downloads/
 
+# 로컬 작업 디렉터리
+.editor-curation/
+.worktrees/
+
 # 기타
 *.log
 .env
