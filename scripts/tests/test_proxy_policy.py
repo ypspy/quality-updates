@@ -10,7 +10,7 @@ import editor.app as editor_app
 
 def test_proxy_rejects_non_pdf_content_type(monkeypatch):
     def fake_fetch_url(url: str, **kwargs):
-        return ("https://example.com/page", b"<html>no</html>", "text/html; charset=utf-8")
+        return ("https://example.com/page", b"<html>no</html>", "text/html; charset=utf-8", None)
 
     monkeypatch.setattr(editor_app, "fetch_url", fake_fetch_url)
 
@@ -28,7 +28,7 @@ def test_proxy_serves_pdf_bytes(monkeypatch, content_type):
     pdf_bytes = b"%PDF-1.7\n%....\n1 0 obj\n<<>>\nendobj\n"
 
     def fake_fetch_url(url: str, **kwargs):
-        return ("https://example.com/doc.pdf", pdf_bytes, content_type)
+        return ("https://example.com/doc.pdf", pdf_bytes, content_type, None)
 
     monkeypatch.setattr(editor_app, "fetch_url", fake_fetch_url)
 
@@ -43,7 +43,7 @@ def test_proxy_serves_pdf_bytes(monkeypatch, content_type):
 
 def test_proxy_rejects_octet_stream_non_pdf_magic(monkeypatch):
     def fake_fetch_url(url: str, **kwargs):
-        return ("https://example.com/file", b"NOTPDF", "application/octet-stream")
+        return ("https://example.com/file", b"NOTPDF", "application/octet-stream", None)
 
     monkeypatch.setattr(editor_app, "fetch_url", fake_fetch_url)
 
@@ -54,7 +54,7 @@ def test_proxy_rejects_octet_stream_non_pdf_magic(monkeypatch):
 
 def test_proxy_rejects_pdf_content_type_without_pdf_magic(monkeypatch):
     def fake_fetch_url(url: str, **kwargs):
-        return ("https://example.com/doc.pdf", b"NOTPDF", "application/pdf")
+        return ("https://example.com/doc.pdf", b"NOTPDF", "application/pdf", None)
 
     monkeypatch.setattr(editor_app, "fetch_url", fake_fetch_url)
 

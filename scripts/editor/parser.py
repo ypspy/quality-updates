@@ -9,11 +9,12 @@ LINK_RE = re.compile(
 SECTION_RE = re.compile(r'^#{1,4}\s+(.+)')
 APPENDIX_RE = re.compile(r'^## Appendix')
 SKIP_RE = re.compile(r'^<!-- skip -->')
+NO_SUMMARY_RE = re.compile(r'^<!-- no_summary -->')
 PDF_RE = re.compile(r'^<!-- pdf: (.+?) -->')
 SOURCE_RE = re.compile(r'^<!-- source:\s*([a-zA-Z0-9_-]+)\|(.+?)\s*-->')
 NOTE_RE = re.compile(r'^\s+[!?]{3} note')
 
-ALLOWED_SOURCE_TYPES = {'pdf', 'web', 'clip', 'url'}
+ALLOWED_SOURCE_TYPES = {'pdf', 'web', 'clip', 'url', 'shot'}
 
 AGENCY_KEYWORDS = {
     '금융감독원': '금융감독원',
@@ -34,7 +35,7 @@ def parse_links(content: str) -> list[dict]:
     """Parse .md content and return list of link dicts.
 
     Each dict: {date, title, url, state, pdf_path, source, agency, line_index}
-    state: 'undecided' | 'skip' | 'needs_summary' | 'done'
+    state: 'undecided' | 'skip' | 'no_summary' | 'needs_summary' | 'done'
     """
     lines = content.splitlines()
     links = []
@@ -72,6 +73,8 @@ def parse_links(content: str) -> list[dict]:
                 next_line = lines[j]
                 if SKIP_RE.match(next_line):
                     state = 'skip'
+                elif NO_SUMMARY_RE.match(next_line):
+                    state = 'no_summary'
                 elif SOURCE_RE.match(next_line):
                     src_type, src_ref = SOURCE_RE.match(next_line).groups()
                     src_type = src_type.strip()

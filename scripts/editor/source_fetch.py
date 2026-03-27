@@ -20,18 +20,31 @@ from __future__ import annotations
 
 import ipaddress
 import socket
+import time
 from dataclasses import dataclass
+from time import perf_counter
 from typing import Iterable
 from urllib.parse import urljoin, urlsplit, urlunsplit
 
 import requests
+import urllib3.exceptions
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 
 _ALLOWED_SCHEMES = {"http", "https"}
 _ALLOWED_PORTS = {80, 443}
 _MAX_REDIRECTS_DEFAULT = 3
 _MAX_BYTES_DEFAULT = 5 * 1024 * 1024  # 5MB
-_TIMEOUT_DEFAULT = (3.0, 8.0)  # (connect, read)
+# Some .go.kr hosts are slow or reset mid-read; read timeout still generous but not excessive.
+_TIMEOUT_DEFAULT = (5.0, 20.0)  # (connect, read)
+
+# Many public sites (e.g. 금감원) return errors or empty bodies to non-browser UAs.
+_DEFAULT_BROWSER_UA = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/122.0.0.0 Safari/537.36"
+)
 
 
 @dataclass(frozen=True)
@@ -139,6 +152,26 @@ def validate_url(url: str) -> NormalizedUrl:
     return NormalizedUrl(url=normalized, scheme=scheme, hostname=hostname, port=port)
 
 
+def _session_with_retries() -> requests.Session:
+    """Session with urllib3-level retries on connect/read drops (e.g. WinError 10054)."""
+    session = requests.Session()
+    # Redirects are handled manually; do not let urllib3 follow them here.
+    retry = Retry(
+        total=6,
+        connect=6,
+        read=6,
+        redirect=0,
+        backoff_factor=0.75,
+        status_forcelist=(),
+        allowed_methods=frozenset({"GET"}),
+        raise_on_status=False,
+    )
+    adapter = HTTPAdapter(max_retries=retry, pool_connections=2, pool_maxsize=2)
+    session.mount("https://", adapter)
+    session.mount("http://", adapter)
+    return session
+
+
 def validate_redirect_chain(urls: Iterable[str]) -> list[NormalizedUrl]:
     """Validate each URL in a redirect chain (no network)."""
     normalized: list[NormalizedUrl] = []
@@ -147,26 +180,45 @@ def validate_redirect_chain(urls: Iterable[str]) -> list[NormalizedUrl]:
     return normalized
 
 
-def fetch_url(
+def _fetch_url_impl(
     url: str,
     *,
-    max_redirects: int = _MAX_REDIRECTS_DEFAULT,
-    timeout: tuple[float, float] = _TIMEOUT_DEFAULT,
-    max_bytes: int = _MAX_BYTES_DEFAULT,
-    user_agent: str = "quality-updates-editor/1.0",
-) -> tuple[str, bytes, str | None]:
-    """Fetch a URL safely (manual redirects), returning (final_url, body_bytes, content_type)."""
-    current = validate_url(url).url
+    max_redirects: int,
+    timeout: tuple[float, float],
+    max_bytes: int,
+    user_agent: str,
+    timing: dict[str, float] | None,
+) -> tuple[str, bytes, str | None, str | None]:
+    """Single attempt: manual redirects, size cap.
 
-    # No cookies/auth forwarding: use a fresh session and minimal headers.
-    session = requests.Session()
-    # Don't inherit proxy/auth/certs from environment (HTTP_PROXY, ~/.netrc, etc).
+    Returns ``(final_url, body, content_type, content_disposition)``.
+    """
+    t0 = perf_counter()
+    current = validate_url(url).url
+    if timing is not None:
+        timing["validate_url_ms"] = (perf_counter() - t0) * 1000.0
+
+    t1 = perf_counter()
+    session = _session_with_retries()
     session.trust_env = False
     session.cookies.clear()
+    if timing is not None:
+        timing["session_setup_ms"] = (perf_counter() - t1) * 1000.0
 
-    headers = {"User-Agent": user_agent, "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"}
+    headers = {
+        "User-Agent": user_agent,
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+        # Some government sites reset TLS when compression negotiation is ambiguous.
+        "Accept-Encoding": "identity",
+        # Avoid stale keep-alive sockets that some hosts close aggressively.
+        "Connection": "close",
+    }
 
+    req_ms = 0.0
+    dl_ms = 0.0
     for _hop in range(max_redirects + 1):
+        t_req = perf_counter()
         resp = session.get(
             current,
             headers=headers,
@@ -174,6 +226,7 @@ def fetch_url(
             allow_redirects=False,
             stream=True,
         )
+        req_ms += (perf_counter() - t_req) * 1000.0
 
         try:
             if 300 <= resp.status_code < 400 and "location" in resp.headers:
@@ -182,19 +235,84 @@ def fetch_url(
                 current = validate_url(next_url).url
                 continue
 
-            # Read with cutoff.
+            if not (200 <= resp.status_code < 300):
+                raise ValueError(f"remote HTTP {resp.status_code}")
+
             data = bytearray()
+            t_dl = perf_counter()
             for chunk in resp.iter_content(chunk_size=64 * 1024):
                 if not chunk:
                     continue
                 data.extend(chunk)
                 if len(data) > max_bytes:
                     raise ValueError("response too large")
+            dl_ms += (perf_counter() - t_dl) * 1000.0
+
+            if len(data) == 0:
+                raise ValueError("empty response body")
 
             content_type = resp.headers.get("content-type")
-            return current, bytes(data), content_type
+            content_disp = resp.headers.get("content-disposition")
+            if timing is not None:
+                timing["request_ms"] = req_ms
+                timing["download_ms"] = dl_ms
+            return current, bytes(data), content_type, content_disp
         finally:
             resp.close()
 
     raise ValueError("too many redirects")
+
+
+def fetch_url(
+    url: str,
+    *,
+    max_redirects: int = _MAX_REDIRECTS_DEFAULT,
+    timeout: tuple[float, float] = _TIMEOUT_DEFAULT,
+    max_bytes: int = _MAX_BYTES_DEFAULT,
+    user_agent: str = _DEFAULT_BROWSER_UA,
+    max_connection_attempts: int = 3,
+    timing: dict[str, float] | None = None,
+) -> tuple[str, bytes, str | None, str | None]:
+    """Fetch a URL safely (manual redirects).
+
+    Returns ``(final_url, body_bytes, content_type, content_disposition)``.
+
+    Retries on transient TLS/TCP resets (common with some .go.kr hosts): urllib3
+    retries per request plus a few full-fetch attempts with short backoff.
+
+    Preview feels slow when: each click refetches (no cache), DNS runs per request,
+    ``Connection: close`` avoids stale sockets on picky hosts, and slow upstreams
+    hit read timeout (see ``_TIMEOUT_DEFAULT``) before failing.
+    """
+    last_exc: BaseException | None = None
+    for attempt in range(max_connection_attempts):
+        t_attempt = perf_counter()
+        try:
+            out = _fetch_url_impl(
+                url,
+                max_redirects=max_redirects,
+                timeout=timeout,
+                max_bytes=max_bytes,
+                user_agent=user_agent,
+                timing=timing,
+            )
+            if timing is not None:
+                timing["attempts"] = float(attempt + 1)
+                timing["attempt_total_ms"] = (perf_counter() - t_attempt) * 1000.0
+            return out
+        except (
+            requests.exceptions.ConnectionError,
+            requests.exceptions.SSLError,
+            requests.exceptions.RetryError,
+            requests.exceptions.ChunkedEncodingError,
+            urllib3.exceptions.ProtocolError,
+            urllib3.exceptions.NewConnectionError,
+            urllib3.exceptions.MaxRetryError,
+        ) as e:
+            last_exc = e
+            if attempt < max_connection_attempts - 1:
+                time.sleep(min(2.0, 0.35 * (2**attempt)))
+                continue
+            raise
+    raise last_exc  # pragma: no cover
 

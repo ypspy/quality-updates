@@ -34,11 +34,11 @@ CURATION = [
 ]
 
 
-def test_skip_inserted():
+def test_skip_writes_marker_after_link():
     result = apply_curation(ORIGINAL, CURATION)
     lines = result.splitlines()
     idx = next(i for i, l in enumerate(lines) if '제목A' in l)
-    assert lines[idx + 1] == '<!-- skip -->', f"got: {lines[idx+1]!r}"
+    assert lines[idx + 1] == '<!-- skip -->'
 
 
 def test_pdf_updated():
@@ -50,8 +50,15 @@ def test_pdf_updated():
 
 def test_old_skip_removed():
     result = apply_curation(ORIGINAL, CURATION)
-    # B had <!-- skip -->, now should have <!-- pdf: ... -->
-    assert result.count('<!-- skip -->') == 1  # only A
+    # B had <!-- skip -->, now <!-- source: ... -->; A still has <!-- skip -->
+    assert result.count('<!-- skip -->') == 1
+
+
+def test_no_summary_writes_marker_after_link():
+    content = "- (25-01-10) [A](https://a.com)\n\n"
+    curation = [{"line_index": 0, "state": "no_summary", "pdf_path": None}]
+    result = apply_curation(content, curation)
+    assert "<!-- no_summary -->" in result
 
 
 def test_old_pdf_removed_for_undecided():
@@ -98,17 +105,45 @@ def test_needs_summary_no_pdf_saves_as_undecided():
 
 
 def test_needs_summary_web_writes_source_marker():
+    # WEB 출처 ref는 행의 원문 링크 URL과 동일하게 저장한다.
     content = "- (25-01-10) [A](https://a.com)\n\n"
     curation = [
         {
             'line_index': 0,
             'state': 'needs_summary',
             'pdf_path': None,
-            'source': {'type': 'web', 'ref': 'https://example.com/doc'},
+            'source': {'type': 'web', 'ref': 'https://a.com'},
         }
     ]
     result = apply_curation(content, curation)
-    assert '<!-- source: web|https://example.com/doc -->' in result
+    assert '<!-- source: web|https://a.com -->' in result
+
+
+def test_crlf_second_link_undecided_removes_skip():
+    """CRLF: ``<!-- skip -->\\r`` must be recognized so markers apply to the correct link."""
+    content = (
+        "- (23-06-28) [A](https://a.example)\r\n"
+        "- (23-06-27) [B](https://b.example)\r\n"
+        "<!-- skip -->\r\n"
+    )
+    curation = [
+        {"line_index": 0, "state": "skip", "pdf_path": None, "title": "A"},
+        {"line_index": 1, "state": "undecided", "pdf_path": None, "title": "B"},
+    ]
+    result = apply_curation(content, curation)
+    assert result.count("<!-- skip -->") == 1
+    lines = result.splitlines()
+    idx_a = next(i for i, l in enumerate(lines) if "[A]" in l)
+    idx_b = next(i for i, l in enumerate(lines) if "[B]" in l)
+    assert lines[idx_a + 1] == "<!-- skip -->"
+    assert idx_b + 1 >= len(lines) or lines[idx_b + 1] != "<!-- skip -->"
+
+
+def test_line_index_string_coerced():
+    content = "- (25-01-10) [A](https://a.com)\n<!-- skip -->\n"
+    curation = [{"line_index": "0", "state": "undecided", "pdf_path": None}]
+    result = apply_curation(content, curation)
+    assert "<!-- skip -->" not in result
 
 
 def test_needs_summary_clip_writes_source_marker():

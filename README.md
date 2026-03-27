@@ -34,16 +34,18 @@
 
 ## 큐레이션 편집 도구
 
-크롤러 생성 `.md` 파일의 링크를 선별하고 PDF를 연결하는 로컬 편집 도구.
+크롤러 생성 `.md`의 링크를 선별·출처를 연결하는 로컬 Flask 편집기. 상세 워크플로·상태 의미·스킵과 MkDocs 관계는 **[docs/editor-curation-workflow.md](docs/editor-curation-workflow.md)** 를 본다.
 
 ```bash
 pip install flask   # 최초 1회
 python scripts/editor.py
 ```
 
-- 파일 선택 → 링크 목록에서 요약 필요 / 스킵 결정
-- PDF 다운로드 후 드롭다운에서 연결
-- 저장 → Claude Code에서 SKILL.md Phase 0·1 수행
+- **파일 드롭다운**: 분기 `.md`를 수정일 **최신 → 과거** 순.
+- **상태**: 미결정 / 요약 필요 / 스킵 / 완료 — 저장 시 `<!-- skip -->`, `<!-- source: … -->` 등으로 반영.
+- **WEB 미리보기·원문 다운로드·KASB 첨부**: 원문은 서버가 가져옵니다. PDF뿐 아니라 Zip·Office·이미지 등(HTML/`text/*`/JSON 제외)도 `downloads/`에 저장할 수 있습니다. KASB 첨부 동일. 완료 알림은 짧은 상단 토스트(JSON `fetch`).
+- **개발**: `FLASK_DEBUG=1`(기본)에서 코드 수정 시 서버는 재시작되지만 **브라우저 탭을 매번 다시 열지 않음**. 끄려면 `FLASK_DEBUG=0`.
+- 저장 후 요약 작업은 **`.claude/skills/quality-updates-writer/SKILL.md`** Phase 0·1.
 
 ---
 
@@ -147,6 +149,7 @@ mkdocs build --strict
 ```
 quality-updates/
 ├── docs/                          # 문서 소스 (MkDocs 소스 루트)
+│   ├── editor-curation-workflow.md # 큐레이션 편집기·스킵·배포 전처리
 │   ├── index.md                   # 홈페이지
 │   ├── assets/
 │   │   ├── images/                # 이미지 (로고 등)
@@ -175,6 +178,8 @@ quality-updates/
 │   ├── workflows/ci.yml           # CI (lint, build, validate)
 │   └── dependabot.yml             # 의존성 자동 업데이트
 ├── scripts/                       # 유틸리티 스크립트
+│   ├── editor.py                  # 큐레이션 편집기 진입점 (Flask)
+│   ├── editor/                    # 편집기 앱·정적 파일
 │   ├── extract_pdf.py             # PDF 텍스트 추출
 │   ├── extract_hwp.py             # HWP 텍스트 추출
 │   ├── reorder_chronological.py   # 콘텐츠 시계열 정렬

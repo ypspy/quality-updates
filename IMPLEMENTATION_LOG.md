@@ -164,6 +164,17 @@ py scripts/reorder_chronological.py nonexistent.md   # → 에러 메시지 + ex
 
 ---
 
+## 2026-03-25 — 큐레이션 편집기·문서·스킬 정리
+
+| 항목 | 내용 |
+|------|------|
+| 편집기 | PDF/KASB 저장 JSON+부모 `fetch`, 토스트, 파일명 인코딩 보정, 분기 파일 드롭다운 최신순, `FLASK_DEBUG` 리로더 시 브라우저 반복 오픈 방지 |
+| 문서 | `docs/editor-curation-workflow.md` 신규, `README.md` 큐레이션 절·트리 갱신 |
+| 스킬 | `.claude/skills/quality-updates-writer/SKILL.md` — 큐레이션 상태·배포 전 스킵 제거 절·체크리스트 행 추가 |
+| Cursor 규칙 | `.cursor/rules/quality-updates-summarization.mdc` — SKILL·워크플로 문서 교차 참조 |
+
+---
+
 ## 향후 작업
 
 - [ ] 기존 콘텐츠의 ADMON_INDENT/TABLE_A 등 검증 이슈 정리 후 validate job에서 `continue-on-error` 제거

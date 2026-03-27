@@ -69,6 +69,10 @@ nav:
       - 품질관리감리 개요: fss-review/index.md
       - 2022년 품질관리감리: fss-review/fr2022.md
 
+# Editor creates `.md.bak` backups in-place; exclude from MkDocs build/serve.
+exclude_docs: |
+  **/*.bak
+
 markdown_extensions:
   - toc:
       permalink: '#'

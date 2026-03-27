@@ -4,20 +4,48 @@ import re
 import shutil
 
 SKIP_RE = re.compile(r'^<!-- skip -->$')
+NO_SUMMARY_RE = re.compile(r'^<!-- no_summary -->$')
 PDF_RE = re.compile(r'^<!-- pdf: .+ -->$')
 SOURCE_RE = re.compile(r'^<!-- source:\s*[a-zA-Z0-9_-]+\|.+ -->$')
 APPENDIX_RE = re.compile(r'^## Appendix')
 
 
+def _line_core(line: str) -> str:
+    """Strip line endings for comparisons. CRLF files must not leave ``\\r`` or markers won't match."""
+    return line.rstrip('\r\n')
+
+
 def _is_comment(line: str) -> bool:
-    return bool(SKIP_RE.match(line) or PDF_RE.match(line) or SOURCE_RE.match(line))
+    core = _line_core(line)
+    return bool(
+        SKIP_RE.match(core)
+        or NO_SUMMARY_RE.match(core)
+        or PDF_RE.match(core)
+        or SOURCE_RE.match(core)
+    )
+
+
+def _build_curation_map(curation: list[dict]) -> dict[int, dict]:
+    """line_index must be int (JSON may send str in edge cases)."""
+    out: dict[int, dict] = {}
+    for entry in curation:
+        if not isinstance(entry, dict):
+            continue
+        li = entry.get('line_index')
+        if li is None:
+            continue
+        try:
+            idx = int(li)
+        except (TypeError, ValueError):
+            continue
+        out[idx] = entry
+    return out
 
 
 def apply_curation(content: str, curation: list[dict]) -> str:
     """Return new .md content with curation comments applied."""
     lines = content.splitlines(keepends=True)
-    # Build lookup: line_index → curation entry
-    curation_map = {entry['line_index']: entry for entry in curation}
+    curation_map = _build_curation_map(curation)
 
     result = []
     i = 0
@@ -25,7 +53,7 @@ def apply_curation(content: str, curation: list[dict]) -> str:
 
     while i < len(lines):
         line = lines[i]
-        stripped = line.rstrip('\n')
+        stripped = _line_core(line)
 
         if APPENDIX_RE.match(stripped):
             in_appendix = True
@@ -53,24 +81,28 @@ def apply_curation(content: str, curation: list[dict]) -> str:
             consumed_blank = False
             preserved_marker_line = None
             while i < len(lines):
-                next_stripped = lines[i].rstrip('\n')
-                if next_stripped == '':
+                next_core = _line_core(lines[i])
+                if next_core == '':
                     consumed_blank = True
                     i += 1
-                elif _is_comment(next_stripped):
+                elif _is_comment(lines[i]):
                     # Preserve an existing marker if the incoming curation doesn't
                     # provide enough info to re-write it. This prevents losing
                     # source markers until the frontend sends `source`.
-                    if preserved_marker_line is None and (SOURCE_RE.match(next_stripped) or PDF_RE.match(next_stripped)):
+                    if preserved_marker_line is None and (
+                        SOURCE_RE.match(next_core) or PDF_RE.match(next_core)
+                    ):
                         preserved_marker_line = lines[i]
                     i += 1
                 else:
                     break
 
-            # Insert new comment based on state
+            # Insert new comment based on state.
             state = entry['state']
             if state == 'skip':
                 result.append('<!-- skip -->\n')
+            elif state == 'no_summary':
+                result.append('<!-- no_summary -->\n')
             elif state == 'needs_summary':
                 src = entry.get('source')
                 if isinstance(src, dict) and src.get('type') and src.get('ref'):

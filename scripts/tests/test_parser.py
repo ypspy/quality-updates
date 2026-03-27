@@ -43,6 +43,19 @@ def test_skip_state():
     assert a['state'] == 'skip'
 
 
+def test_no_summary_state():
+    md = """
+### 금융감독원
+
+- (25-01-10) [제목A](https://fss.or.kr/a)
+<!-- no_summary -->
+"""
+    links = parse_links(md)
+    assert len(links) == 1
+    a = links[0]
+    assert a["state"] == "no_summary"
+
+
 def test_pdf_state():
     links = parse_links(SAMPLE_MD)
     b = next(l for l in links if l['title'] == '제목B')
@@ -64,6 +77,20 @@ def test_clip_source_marker_parsed():
     assert x['state'] == 'needs_summary'
     assert x['source'] == {'type': 'clip', 'ref': 'clip_1700000000_a1b2c3d4'}
     assert x.get('pdf_path') in (None, '')
+
+
+def test_shot_source_marker_parsed():
+    md = """
+### 금융감독원
+
+- (25-01-10) [스크린샷항목](https://example.com/x)
+<!-- source: shot|downloads/x.png -->
+"""
+    links = parse_links(md)
+    assert len(links) == 1
+    x = links[0]
+    assert x["state"] == "needs_summary"
+    assert x["source"] == {"type": "shot", "ref": "downloads/x.png"}
 
 
 def test_done_state():

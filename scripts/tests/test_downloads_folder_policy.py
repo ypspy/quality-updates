@@ -29,11 +29,50 @@ def test_downloads_list_default_folder(monkeypatch, tmp_path):
     downloads.mkdir()
     (downloads / "a.pdf").write_bytes(b"%PDF-1.7\n%...")
     (downloads / "b.pdf").write_bytes(b"%PDF-1.7\n%...")
+    (downloads / "c.zip").write_bytes(b"PK\x03\x04")
     (downloads / "c.txt").write_text("nope", encoding="utf-8")
 
     client = editor_app.app.test_client()
     resp = client.get("/api/downloads")
     assert resp.status_code == 200
     data = resp.get_json()
-    assert data == ["downloads/a.pdf", "downloads/b.pdf"]
+    assert data == ["downloads/a.pdf", "downloads/b.pdf", "downloads/c.txt", "downloads/c.zip"]
+
+
+def test_clear_downloads_only_configured_folder(monkeypatch, tmp_path):
+    monkeypatch.setattr(editor_app, "CONFIG_PATH", tmp_path / "editor_config.json")
+    monkeypatch.setattr(editor_app, "repo_root", lambda: tmp_path)
+
+    # Two folders: downloads root and a configured subfolder.
+    downloads = tmp_path / "downloads"
+    sub = downloads / "session"
+    sub.mkdir(parents=True)
+    (downloads / "keep.pdf").write_bytes(b"%PDF-1.7\n%...")
+    (sub / "a.pdf").write_bytes(b"%PDF-1.7\n%...")
+    (sub / "b.zip").write_bytes(b"PK\x03\x04")
+    (sub / "note.txt").write_text("temp", encoding="utf-8")
+    (sub / "nested").mkdir()
+    (sub / "nested" / "c.bin").write_bytes(b"\x00\x01\x02")
+
+    client = editor_app.app.test_client()
+    resp = client.post("/api/config", json={"downloads_folder": "downloads/session/"})
+    assert resp.status_code == 200
+
+    # Missing confirmation rejected
+    resp = client.post("/api/downloads/clear", json={})
+    assert resp.status_code == 400
+
+    # Clear confirmed
+    resp = client.post("/api/downloads/clear", json={"confirm": "DELETE"})
+    assert resp.status_code == 200
+    data = resp.get_json() or {}
+    assert data.get("ok") is True
+    assert int(data.get("deleted") or 0) >= 4
+
+    assert (downloads / "keep.pdf").exists()
+    assert not (sub / "a.pdf").exists()
+    assert not (sub / "b.zip").exists()
+    assert not (sub / "note.txt").exists()
+    assert not (sub / "nested" / "c.bin").exists()
+    assert (sub / "nested").exists()
 
