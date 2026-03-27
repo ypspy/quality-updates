@@ -631,7 +631,7 @@
     document.getElementById('cnt-total').textContent = counts.total;
     document.getElementById('cnt-needs').textContent = counts.needs_summary;
     document.getElementById('cnt-skip').textContent = counts.skip;
-    // no_summary counter not currently shown in header (keep counts for future UI)
+    document.getElementById('cnt-no-summary').textContent = counts.no_summary;
     document.getElementById('cnt-undecided').textContent = counts.undecided;
     document.getElementById('cnt-done').textContent = counts.done;
   }

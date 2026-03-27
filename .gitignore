@@ -31,6 +31,12 @@ scripts/hwp_path.txt
 scripts/pdf_extracted.txt
 scripts/pdf_path.txt
 
+# 일회성 OCR·추출 작업물 (PDF 텍스트 덤프 등)
+scripts/_tmp_ocr/
+
+# 편집기·수동 백업 (원본은 동일 경로 .md)
+*.md.bak
+
 # IDE / 에디터
 .vscode/
 .idea/
