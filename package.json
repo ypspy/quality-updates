@@ -22,7 +22,8 @@
     "build:strict": "mkdocs build --strict",
     "build:watch": "nodemon --watch docs --ext md,yml --exec \"mkdocs build\"",
     "clean": "rimraf site .cache",
-    "lint:md": "markdownlint \"docs/**/*.md\" -c .markdownlint.json"
+    "lint:md": "markdownlint \"docs/**/*.md\" -c .markdownlint.json",
+    "crawl": "python scripts/crawl.py"
   },
   "devDependencies": {
     "nodemon": "^3.0.0",

@@ -117,6 +117,10 @@ npm run clean        # site, .cache 등 빌드 산출물 삭제
 ### 5. 스크립트 (콘텐츠 작업용)
 
 ```bash
+# 분기별 규제 업데이트 수집 (신규 분기만 docs/에 생성)
+python scripts/crawl.py --year 2026 --quarter 1
+python scripts/crawl.py   # 인자 생략 시 현재 분기
+
 # PDF 텍스트 추출
 python scripts/extract_pdf.py
 
@@ -178,6 +182,8 @@ quality-updates/
 │   ├── workflows/ci.yml           # CI (lint, build, validate)
 │   └── dependabot.yml             # 의존성 자동 업데이트
 ├── scripts/                       # 유틸리티 스크립트
+│   ├── crawl.py                   # 규제 업데이트 크롤러 CLI
+│   ├── crawler/                   # FSS·FSC·KICPA·KASB 수집 모듈
 │   ├── editor.py                  # 큐레이션 편집기 진입점 (Flask)
 │   ├── editor/                    # 편집기 앱·정적 파일
 │   ├── extract_pdf.py             # PDF 텍스트 추출

@@ -181,6 +181,18 @@ TaskUpdate → completed.
 
 ### STEP 2: 분기 파일 생성 (없는 분기마다 반복)
 
+**우선**: 크롤러로 골격(링크 목록 + Appendix A) 생성.
+
+```bash
+python scripts/crawl.py --year {연도} --quarter {N}
+```
+
+- 출력: `docs/quality-updates/{연도}/{연도}-MM-DD_to_{연도}-MM-DD.md`
+- 파일이 이미 있으면 skip (덮어쓰기 금지). 크롤러가 front matter·4개 기관 섹션·Appendix를 채움.
+- **Executive Summary·기관별 요약·시사점**은 크롤러에 없음 → SUMMARIZE Phase 2에서 추가.
+
+크롤러를 쓸 수 없을 때만 아래 수동 템플릿으로 빈 골격을 작성한다.
+
 **파일 경로**: `docs/quality-updates/{연도}/{연도}-MM-DD_to_{연도}-MM-DD.md`
 
 **분기별 구간**:
