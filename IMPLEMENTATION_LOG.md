@@ -175,7 +175,35 @@ py scripts/reorder_chronological.py nonexistent.md   # → 에러 메시지 + ex
 
 ---
 
+## 2026-06-25 — 플랫폼 통합 (platform-hardening)
+
+| 항목 | 내용 |
+|------|------|
+| 크롤러 | `scripts/crawl.py`, `scripts/crawler/` — 메인 repo 통합 |
+| CI | pytest job, `validate_content --strict` (continue-on-error 제거) |
+| 배포 | `scripts/prepare_deploy.py`, skip_removal, deploy_hints |
+| 편집기 | Blueprint 분리, helpers 추출 |
+| spec/plan | `docs/superpowers/specs/2026-06-25-*`, `plans/2026-06-25-platform-hardening.md` |
+
+---
+
+## 2026-06-25 — 문서 IA·Agent 진입점
+
+| 항목 | 내용 |
+|------|------|
+| Agent | `AGENTS.md` — 라우팅·보완 기획 프롬프트 템플릿 |
+| 지도 | `docs/project/README.md`, `docs/superpowers/README.md` |
+| 운영 | `docs/project/quarterly-operations-guide.md` (분기 SSOT) |
+| MkDocs | `exclude_docs`: `project/**`, `superpowers/**` |
+| spec | `docs/superpowers/specs/2026-06-25-doc-organization-design.md` |
+
+> **2026-06 이후** 기능·구조 변경은 `docs/superpowers/specs/` 및 [superpowers/README.md](docs/superpowers/README.md)를 우선 참조.
+
+---
+
 ## 향후 작업
 
-- [ ] 기존 콘텐츠의 ADMON_INDENT/TABLE_A 등 검증 이슈 정리 후 validate job에서 `continue-on-error` 제거
-- [ ] 2022~2023 문서의 `(YYYY-MM-DD)` 형식 → `(YY-MM-DD)` 변환 검토
+- [x] validate job `continue-on-error` 제거 (2026-06 platform-hardening)
+- [x] 2022 문서 `(YYYY-MM-DD)` → `(YY-MM-DD)` (validate strict 대응)
+- [ ] 분기 콘텐츠 백필 (2023 Q2, 2024 Q1·Q2 gold standard)
+- [x] `quarterly-operations-guide.md`를 `docs/project/`로 이동

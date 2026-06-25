@@ -72,6 +72,8 @@ nav:
 # Editor creates `.md.bak` backups in-place; exclude from MkDocs build/serve.
 exclude_docs: |
   **/*.bak
+  project/**
+  superpowers/**
 
 markdown_extensions:
   - toc:

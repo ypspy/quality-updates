@@ -153,12 +153,14 @@ mkdocs build --strict
 
 ### 분기별 규제 업데이트 문서
 
-1. **수집**: `python scripts/crawl.py --year YYYY --quarter N` — `docs/quality-updates/YYYY/`에 파일이 없을 때만 생성 (기존 파일 보호). `--force`로 덮어쓰기.
-2. **큐레이션**: `python scripts/editor.py`로 링크 선별·출처 연결.
-3. **요약**: `.claude/skills/quality-updates-writer/SKILL.md` (SUMMARIZE).
-4. **탐색 등록**: `mkdocs.yml`의 `nav` → `규제 업데이트` → 해당 연도 아래에 새 항목을 추가합니다. 레이블 예: `N분기 (MM–MM월)`.
-5. **(선택)** 홈페이지 `docs/index.md`의 "Latest Update" 블록과 규제 업데이트 링크가 새 문서를 가리키도록 갱신합니다.
-6. **배포 전**: `python scripts/prepare_deploy.py` (skip 제거 + validate strict + nav/index diff 힌트).
+운영 절차·Agent/HITL 역할·품질 게이트는 **[docs/project/quarterly-operations-guide.md](docs/project/quarterly-operations-guide.md)** (정본). Agent는 **[AGENTS.md](AGENTS.md)** 도 참조.
+
+1. **수집**: `python scripts/crawl.py --year YYYY --quarter N` — 신규 파일만 생성. `--force`로 덮어쓰기.
+2. **큐레이션**: `python scripts/editor.py` — [editor-curation-workflow.md](docs/editor-curation-workflow.md)
+3. **요약**: [quality-updates-writer/SKILL.md](.claude/skills/quality-updates-writer/SKILL.md)
+4. **탐색 등록**: `mkdocs.yml` nav
+5. **(선택)** `docs/index.md` Latest Update 갱신
+6. **배포 전**: `python scripts/prepare_deploy.py`
 
 수동으로 파일을 만들 때는 아래를 참고합니다.
 
