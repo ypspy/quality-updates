@@ -332,6 +332,10 @@ tags:
 
 ### STEP 2: 삭제 실행
 
+**우선**: `python scripts/prepare_deploy.py` (또는 `--dry-run`으로 미리보기). Appendix 이전 구역의 skip 쌍만 제거하고 `validate_content --strict`를 실행한다.
+
+수동 삭제 시:
+
 - 링크 줄 + `<!-- skip -->` 줄 함께 삭제
 - 미결정 링크(skip 없음)는 보존
 - 앞뒤 리스트 빈 줄 정리

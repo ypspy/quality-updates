@@ -158,7 +158,7 @@ mkdocs build --strict
 3. **요약**: `.claude/skills/quality-updates-writer/SKILL.md` (SUMMARIZE).
 4. **탐색 등록**: `mkdocs.yml`의 `nav` → `규제 업데이트` → 해당 연도 아래에 새 항목을 추가합니다. 레이블 예: `N분기 (MM–MM월)`.
 5. **(선택)** 홈페이지 `docs/index.md`의 "Latest Update" 블록과 규제 업데이트 링크가 새 문서를 가리키도록 갱신합니다.
-6. **배포 전**: `mkdocs build --strict`, 스킵 마커 제거 등 — `prepare_deploy` 스크립트 추가 예정.
+6. **배포 전**: `python scripts/prepare_deploy.py` (skip 제거 + validate strict + nav/index diff 힌트).
 
 수동으로 파일을 만들 때는 아래를 참고합니다.
 

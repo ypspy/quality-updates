@@ -22,6 +22,8 @@
 | **스킵** | 공개 본문에서 제외해 두겠다는 표시 | 링크 **바로 다음 줄** `<!-- skip -->`(빈 줄 0~1개 허용; 파서·저장기가 동일 규칙) |
 | **완료** | 요약 블록까지 반영됨 | 링크 다음 `!!! note` / `??? note` 등 기존 본문 유지 |
 
+- **배포 전처리**: `python scripts/prepare_deploy.py` — `<!-- skip -->` 쌍 제거, `validate_content --strict`, `mkdocs.yml`·`docs/index.md` diff 힌트(stdout, 자동 적용 없음). `--dry-run`으로 변경 없이 확인.
+
 ## MkDocs 배포와 `<!-- skip -->`
 
 - MkDocs 기본 동작만으로는 **`<!-- skip -->` 줄은 HTML 주석으로 렌더에 안 보이지만**, **위 링크 불릿 한 줄은 그대로 사이트에 노출**된다.

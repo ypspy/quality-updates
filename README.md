@@ -133,6 +133,9 @@ python scripts/reorder_chronological.py docs/quality-updates/2025/2025-01-01_to_
 
 # 콘텐츠 검증 (admonition, YAML, 날짜 형식 등)
 python scripts/validate_content.py
+
+# 배포 전처리 (skip 제거 + validate + nav/index 힌트)
+python scripts/prepare_deploy.py
 ```
 
 ### 6. 엄격 빌드 검증
