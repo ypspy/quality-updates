@@ -1,6 +1,7 @@
 ---
 title: 규제 업데이트
 description: 연도·분기별 회계·감사 규제 업데이트 문서 아카이브
+period_label: overview
 ---
 
 # 규제 업데이트
