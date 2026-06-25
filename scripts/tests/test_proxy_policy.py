@@ -6,13 +6,14 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import editor.app as editor_app
+import editor.source_fetch as source_fetch
 
 
 def test_proxy_rejects_non_pdf_content_type(monkeypatch):
     def fake_fetch_url(url: str, **kwargs):
         return ("https://example.com/page", b"<html>no</html>", "text/html; charset=utf-8", None)
 
-    monkeypatch.setattr(editor_app, "fetch_url", fake_fetch_url)
+    monkeypatch.setattr(source_fetch, "fetch_url", fake_fetch_url)
 
     client = editor_app.app.test_client()
     resp = client.get("/api/source/proxy?url=" + "https%3A%2F%2Fexample.com%2Fpage")
@@ -30,7 +31,7 @@ def test_proxy_serves_pdf_bytes(monkeypatch, content_type):
     def fake_fetch_url(url: str, **kwargs):
         return ("https://example.com/doc.pdf", pdf_bytes, content_type, None)
 
-    monkeypatch.setattr(editor_app, "fetch_url", fake_fetch_url)
+    monkeypatch.setattr(source_fetch, "fetch_url", fake_fetch_url)
 
     client = editor_app.app.test_client()
     resp = client.get("/api/source/proxy?url=" + "https%3A%2F%2Fexample.com%2Fdoc.pdf")
@@ -45,7 +46,7 @@ def test_proxy_rejects_octet_stream_non_pdf_magic(monkeypatch):
     def fake_fetch_url(url: str, **kwargs):
         return ("https://example.com/file", b"NOTPDF", "application/octet-stream", None)
 
-    monkeypatch.setattr(editor_app, "fetch_url", fake_fetch_url)
+    monkeypatch.setattr(source_fetch, "fetch_url", fake_fetch_url)
 
     client = editor_app.app.test_client()
     resp = client.get("/api/source/proxy?url=" + "https%3A%2F%2Fexample.com%2Ffile")
@@ -56,7 +57,7 @@ def test_proxy_rejects_pdf_content_type_without_pdf_magic(monkeypatch):
     def fake_fetch_url(url: str, **kwargs):
         return ("https://example.com/doc.pdf", b"NOTPDF", "application/pdf", None)
 
-    monkeypatch.setattr(editor_app, "fetch_url", fake_fetch_url)
+    monkeypatch.setattr(source_fetch, "fetch_url", fake_fetch_url)
 
     client = editor_app.app.test_client()
     resp = client.get("/api/source/proxy?url=" + "https%3A%2F%2Fexample.com%2Fdoc.pdf")
