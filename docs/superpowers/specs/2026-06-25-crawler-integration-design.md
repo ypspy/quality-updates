@@ -1,7 +1,7 @@
 # Quality Updates Crawler — 메인 프로젝트 통합 설계 스펙
 
 **날짜**: 2026-06-25  
-**상태**: 검토 중  
+**상태**: 승인됨  
 **범위**: `quality-updates-crawler` 별도 저장소를 메인 `quality-updates` 레포에 단일 저장소로 통합
 
 ---
@@ -159,8 +159,8 @@ python scripts/crawl.py --year 2026 --quarter 1 --dry-run
 title: {START} ~ {END} Regulatory Updates
 jurisdiction: KR
 year: {YEAR}
-frequency: quarterly|monthly
-period_label: {label}
+frequency: quarterly
+period_label: {label}   # YYYY-QN
 period:
   start: {START}
   end: {END}
