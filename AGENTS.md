@@ -11,7 +11,7 @@ Cursor·Claude 등 **AI 에이전트**가 이 저장소에서 작업할 때의 �
 |--------------|--------------|----------|
 | **분기 보도자료 요약** | [.claude/skills/quality-updates-writer/SKILL.md](.claude/skills/quality-updates-writer/SKILL.md) | SUMMARIZE / SKIP_REMOVAL |
 | **분기 파이프라인 전체** | [docs/project/quarterly-operations-guide.md](docs/project/quarterly-operations-guide.md) | crawl → editor → skill → prepare_deploy |
-| **큐레이션·편집기** | [docs/editor-curation-workflow.md](docs/editor-curation-workflow.md) | HITL 주도; Agent는 마커 임의 변경 금지 |
+| **큐레이션·편집기** | [docs/project/editor-curation-workflow.md](docs/project/editor-curation-workflow.md) | HITL 주도; Agent는 마커 임의 변경 금지 |
 | **프로젝트 점검·보완 기획** | 이 파일 + `/brainstorming` | 평가 → 2~3안 → **spec 승인** → plan → 구현 |
 | **승인된 기능 구현** | `docs/superpowers/specs/YYYY-MM-DD-*-design.md` | [plan](docs/superpowers/plans/) + Subagent-Driven |
 | **PR·CI·린트** | [CONTRIBUTING.md](CONTRIBUTING.md) | pytest, validate `--strict`, mkdocs `--strict` |

@@ -156,7 +156,7 @@ mkdocs build --strict
 운영 절차·Agent/HITL 역할·품질 게이트는 **[docs/project/quarterly-operations-guide.md](docs/project/quarterly-operations-guide.md)** (정본). Agent는 **[AGENTS.md](AGENTS.md)** 도 참조.
 
 1. **수집**: `python scripts/crawl.py --year YYYY --quarter N` — 신규 파일만 생성. `--force`로 덮어쓰기.
-2. **큐레이션**: `python scripts/editor.py` — [editor-curation-workflow.md](docs/editor-curation-workflow.md)
+2. **큐레이션**: `python scripts/editor.py` — [editor-curation-workflow.md](docs/project/editor-curation-workflow.md)
 3. **요약**: [quality-updates-writer/SKILL.md](.claude/skills/quality-updates-writer/SKILL.md)
 4. **탐색 등록**: `mkdocs.yml` nav
 5. **(선택)** `docs/index.md` Latest Update 갱신

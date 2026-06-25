@@ -193,11 +193,17 @@ py scripts/reorder_chronological.py nonexistent.md   # → 에러 메시지 + ex
 |------|------|
 | Agent | `AGENTS.md` — 라우팅·보완 기획 프롬프트 템플릿 |
 | 지도 | `docs/project/README.md`, `docs/superpowers/README.md` |
-| 운영 | `docs/project/quarterly-operations-guide.md` (분기 SSOT) |
+| 운영 | `docs/project/quarterly-operations-guide.md`, `docs/project/editor-curation-workflow.md` (분기·편집기 SSOT) |
 | MkDocs | `exclude_docs`: `project/**`, `superpowers/**` |
 | spec | `docs/superpowers/specs/2026-06-25-doc-organization-design.md` |
 
-> **2026-06 이후** 기능·구조 변경은 `docs/superpowers/specs/` 및 [superpowers/README.md](docs/superpowers/README.md)를 우선 참조.
+## 2026-06-25 — 문서 IA 2차 (project/ 통합)
+
+| 항목 | 내용 |
+|------|------|
+| 이동 | `editor-curation-workflow.md` → `docs/project/` (작업지시서와 동일 계층) |
+| README | 큐레이션 절 축소 — 상세는 project 문서로 위임 |
+| MkDocs | `docs/project/**` 전체 exclude — 운영 문서는 `mkdocs serve`에 미표시 |
 
 ---
 
@@ -207,3 +213,4 @@ py scripts/reorder_chronological.py nonexistent.md   # → 에러 메시지 + ex
 - [x] 2022 문서 `(YYYY-MM-DD)` → `(YY-MM-DD)` (validate strict 대응)
 - [ ] 분기 콘텐츠 백필 (2023 Q2, 2024 Q1·Q2 gold standard)
 - [x] `quarterly-operations-guide.md`를 `docs/project/`로 이동
+- [x] `editor-curation-workflow.md`를 `docs/project/`로 이동 (문서 IA 2차)

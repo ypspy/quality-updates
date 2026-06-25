@@ -2,7 +2,7 @@
 
 **대상**: Quality Updates 분기별 규제 업데이트 문서 운영  
 **버전**: 2026-06  
-**관련 문서**: [README.md](../../README.md), [CONTRIBUTING.md](../../CONTRIBUTING.md), [editor-curation-workflow.md](../editor-curation-workflow.md), [quality-updates-writer 스킬](../../.claude/skills/quality-updates-writer/SKILL.md)
+**관련 문서**: [README.md](../../README.md), [CONTRIBUTING.md](../../CONTRIBUTING.md), [editor-curation-workflow.md](editor-curation-workflow.md), [quality-updates-writer 스킬](../../.claude/skills/quality-updates-writer/SKILL.md)
 
 ---
 

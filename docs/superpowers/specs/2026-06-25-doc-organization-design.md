@@ -46,10 +46,10 @@ quality-updates/
 ├── CONTRIBUTING.md                   # PR·CI·스타일 (운영 상세는 링크)
 │
 ├── docs/
-│   ├── project/                      # [신규] 메타·운영 (MkDocs exclude)
-│   │   └── README.md                 # 문서 지도
-│   ├── quarterly-operations-guide.md # [유지] 운영 SSOT
-│   ├── editor-curation-workflow.md   # [유지] 편집기 SSOT
+│   ├── project/                      # 메타·운영 (MkDocs exclude) — 2차 완료
+│   │   ├── README.md
+│   │   ├── quarterly-operations-guide.md
+│   │   └── editor-curation-workflow.md
 │   ├── superpowers/                  # [유지] 설계 이력
 │   │   ├── README.md                 # [신규] specs/plans 색인
 │   │   ├── specs/
@@ -66,8 +66,8 @@ quality-updates/
 
 | 주제 | 정본 | 다른 문서 |
 |------|------|-----------|
-| 분기 운영·HITL/Agent | `docs/quarterly-operations-guide.md` | README·CONTRIBUTING = 요약+링크 |
-| 편집기·마커 | `docs/editor-curation-workflow.md` | 작업지시서 Phase 2 = 링크 |
+| 분기 운영·HITL/Agent | `docs/project/quarterly-operations-guide.md` | README·CONTRIBUTING = 요약+링크 |
+| 편집기·마커 | `docs/project/editor-curation-workflow.md` | 작업지시서 Phase 2 = 링크 |
 | 분기 요약 포맷 | `.claude/skills/quality-updates-writer/SKILL.md` | 작업지시서 Phase 3 = 링크 |
 | 로컬 개발·스크립트 | `README.md` | — |
 | PR·린트·CI | `CONTRIBUTING.md` | — |
@@ -134,8 +134,8 @@ SSOT 원칙, AGENTS.md 허브, MkDocs exclude 반영. 구현 전 spec 승인.
 | `AGENTS.md` | Agent | 기획·라우팅·프롬프트 |
 | `README.md` | 개발자 | 온보딩 |
 | `CONTRIBUTING.md` | 기여자 | PR |
-| `quarterly-operations-guide.md` | 운영자·HITL | 분기 파이프라인 |
-| `editor-curation-workflow.md` | 운영자 | 편집기 |
+| `docs/project/quarterly-operations-guide.md` | 운영자·HITL | 분기 파이프라인 |
+| `docs/project/editor-curation-workflow.md` | 운영자 | 편집기 |
 | `superpowers/README.md` | 개발·Agent | 설계 이력 |
 | `IMPLEMENTATION_LOG.md` | 유지보수 | 변경 로그 |
 
@@ -161,7 +161,7 @@ exclude_docs: |
 ```
 
 공개 사이트 검색·nav에서 내부·설계 문서 제외.  
-`quarterly-operations-guide.md`, `editor-curation-workflow.md`는 1차 **exclude하지 않음** (선택적 공개 유지). 2차에서 `docs/project/`로 이동 시 함께 exclude.
+**2차 완료**: `quarterly-operations-guide.md`, `editor-curation-workflow.md` 모두 `docs/project/`에 있으며 `project/**` exclude로 사이트에 미노출.
 
 ---
 
@@ -206,4 +206,4 @@ exclude_docs: |
 
 | 날짜 | 내용 |
 |------|------|
-| 2026-06-25 | 초판 — brainstorming 승인 |
+| 2026-06-25 | 2차 — `editor-curation-workflow.md` → `docs/project/`; 운영 문서 project/ 일원화 |

@@ -2,7 +2,7 @@
 
 로컬 도구 `python scripts/editor.py`(Flask)로 `docs/quality-updates/**/*.md`의 링크 행을 정리하고, 이후 에이전트(SKILL)로 요약·배포 전처리를 수행할 때의 약속을 정리한다.
 
-**전체 분기 운영 흐름·Agent/HITL 역할**: [project/quarterly-operations-guide.md](project/quarterly-operations-guide.md)
+**전체 분기 운영 흐름·Agent/HITL 역할**: [quarterly-operations-guide.md](quarterly-operations-guide.md)
 
 ## 편집기 동작 요약 (2026-03 기준)
 

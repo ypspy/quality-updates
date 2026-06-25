@@ -38,18 +38,13 @@
 
 ## 큐레이션 편집 도구
 
-크롤러 생성 `.md`의 링크를 선별·출처를 연결하는 로컬 Flask 편집기. 상세 워크플로·상태 의미·스킵과 MkDocs 관계는 **[docs/editor-curation-workflow.md](docs/editor-curation-workflow.md)** 를 본다.
+로컬 Flask UI로 분기 `.md` 링크를 선별·출처를 연결한다. 상세는 **[docs/project/editor-curation-workflow.md](docs/project/editor-curation-workflow.md)** · **[분기 운영 작업지시서](docs/project/quarterly-operations-guide.md)** Phase 2.
 
 ```bash
-pip install flask   # 최초 1회
-python scripts/editor.py
+python scripts/editor.py   # http://localhost:5000
 ```
 
-- **파일 드롭다운**: 분기 `.md`를 수정일 **최신 → 과거** 순.
-- **상태**: 미결정 / 요약 필요 / 스킵 / 완료 — 저장 시 `<!-- skip -->`, `<!-- source: … -->` 등으로 반영.
-- **WEB 미리보기·원문 다운로드·KASB 첨부**: 원문은 서버가 가져옵니다. PDF뿐 아니라 Zip·Office·이미지 등(HTML/`text/*`/JSON 제외)도 `downloads/`에 저장할 수 있습니다. KASB 첨부 동일. 완료 알림은 짧은 상단 토스트(JSON `fetch`).
-- **개발**: `FLASK_DEBUG=1`(기본)에서 코드 수정 시 서버는 재시작되지만 **브라우저 탭을 매번 다시 열지 않음**. 끄려면 `FLASK_DEBUG=0`.
-- 저장 후 요약 작업은 **`.claude/skills/quality-updates-writer/SKILL.md`** Phase 0·1.
+요약은 **quality-updates-writer** 스킬 Phase 0·1.
 
 ---
 
@@ -202,9 +197,9 @@ quality-updates/
 ├── docs/                          # 문서 소스 (MkDocs 소스 루트)
 │   ├── project/                   # 메타·운영 문서 (MkDocs exclude)
 │   │   ├── README.md              # 문서 지도
-│   │   └── quarterly-operations-guide.md
+│   │   ├── quarterly-operations-guide.md
+│   │   └── editor-curation-workflow.md
 │   ├── superpowers/               # 설계 spec·plan 아카이브 (MkDocs exclude)
-│   ├── editor-curation-workflow.md
 │   ├── index.md                   # 홈페이지
 │   ├── assets/
 │   │   ├── images/                # 이미지 (로고 등)
