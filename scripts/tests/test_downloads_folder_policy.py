@@ -6,12 +6,13 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import editor.app as editor_app
+import editor.config as editor_config
 
 
 @pytest.mark.parametrize("bad_value", ["../", "..", "/etc", r"C:\\", "C:/", r"downloads\..\evil"])
 def test_config_rejects_invalid_downloads_folder(monkeypatch, tmp_path, bad_value):
-    monkeypatch.setattr(editor_app, "CONFIG_PATH", tmp_path / "editor_config.json")
-    monkeypatch.setattr(editor_app, "repo_root", lambda: tmp_path)
+    monkeypatch.setattr(editor_config, "CONFIG_PATH", tmp_path / "editor_config.json")
+    monkeypatch.setattr(editor_config, "repo_root", lambda: tmp_path)
 
     client = editor_app.app.test_client()
     resp = client.post("/api/config", json={"downloads_folder": bad_value})
@@ -22,8 +23,8 @@ def test_config_rejects_invalid_downloads_folder(monkeypatch, tmp_path, bad_valu
 
 def test_downloads_list_default_folder(monkeypatch, tmp_path):
     # Isolate config + repo root for test
-    monkeypatch.setattr(editor_app, "CONFIG_PATH", tmp_path / "editor_config.json")
-    monkeypatch.setattr(editor_app, "repo_root", lambda: tmp_path)
+    monkeypatch.setattr(editor_config, "CONFIG_PATH", tmp_path / "editor_config.json")
+    monkeypatch.setattr(editor_config, "repo_root", lambda: tmp_path)
 
     downloads = tmp_path / "downloads"
     downloads.mkdir()
@@ -40,8 +41,8 @@ def test_downloads_list_default_folder(monkeypatch, tmp_path):
 
 
 def test_clear_downloads_only_configured_folder(monkeypatch, tmp_path):
-    monkeypatch.setattr(editor_app, "CONFIG_PATH", tmp_path / "editor_config.json")
-    monkeypatch.setattr(editor_app, "repo_root", lambda: tmp_path)
+    monkeypatch.setattr(editor_config, "CONFIG_PATH", tmp_path / "editor_config.json")
+    monkeypatch.setattr(editor_config, "repo_root", lambda: tmp_path)
 
     # Two folders: downloads root and a configured subfolder.
     downloads = tmp_path / "downloads"

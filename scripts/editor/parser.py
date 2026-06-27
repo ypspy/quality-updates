@@ -10,8 +10,8 @@ SECTION_RE = re.compile(r'^#{1,4}\s+(.+)')
 APPENDIX_RE = re.compile(r'^## Appendix')
 SKIP_RE = re.compile(r'^<!-- skip -->')
 NO_SUMMARY_RE = re.compile(r'^<!-- no_summary -->')
-PDF_RE = re.compile(r'^<!-- pdf: (.+?) -->')
-SOURCE_RE = re.compile(r'^<!-- source:\s*([a-zA-Z0-9_-]+)\|(.+?)\s*-->')
+PDF_RE = re.compile(r'^\s*<!-- pdf: (.+?) -->')
+SOURCE_RE = re.compile(r'^\s*<!-- source:\s*([a-zA-Z0-9_-]+)\|(.+?)\s*-->')
 NOTE_RE = re.compile(r'^\s+[!?]{3} note')
 
 ALLOWED_SOURCE_TYPES = {'pdf', 'web', 'clip', 'url', 'shot'}
@@ -92,6 +92,12 @@ def parse_links(content: str) -> list[dict]:
                     # If source type is pdf, populate pdf_path as well.
                     if source and source['type'] == 'pdf':
                         pdf_path = source['ref']
+                    # Summarized item: source marker then note block (MkDocs-safe layout).
+                    k = j + 1
+                    while k < len(lines) and lines[k].strip() == '':
+                        k += 1
+                    if k < len(lines) and NOTE_RE.match(lines[k]):
+                        state = 'done'
                 elif PDF_RE.match(next_line):
                     state = 'needs_summary'
                     pdf_path = PDF_RE.match(next_line).group(1).strip()

@@ -67,6 +67,27 @@ iframe {
   }
 }
 
+/* 분기 규제 동향 문서 — 리스트 항목 간격 (2026-06-26-quarterly-update-list-spacing) */
+.md-content__inner.quarterly-update ul > li {
+  margin-bottom: 1em;
+}
+
+.md-content__inner.quarterly-update ul > li:last-child {
+  margin-bottom: 0;
+}
+
+.md-content__inner.quarterly-update ul > li > p {
+  margin: 0;
+}
+
+.md-content__inner.quarterly-update ul > li > :is(.admonition, details) {
+  margin: 0.65em 0 0;
+}
+
+.md-content__inner.quarterly-update ul > li > :is(.admonition, details):last-child {
+  margin-bottom: 0;
+}
+
 /* 인쇄 스타일 */
 @media print {
   iframe {

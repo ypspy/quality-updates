@@ -1,9 +1,37 @@
 /**
  * Quality Updates - 사이트 전용 스크립트
- * 모든 페이지에서 로드됩니다.
- * 향후 커스텀 기능(예: 링크 동작, 툴팁 등)을 여기에 추가할 수 있습니다.
+ * 분기 규제 업데이트 페이지 스코프: docs/superpowers/specs/2026-06-26-quarterly-update-list-spacing-design.md
  */
 (function () {
   'use strict';
-  // 예약: 커스텀 초기화 로직
+
+  var QUARTERLY_PATH = /\/quality-updates\/\d{4}\//;
+
+  function isQuarterlyUpdatePage() {
+    return QUARTERLY_PATH.test(location.pathname);
+  }
+
+  function applyQuarterlyUpdateScope() {
+    var article = document.querySelector('.md-content__inner');
+    if (!article) {
+      return;
+    }
+    if (isQuarterlyUpdatePage()) {
+      article.classList.add('quarterly-update');
+    } else {
+      article.classList.remove('quarterly-update');
+    }
+  }
+
+  function init() {
+    applyQuarterlyUpdateScope();
+  }
+
+  if (typeof document$ !== 'undefined') {
+    document$.subscribe(init);
+  } else if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();

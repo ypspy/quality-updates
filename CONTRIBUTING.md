@@ -153,11 +153,19 @@ mkdocs build --strict
 
 ### 분기별 규제 업데이트 문서
 
-1. **파일 생성**: `docs/quality-updates/YYYY/YYYY-MM-DD_to_YYYY-MM-DD.md`
-2. **프론트매터**: [README.md - 콘텐츠 업데이트 가이드](README.md#콘텐츠-업데이트-가이드)의 템플릿을 복사해 기간·연도·분기·기관에 맞게 수정합니다.
-3. **본문**: 기존 분기 문서와 동일한 섹션 구조(금융감독원, 보도자료 등)를 따릅니다.
-4. **탐색 등록**: `mkdocs.yml`의 `nav` → `규제 업데이트` → 해당 연도 아래에 새 항목을 추가합니다. 레이블 예: `N분기 (MM–MM월)`.
-5. **(선택)** 홈페이지 `docs/index.md`의 "Latest Update" 블록과 규제 업데이트 링크가 새 문서를 가리키도록 갱신합니다.
+운영 절차·Agent/HITL 역할·품질 게이트는 **[docs/project/quarterly-operations-guide.md](docs/project/quarterly-operations-guide.md)** (정본). Agent는 **[AGENTS.md](AGENTS.md)** 도 참조.
+
+1. **수집**: `python scripts/crawl.py --year YYYY --quarter N` — 신규 파일만 생성. `--force`로 덮어쓰기.
+2. **큐레이션**: `python scripts/editor.py` — [editor-curation-workflow.md](docs/project/editor-curation-workflow.md)
+3. **요약**: [quality-updates-writer/SKILL.md](.claude/skills/quality-updates-writer/SKILL.md)
+4. **탐색 등록**: `mkdocs.yml` nav
+5. **(선택)** `docs/index.md` Latest Update 갱신
+6. **배포 전**: `python scripts/prepare_deploy.py`
+
+수동으로 파일을 만들 때는 아래를 참고합니다.
+
+- **파일 경로**: `docs/quality-updates/YYYY/YYYY-MM-DD_to_YYYY-MM-DD.md`
+- **프론트매터**: [README.md - 콘텐츠 업데이트 가이드](README.md#콘텐츠-업데이트-가이드)의 템플릿
 
 ### 품질관리감리·기타 콘텐츠
 

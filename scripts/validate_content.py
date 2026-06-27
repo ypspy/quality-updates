@@ -10,6 +10,8 @@ import sys
 from pathlib import Path
 from typing import NamedTuple
 
+from source_marker_layout import find_unsafe_source_layout
+
 
 class ValidationError(NamedTuple):
     line_no: int
@@ -24,6 +26,35 @@ TYPE_B_HEADER_1 = "| 회사명 | 구분 | 주요 지적사항 | 주요 조치 |"
 TYPE_B_HEADER_2 = "| 회사 | 주요 지적사항 | 대상 | 조치 |"
 
 DATE_PATTERN = re.compile(r"\(\d{2}-\d{2}-\d{2}\)")
+
+PHASE2_PATTERNS = [
+    ("PHASE2_ES", re.compile(r"^#{2,3}\s+Executive Summary\s*$"), "error"),
+    ("PHASE2_AGENCY", re.compile(r"^#{2,4}\s+기관별 요약\s*$"), "error"),
+    ("PHASE2_IMPL", re.compile(r"^#{2,4}\s+시사점\s*$"), "error"),
+    ("PHASE2_LEGACY", re.compile(r"^#{2,3}\s+요약\s*$"), "error"),
+]
+
+COLLAPSIBLE_NOTE = re.compile(r"^\s*\?\?\?\s+note\s+")
+
+
+def validate_no_collapsible_note(lines: list[str], path: Path) -> list[ValidationError]:
+    """Link-summary note must use !!! (non-collapsible); ??? info in Appendix remains allowed."""
+    if path.name == "index.md":
+        return []
+    if "quality-updates" not in path.as_posix():
+        return []
+    errors: list[ValidationError] = []
+    for i, line in enumerate(lines):
+        if COLLAPSIBLE_NOTE.match(line):
+            errors.append(
+                ValidationError(
+                    i + 1,
+                    "COLLAPSIBLE_NOTE",
+                    '링크 요약은 `!!! note` 사용 (`??? note` 금지). Appendix·중첩 `??? info`는 허용',
+                    "error",
+                )
+            )
+    return errors
 
 
 def _is_admonition_line(line: str) -> bool:
@@ -158,6 +189,31 @@ def validate_table_schema(lines: list[str], path: Path) -> list[ValidationError]
     return errors
 
 
+def validate_source_layout(lines: list[str], path: Path) -> list[ValidationError]:
+    """MkDocs 렌더를 깨는 source+note 배치 검출."""
+    errors: list[ValidationError] = []
+    for line_no, message in find_unsafe_source_layout(lines):
+        errors.append(ValidationError(line_no, "SOURCE_LAYOUT", message, "error"))
+    return errors
+
+
+def validate_no_phase2(lines: list[str], path: Path) -> list[ValidationError]:
+    """Phase 2 집계 요약 헤더 금지 (링크 note 접두어는 제외)."""
+    if path.name == "index.md":
+        return []
+    if "quality-updates" not in path.as_posix():
+        return []
+    errors: list[ValidationError] = []
+    for i, line in enumerate(lines):
+        stripped = line.rstrip()
+        for code, pat, sev in PHASE2_PATTERNS:
+            if pat.match(stripped):
+                errors.append(
+                    ValidationError(i + 1, code, f"Phase 2 헤더 금지: {stripped}", sev)
+                )
+    return errors
+
+
 def validate_file(filepath: Path, strict: bool) -> list[ValidationError]:
     """단일 파일 검증."""
     try:
@@ -171,6 +227,9 @@ def validate_file(filepath: Path, strict: bool) -> list[ValidationError]:
         validate_yaml_frontmatter,
         validate_date_format,
         validate_table_schema,
+        validate_source_layout,
+        validate_no_phase2,
+        validate_no_collapsible_note,
     ]:
         all_errors.extend(fn(lines, filepath))
     if strict:

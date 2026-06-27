@@ -2,6 +2,8 @@
 
 로컬 도구 `python scripts/editor.py`(Flask)로 `docs/quality-updates/**/*.md`의 링크 행을 정리하고, 이후 에이전트(SKILL)로 요약·배포 전처리를 수행할 때의 약속을 정리한다.
 
+**전체 분기 운영 흐름·Agent/HITL 역할**: [quarterly-operations-guide.md](quarterly-operations-guide.md)
+
 ## 편집기 동작 요약 (2026-03 기준)
 
 - **파일 선택**: `/api/files` — `docs/quality-updates` 아래 `.md`를 **수정일 최신 → 과거** 순.
@@ -20,7 +22,9 @@
 | **미결정** | 스킵/요약/완료 미선택, 처리 전 | (없음) |
 | **요약 필요** | 요약 작업 대상; 출처(PDF·WEB·CLIP) 연결 | `<!-- source: … -->` (또는 레거시 `<!-- pdf: … -->`) |
 | **스킵** | 공개 본문에서 제외해 두겠다는 표시 | 링크 **바로 다음 줄** `<!-- skip -->`(빈 줄 0~1개 허용; 파서·저장기가 동일 규칙) |
-| **완료** | 요약 블록까지 반영됨 | 링크 다음 `!!! note` / `??? note` 등 기존 본문 유지 |
+| **완료** | 요약 블록까지 반영됨 | 링크 다음 `!!! note` |
+
+- **배포 전처리**: `python scripts/prepare_deploy.py` — `<!-- skip -->` 쌍 제거, `validate_content --strict`, `mkdocs.yml`·`docs/index.md` diff 힌트(stdout, 자동 적용 없음). `--dry-run`으로 변경 없이 확인.
 
 ## MkDocs 배포와 `<!-- skip -->`
 

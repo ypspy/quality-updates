@@ -6,6 +6,7 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import editor.app as editor_app
+import editor.config as editor_config
 
 
 def test_save_accepts_null_curation(tmp_path, monkeypatch):
@@ -15,7 +16,7 @@ def test_save_accepts_null_curation(tmp_path, monkeypatch):
     md.parent.mkdir(parents=True)
     md.write_text("- (25-01-01) [T](https://example.com/a)\n", encoding="utf-8")
 
-    monkeypatch.setattr(editor_app, "repo_root", lambda: root)
+    monkeypatch.setattr(editor_config, "repo_root", lambda: root)
 
     client = editor_app.app.test_client()
     resp = client.post(
@@ -31,7 +32,7 @@ def test_save_rejects_bad_line_index_entries(tmp_path, monkeypatch):
     md = root / "docs" / "x.md"
     md.parent.mkdir(parents=True)
     md.write_text("- (25-01-01) [T](https://example.com/a)\n", encoding="utf-8")
-    monkeypatch.setattr(editor_app, "repo_root", lambda: root)
+    monkeypatch.setattr(editor_config, "repo_root", lambda: root)
 
     client = editor_app.app.test_client()
     resp = client.post(
@@ -52,7 +53,7 @@ def test_save_persists_to_sidecar_without_mutating_markdown(tmp_path, monkeypatc
     md.parent.mkdir(parents=True)
     original = "- (25-01-01) [T](https://example.com/a)\n"
     md.write_text(original, encoding="utf-8")
-    monkeypatch.setattr(editor_app, "repo_root", lambda: root)
+    monkeypatch.setattr(editor_config, "repo_root", lambda: root)
 
     client = editor_app.app.test_client()
     resp = client.post(
@@ -81,7 +82,7 @@ def test_links_overlay_uses_sidecar_state(tmp_path, monkeypatch):
     md = root / "docs" / "x.md"
     md.parent.mkdir(parents=True)
     md.write_text("- (25-01-01) [T](https://example.com/a)\n", encoding="utf-8")
-    monkeypatch.setattr(editor_app, "repo_root", lambda: root)
+    monkeypatch.setattr(editor_config, "repo_root", lambda: root)
     client = editor_app.app.test_client()
 
     save_resp = client.post(
@@ -114,7 +115,7 @@ def test_export_to_md_writes_markers_from_sidecar(tmp_path, monkeypatch):
     md = root / "docs" / "x.md"
     md.parent.mkdir(parents=True)
     md.write_text("- (25-01-01) [T](https://example.com/a)\n", encoding="utf-8")
-    monkeypatch.setattr(editor_app, "repo_root", lambda: root)
+    monkeypatch.setattr(editor_config, "repo_root", lambda: root)
     client = editor_app.app.test_client()
 
     save_resp = client.post(
@@ -137,7 +138,7 @@ def test_import_from_md_writes_sidecar(tmp_path, monkeypatch):
         "- (25-01-01) [T](https://example.com/a)\n<!-- source: pdf|downloads/a.pdf -->\n",
         encoding="utf-8",
     )
-    monkeypatch.setattr(editor_app, "repo_root", lambda: root)
+    monkeypatch.setattr(editor_config, "repo_root", lambda: root)
     client = editor_app.app.test_client()
 
     import_resp = client.post("/api/sync/import_from_md", json={"file": "docs/x.md"})
@@ -154,7 +155,7 @@ def test_no_summary_roundtrip_export_import(tmp_path, monkeypatch):
     md = root / "docs" / "x.md"
     md.parent.mkdir(parents=True)
     md.write_text("- (25-01-01) [T](https://example.com/a)\n", encoding="utf-8")
-    monkeypatch.setattr(editor_app, "repo_root", lambda: root)
+    monkeypatch.setattr(editor_config, "repo_root", lambda: root)
     client = editor_app.app.test_client()
 
     save_resp = client.post(

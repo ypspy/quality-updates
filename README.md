@@ -3,6 +3,9 @@
 회계·감사 분야 규제 모니터링을 위한 정적 문서 사이트입니다.  
 금융위원회·금융감독원·회계기준원 등 주요 기관의 보도자료, 제도 개정, 감리 결과를 시기별로 정리하여 제공합니다.
 
+- **Agent 작업**: [AGENTS.md](AGENTS.md) — 프로젝트 점검·보완 기획 프롬프트, 작업 라우팅
+- **문서 지도**: [docs/project/README.md](docs/project/README.md)
+
 - **사이트**: [https://quality-updates.onrender.com](https://quality-updates.onrender.com)
 - **빌드**: [MkDocs](https://www.mkdocs.org/) + [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/)
 
@@ -10,7 +13,8 @@
 
 ## 목차
 
-- [기능](#기능)
+- [큐레이션 편집 도구](#큐레이션-편집-도구)
+- [분기 운영 워크플로](#분기-운영-워크플로)
 - [로컬 개발 환경 설정](#로컬-개발-환경-설정)
 - [프로젝트 구조](#프로젝트-구조)
 - [콘텐츠 업데이트 가이드](#콘텐츠-업데이트-가이드)
@@ -28,24 +32,56 @@
 - **검색**: MkDocs Material 검색 (한국어 구분자 지원)
 - **이미지 라이트박스**: glightbox 플러그인
 - **HTML/CSS/JS 최소화**: minify 플러그인으로 출력 최적화
-- **CI**: GitHub Actions (markdownlint, MkDocs 빌드, 콘텐츠 검증)
+- **CI**: GitHub Actions (markdownlint, pytest, MkDocs 빌드, 콘텐츠 검증 strict)
 
 ---
 
 ## 큐레이션 편집 도구
 
-크롤러 생성 `.md`의 링크를 선별·출처를 연결하는 로컬 Flask 편집기. 상세 워크플로·상태 의미·스킵과 MkDocs 관계는 **[docs/editor-curation-workflow.md](docs/editor-curation-workflow.md)** 를 본다.
+로컬 Flask UI로 분기 `.md` 링크를 선별·출처를 연결한다. 상세는 **[docs/project/editor-curation-workflow.md](docs/project/editor-curation-workflow.md)** · **[분기 운영 작업지시서](docs/project/quarterly-operations-guide.md)** Phase 2.
 
 ```bash
-pip install flask   # 최초 1회
-python scripts/editor.py
+python scripts/editor.py   # http://localhost:5000
 ```
 
-- **파일 드롭다운**: 분기 `.md`를 수정일 **최신 → 과거** 순.
-- **상태**: 미결정 / 요약 필요 / 스킵 / 완료 — 저장 시 `<!-- skip -->`, `<!-- source: … -->` 등으로 반영.
-- **WEB 미리보기·원문 다운로드·KASB 첨부**: 원문은 서버가 가져옵니다. PDF뿐 아니라 Zip·Office·이미지 등(HTML/`text/*`/JSON 제외)도 `downloads/`에 저장할 수 있습니다. KASB 첨부 동일. 완료 알림은 짧은 상단 토스트(JSON `fetch`).
-- **개발**: `FLASK_DEBUG=1`(기본)에서 코드 수정 시 서버는 재시작되지만 **브라우저 탭을 매번 다시 열지 않음**. 끄려면 `FLASK_DEBUG=0`.
-- 저장 후 요약 작업은 **`.claude/skills/quality-updates-writer/SKILL.md`** Phase 0·1.
+요약은 **quality-updates-writer** 스킬 Phase 0·1.
+
+---
+
+## 분기 운영 워크플로
+
+분기별 규제 업데이트 문서를 **수집 → 큐레이션 → 요약 → 사이트 반영 → 배포**까지 처리하는 표준 흐름입니다.  
+**Agent(에이전트)** 와 **전문가(HITL, Human-in-the-Loop)** 의 역할·체크리스트는 **[docs/project/quarterly-operations-guide.md](docs/project/quarterly-operations-guide.md)** (분기 운영 작업지시서)를 본다.
+
+```mermaid
+flowchart LR
+    A[crawl.py] --> B[editor.py]
+    B --> C[quality-updates-writer]
+    C --> D[nav / index.md]
+    D --> E[prepare_deploy.py]
+    E --> F[mkdocs build --strict]
+    F --> G[main push → Render]
+```
+
+| 단계 | 명령·도구 | 산출물 |
+|------|-----------|--------|
+| 1. 수집 | `python scripts/crawl.py --year YYYY --quarter N` | `docs/quality-updates/YYYY/*.md` (신규만) |
+| 2. 큐레이션 | `python scripts/editor.py` | `<!-- skip -->`, `<!-- source: … -->` 마커 |
+| 3. 요약 | `quality-updates-writer` 스킬 (SUMMARIZE) | 링크별 note |
+| 4. 사이트 등록 | `mkdocs.yml` nav, `docs/index.md` | 사이드바·홈 최신 링크 |
+| 5. 배포 전처리 | `python scripts/prepare_deploy.py` | skip 제거, validate, nav/index diff 힌트 |
+| 6. 빌드·배포 | `mkdocs build --strict` → `main` push | [quality-updates.onrender.com](https://quality-updates.onrender.com) |
+
+**npm 단축** (Node.js 설치 시):
+
+```bash
+npm run crawl              # python scripts/crawl.py (현재 분기)
+npm run prepare:deploy     # 배포 전처리
+npm test                   # scripts/ 테스트 (pytest)
+npm run build:strict       # MkDocs strict 빌드
+```
+
+상세 절차·역할 분담·품질 게이트: [docs/project/quarterly-operations-guide.md](docs/project/quarterly-operations-guide.md) · [docs/project/README.md](docs/project/README.md) · [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ---
 
@@ -112,11 +148,18 @@ npm run build        # mkdocs build
 npm run build:strict # mkdocs build --strict (경고 시 실패)
 npm run lint:md      # markdownlint-cli (docs 내 .md 검사)
 npm run clean        # site, .cache 등 빌드 산출물 삭제
+npm run crawl        # 분기 크롤 (현재 분기)
+npm run prepare:deploy  # 배포 전처리
+npm test             # scripts/ pytest
 ```
 
 ### 5. 스크립트 (콘텐츠 작업용)
 
 ```bash
+# 분기별 규제 업데이트 수집 (신규 분기만 docs/에 생성)
+python scripts/crawl.py --year 2026 --quarter 1
+python scripts/crawl.py   # 인자 생략 시 현재 분기
+
 # PDF 텍스트 추출
 python scripts/extract_pdf.py
 
@@ -129,6 +172,9 @@ python scripts/reorder_chronological.py docs/quality-updates/2025/2025-01-01_to_
 
 # 콘텐츠 검증 (admonition, YAML, 날짜 형식 등)
 python scripts/validate_content.py
+
+# 배포 전처리 (skip 제거 + validate + nav/index 힌트)
+python scripts/prepare_deploy.py
 ```
 
 ### 6. 엄격 빌드 검증
@@ -149,7 +195,11 @@ mkdocs build --strict
 ```
 quality-updates/
 ├── docs/                          # 문서 소스 (MkDocs 소스 루트)
-│   ├── editor-curation-workflow.md # 큐레이션 편집기·스킵·배포 전처리
+│   ├── project/                   # 메타·운영 문서 (MkDocs exclude)
+│   │   ├── README.md              # 문서 지도
+│   │   ├── quarterly-operations-guide.md
+│   │   └── editor-curation-workflow.md
+│   ├── superpowers/               # 설계 spec·plan 아카이브 (MkDocs exclude)
 │   ├── index.md                   # 홈페이지
 │   ├── assets/
 │   │   ├── images/                # 이미지 (로고 등)
@@ -178,14 +228,18 @@ quality-updates/
 │   ├── workflows/ci.yml           # CI (lint, build, validate)
 │   └── dependabot.yml             # 의존성 자동 업데이트
 ├── scripts/                       # 유틸리티 스크립트
+│   ├── crawl.py                   # 규제 업데이트 크롤러 CLI
+│   ├── crawler/                   # FSS·FSC·KICPA·KASB 수집 모듈
 │   ├── editor.py                  # 큐레이션 편집기 진입점 (Flask)
 │   ├── editor/                    # 편집기 앱·정적 파일
 │   ├── extract_pdf.py             # PDF 텍스트 추출
 │   ├── extract_hwp.py             # HWP 텍스트 추출
 │   ├── reorder_chronological.py   # 콘텐츠 시계열 정렬
 │   ├── validate_content.py        # 콘텐츠 스키마 검증
+│   ├── prepare_deploy.py          # 배포 전처리 (skip·validate·힌트)
 │   └── tests/                     # 스크립트 단위 테스트
-├── AGENT_INSTRUCTION.md           # 에이전트 요약·포맷 지침 (Phase 1/2)
+├── .claude/skills/quality-updates-writer/  # 분기 요약·배포 정리 스킬
+├── AGENTS.md                        # Agent 진입·보완 기획 프롬프트
 ├── README.md                      # 이 파일
 ├── CONTRIBUTING.md                # 기여 가이드
 └── IMPLEMENTATION_LOG.md          # 개선 작업 실행 로그
@@ -232,12 +286,38 @@ tags: [규제 업데이트, 회계기준, 감사감리, 금융감독]
 문서 본문은 기존 분기별 파일과 동일한 형식(금융감독원, 보도자료 등 섹션)을 따르면 됩니다.  
 추가 후 **반드시 `mkdocs.yml`의 `nav`에 새 페이지를 등록**해야 사이드바/탭에 표시됩니다.
 
+**전체 분기 운영 흐름·Agent/HITL 역할**: [분기 운영 워크플로](#분기-운영-워크플로) · [docs/project/quarterly-operations-guide.md](docs/project/quarterly-operations-guide.md) · [AGENTS.md](AGENTS.md)
+
 ### 품질관리감리·기타 문서
 
 - 새 문서에도 `title`, `description` 등 최소 프론트매터를 두는 것을 권장합니다.
 - 이미지 추가 시 `CONTRIBUTING.md`의 이미지·alt 텍스트 가이드라인을 참고하세요.
 
 자세한 워크플로우·커밋 규칙·테스트 체크리스트는 **[CONTRIBUTING.md](CONTRIBUTING.md)** 를 참조하세요.
+
+---
+
+## MCP 코퍼스 (에이전트·Cursor)
+
+분기 `.md`를 JSONL로 export한 뒤 MCP tool로 검색·조회합니다. 감사 규제 렌즈 스킬(`audit-regulatory-lens`) v1.1에서 우선 사용.
+
+```bash
+# 코퍼스 생성 (skip 제외, Appendix A 이전만)
+python scripts/export_corpus.py --strict
+
+# 로컬 stdio MCP (Cursor)
+# .cursor/mcp.json 예시:
+# { "mcpServers": { "quality-updates": {
+#     "command": "python", "args": ["scripts/mcp_server/stdio.py"],
+#     "cwd": "/path/to/quality-updates" } } }
+python scripts/mcp_server/stdio.py
+
+# Hosted HTTP (Render 2번째 Web Service, env MCP_API_KEY 필수)
+uvicorn mcp_server.http:app --host 0.0.0.0 --port 8000
+# (scripts/를 cwd로, PYTHONPATH=scripts)
+```
+
+설계: [docs/superpowers/specs/2026-06-27-mcp-corpus-design.md](docs/superpowers/specs/2026-06-27-mcp-corpus-design.md)
 
 ---
 
