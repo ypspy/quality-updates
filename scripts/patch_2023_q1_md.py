@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-"""One-off patch for docs/quality-updates/2023/2023-01-01_to_2023-03-31.md"""
+"""DEPRECATED: One-off patch for 2023 Q1 — Phase 2 제거(2026-06-26 spec) 이후 실행 금지."""
 from pathlib import Path
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 MD = ROOT / "docs" / "quality-updates" / "2023" / "2023-01-01_to_2023-03-31.md"
@@ -742,4 +743,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(
+        "patch_2023_q1_md.py is deprecated (Phase 2 removed per 2026-06-26 spec). "
+        "Do not run."
+    )

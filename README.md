@@ -67,7 +67,7 @@ flowchart LR
 |------|-----------|--------|
 | 1. 수집 | `python scripts/crawl.py --year YYYY --quarter N` | `docs/quality-updates/YYYY/*.md` (신규만) |
 | 2. 큐레이션 | `python scripts/editor.py` | `<!-- skip -->`, `<!-- source: … -->` 마커 |
-| 3. 요약 | `quality-updates-writer` 스킬 (SUMMARIZE) | Executive Summary, 기관별 요약, 링크별 note |
+| 3. 요약 | `quality-updates-writer` 스킬 (SUMMARIZE) | 링크별 note |
 | 4. 사이트 등록 | `mkdocs.yml` nav, `docs/index.md` | 사이드바·홈 최신 링크 |
 | 5. 배포 전처리 | `python scripts/prepare_deploy.py` | skip 제거, validate, nav/index diff 힌트 |
 | 6. 빌드·배포 | `mkdocs build --strict` → `main` push | [quality-updates.onrender.com](https://quality-updates.onrender.com) |
@@ -294,6 +294,30 @@ tags: [규제 업데이트, 회계기준, 감사감리, 금융감독]
 - 이미지 추가 시 `CONTRIBUTING.md`의 이미지·alt 텍스트 가이드라인을 참고하세요.
 
 자세한 워크플로우·커밋 규칙·테스트 체크리스트는 **[CONTRIBUTING.md](CONTRIBUTING.md)** 를 참조하세요.
+
+---
+
+## MCP 코퍼스 (에이전트·Cursor)
+
+분기 `.md`를 JSONL로 export한 뒤 MCP tool로 검색·조회합니다. 감사 규제 렌즈 스킬(`audit-regulatory-lens`) v1.1에서 우선 사용.
+
+```bash
+# 코퍼스 생성 (skip 제외, Appendix A 이전만)
+python scripts/export_corpus.py --strict
+
+# 로컬 stdio MCP (Cursor)
+# .cursor/mcp.json 예시:
+# { "mcpServers": { "quality-updates": {
+#     "command": "python", "args": ["scripts/mcp_server/stdio.py"],
+#     "cwd": "/path/to/quality-updates" } } }
+python scripts/mcp_server/stdio.py
+
+# Hosted HTTP (Render 2번째 Web Service, env MCP_API_KEY 필수)
+uvicorn mcp_server.http:app --host 0.0.0.0 --port 8000
+# (scripts/를 cwd로, PYTHONPATH=scripts)
+```
+
+설계: [docs/superpowers/specs/2026-06-27-mcp-corpus-design.md](docs/superpowers/specs/2026-06-27-mcp-corpus-design.md)
 
 ---
 

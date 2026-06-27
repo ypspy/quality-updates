@@ -66,6 +66,7 @@ flowchart TB
 |---|-------|------|--------|
 | **실행** | `python scripts/crawl.py --year YYYY --quarter N` | 대상 연도·분기 지정, `--dry-run` 결과 확인 | 파일 없을 때만 생성 (기존 큐레이션본 보호) |
 | **산출** | `docs/quality-updates/YYYY/YYYY-MM-DD_to_YYYY-MM-DD.md` | — | YAML front matter, 4기관 링크, Appendix A |
+| **정렬** | 본문 dated list는 **과거→현재** (`unified.py`) | — | Appendix A는 크롤 수집 순(최신→과거) **유지** |
 | **검토** | — | 기간·건수 이상 여부, 누락 기관 없는지 샘플 확인 | — |
 
 **Agent 체크리스트**
@@ -73,6 +74,7 @@ flowchart TB
 - [ ] 올바른 `--year` / `--quarter` (또는 `--start` / `--end`)
 - [ ] `[WARN] Output exists, skipping` 시 기존 파일 의도 확인
 - [ ] `[DONE]` 경로가 `docs/quality-updates/{연도}/` 인지 확인
+- [ ] 본문 첫·마지막 링크 날짜가 분기 시작·종료 방향과 맞는지 (과거→현재)
 
 **HITL 체크리스트**
 
@@ -112,12 +114,11 @@ flowchart TB
 |---|-------|------|--------|
 | **실행** | `quality-updates-writer` — **SUMMARIZE** | 요약 대상 링크·우선순위 지시 | 스킬 포맷·gold standard |
 | **Phase 0** | PDF/WEB/CLIP 경로 결정 | 출처 파일 존재·적합성 확인 | `extract_pdf.py` 등 |
-| **Phase 1** | 링크별 `??? note` 요약 | **사실 관계 최종 검증** | — |
-| **Phase 2** | Executive Summary, 기관별 요약, 시사점 | 문체·강조점·누락 이슈 검토 | — |
+| **Phase 1** | 링크별 `!!! note` 요약 | **사실 관계 최종 검증** | — |
 
 **Agent 체크리스트** (스킬 준수)
 
-- [ ] gold standard 참조: `2024-10-01_to_2024-12-31.md`, `2025-10-01_to_2025-12-31.md`
+- [ ] gold standard 참조: `2023-04-01_to_2023-06-30.md`, `2025-10-01_to_2025-12-31.md`
 - [ ] 원문 미확인 내용 미포함
 - [ ] 접근 불가 시 `<!-- 원문 접근 불가 -->` 처리
 
@@ -125,7 +126,6 @@ flowchart TB
 
 - [ ] 제재·수치·제도명 등 **핵심 사실** 샘플링 대조
 - [ ] 과도한 해석·일반론 없음
-- [ ] 분기 테마(Executive Summary)가 실무 관점에서 적절한지
 
 ---
 

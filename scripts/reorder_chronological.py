@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Quality-updates 문서의 날짜순 리스트를 과거→현재 순으로 재정렬합니다.
+#### 하위섹션 단위로만 정렬하며 ###/#### 헤더는 유지합니다.
 한국회계기준원 주요일정 섹션은 이미 시간 순이므로 변경하지 않습니다.
 """
 
@@ -11,12 +12,20 @@ from pathlib import Path
 from typing import Optional
 
 
-# 날짜 패턴: 앞에 공백 있을 수 있음 (Appendix 등), - (YY-MM-DD)
-DATE_PATTERN = re.compile(r'^(\s*)- \((\d{2})-(\d{2})-(\d{2})\) ')
+DATE_PATTERN = re.compile(r"^(\s*)- \((\d{2})-(\d{2})-(\d{2})\) ")
+APPENDIX_RE = re.compile(r"^## Appendix A\b")
+SUBSECTION_RE = re.compile(r"^####\s+")
+AGENCY_RE = re.compile(r"^###\s+")
+
+
+def _appendix_boundary(lines: list[str]) -> int:
+    for idx, line in enumerate(lines):
+        if APPENDIX_RE.match(line.strip()):
+            return idx
+    return len(lines)
 
 
 def parse_date_from_line(line: str) -> Optional[tuple[str, tuple[int, int, int]]]:
-    """라인에서 (YY-MM-DD) 파싱. (들여쓰기, (year, month, day)) 반환."""
     m = DATE_PATTERN.match(line)
     if not m:
         return None
@@ -25,96 +34,111 @@ def parse_date_from_line(line: str) -> Optional[tuple[str, tuple[int, int, int]]
     return (indent, (year, mm, dd))
 
 
+def _is_schedule_subsection(header_line: str, in_kasb: bool) -> bool:
+    return in_kasb and "주요일정" in header_line
+
+
+def _extract_item_block(lines: list[str], start: int) -> tuple[str, int]:
+    item_lines = [lines[start]]
+    k = start + 1
+    while k < len(lines):
+        nxt = lines[k]
+        if parse_date_from_line(nxt) is not None:
+            break
+        if SUBSECTION_RE.match(nxt.strip()) or AGENCY_RE.match(nxt.strip()):
+            break
+        if APPENDIX_RE.match(nxt.strip()):
+            break
+        if nxt.strip().startswith("---"):
+            break
+        item_lines.append(nxt)
+        k += 1
+    return "\n".join(item_lines), k
+
+
+def _sort_subsection_items(lines: list[str], start: int, end: int) -> list[str]:
+    items: list[tuple[tuple[int, int, int], str]] = []
+    prefix: list[str] = []
+    i = start
+    while i < end:
+        line = lines[i]
+        parsed = parse_date_from_line(line)
+        if parsed is None:
+            prefix.append(line)
+            i += 1
+            continue
+        _, dt = parsed
+        block, i = _extract_item_block(lines, i)
+        items.append((dt, block))
+    if not items:
+        return lines[start:end]
+    sorted_blocks = [block for _, block in sorted(items, key=lambda x: x[0])]
+    out = prefix[:]
+    for idx, block in enumerate(sorted_blocks):
+        if out and out[-1].strip() != "":
+            out.append("")
+        out.append(block)
+    return out
+
+
 def process_file(filepath: Path, dry_run: bool = False) -> bool:
-    """단일 파일 처리: dated list를 과거→현재 순으로 정렬 (한국회계기준원 주요일정 제외).
-    Returns True if file was updated (or would be updated in dry_run)."""
-    text = filepath.read_text(encoding='utf-8')
-    lines = text.split('\n')
+    text = filepath.read_text(encoding="utf-8")
+    lines = text.split("\n")
+    appendix_start = _appendix_boundary(lines)
+    main_lines = lines[:appendix_start]
+    appendix_lines = lines[appendix_start:]
 
     output: list[str] = []
     i = 0
-
-    # 컨텍스트: 한국회계기준원 섹션인지, 주요일정 하위섹션인지
     in_kasb = False
-    in_main_schedule = False
 
-    while i < len(lines):
-        line = lines[i]
+    while i < len(main_lines):
+        line = main_lines[i]
 
-        # 섹션 헤더 추적
-        if line.strip().startswith('### ') and '한국회계기준원' in line:
-            in_kasb = True
-            in_main_schedule = False
-        elif line.strip().startswith('### '):
-            in_kasb = False
-            in_main_schedule = False
-        elif '주요일정' in line and (line.strip().startswith('#### ') or '**주요일정**' in line):
-            in_main_schedule = in_kasb
-        elif line.strip().startswith('#### ') and '주요일정' not in line:
-            in_main_schedule = False
-        elif '??? info "한국회계기준원"' in line:
-            in_kasb = True
-            in_main_schedule = False
-        elif '??? info "' in line and '한국회계기준원' not in line:
-            in_kasb = False
-            in_main_schedule = False
-        elif '**' in line and '주요일정' in line and in_kasb:
-            in_main_schedule = True
-        elif '**' in line and '주요일정' not in line:
-            if in_kasb:
-                in_main_schedule = False
+        if AGENCY_RE.match(line.strip()):
+            in_kasb = "한국회계기준원" in line
+            output.append(line)
+            i += 1
+            continue
 
-        parsed = parse_date_from_line(line)
-        if parsed is not None and not in_main_schedule:
-            indent, dt = parsed
-            items: list[tuple[tuple[int, int, int], str]] = []
-            j = i
-            while j < len(lines):
-                curr_line = lines[j]
-                curr_parsed = parse_date_from_line(curr_line)
-                if curr_parsed is not None:
-                    _, curr_dt = curr_parsed
-                    item_lines = [curr_line]
-                    k = j + 1
-                    while k < len(lines):
-                        nxt = lines[k]
-                        if parse_date_from_line(nxt) is not None:
-                            break
-                        if nxt.strip().startswith('###') or (nxt.strip().startswith('---') and len(output) > 0 and '---' in ''.join(output[-5:])):
-                            break
-                        # ??? info at 4 spaces = new Appendix agency block; 8+ spaces = nested, don't break
-                        if re.match(r'^    \?\?\? info "', nxt):
-                            break
-                        if re.match(r'^\s*\*\*[^*]+\*\*\s*$', nxt.strip()):
-                            break
-                        if re.match(r'^\s*####\s+', nxt) and '주요일정' not in nxt:
-                            break
-                        item_lines.append(nxt)
-                        k += 1
-                    items.append((curr_dt, '\n'.join(item_lines)))
-                    j = k
-                else:
-                    j += 1
-                    break
-            if items:
-                sorted_items = sorted(items, key=lambda x: x[0])
-                for _, item_text in sorted_items:
-                    output.append(item_text)
-                i = j
+        if SUBSECTION_RE.match(line.strip()):
+            header = line
+            output.append(header)
+            i += 1
+            if _is_schedule_subsection(header, in_kasb):
+                while i < len(main_lines):
+                    nxt = main_lines[i]
+                    if SUBSECTION_RE.match(nxt.strip()) or AGENCY_RE.match(nxt.strip()):
+                        break
+                    output.append(nxt)
+                    i += 1
                 continue
+
+            subsection_start = i
+            while i < len(main_lines):
+                nxt = main_lines[i]
+                if SUBSECTION_RE.match(nxt.strip()) or AGENCY_RE.match(nxt.strip()):
+                    break
+                i += 1
+            output.extend(_sort_subsection_items(main_lines, subsection_start, i))
+            continue
 
         output.append(line)
         i += 1
 
-    new_text = '\n'.join(output)
+    if appendix_lines:
+        if output and appendix_lines and output[-1].strip() != "":
+            output.append("")
+        output.extend(appendix_lines)
+
+    new_text = "\n".join(output)
     if new_text != text:
         if not dry_run:
-            filepath.write_text(new_text, encoding='utf-8')
+            filepath.write_text(new_text, encoding="utf-8")
         print(f"Updated: {filepath}")
         return True
-    else:
-        print(f"No change: {filepath}")
-        return False
+    print(f"No change: {filepath}")
+    return False
 
 
 def main():

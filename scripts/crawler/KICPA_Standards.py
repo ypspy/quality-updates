@@ -160,8 +160,6 @@ def crawl_sumboard(start_date, end_date):
 
         time.sleep(0.2)
 
-    # 날짜 최신순 정렬
-    collected.sort(key=lambda x: x["date"], reverse=True)
     return collected
 
 

@@ -6,7 +6,7 @@ import shutil
 SKIP_RE = re.compile(r'^<!-- skip -->$')
 NO_SUMMARY_RE = re.compile(r'^<!-- no_summary -->$')
 PDF_RE = re.compile(r'^<!-- pdf: .+ -->$')
-SOURCE_RE = re.compile(r'^<!-- source:\s*[a-zA-Z0-9_-]+\|.+ -->$')
+SOURCE_RE = re.compile(r'^\s*<!-- source:\s*[a-zA-Z0-9_-]+\|.+ -->$')
 APPENDIX_RE = re.compile(r'^## Appendix')
 
 

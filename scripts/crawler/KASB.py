@@ -17,6 +17,11 @@ BOARDS = {
     },
 }
 
+SCHEDULE = {
+    "list": "https://www.kasb.or.kr/front/board/calListA.do",
+    "view": "https://www.kasb.or.kr/front/board/calView.do",
+}
+
 SESSION_HEADERS = {
     "User-Agent": "Mozilla/5.0",
 }
@@ -86,6 +91,65 @@ def crawl_board(name, cfg, start, end):
         page += 1
 
     print(f"=== [{name}] 완료: {len(items)}건 ===")
+    return items
+
+
+def parse_schedule_page(html):
+    soup = BeautifulSoup(html, "html.parser")
+    results = []
+
+    for row in soup.select("table tbody tr"):
+        cols = row.find_all("td")
+        if len(cols) != 5:
+            continue
+
+        title_tag = cols[3].find("a")
+        if not title_tag:
+            continue
+
+        onclick = title_tag.get("onclick", "")
+        if "fn_Detail" not in onclick:
+            continue
+
+        title = title_tag.get_text(strip=True)
+        if not title:
+            continue
+
+        raw_date = cols[0].get_text(strip=True)
+        try:
+            d = datetime.strptime(raw_date, "%Y-%m-%d").strftime("%y-%m-%d")
+        except ValueError:
+            continue
+
+        seq = onclick.split("'")[1]
+        url = f"{SCHEDULE['view']}?seq={seq}"
+        results.append((d, title, url))
+
+    return results
+
+
+def crawl_schedule(start, end):
+    session = requests.Session()
+    session.headers.update(SESSION_HEADERS)
+    session.get(SCHEDULE["list"])
+
+    page = 1
+    items = []
+
+    print("\n=== [주요일정] 크롤링 시작 ===")
+
+    while True:
+        html = fetch_page(session, SCHEDULE["list"], page, start, end)
+        parsed = parse_schedule_page(html)
+
+        if not parsed:
+            break
+
+        items.extend(parsed)
+        page += 1
+
+    items.sort(key=lambda t: datetime.strptime(t[0], "%y-%m-%d"))
+    print(f"=== [주요일정] 완료: {len(items)}건 ===")
     return items
 
 

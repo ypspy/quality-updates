@@ -1,4 +1,5 @@
 <!-- DEPRECATED: 이 파일의 내용은 SKILL.md의 "WORKFLOW — BOILERPLATE" 섹션으로 이동되었습니다. -->
+<!-- Phase 2(Executive Summary·기관별 요약·시사점)는 2026-06-26 spec으로 제거됨. SKILL.md BOILERPLATE 참조. -->
 <!-- 이 파일은 git 이력 보존을 위해 삭제하지 않습니다. SKILL.md를 사용하세요. -->
 
 # 보일러플레이트 생성 지침

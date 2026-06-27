@@ -3,6 +3,8 @@
 import html
 import json
 import re
+import shutil
+import sys
 import tempfile
 import threading
 from html.parser import HTMLParser
@@ -204,6 +206,33 @@ def capture_preview_png_bytes(cleaned_html: str, *, base_url: str) -> bytes:
                 browser.close()
 
 
+def configure_tesseract() -> str:
+    """Resolve tesseract binary and return OCR config flags (tessdata-dir, psm)."""
+    try:
+        import pytesseract  # type: ignore
+    except Exception as e:  # pragma: no cover
+        raise RuntimeError(
+            "pytesseract가 필요합니다. `pip install pytesseract`를 설치하세요."
+        ) from e
+
+    cmd = shutil.which("tesseract")
+    if not cmd and sys.platform == "win32":
+        win_exe = Path(r"C:\Program Files\Tesseract-OCR\tesseract.exe")
+        if win_exe.is_file():
+            cmd = str(win_exe)
+            pytesseract.pytesseract.tesseract_cmd = cmd
+    if not cmd and not getattr(pytesseract.pytesseract, "tesseract_cmd", None):
+        raise RuntimeError(
+            "Tesseract OCR이 필요합니다. Windows: `winget install UB-Mannheim.TesseractOCR`"
+        )
+
+    flags = ["--psm", "6"]
+    repo_tess = config.repo_root() / "downloads" / "tessdata"
+    if (repo_tess / "kor.traineddata").is_file():
+        flags.extend(["--tessdata-dir", str(repo_tess)])
+    return " ".join(flags)
+
+
 def ocr_png_to_text(png_bytes: bytes) -> str:
     """OCR PNG screenshot to text. Requires pytesseract + system Tesseract."""
     try:
@@ -215,9 +244,9 @@ def ocr_png_to_text(png_bytes: bytes) -> str:
     except Exception as e:  # pragma: no cover
         raise RuntimeError("Pillow가 필요합니다. `pip install pillow`를 설치하세요.") from e
 
+    ocr_config = configure_tesseract()
     img = Image.open(BytesIO(png_bytes))
-    # PSM 6: assume a uniform block of text; better for tables than default in many cases.
-    text = pytesseract.image_to_string(img, lang="kor+eng", config="--psm 6")
+    text = pytesseract.image_to_string(img, lang="kor+eng", config=ocr_config)
     return (text or "").strip()
 
 

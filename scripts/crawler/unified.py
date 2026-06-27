@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -80,6 +81,34 @@ def ensure_output_dir() -> None:
     output_dir().mkdir(parents=True, exist_ok=True)
 
 
+def _yy_mm_dd_key(date_str: str) -> tuple[int, int, int]:
+    yy, mm, dd = date_str.split("-")
+    return (2000 + int(yy), int(mm), int(dd))
+
+
+def sort_fss_items(items: list[dict]) -> list[dict]:
+    return sorted(items, key=lambda i: _yy_mm_dd_key(i["date"]))
+
+
+def sort_kicpa_dict_items(items: list[dict]) -> list[dict]:
+    return sorted(items, key=lambda i: i["date"])
+
+
+def sort_dated_tuples(items: list[tuple[str, str, str]]) -> list[tuple[str, str, str]]:
+    return sorted(items, key=lambda t: _yy_mm_dd_key(t[0]))
+
+
+def sort_md_link_lines(items: list[str]) -> list[str]:
+    def key(line: str) -> tuple[int, int, int]:
+        m = re.match(r"^- \((\d{2})-(\d{2})-(\d{2})\)", line)
+        if not m:
+            return (9999, 12, 31)
+        yy, mm, dd = (int(x) for x in m.groups())
+        return (2000 + yy, mm, dd)
+
+    return sorted(items, key=key)
+
+
 def md_lines(items):
     return "\n".join(f"- ({d}) [{title}]({link})" for d, title, link in items)
 
@@ -122,15 +151,24 @@ def collect_fss() -> str:
 
     press = FSS.fetch_press_release()
     APPENDIX["금융감독원"]["보도자료"] = press
-    lines += ["#### 보도자료\n", md_lines([(i["date"], i["title"], i["link"]) for i in press])]
+    lines += [
+        "#### 보도자료\n",
+        md_lines([(i["date"], i["title"], i["link"]) for i in sort_fss_items(press)]),
+    ]
 
     rules = FSS.fetch_rules_revision()
     APPENDIX["금융감독원"]["세칙제ㆍ개정예고"] = rules
-    lines += ["\n#### 세칙제ㆍ개정예고\n", md_lines([(i["date"], i["title"], i["link"]) for i in rules])]
+    lines += [
+        "\n#### 세칙제ㆍ개정예고\n",
+        md_lines([(i["date"], i["title"], i["link"]) for i in sort_fss_items(rules)]),
+    ]
 
     trend = FSS.fetch_accounting_trend()
     APPENDIX["금융감독원"]["회계감독 동향자료"] = trend
-    lines += ["\n#### 회계감독 동향자료\n", md_lines([(i["date"], i["title"], i["link"]) for i in trend])]
+    lines += [
+        "\n#### 회계감독 동향자료\n",
+        md_lines([(i["date"], i["title"], i["link"]) for i in sort_fss_items(trend)]),
+    ]
 
     return "\n".join(lines)
 
@@ -140,15 +178,15 @@ def collect_fsc() -> str:
 
     press = FSC.crawl_board("보도자료", FSC.BASE_URLS["보도자료"])
     APPENDIX["금융위원회"]["보도자료"] = press
-    lines += ["#### 보도자료\n", "\n".join(press)]
+    lines += ["#### 보도자료\n", "\n".join(sort_md_link_lines(press))]
 
     rules = FSC.crawl_board("소관규정", FSC.BASE_URLS["소관규정"])
     APPENDIX["금융위원회"]["고시/공고/훈령"] = rules
-    lines += ["\n#### 고시/공고/훈령\n", "\n".join(rules)]
+    lines += ["\n#### 고시/공고/훈령\n", "\n".join(sort_md_link_lines(rules))]
 
     legis = FSC.crawl_board("입법예고", FSC.BASE_URLS["입법예고"])
     APPENDIX["금융위원회"]["입법예고/규정변경예고"] = legis
-    lines += ["\n#### 입법예고/규정변경예고\n", "\n".join(legis)]
+    lines += ["\n#### 입법예고/규정변경예고\n", "\n".join(sort_md_link_lines(legis))]
 
     return "\n".join(lines)
 
@@ -160,14 +198,24 @@ def collect_kicpa() -> str:
     APPENDIX["한국공인회계사회"]["알림마당 - 공지사항"] = noti
     lines += [
         "#### 알림마당 - 공지사항\n",
-        md_lines([(i["date"].strftime("%y-%m-%d"), i["title"], i["link"]) for i in noti]),
+        md_lines(
+            [
+                (i["date"].strftime("%y-%m-%d"), i["title"], i["link"])
+                for i in sort_kicpa_dict_items(noti)
+            ]
+        ),
     ]
 
     std = KICPA_Standards.crawl_sumboard(START_DATE, END_DATE)
     APPENDIX["한국공인회계사회"]["회계감사 - 감사인증기준"] = std
     lines += [
         "\n#### 회계감사 - 감사인증기준\n",
-        md_lines([(i["date"].strftime("%y-%m-%d"), i["title"], i["link"]) for i in std]),
+        md_lines(
+            [
+                (i["date"].strftime("%y-%m-%d"), i["title"], i["link"])
+                for i in sort_kicpa_dict_items(std)
+            ]
+        ),
     ]
 
     return "\n".join(lines)
@@ -178,11 +226,15 @@ def collect_kasb() -> str:
 
     noti = KASB.crawl_board("공지사항", KASB.BOARDS["공지사항"], START_DATE_STR, END_DATE_STR)
     APPENDIX["한국회계기준원"]["소통광장 - 공지사항"] = noti
-    lines += ["#### 소통광장 - 공지사항\n", md_lines(noti)]
+    lines += ["#### 소통광장 - 공지사항\n", md_lines(sort_dated_tuples(noti))]
 
     press = KASB.crawl_board("보도자료", KASB.BOARDS["보도자료"], START_DATE_STR, END_DATE_STR)
     APPENDIX["한국회계기준원"]["소통광장 - 보도자료"] = press
-    lines += ["\n#### 소통광장 - 보도자료\n", md_lines(press)]
+    lines += ["\n#### 소통광장 - 보도자료\n", md_lines(sort_dated_tuples(press))]
+
+    schedule = KASB.crawl_schedule(START_DATE_STR, END_DATE_STR)
+    APPENDIX["한국회계기준원"]["주요일정"] = schedule
+    lines += ["\n#### 주요일정\n", md_lines(schedule)]
 
     return "\n".join(lines)
 

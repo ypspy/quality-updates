@@ -13,6 +13,7 @@ Quality Updates **저장소 운영·개발·Agent**용 문서 목록입니다.
 |------|------|
 | [AGENTS.md](../../AGENTS.md) | **Agent 진입점** — 라우팅, 보완 기획 프롬프트 템플릿 |
 | [.claude/skills/quality-updates-writer/SKILL.md](../../.claude/skills/quality-updates-writer/SKILL.md) | 분기 요약·스킵 제거 (RIGID) |
+| [.claude/skills/audit-regulatory-lens/SKILL.md](../../.claude/skills/audit-regulatory-lens/SKILL.md) | 감사 Planning/Execution/Reporting 규제 렌즈 (ADVISORY) |
 
 ---
 
@@ -61,7 +62,10 @@ README·CONTRIBUTING·AGENTS.md의 운영·큐레이션 요약은 위 문서를 
 |------|------|
 | 분기 운영 | `docs/project/quarterly-operations-guide.md` |
 | 편집기 | `docs/project/editor-curation-workflow.md` |
-| 요약 포맷 | `quality-updates-writer/SKILL.md` |
+| 요약 포맷 | `.claude/skills/quality-updates-writer/SKILL.md` (Phase 1 링크 note) |
+| 감사 규제 렌즈 | `.claude/skills/audit-regulatory-lens/SKILL.md` |
+| MCP 코퍼스 export | `scripts/export_corpus.py` → `data/corpus/` |
+| MCP 서버 | `scripts/mcp_server/` (stdio + HTTP) |
 | Agent 기획 | `AGENTS.md` |
 | 로컬 개발 | `README.md` |
 | PR/CI | `CONTRIBUTING.md` |
