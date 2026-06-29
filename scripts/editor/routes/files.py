@@ -52,12 +52,12 @@ def list_downloads():
 
     folder = root / downloads_folder
     if not folder.exists() or not folder.is_dir():
-        return jsonify([])
+        return jsonify({"files": [], "folder_exists": False})
 
     files = [f for f in folder.rglob("*") if f.is_file()]
     files.sort(key=lambda p: p.as_posix().lower())
     rel = [f.relative_to(root).as_posix() for f in files]
-    return jsonify(rel)
+    return jsonify({"files": rel, "folder_exists": True})
 
 
 def _clear_folder_files(folder: Path) -> int:
@@ -95,4 +95,10 @@ def clear_downloads():
         deleted = _clear_folder_files(folder)
     except OSError as e:
         return jsonify({"error": f"could not clear downloads: {e}"}), 500
-    return jsonify({"ok": True, "deleted": deleted, "folder": downloads_folder})
+    folder_exists = folder.exists() and folder.is_dir()
+    return jsonify({
+        "ok": True,
+        "deleted": deleted,
+        "folder": downloads_folder,
+        "folder_exists": folder_exists,
+    })

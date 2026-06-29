@@ -15,6 +15,7 @@
   // clipDraft: optional string — unsaved CLIP textarea (not sent to API).
   let linksData = [];   // [{date, title, url, state, source, pdf_path, sourcePanel, clipDraft?, agency, line_index}]
   let pdfFiles = [];    // string[] (Option A)
+  let pdfFolderExists = false;
   let lastPdfFilesLoadedAt = 0;
   let pdfFilesInputDebounceTimer = null;
   let pdfFilesInputDebounceSeq = 0;
@@ -117,8 +118,8 @@
   async function init() {
     setupParentSaveMessageListener();
     await loadConfig();
-    await populateFileSelect();
     await loadPdfFiles();
+    await populateFileSelect();
     document.getElementById('file-select').addEventListener('change', onFileChange);
     document.getElementById('btn-save').addEventListener('click', onSave);
     document.getElementById('btn-export-md').addEventListener('click', onExportToMd);
@@ -167,7 +168,15 @@
   }
 
   async function loadPdfFiles() {
-    pdfFiles = await fetchJSON('/api/downloads');
+    const data = await fetchJSON('/api/downloads');
+    if (Array.isArray(data)) {
+      // Legacy plain string[] — empty list may still mean folder exists.
+      pdfFiles = data;
+      pdfFolderExists = true;
+    } else {
+      pdfFiles = Array.isArray(data.files) ? data.files : [];
+      pdfFolderExists = !!data.folder_exists;
+    }
     lastPdfFilesLoadedAt = Date.now();
   }
 
@@ -408,6 +417,8 @@
         return;
       }
       showToast(`삭제됨: ${Number(data.deleted || 0)}개`);
+      pdfFolderExists = data.folder_exists !== false;
+      clearRecentPdfPaths();
       await loadPdfFiles();
       renderTable();
     } catch (_) {
@@ -542,8 +553,10 @@
     const inputValue = selectedPath ? fileName : '';
 
     const listId = `source-list-${idx}`;
-    const pdfBlock = pdfFiles.length === 0
+    const pdfBlock = !pdfFolderExists
       ? '<span class="source-no-pdf">폴더 없음</span>'
+      : pdfFiles.length === 0
+      ? '<span class="source-no-pdf">파일 없음</span>'
       : `
       <div class="source-picker" data-idx="${idx}">
         <div class="source-picker-top">
@@ -757,26 +770,31 @@
             body: JSON.stringify({ url: u }),
           });
           const data = await res.json().catch(() => ({}));
-          if (!res.ok || !data || !data.id) {
-            const extra = data && data.path ? `\n(스크린샷 저장: ${data.path})` : '';
-            alert(((data && data.error) ? data.error : '미리보기 저장 실패') + extra);
+          const shotPath = data && data.path ? String(data.path).trim() : '';
+          const clipId = data && data.id ? String(data.id).trim() : '';
+          if (!shotPath && (!res.ok || !clipId)) {
+            const extra = shotPath ? `\n(스크린샷 저장: ${shotPath})` : '';
+            alert(((data && data.error) ? data.error : '캡쳐 저장 실패') + extra);
             return;
           }
-          if (data && data.path) {
-            showToast(`스크린샷 저장: ${data.path}`);
+          if (shotPath) {
+            showToast(`스크린샷 저장: ${shotPath}`);
           }
           const link = linksData[idx];
-          // Source of record: screenshot path (stable evidence for tables).
           link.sourcePanel = 'web';
-          link.source = { type: 'shot', ref: data.path };
+          link.source = { type: 'shot', ref: shotPath };
           link.pdf_path = null;
           link.state = 'needs_summary';
           link.clipDraft = null;
           updateCounter();
           renderTable();
-          // OCR 결과는 clip으로 저장되지만, source는 screenshot으로 둔다.
-          // 필요 시 CLIP preview는 응답 id로 직접 열 수 있다.
-          openClipPreview(data.id);
+          if (!res.ok && data && data.error) {
+            alert(`${data.error}\n스크린샷은 연결되었습니다: ${shotPath}`);
+          } else if (clipId) {
+            openClipPreview(clipId);
+          }
+        } catch (_) {
+          alert('캡쳐 요청 실패 — 편집기 서버가 재시작 중이거나 연결이 끊겼을 수 있습니다. 잠시 후 다시 시도하세요.');
         } finally {
           // Button recreated on render; best-effort re-enable for no-render paths.
           try { webSaveClip.disabled = false; } catch (_) {}
@@ -1054,7 +1072,9 @@
     const query = String(rawQuery || '');
     const qNorm = normalizeForMatch(query);
 
-    const recent = qNorm ? [] : getRecentPdfPaths();
+    const recent = qNorm
+      ? []
+      : getRecentPdfPaths().filter((p) => pdfFiles.includes(p));
     const results = filterAndSortPdfPaths(pdfFiles, query);
 
     // Avoid dupes between recent and results
@@ -1202,6 +1222,14 @@
       return arr.filter((x) => typeof x === 'string' && x.trim().length > 0).slice(0, MAX_RECENTS);
     } catch (e) {
       return [];
+    }
+  }
+
+  function clearRecentPdfPaths() {
+    try {
+      localStorage.removeItem(RECENTS_KEY_PDF);
+    } catch (e) {
+      // ignore (private mode)
     }
   }
 
