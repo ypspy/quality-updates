@@ -199,7 +199,11 @@ def source_preview_fast_status(job_id: str):
     with preview_helpers._PREVIEW_JOBS_LOCK:
         job = preview_helpers._PREVIEW_JOBS.get(job_id)
     if not job:
-        return jsonify({"ready": True, "next": None, "error": "job not found"}), 404
+        return jsonify({
+            "ready": False,
+            "stage": "미리보기 세션이 만료되었습니다. WEB 미리보기를 다시 여세요.",
+            "error": "job not found",
+        }), 404
     if not job.get("ready"):
         return jsonify({"ready": False, "stage": job.get("stage") or "처리 중"})
     url = request.args.get("url") or ""

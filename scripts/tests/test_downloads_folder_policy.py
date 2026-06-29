@@ -37,7 +37,10 @@ def test_downloads_list_default_folder(monkeypatch, tmp_path):
     resp = client.get("/api/downloads")
     assert resp.status_code == 200
     data = resp.get_json()
-    assert data == ["downloads/a.pdf", "downloads/b.pdf", "downloads/c.txt", "downloads/c.zip"]
+    assert data == {
+        "files": ["downloads/a.pdf", "downloads/b.pdf", "downloads/c.txt", "downloads/c.zip"],
+        "folder_exists": True,
+    }
 
 
 def test_clear_downloads_only_configured_folder(monkeypatch, tmp_path):
@@ -76,4 +79,27 @@ def test_clear_downloads_only_configured_folder(monkeypatch, tmp_path):
     assert not (sub / "note.txt").exists()
     assert not (sub / "nested" / "c.bin").exists()
     assert (sub / "nested").exists()
+
+
+def test_downloads_list_empty_folder(monkeypatch, tmp_path):
+    monkeypatch.setattr(editor_config, "CONFIG_PATH", tmp_path / "editor_config.json")
+    monkeypatch.setattr(editor_config, "repo_root", lambda: tmp_path)
+
+    downloads = tmp_path / "downloads"
+    downloads.mkdir()
+
+    client = editor_app.app.test_client()
+    resp = client.get("/api/downloads")
+    assert resp.status_code == 200
+    assert resp.get_json() == {"files": [], "folder_exists": True}
+
+
+def test_downloads_list_missing_folder(monkeypatch, tmp_path):
+    monkeypatch.setattr(editor_config, "CONFIG_PATH", tmp_path / "editor_config.json")
+    monkeypatch.setattr(editor_config, "repo_root", lambda: tmp_path)
+
+    client = editor_app.app.test_client()
+    resp = client.get("/api/downloads")
+    assert resp.status_code == 200
+    assert resp.get_json() == {"files": [], "folder_exists": False}
 
