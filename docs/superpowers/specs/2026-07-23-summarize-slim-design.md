@@ -1,7 +1,7 @@
 # SUMMARIZE 비용 슬림 (품질 유지) — Design
 
 **날짜**: 2026-07-23  
-**상태**: 설계 승인됨 — 구현 계획 대기 (`docs/superpowers/plans/2026-07-23-summarize-slim.md`)  
+**상태**: Dual 구현 — 게이트 대기  
 **선행**: [2026-07-23-summarize-economics-design.md](2026-07-23-summarize-economics-design.md) §9.3–§9.4  
 **대상**: `.claude/skills/quality-updates-writer` — **SUMMARIZE**만
 

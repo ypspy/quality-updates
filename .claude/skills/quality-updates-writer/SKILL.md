@@ -5,7 +5,8 @@ description: 한국 금융 규제 당국(FSS, FSC, KICPA, KASB)의 분기별 규
 
 > **RIGID SKILL** — 이 스킬의 모든 규칙은 엄격히 따른다. 포맷·표 스키마·들여쓰기 규칙을 임의로 변형하지 않는다.
 
-> **기준 파일(gold standard)**: `docs/quality-updates/2023/2023-04-01_to_2023-06-30.md`, `docs/quality-updates/2025/2025-10-01_to_2025-12-31.md` — 포맷·어조·상세 수준의 기준. 판단이 어려우면 이 파일들을 참조할 것.
+> **SUMMARIZE 기준 (Dual):** 기본 `.claude/skills/quality-updates-writer/reference/gold-excerpts.md` (세션 1회). 판단 어려울 때만 전문 gold 2파일 추가 1회. **재주입 금지.**
+> **전문 gold (선택):** `docs/quality-updates/2023/2023-04-01_to_2023-06-30.md`, `docs/quality-updates/2025/2025-10-01_to_2025-12-31.md`
 
 # 에이전트 지침: Quality Updates – 회계·감사 규제 동향 요약
 
@@ -17,7 +18,7 @@ description: 한국 금융 규제 당국(FSS, FSC, KICPA, KASB)의 분기별 규
 
 스킬 호출 즉시 사용자에게 고지:
 
-> `quality-updates-writer 스킬로 [작업 유형]을 시작합니다. 기준 파일: 2023-04-01_to_2023-06-30.md / 2025-10-01_to_2025-12-31.md`
+> `quality-updates-writer 스킬로 [작업 유형]을 시작합니다. SUMMARIZE 기준: gold-excerpts.md (Dual; 전문 gold는 판단 어려울 때만)`
 
 ### 2. 작업 유형 감지
 
@@ -48,12 +49,28 @@ description: 한국 금융 규제 당국(FSS, FSC, KICPA, KASB)의 분기별 규
 - "링크+skip 삭제 실행"
 - "Appendix 보존 확인"
 
-### 4. Gold Standard 파일 확인
+### 4. Gold / excerpts 확인 (SUMMARIZE만)
 
-**SUMMARIZE 유형만**: Phase 1 시작 전 아래 파일을 반드시 읽어 포맷·어조·상세 수준을 확인한다.
+Phase 1 시작 전 **세션당 1회**:
+1. `reference/gold-excerpts.md`를 Read한다.
+2. 포맷·어조가 발췌만으로 불충분할 때만 전문 gold 2파일 중 필요 분량을 Read한다 (가능하면 해당 Excerpt 출처 구간만).
+3. 이후 링크 루프에서 gold-excerpts·전문 gold·이 SKILL.md 전문을 **다시 Read하지 않는다**.
 
-- `docs/quality-updates/2023/2023-04-01_to_2023-06-30.md`
-- `docs/quality-updates/2025/2025-10-01_to_2025-12-31.md`
+### 4b. 분기 md 윈도우 (SUMMARIZE Phase 1)
+
+대상 분기 파일 **전문 Read 금지**. 허용: 링크 줄 ±80줄, 소속 `##`/`####` 헤더, 삽입 후 해당 `!!! note`만 재확인. Appendix·타 기관 전체 로드 금지.
+
+### 4c. REFERENCE 온디맨드
+
+| 링크 유형 | 로드 |
+|-----------|------|
+| 일반 보도/공지 | A + B (세션 내 기로드 시 재Read 금지) |
+| 제재·증선위 | + D |
+| 입법예고·특수 | + E |
+| Appendix | + G |
+| 선별 판단 | + C |
+
+매 링크 A–G 전체 재독 **금지**.
 
 ---
 
@@ -142,7 +159,7 @@ TaskUpdate → in_progress. 아래 우선순위 표 적용. 결정 후 TaskUpdat
 
 **요약 배치**: 링크 줄 바로 하단, 사이 빈 줄 1개. 요약 블록 마지막 줄과 다음 링크 사이 빈 줄 1개.
 
-→ 포맷 규칙: **REFERENCE A, B, C, D, E** 참조
+→ 포맷·유형별 규칙: **§4c 온디맨드 표**에 따라 필요한 REFERENCE만 로드 (매 링크 A–G 전체 재독 금지)
 
 **큐레이션 링크 상태 코드**:
 
