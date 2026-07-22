@@ -12,6 +12,7 @@ Agent 진입·프롬프트: [AGENTS.md](../../AGENTS.md)
 
 | 날짜 | 파일 | 요약 |
 |------|------|------|
+| 2026-07-23 | [summarize-slim-design.md](specs/2026-07-23-summarize-slim-design.md) | SUMMARIZE 비용 슬림 (발췌 gold·윈도우·온디맨드, 품질 게이트) |
 | 2026-07-23 | [summarize-economics-design.md](specs/2026-07-23-summarize-economics-design.md) | SUMMARIZE 비용 분해·슬림 후보 진단 (2016 Q1 표본) |
 | 2026-06-26 | [chronological-main-body-design.md](specs/2026-06-26-chronological-main-body-design.md) | 본문 과거→현재 정렬, Appendix 크롤 순 유지 |
 | 2026-06-26 | [admonition-expand-notes-design.md](specs/2026-06-26-admonition-expand-notes-design.md) | 링크 요약 `??? note` → `!!! note` (Appendix `??? info` 유지) |
@@ -34,6 +35,7 @@ Agent 진입·프롬프트: [AGENTS.md](../../AGENTS.md)
 
 | 날짜 | 파일 | 요약 |
 |------|------|------|
+| 2026-07-23 | [summarize-slim.md](plans/2026-07-23-summarize-slim.md) | SUMMARIZE 비용 슬림 (발췌·윈도우·게이트) |
 | 2026-07-23 | [summarize-economics.md](plans/2026-07-23-summarize-economics.md) | SUMMARIZE 비용 분해·슬림 후보 진단 |
 | 2026-06-27 | [mcp-corpus.md](plans/2026-06-27-mcp-corpus.md) | Corpus export + MCP stdio/HTTP |
 | 2026-06-27 | [audit-regulatory-lens-skill.md](plans/2026-06-27-audit-regulatory-lens-skill.md) | 감사 규제 렌즈 ADVISORY 스킬 |
