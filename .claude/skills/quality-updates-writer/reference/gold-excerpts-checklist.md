@@ -51,9 +51,11 @@ Excerpt ID ↔ `covers` tags (Task 1 큐레이션과 일치).
 
 | # | Link (date · title) | source | Format | Facts | Tone-detail | Overall |
 |---|---------------------|--------|--------|-------|-------------|---------|
-| 1 | 16-03-01 · 2016년 외부감사제도 전국 순회 설명회 개최 | `pdf\|downloads/160302_조간_2016년 외부감사제도 전국 순회 설명회 개최.pdf` | | | | |
-| 2 | 16-02-01 · 자산총액 1천억+ 비상장법인 감사前 재무제표 제출 | `pdf\|downloads/160201_조간_자산총액 1천억원 이상인 비상장법인은 올해부터 감사전 재무제표를 금융감독원에 제출해야 합니다_f.pdf` | | | | |
-| 5 | 16-02-16 · 수주산업 회계투명성 제고방안 설명회 개최 | `pdf\|downloads/160216_석간_수주산업 회계투명성 제고방안 설명회 개최.pdf` | | | | |
+| 1 | 16-03-01 · 2016년 외부감사제도 전국 순회 설명회 개최 | `pdf\|downloads/160302_조간_2016년 외부감사제도 전국 순회 설명회 개최.pdf` | Pass | Pass | Pass | Pass |
+| 2 | 16-02-01 · 자산총액 1천억+ 비상장법인 감사前 재무제표 제출 | `pdf\|downloads/160201_조간_자산총액 1천억원 이상인 비상장법인은 올해부터 감사전 재무제표를 금융감독원에 제출해야 합니다_f.pdf` | Pass | Pass | Pass | Pass |
+| 5 | 16-02-16 · 수주산업 회계투명성 제고방안 설명회 개최 | `pdf\|downloads/160216_석간_수주산업 회계투명성 제고방안 설명회 개최.pdf` | Pass | Pass | Pass | Pass |
+
+**대조 상세:** `.superpowers/sdd/slim-gate-drafts.md` — (a) legacy(전문 gold 유사 note 1–2개 추가 참조) vs (b) Dual(`gold-excerpts.md` E1–E4만) 초안이 3링크 모두 **문자 그대로 동일**. Format(들여쓰기·style-A/B 구조), Facts(수치·기한·대상 — PDF 원문 직접 대조), Tone-detail(불릿 4–6개, gold 수준) 전 축 Pass. 근거: 표본이 모두 일반 note(style-A/B)이고 발췌 최소구성(E1·E2 style-A, E3·E4 style-B)이 정확히 해당 유형을 커버하여 전문 gold 추가 참조가 새 정보를 제공하지 않음.
 
 ---
 
@@ -61,6 +63,6 @@ Excerpt ID ↔ `covers` tags (Task 1 큐레이션과 일치).
 
 | Stage | Date | Result | Notes |
 |-------|------|--------|-------|
-| Dual | | | SKILL Dual 규칙 적용; 게이트 대조 전 |
-| Excerpt-only | | | Task 4 Pass 후에만 전환 |
-| Fail · 보강 | | | 발췌 재큐레이션·재대조 필요 시 |
+| Dual | 2026-07-23 | Pass | 표본 #1·#2·#5 3링크×3축 전건 Pass (Minor 없음). SKILL Dual 규칙 유지, Excerpt-only 전환 승인 대기(별도 Task) |
+| Excerpt-only | | | Task 4 Pass 확정 — 전환은 후속 Task에서 별도 진행 |
+| Fail · 보강 | — | N/A | 이번 게이트는 Fail 없음 |

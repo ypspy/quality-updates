@@ -1,7 +1,7 @@
 # SUMMARIZE 비용 슬림 (품질 유지) — Design
 
 **날짜**: 2026-07-23  
-**상태**: Dual 구현 — 게이트 대기  
+**상태**: Dual 게이트 Pass (3/3 링크 × 3축) — Excerpt-only 전환은 별도 승인 대기  
 **선행**: [2026-07-23-summarize-economics-design.md](2026-07-23-summarize-economics-design.md) §9.3–§9.4  
 **대상**: `.claude/skills/quality-updates-writer` — **SUMMARIZE**만
 
@@ -157,7 +157,13 @@ Appendix·타 기관 섹션 전체 로드 금지(다른 작업 유형 제외).
 
 | 일자 | 표본 링크 | 포맷 | 사실 | 어조·상세 | 종합 |
 |------|-----------|------|------|-----------|------|
-| | | | | | |
+| 2026-07-23 | #1 16-03-01 외부감사제도 순회 설명회 | Pass | Pass | Pass | Pass |
+| 2026-07-23 | #2 16-02-01 감사前 재무제표 제출 | Pass | Pass | Pass | Pass |
+| 2026-07-23 | #5 16-02-16 수주산업 설명회 | Pass | Pass | Pass | Pass |
 
-**단계:** Dual / Excerpt-only / 롤백  
+**단계:** Dual (Pass 확정) → Excerpt-only 전환은 **별도 승인·별도 Task**에서 진행 / 롤백 불필요(Fail 없음)  
 **비고:**
+- 대조 방법: (a) legacy-style anchor(공통 pdf extract·±80줄 md 윈도우·REFERENCE A+B 동일 + 전문 gold에서 유사 note 1–2개 추가 참조) vs (b) Dual(`gold-excerpts.md` E1–E4만). 상세: `.superpowers/sdd/slim-gate-drafts.md`.
+- 3표본 모두 (a)/(b) 산출물이 **문자 그대로 동일** — 발췌 최소구성(style-A E1·E2, style-B E3·E4)이 표본의 일반 note 유형을 정확히 커버하여 전문 gold 추가 참조가 품질에 차이를 만들지 않음.
+- Facts는 PDF 원문 직접 대조로 확인(수치·기한·대상 누락 없음); Facts 축은 gold 소스와 무관하게 원문 의존이므로 (a)/(b) 원천적으로 동일.
+- **주의(범위 한정):** 이번 3표본은 모두 일반 note(style-A/B)이며 Type A/B 표·입법예고(E형)·`??? info` 접기는 대조 대상에 포함되지 않음(경제성 §9.2 `#4` OCR sparse 제외 규칙에 따름). 해당 유형 슬림 신뢰도는 후속 표본 확대 시 재확인 권고.
