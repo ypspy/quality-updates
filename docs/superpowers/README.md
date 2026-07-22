@@ -12,6 +12,7 @@ Agent 진입·프롬프트: [AGENTS.md](../../AGENTS.md)
 
 | 날짜 | 파일 | 요약 |
 |------|------|------|
+| 2026-07-23 | [summarize-economics-design.md](specs/2026-07-23-summarize-economics-design.md) | SUMMARIZE 비용 분해·슬림 후보 진단 (2016 Q1 표본) |
 | 2026-06-26 | [chronological-main-body-design.md](specs/2026-06-26-chronological-main-body-design.md) | 본문 과거→현재 정렬, Appendix 크롤 순 유지 |
 | 2026-06-26 | [admonition-expand-notes-design.md](specs/2026-06-26-admonition-expand-notes-design.md) | 링크 요약 `??? note` → `!!! note` (Appendix `??? info` 유지) |
 | 2026-06-27 | [audit-regulatory-lens-skill-design.md](specs/2026-06-27-audit-regulatory-lens-skill-design.md) | Planning/Execution/Reporting 감사 규제 렌즈 스킬 |
@@ -33,6 +34,7 @@ Agent 진입·프롬프트: [AGENTS.md](../../AGENTS.md)
 
 | 날짜 | 파일 | 요약 |
 |------|------|------|
+| 2026-07-23 | [summarize-economics.md](plans/2026-07-23-summarize-economics.md) | SUMMARIZE 비용 분해·슬림 후보 진단 |
 | 2026-06-27 | [mcp-corpus.md](plans/2026-06-27-mcp-corpus.md) | Corpus export + MCP stdio/HTTP |
 | 2026-06-27 | [audit-regulatory-lens-skill.md](plans/2026-06-27-audit-regulatory-lens-skill.md) | 감사 규제 렌즈 ADVISORY 스킬 |
 | 2026-06-26 | [admonition-expand-notes.md](plans/2026-06-26-admonition-expand-notes.md) | `??? note` → `!!! note` 백필 |
