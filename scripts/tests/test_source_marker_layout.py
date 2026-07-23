@@ -83,6 +83,33 @@ def test_normalize_spacing_preserves_note_title_gap():
     assert '!!! note "주요 내용"\n\n        - bullet' in fixed
 
 
+def test_normalize_spacing_preserves_agency_header_after_no_summary():
+    """Regression: no_summary entry must not swallow ###/#### that follow it."""
+    md = """\
+### 금융감독원
+
+#### 회계감독 동향자료
+
+- (16-03-09) [설명자료](https://www.fss.or.kr/fss/bbs/B0000154/view.do?nttId=1)
+<!-- no_summary -->
+
+### 금융위원회
+
+#### 보도자료
+
+- (16-01-21) [조치](https://fsc.go.kr/no010101/71938)
+
+    !!! note "주요 내용"
+
+        - (개요) 테스트
+"""
+    fixed, _ = normalize_quarterly_spacing(md)
+    assert "### 금융위원회" in fixed
+    assert "#### 보도자료" in fixed
+    assert fixed.index("<!-- no_summary -->") < fixed.index("### 금융위원회")
+    assert fixed.index("### 금융위원회") < fixed.index("https://fsc.go.kr/")
+
+
 def test_parser_done_with_indented_source():
     md = """\
 ### 금융감독원

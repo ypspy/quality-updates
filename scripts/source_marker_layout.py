@@ -6,6 +6,7 @@ import re
 
 LINK_RE = re.compile(r"^\s*- \(\d{2}-\d{2}-\d{2}\) \[(.+?)\]\((https?://[^\)]+)\)")
 TOP_LINK_RE = re.compile(r"^- \(\d{2}-\d{2}-\d{2}\) ")
+SECTION_HEADER_RE = re.compile(r"^#{2,4}\s")
 NO_SUMMARY_RE = re.compile(r"^<!-- no_summary -->$")
 APPENDIX_RE = re.compile(r"^## Appendix")
 SOURCE_RE = re.compile(r"^(?P<indent>\s*)<!-- source:\s*(.+?)\s*-->\s*$")
@@ -156,7 +157,11 @@ def normalize_quarterly_spacing(content: str) -> tuple[str, int]:
         if TOP_LINK_RE.match(head[i]):
             entry = [head[i]]
             i += 1
+            # Stop at next link OR section header — otherwise ###/#### after
+            # <!-- no_summary --> is swallowed and dropped by _format_link_entry.
             while i < len(head) and not TOP_LINK_RE.match(head[i]):
+                if SECTION_HEADER_RE.match(head[i]):
+                    break
                 entry.append(head[i])
                 i += 1
             segments.append(("entry", _format_link_entry(entry)))
