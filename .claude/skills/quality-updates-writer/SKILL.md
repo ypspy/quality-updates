@@ -5,8 +5,8 @@ description: 한국 금융 규제 당국(FSS, FSC, KICPA, KASB)의 분기별 규
 
 > **RIGID SKILL** — 이 스킬의 모든 규칙은 엄격히 따른다. 포맷·표 스키마·들여쓰기 규칙을 임의로 변형하지 않는다.
 
-> **SUMMARIZE 기준 (Dual):** 기본 `.claude/skills/quality-updates-writer/reference/gold-excerpts.md` (세션 1회). 판단 어려울 때만 전문 gold 2파일 추가 1회. **재주입 금지.**
-> **전문 gold (선택):** `docs/quality-updates/2023/2023-04-01_to_2023-06-30.md`, `docs/quality-updates/2025/2025-10-01_to_2025-12-31.md`
+> **SUMMARIZE 기준 (Excerpt-only):** 기본 `.claude/skills/quality-updates-writer/reference/gold-excerpts.md` (세션 1회). 전문 gold 읽기 의무 없음(선택 참고). **재주입 금지.**
+> **전문 gold (선택 참고):** `docs/quality-updates/2023/2023-04-01_to_2023-06-30.md`, `docs/quality-updates/2025/2025-10-01_to_2025-12-31.md`
 
 # 에이전트 지침: Quality Updates – 회계·감사 규제 동향 요약
 
@@ -18,7 +18,7 @@ description: 한국 금융 규제 당국(FSS, FSC, KICPA, KASB)의 분기별 규
 
 스킬 호출 즉시 사용자에게 고지:
 
-> `quality-updates-writer 스킬로 [작업 유형]을 시작합니다. SUMMARIZE 기준: gold-excerpts.md (Dual; 전문 gold는 판단 어려울 때만)`
+> `quality-updates-writer 스킬로 [작업 유형]을 시작합니다. SUMMARIZE 기준: gold-excerpts.md (Excerpt-only; 전문 gold는 선택 참고)`
 
 ### 2. 작업 유형 감지
 
@@ -53,8 +53,7 @@ description: 한국 금융 규제 당국(FSS, FSC, KICPA, KASB)의 분기별 규
 
 Phase 1 시작 전 **세션당 1회**:
 1. `reference/gold-excerpts.md`를 Read한다.
-2. 포맷·어조가 발췌만으로 불충분할 때만 전문 gold 2파일 중 필요 분량을 Read한다 (가능하면 해당 Excerpt 출처 구간만).
-3. 이후 링크 루프에서 gold-excerpts·전문 gold·이 SKILL.md 전문을 **다시 Read하지 않는다**.
+2. 이후 링크 루프에서 gold-excerpts·전문 gold·이 SKILL.md 전문을 **다시 Read하지 않는다**. 컨텍스트 부족 시 발췌/gold를 다시 넣지 말고 §4c에 따라 REFERENCE **부분**만 로드.
 
 ### 4b. 분기 md 윈도우 (SUMMARIZE Phase 1)
 

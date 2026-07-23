@@ -112,13 +112,13 @@ flowchart TB
 
 | | Agent | HITL | 시스템 |
 |---|-------|------|--------|
-| **실행** | `quality-updates-writer` — **SUMMARIZE** | 요약 대상 링크·우선순위 지시 | 스킬 포맷·gold standard |
+| **실행** | `quality-updates-writer` — **SUMMARIZE** (gold-excerpts + md ±80줄 윈도우 + REFERENCE 온디맨드; 재주입 금지) | 요약 대상 링크·우선순위 지시 | 스킬 포맷·gold-excerpts |
 | **Phase 0** | PDF/WEB/CLIP 경로 결정 | 출처 파일 존재·적합성 확인 | `extract_pdf.py` 등 |
 | **Phase 1** | 링크별 `!!! note` 요약 | **사실 관계 최종 검증** | — |
 
 **Agent 체크리스트** (스킬 준수)
 
-- [ ] gold standard 참조: `2023-04-01_to_2023-06-30.md`, `2025-10-01_to_2025-12-31.md`
+- [ ] `reference/gold-excerpts.md` 세션 1회 Read; 분기 md ±80줄 윈도우; REFERENCE 온디맨드; 재주입 금지
 - [ ] 원문 미확인 내용 미포함
 - [ ] 접근 불가 시 `<!-- 원문 접근 불가 -->` 처리
 
