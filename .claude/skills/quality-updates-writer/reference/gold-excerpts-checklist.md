@@ -64,5 +64,5 @@ Excerpt ID ↔ `covers` tags (Task 1 큐레이션과 일치).
 | Stage | Date | Result | Notes |
 |-------|------|--------|-------|
 | Dual | 2026-07-23 | Pass | 표본 #1·#2·#5 3링크×3축 전건 Pass (Minor 없음). SKILL Dual 규칙 유지, Excerpt-only 전환 승인 대기(별도 Task) |
-| Excerpt-only | | | Task 4 Pass 확정 — 전환은 후속 Task에서 별도 진행 |
+| Excerpt-only | 2026-07-23 | Pass/적용 | Task 5 SKILL Excerpt-only 전환 완료 |
 | Fail · 보강 | — | N/A | 이번 게이트는 Fail 없음 |
