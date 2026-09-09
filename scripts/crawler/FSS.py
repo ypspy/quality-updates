@@ -64,32 +64,21 @@ def fetch_press_release(max_page=50):
             timeout=10,
         )
 
-        soup = BeautifulSoup(res.text, "html.parser")
-        rows = soup.select("div.bd-list table tbody tr")
+        rows = parse_press_list_html(res.text)
         print(f"  └ rows: {len(rows)}", flush=True)
 
         if not rows:
             break
 
-        for row in rows:
-            a = row.select_one("td.title a")
-            tds = row.find_all("td")
-            if not a or len(tds) < 4:
-                continue
-
-            try:
-                dt = datetime.strptime(tds[3].get_text(strip=True), "%Y-%m-%d")
-            except:
-                continue
-
-            if dt < start_dt:
+        for item in rows:
+            if item["posted_on"] < start_dt:
                 print("  └ 시작일 이전 도달 → 종료", flush=True)
                 return results
 
             results.append({
-                "date": dt.strftime("%y-%m-%d"),
-                "title": a.get_text(strip=True),
-                "link": urljoin(BASE_URL, a["href"]),
+                "date": item["posted_on"].strftime("%y-%m-%d"),
+                "title": item["title"],
+                "link": urljoin(BASE_URL, item["href"]),
             })
 
     return results

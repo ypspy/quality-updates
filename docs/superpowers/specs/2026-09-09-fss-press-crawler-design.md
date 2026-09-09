@@ -1,7 +1,7 @@
 # FSS 보도자료 목록 크롤러 — KRDS 마크업 대응
 
 **날짜**: 2026-09-09  
-**상태**: 초안 (브레인스토밍 합의됨)  
+**상태**: 승인됨  
 **범위**: 금융감독원 보도자료 목록 파서만 개편 HTML에 맞춤  
 **선행 스펙**: [2026-06-25-crawler-integration-design.md](2026-06-25-crawler-integration-design.md)
 

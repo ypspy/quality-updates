@@ -36,6 +36,7 @@ Agent 진입·프롬프트: [AGENTS.md](../../AGENTS.md)
 
 | 날짜 | 파일 | 요약 |
 |------|------|------|
+| 2026-09-09 | [fss-press-crawler.md](plans/2026-09-09-fss-press-crawler.md) | FSS 보도자료 목록 파서 KRDS 셀렉터 수정 |
 | 2026-07-23 | [summarize-slim.md](plans/2026-07-23-summarize-slim.md) | SUMMARIZE 비용 슬림 (발췌·윈도우·게이트) |
 | 2026-07-23 | [summarize-economics.md](plans/2026-07-23-summarize-economics.md) | SUMMARIZE 비용 분해·슬림 후보 진단 |
 | 2026-06-27 | [mcp-corpus.md](plans/2026-06-27-mcp-corpus.md) | Corpus export + MCP stdio/HTTP |
