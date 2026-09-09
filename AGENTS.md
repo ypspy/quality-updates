@@ -10,8 +10,7 @@ Cursor·Claude 등 **AI 에이전트**가 이 저장소에서 작업할 때의 �
 | 하고 싶은 일 | 먼저 읽을 것 | 워크플로 |
 |--------------|--------------|----------|
 | **분기 보도자료 요약** | [.claude/skills/quality-updates-writer/SKILL.md](.claude/skills/quality-updates-writer/SKILL.md) | SUMMARIZE / SKIP_REMOVAL — SUMMARIZE: gold-excerpts + md ±80줄 윈도우 + REFERENCE 온디맨드; 재주입 금지. [상세](docs/superpowers/specs/2026-07-23-summarize-slim-design.md) |
-| **감사 규제 렌즈 (Planning/Execution/Reporting)** | [.claude/skills/audit-regulatory-lens/SKILL.md](.claude/skills/audit-regulatory-lens/SKILL.md) | ADVISORY; writer와 **동시 사용 금지** |
-| **MCP 코퍼스 export·서버** | [docs/superpowers/specs/2026-06-27-mcp-corpus-design.md](docs/superpowers/specs/2026-06-27-mcp-corpus-design.md) | `export_corpus.py` → stdio/HTTP MCP |
+| **다른 Agent 소비 (MCP, 읽기 전용)** | [README MCP 절](README.md) · [mcp-corpus spec](docs/superpowers/specs/2026-06-27-mcp-corpus-design.md) | `export_corpus.py` → stdio/HTTP. 인용 계약. 코퍼스 쓰기는 생산 레인만. |
 | **분기 파이프라인 전체** | [docs/project/quarterly-operations-guide.md](docs/project/quarterly-operations-guide.md) | crawl → editor → skill → prepare_deploy |
 | **큐레이션·편집기** | [docs/project/editor-curation-workflow.md](docs/project/editor-curation-workflow.md) | HITL 주도; Agent는 마커 임의 변경 금지 |
 | **프로젝트 점검·보완 기획** | 이 파일 + `/brainstorming` | 평가 → 2~3안 → **spec 승인** → plan → 구현 |
@@ -81,7 +80,7 @@ HITL 담당: editor 큐레이션, 요약 검증, nav/index, push 승인
 - **기획 → 구현**: `/brainstorming`으로 spec이 승인되기 전 코드·대규모 리팩터를 시작하지 않는다.
 - **커밋**: 사용자가 요청할 때만. `quality-updates-writer`는 RIGID 스킬이다.
 - **SUMMARIZE 슬림** (요약 시): `gold-excerpts` + 분기 md ±80줄 윈도우 + REFERENCE 온디맨드; 재주입 금지 — [spec](docs/superpowers/specs/2026-07-23-summarize-slim-design.md)
-- **감사 규제 렌즈**: `audit-regulatory-lens` 스킬은 코퍼스 **읽기 전용** — `docs/quality-updates/` 및 파이프라인 `.md` **수정 금지**
+- **코퍼스 소비**: 다른 Agent는 MCP만 읽는다. 소비 경로로 `docs/quality-updates/`를 grep하지 않는다. 큐레이션·요약·nav 쓰기는 생산 레인만.
 
 ---
 
@@ -102,5 +101,6 @@ HITL 담당: editor 큐레이션, 요약 검증, nav/index, push 승인
 ```bash
 cd scripts && python -m pytest tests/ -q
 python scripts/validate_content.py --strict
+python scripts/export_corpus.py --strict
 mkdocs build --strict
 ```
