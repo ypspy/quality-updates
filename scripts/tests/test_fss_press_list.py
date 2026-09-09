@@ -63,8 +63,10 @@ def test_parse_press_list_html_skips_invalid_rows():
 def test_fetch_press_release_uses_krds_parser(monkeypatch):
     html = FIXTURE.read_text(encoding="utf-8")
     empty = "<table><tbody></tbody></table>"
+    requested_pages = []
 
     def fake_get(url, params=None, timeout=None):
+        requested_pages.append((params or {}).get("pageIndex"))
         resp = MagicMock()
         resp.text = html if (params or {}).get("pageIndex") == 1 else empty
         return resp
@@ -75,6 +77,7 @@ def test_fetch_press_release_uses_krds_parser(monkeypatch):
     monkeypatch.setattr(FSS.session, "get", fake_get)
 
     items = FSS.fetch_press_release(max_page=3)
+    assert requested_pages == [1, 2]
     assert len(items) == 2
     assert items[0]["date"] == "26-09-09"
     assert items[0]["title"] == "공모 목표전환형 펀드 현황 및 투자자 유의사항 안내"
