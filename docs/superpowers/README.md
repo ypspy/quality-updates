@@ -12,6 +12,7 @@ Agent 진입·프롬프트: [AGENTS.md](../../AGENTS.md)
 
 | 날짜 | 파일 | 요약 |
 |------|------|------|
+| 2026-09-09 | [fss-press-crawler-design.md](specs/2026-09-09-fss-press-crawler-design.md) | FSS 보도자료 목록 파서 KRDS 셀렉터 수정 |
 | 2026-07-23 | [summarize-slim-design.md](specs/2026-07-23-summarize-slim-design.md) | SUMMARIZE 비용 슬림 (발췌 gold·윈도우·온디맨드, 품질 게이트) |
 | 2026-07-23 | [summarize-economics-design.md](specs/2026-07-23-summarize-economics-design.md) | SUMMARIZE 비용 분해·슬림 후보 진단 (2016 Q1 표본) |
 | 2026-06-26 | [chronological-main-body-design.md](specs/2026-06-26-chronological-main-body-design.md) | 본문 과거→현재 정렬, Appendix 크롤 순 유지 |
