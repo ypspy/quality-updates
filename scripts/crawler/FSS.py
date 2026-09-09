@@ -19,6 +19,29 @@ session.headers.update({
 # =====================================================
 # 1. 보도자료
 # =====================================================
+def parse_press_list_html(html):
+    soup = BeautifulSoup(html, "html.parser")
+    results = []
+    for row in soup.select("table tbody tr"):
+        a = row.select_one("td.title a")
+        tds = row.find_all("td")
+        if not a or len(tds) < 4:
+            continue
+        href = a.get("href") or ""
+        if not href:
+            continue
+        try:
+            posted_on = datetime.strptime(tds[3].get_text(strip=True), "%Y-%m-%d")
+        except ValueError:
+            continue
+        results.append({
+            "title": a.get_text(strip=True),
+            "href": href,
+            "posted_on": posted_on,
+        })
+    return results
+
+
 def fetch_press_release(max_page=50):
     BASE_URL = "https://www.fss.or.kr/fss/bbs/B0000188/list.do"
     results = []
