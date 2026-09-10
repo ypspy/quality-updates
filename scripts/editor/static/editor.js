@@ -26,6 +26,10 @@
 
   // Dropdown state (single-open at a time)
   let openPicker = null; // { idx, rootEl, inputEl, listEl, activeIndex, items: [{path, kind:'recent'|'result'}] }
+  let selectedIdx = 0;
+  let selectedLineIndex = null;
+  let uiMode = 'row';
+  const SOURCE_PANEL_CYCLE = ['pdf', 'web', 'clip'];
 
   // ── Toast (download saved 등) ──────────────────────────────────────────────
   let toastHideTimer = null;
@@ -166,6 +170,7 @@
     document.getElementById('btn-clear-downloads').addEventListener('click', onClearDownloads);
     setupDivider();
     startAutoSave();
+    document.addEventListener('keydown', onEditorKeyDown);
   }
 
   async function loadConfig() {
@@ -470,11 +475,141 @@
     linksData = (data.links || []).map(normalizeLink);
     originalContent = data.content;
     lastSavedDigest = buildCurationDigest();
+    selectedIdx = 0;
+    selectedLineIndex = linksData[0] ? linksData[0].line_index : null;
+    uiMode = 'row';
     renderTable();
     updateCounter();
   }
 
   // ── Render ──────────────────────────────────────────────────────────────────
+  function rememberSelection() {
+    const link = linksData[selectedIdx];
+    selectedLineIndex = link ? link.line_index : null;
+  }
+
+  function restoreSelectionAfterRender() {
+    if (!linksData.length) {
+      selectedIdx = 0;
+      selectedLineIndex = null;
+      return;
+    }
+    if (selectedLineIndex != null) {
+      const found = linksData.findIndex((l) => l.line_index === selectedLineIndex);
+      selectedIdx = found >= 0 ? found : 0;
+    } else if (selectedIdx < 0 || selectedIdx >= linksData.length) {
+      selectedIdx = 0;
+    }
+    selectedLineIndex = linksData[selectedIdx].line_index;
+    applyRowTabStops();
+    if (uiMode === 'row') {
+      const tr = document.querySelector('#link-tbody tr[data-idx="' + selectedIdx + '"]');
+      if (tr) {
+        tr.focus({ preventScroll: true });
+        tr.scrollIntoView({ block: 'nearest' });
+      }
+    }
+  }
+
+  function applyRowTabStops() {
+    const rows = document.querySelectorAll('#link-tbody tr[data-idx]');
+    rows.forEach((tr) => {
+      const idx = Number(tr.dataset.idx);
+      const selected = idx === selectedIdx;
+      tr.tabIndex = selected ? 0 : -1;
+      tr.classList.toggle('is-selected', selected);
+      tr.querySelectorAll('.title-link, .state-badge, .source-tab, .source-btn, .source-input, .clip-draft').forEach((el) => {
+        if (uiMode === 'source-edit' && selected) return;
+        el.tabIndex = -1;
+      });
+    });
+  }
+
+  function selectRow(idx, opts) {
+    if (idx < 0 || idx >= linksData.length) return;
+    selectedIdx = idx;
+    selectedLineIndex = linksData[idx].line_index;
+    uiMode = (opts && opts.keepMode) ? uiMode : 'row';
+    applyRowTabStops();
+    const tr = document.querySelector('#link-tbody tr[data-idx="' + idx + '"]');
+    if (tr && uiMode === 'row') {
+      tr.focus({ preventScroll: true });
+      tr.scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+  function moveSelection(delta) {
+    if (!linksData.length) return;
+    const next = Math.max(0, Math.min(linksData.length - 1, selectedIdx + delta));
+    selectRow(next);
+  }
+
+  function cycleSourcePanel(idx, delta) {
+    const link = linksData[idx];
+    if (!link || link.state !== 'needs_summary') return;
+    const cur = sourceKind(link);
+    const i = Math.max(0, SOURCE_PANEL_CYCLE.indexOf(cur));
+    const next = SOURCE_PANEL_CYCLE[(i + delta + SOURCE_PANEL_CYCLE.length) % SOURCE_PANEL_CYCLE.length];
+    link.sourcePanel = next;
+    closeOpenPicker();
+    rememberSelection();
+    renderTable();
+  }
+
+  function isHeaderTarget(el) {
+    return !!(el && el.closest && el.closest('#header'));
+  }
+
+  function isTypingTarget(el) {
+    if (!el) return false;
+    const tag = (el.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || tag === 'select') return true;
+    if (el.isContentEditable) return true;
+    return false;
+  }
+
+  function onEditorKeyDown(e) {
+    if (e.defaultPrevented) return;
+    if (openPicker) return;
+    if (uiMode === 'source-edit') return;
+    const t = e.target;
+    if (isHeaderTarget(t) || isTypingTarget(t)) return;
+    if (!linksData.length) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      moveSelection(1);
+      return;
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      moveSelection(-1);
+      return;
+    }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const url = linksData[selectedIdx] && linksData[selectedIdx].url;
+      if (url) openPreview(url);
+      selectRow(selectedIdx);
+      return;
+    }
+    if (e.key === ' ' || e.key === 'Spacebar') {
+      e.preventDefault();
+      cycleState(selectedIdx);
+      return;
+    }
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      cycleSourcePanel(selectedIdx, -1);
+      return;
+    }
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      cycleSourcePanel(selectedIdx, 1);
+      return;
+    }
+  }
+
   function renderTable() {
     const tbody = document.getElementById('link-tbody');
     tbody.innerHTML = '';
@@ -499,6 +634,7 @@
       const tr = document.createElement('tr');
       tr.dataset.idx = idx;
       tr.className = stateClass(link.state);
+      tr.addEventListener('mousedown', () => selectRow(idx, { keepMode: true }));
 
       tr.innerHTML = `
         <td colspan="5" class="link-row-td">
@@ -516,23 +652,17 @@
 
       // Title click → preview
       const titleEl = tr.querySelector('.title-link');
-      titleEl.addEventListener('click', () => openPreview(link.url));
-      titleEl.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          openPreview(link.url);
-        }
+      titleEl.addEventListener('click', () => {
+        selectRow(idx);
+        openPreview(link.url);
       });
 
       // State badge click (not done)
       if (link.state !== 'done') {
         const badge = tr.querySelector('.state-badge');
-        badge.addEventListener('click', () => cycleState(idx));
-        badge.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            cycleState(idx);
-          }
+        badge.addEventListener('click', () => {
+          selectRow(idx);
+          cycleState(idx);
         });
       }
 
@@ -540,6 +670,7 @@
 
       tbody.appendChild(tr);
     });
+    restoreSelectionAfterRender();
   }
 
   function reRenderRow(tr, idx) {
@@ -550,12 +681,6 @@
     if (link.state !== 'done') {
       const badge = tr.querySelector('.state-badge');
       badge.addEventListener('click', () => cycleState(idx));
-      badge.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          cycleState(idx);
-        }
-      });
     }
   }
 
@@ -663,6 +788,8 @@
 
   function cycleState(idx) {
     const link = linksData[idx];
+    if (!link || link.state === 'done') return;
+    if (selectedIdx !== idx) selectedIdx = idx;
     const cur = STATE_CYCLE.indexOf(link.state);
     link.state = STATE_CYCLE[(cur + 1) % STATE_CYCLE.length];
     if (link.state !== 'needs_summary') {
@@ -672,6 +799,7 @@
       link.clipDraft = null;
     }
     updateCounter();
+    rememberSelection();
     renderTable(); // simple full re-render
   }
 
@@ -757,6 +885,9 @@
         showFallback(url);
       }
     }, 3000);
+
+    const tr = document.querySelector('#link-tbody tr[data-idx="' + selectedIdx + '"]');
+    if (tr) tr.focus({ preventScroll: true });
   }
 
   function showFallback(url) {

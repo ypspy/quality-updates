@@ -94,6 +94,12 @@ tr.state-skip td { color: #aaa; }
 tr.state-needs td { background: #e3f2fd; }
 tr.state-done td { color: #888; font-style: italic; }
 
+#link-tbody tr[data-idx].is-selected td {
+  box-shadow: inset 4px 0 0 #1565c0;
+  outline: 2px solid rgba(21, 101, 192, 0.45);
+  outline-offset: -2px;
+}
+
 /* State badge */
 .state-badge { cursor: pointer; padding: 2px 8px; border-radius: 12px; font-size: 11px; user-select: none; white-space: nowrap; }
 .badge-undecided { background: #eeeeee; }
