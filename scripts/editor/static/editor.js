@@ -586,13 +586,88 @@
     return false;
   }
 
+  function panelControls(tr) {
+    const cell = tr.querySelector('.source-cell');
+    if (!cell) return [];
+    return Array.prototype.slice.call(cell.querySelectorAll('button, input, textarea'));
+  }
+
+  function enterSourceEdit() {
+    const link = linksData[selectedIdx];
+    if (!link || link.state === 'done') return false;
+    const tr = document.querySelector('#link-tbody tr[data-idx="' + selectedIdx + '"]');
+    if (!tr) return false;
+    const cell = tr.querySelector('.source-cell');
+    if (!cell) return false;
+    const kind = sourceKind(link);
+    let target = null;
+    if (kind === 'pdf') target = cell.querySelector('.source-input');
+    else if (kind === 'web') target = cell.querySelector('.web-btn-preview');
+    else target = cell.querySelector('.clip-draft');
+    if (!target) return false;
+    uiMode = 'source-edit';
+    panelControls(tr).forEach((el) => {
+      const panel = el.closest('.source-panel');
+      const hidden = panel && panel.style.display === 'none';
+      el.tabIndex = hidden ? -1 : 0;
+    });
+    cell.querySelectorAll('.source-tab').forEach((el) => { el.tabIndex = 0; });
+    target.focus();
+    return true;
+  }
+
+  function exitSourceEdit() {
+    if (openPicker) {
+      closeOpenPicker();
+      return;
+    }
+    uiMode = 'row';
+    applyRowTabStops();
+    const tr = document.querySelector('#link-tbody tr[data-idx="' + selectedIdx + '"]');
+    if (tr) tr.focus({ preventScroll: true });
+  }
+
   function onEditorKeyDown(e) {
     if (e.defaultPrevented) return;
-    if (openPicker) return;
-    if (uiMode === 'source-edit') return;
     const t = e.target;
+
+    if (e.key === 'Escape' && uiMode === 'source-edit' && !openPicker) {
+      e.preventDefault();
+      exitSourceEdit();
+      return;
+    }
+
+    if (uiMode === 'source-edit') {
+      if (e.key === 'Tab') {
+        const tr = document.querySelector('#link-tbody tr[data-idx="' + selectedIdx + '"]');
+        if (!tr) return;
+        const focusables = panelControls(tr).filter((el) => el.tabIndex >= 0 && !el.disabled);
+        const tabs = Array.prototype.slice.call(tr.querySelectorAll('.source-tab'));
+        const list = tabs.concat(focusables);
+        if (!list.length) return;
+        const i = list.indexOf(document.activeElement);
+        if (e.shiftKey && (i <= 0)) {
+          e.preventDefault();
+          exitSourceEdit();
+          return;
+        }
+        if (!e.shiftKey && i === list.length - 1) {
+          e.preventDefault();
+          list[list.length - 1].focus();
+          return;
+        }
+      }
+      return;
+    }
+
+    if (openPicker) return;
     if (isHeaderTarget(t) || isTypingTarget(t)) return;
     if (!linksData.length) return;
+
+    if (e.key === 'Tab' && !e.shiftKey) {
+      if (enterSourceEdit()) e.preventDefault();
+      return;
+    }
 
     if (e.key === 'ArrowDown') {
       e.preventDefault();
@@ -608,7 +683,8 @@
       e.preventDefault();
       const url = linksData[selectedIdx] && linksData[selectedIdx].url;
       if (url) openPreview(url);
-      selectRow(selectedIdx);
+      const tr = document.querySelector('#link-tbody tr[data-idx="' + selectedIdx + '"]');
+      if (tr) tr.focus({ preventScroll: true });
       return;
     }
     if (e.key === ' ' || e.key === 'Spacebar') {
@@ -624,7 +700,6 @@
     if (e.key === 'ArrowRight') {
       e.preventDefault();
       cycleSourcePanel(selectedIdx, 1);
-      return;
     }
   }
 
@@ -1252,8 +1327,11 @@
   }
 
   function onDocKeyDown(e) {
-    // Global ESC close even if focus moved elsewhere (spec includes Esc closes)
+    // Global ESC close even if focus moved elsewhere (spec includes Esc closes).
+    // preventDefault so the same Escape does not also exit source-edit
+    // (onEditorKeyDown runs on bubble after this capture listener).
     if (e.key === 'Escape' && openPicker) {
+      e.preventDefault();
       closeOpenPicker();
     }
   }
