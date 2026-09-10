@@ -508,6 +508,10 @@
         tr.focus({ preventScroll: true });
         tr.scrollIntoView({ block: 'nearest' });
       }
+    } else if (uiMode === 'source-edit') {
+      if (!enterSourceEdit()) {
+        exitSourceEdit();
+      }
     }
   }
 
