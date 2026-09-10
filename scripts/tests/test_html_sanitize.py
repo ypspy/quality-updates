@@ -292,3 +292,31 @@ def test_narrow_kicpa_unwraps_tables_to_divs():
     assert "preview-td" in out
     assert "셀A" in out and "셀B" in out
 
+
+def test_url_looks_like_attachment_by_suffix():
+    import editor.download_helpers as dh
+
+    assert dh.url_looks_like_attachment("https://kasb.or.kr/files/a.pdf") is True
+    assert dh.url_looks_like_attachment("https://example.com/x.HWPX?x=1") is True
+    assert dh.url_looks_like_attachment("https://example.com/page") is False
+    assert dh.url_looks_like_attachment("https://example.com/view.do") is False
+
+
+def test_rewrites_pdf_href_to_save_fetched():
+    import editor.html_sanitize as hs
+
+    html = '<a href="attach/foo.pdf">첨부</a>'
+    out = hs.sanitize_html_for_web_preview(html, base_url="https://example.com/dir/")
+    assert "/api/source/save_fetched?url=" in out
+    assert "foo.pdf" in out
+    assert "/api/source/preview?url=" not in out
+
+
+def test_html_article_href_still_goes_to_preview():
+    import editor.html_sanitize as hs
+
+    html = '<a href="https://example.com/article">본문</a>'
+    out = hs.sanitize_html_for_web_preview(html, base_url="https://example.com/")
+    assert "/api/source/preview?url=" in out
+    assert "/api/source/save_fetched?url=" not in out
+

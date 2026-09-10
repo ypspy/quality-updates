@@ -18,6 +18,8 @@ from urllib.parse import quote, urljoin, urlsplit
 import bleach
 from bs4 import BeautifulSoup, Comment, NavigableString
 
+from .download_helpers import url_looks_like_attachment
+
 
 _KASB_FILEDOWN_RE = re.compile(
     r"fileDownload\s*\(\s*['\"]([^'\"]+)['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\)",
@@ -256,7 +258,10 @@ def sanitize_html_for_web_preview(html: str, base_url: str) -> str:
             continue
 
         encoded = quote(abs_url, safe="")
-        el.attrs["href"] = f"/api/source/preview?url={encoded}"
+        if url_looks_like_attachment(abs_url):
+            el.attrs["href"] = f"/api/source/save_fetched?url={encoded}"
+        else:
+            el.attrs["href"] = f"/api/source/preview?url={encoded}"
         el.attrs["rel"] = "noopener noreferrer"
 
     # (c) Final pass: bleach allowlist sanitization.

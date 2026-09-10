@@ -6,6 +6,42 @@ from urllib.parse import unquote, unquote_to_bytes, urlsplit
 
 from flask import jsonify
 
+_ATTACHMENT_SUFFIXES = frozenset(
+    {
+        ".pdf",
+        ".hwp",
+        ".hwpx",
+        ".hml",
+        ".zip",
+        ".7z",
+        ".rar",
+        ".doc",
+        ".docx",
+        ".xls",
+        ".xlsx",
+        ".ppt",
+        ".pptx",
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".gif",
+        ".webp",
+        ".tif",
+        ".tiff",
+    }
+)
+
+
+def url_looks_like_attachment(url: str) -> bool:
+    """True when the URL path suffix is a downloadable file, not an HTML page."""
+    if not isinstance(url, str) or not url.strip():
+        return False
+    path = urlsplit(url.strip()).path.lower()
+    dot = path.rfind(".")
+    if dot < 0:
+        return False
+    return path[dot:] in _ATTACHMENT_SUFFIXES
+
 
 def is_pdf_bytes(data: bytes) -> bool:
     if not isinstance(data, (bytes, bytearray)):
