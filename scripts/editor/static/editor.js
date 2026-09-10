@@ -1250,27 +1250,10 @@
     const qNorm = normalizeForMatch(query);
     const all = Array.isArray(paths) ? paths : [];
     if (!qNorm) return all.slice();
-
-    const scored = [];
-    for (const p of all) {
-      const cand = String(p || '');
-      const candNorm = normalizeForMatch(cand);
-      const idx = candNorm.indexOf(qNorm);
-      if (idx === -1) continue;
-      const isExact = candNorm === qNorm;
-      const isPrefix = idx === 0;
-      scored.push({ path: cand, idx, isExact, isPrefix });
-    }
-
-    scored.sort((a, b) => {
-      // exact > prefix > earlier match index > lex
-      if (a.isExact !== b.isExact) return a.isExact ? -1 : 1;
-      if (a.isPrefix !== b.isPrefix) return a.isPrefix ? -1 : 1;
-      if (a.idx !== b.idx) return a.idx - b.idx;
-      return a.path.localeCompare(b.path);
+    return all.filter((p) => {
+      const candNorm = normalizeForMatch(String(p || ''));
+      return candNorm.indexOf(qNorm) !== -1;
     });
-
-    return scored.map((x) => x.path);
   }
 
   function normalizeForMatch(s) {

@@ -22,7 +22,6 @@ def test_config_rejects_invalid_downloads_folder(monkeypatch, tmp_path, bad_valu
 
 
 def test_downloads_list_default_folder(monkeypatch, tmp_path):
-    # Isolate config + repo root for test
     monkeypatch.setattr(editor_config, "CONFIG_PATH", tmp_path / "editor_config.json")
     monkeypatch.setattr(editor_config, "repo_root", lambda: tmp_path)
 
@@ -37,10 +36,33 @@ def test_downloads_list_default_folder(monkeypatch, tmp_path):
     resp = client.get("/api/downloads")
     assert resp.status_code == 200
     data = resp.get_json()
-    assert data == {
-        "files": ["downloads/a.pdf", "downloads/b.pdf", "downloads/c.txt", "downloads/c.zip"],
-        "folder_exists": True,
+    assert data["folder_exists"] is True
+    assert set(data["files"]) == {
+        "downloads/a.pdf",
+        "downloads/b.pdf",
+        "downloads/c.txt",
+        "downloads/c.zip",
     }
+
+
+def test_downloads_list_newest_mtime_first(monkeypatch, tmp_path):
+    monkeypatch.setattr(editor_config, "CONFIG_PATH", tmp_path / "editor_config.json")
+    monkeypatch.setattr(editor_config, "repo_root", lambda: tmp_path)
+
+    downloads = tmp_path / "downloads"
+    downloads.mkdir()
+    older = downloads / "older.pdf"
+    newer = downloads / "newer.pdf"
+    older.write_bytes(b"%PDF-1.7\n%...")
+    newer.write_bytes(b"%PDF-1.7\n%...")
+    os.utime(older, (1_000_000, 1_000_000))
+    os.utime(newer, (2_000_000, 2_000_000))
+
+    client = editor_app.app.test_client()
+    resp = client.get("/api/downloads")
+    assert resp.status_code == 200
+    files = resp.get_json()["files"]
+    assert files.index("downloads/newer.pdf") < files.index("downloads/older.pdf")
 
 
 def test_clear_downloads_only_configured_folder(monkeypatch, tmp_path):

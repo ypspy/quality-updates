@@ -55,7 +55,15 @@ def list_downloads():
         return jsonify({"files": [], "folder_exists": False})
 
     files = [f for f in folder.rglob("*") if f.is_file()]
-    files.sort(key=lambda p: p.as_posix().lower())
+
+    def _download_sort_key(p: Path):
+        try:
+            mtime = p.stat().st_mtime
+        except OSError:
+            mtime = 0.0
+        return (-mtime, p.as_posix().lower())
+
+    files.sort(key=_download_sort_key)
     rel = [f.relative_to(root).as_posix() for f in files]
     return jsonify({"files": rel, "folder_exists": True})
 
