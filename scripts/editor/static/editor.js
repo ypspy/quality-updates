@@ -522,10 +522,23 @@
       const selected = idx === selectedIdx;
       tr.tabIndex = selected ? 0 : -1;
       tr.classList.toggle('is-selected', selected);
-      tr.querySelectorAll('.title-link, .state-badge, .source-tab, .source-btn, .source-input, .clip-draft').forEach((el) => {
-        if (uiMode === 'source-edit' && selected) return;
+      tr.querySelectorAll('.title-link, .state-badge').forEach((el) => {
         el.tabIndex = -1;
       });
+      const sourceEls = tr.querySelectorAll('.source-tab, .source-btn, .source-input, .clip-draft');
+      if (uiMode === 'source-edit' && selected) {
+        sourceEls.forEach((el) => {
+          if (el.classList.contains('source-tab')) {
+            el.tabIndex = 0;
+            return;
+          }
+          const panel = el.closest('.source-panel');
+          const hidden = panel && panel.style.display === 'none';
+          el.tabIndex = hidden ? -1 : 0;
+        });
+      } else {
+        sourceEls.forEach((el) => { el.tabIndex = -1; });
+      }
     });
   }
 
@@ -596,7 +609,7 @@
     return Array.prototype.slice.call(cell.querySelectorAll('button, input, textarea'));
   }
 
-  function enterSourceEdit() {
+  function enterSourceEdit(opts) {
     const link = linksData[selectedIdx];
     if (!link || link.state === 'done') return false;
     const tr = document.querySelector('#link-tbody tr[data-idx="' + selectedIdx + '"]');
@@ -610,13 +623,8 @@
     else target = cell.querySelector('.clip-draft');
     if (!target) return false;
     uiMode = 'source-edit';
-    panelControls(tr).forEach((el) => {
-      const panel = el.closest('.source-panel');
-      const hidden = panel && panel.style.display === 'none';
-      el.tabIndex = hidden ? -1 : 0;
-    });
-    cell.querySelectorAll('.source-tab').forEach((el) => { el.tabIndex = 0; });
-    target.focus();
+    applyRowTabStops();
+    if (!(opts && opts.skipFocus)) target.focus();
     return true;
   }
 
@@ -667,7 +675,7 @@
     }
 
     if (openPicker) return;
-    if (isHeaderTarget(t) || isTypingTarget(t)) return;
+    if (isHeaderTarget(t) || isTypingTarget(t) || isLinkTbodyControlTarget(t)) return;
     if (!linksData.length) return;
 
     if (e.key === 'Tab' && !e.shiftKey) {
@@ -738,7 +746,11 @@
         const tag = ((t && t.tagName) || '').toLowerCase();
         const skipFocus = tag === 'input' || tag === 'textarea' || tag === 'select' || tag === 'button'
           || !!(t && t.closest && t.closest('.title-link'));
-        selectRow(idx, { keepMode: true, skipFocus: skipFocus });
+        const sameRow = idx === selectedIdx;
+        selectRow(idx, { keepMode: sameRow, skipFocus: skipFocus });
+        if (sameRow && isLinkTbodyControlTarget(t)) {
+          enterSourceEdit({ skipFocus: true });
+        }
       });
 
       tr.innerHTML = `
@@ -776,17 +788,6 @@
       tbody.appendChild(tr);
     });
     restoreSelectionAfterRender();
-  }
-
-  function reRenderRow(tr, idx) {
-    const link = linksData[idx];
-    tr.className = stateClass(link.state);
-    const stateEl = tr.querySelector('.cell-state');
-    if (stateEl) stateEl.innerHTML = stateBadge(link, idx);
-    if (link.state !== 'done') {
-      const badge = tr.querySelector('.state-badge');
-      badge.addEventListener('click', () => cycleState(idx));
-    }
   }
 
   function stateClass(state) {
