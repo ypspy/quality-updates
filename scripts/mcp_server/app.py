@@ -22,13 +22,21 @@ from mcp_server.core import (  # noqa: E402
     search_regulatory_updates,
 )
 
+CITATION_INSTRUCTIONS = (
+    "Read-only Korean financial regulatory corpus (FSS, FSC, KICPA, KASB). "
+    "Use search_regulatory_updates then get_regulatory_update. "
+    "Citation contract: (1) Every claim must include agency, date, title, url "
+    "(and id when available). (2) Use only facts in note bullets/tables; "
+    "do not invent numbers or interpretations. (3) If summary_status is "
+    "no_summary, treat title and url as hints only, not body facts. "
+    "(4) Skipped items are absent from the corpus; do not recover them "
+    "from source markdown. (5) Corpus is read-only; curation, summaries, "
+    "and nav belong to the production pipeline."
+)
+
 mcp = FastMCP(
     "quality-updates",
-    instructions=(
-        "Read-only access to Korean financial regulatory updates corpus "
-        "(FSS, FSC, KICPA, KASB). Use search_regulatory_updates then "
-        "get_regulatory_update for note text and URLs."
-    ),
+    instructions=CITATION_INSTRUCTIONS,
 )
 
 

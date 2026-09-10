@@ -1,7 +1,7 @@
 # 분기 운영 작업지시서
 
 **대상**: Quality Updates 분기별 규제 업데이트 문서 운영  
-**버전**: 2026-06  
+**버전**: 2026-09  
 **관련 문서**: [README.md](../../README.md), [CONTRIBUTING.md](../../CONTRIBUTING.md), [editor-curation-workflow.md](editor-curation-workflow.md), [quality-updates-writer 스킬](../../.claude/skills/quality-updates-writer/SKILL.md)
 
 ---
@@ -50,10 +50,11 @@ flowchart TB
     end
     subgraph phase5 [Phase 5 — 배포]
         P5A[Agent: prepare_deploy.py]
-        P5H[HITL: 힌트·최종 diff 승인]
+        P5C[Agent: export_corpus.py --strict]
+        P5H[HITL: 힌트·corpus diff 승인]
         P5B[시스템: mkdocs build --strict, CI, Render]
     end
-    P1A --> P1H --> P2H --> P3A --> P3H --> P4H --> P5A --> P5H --> P5B
+    P1A --> P1H --> P2H --> P3A --> P3H --> P4H --> P5A --> P5C --> P5H --> P5B
 ```
 
 ---
@@ -153,6 +154,7 @@ flowchart TB
 | | Agent | HITL | 시스템 |
 |---|-------|------|--------|
 | **실행** | `python scripts/prepare_deploy.py` | stdout diff 힌트 검토·적용 | skip 제거, validate `--strict` |
+| **코퍼스** | `python scripts/export_corpus.py --strict` | `data/corpus/` JSONL·manifest 커밋 여부 검토 | skip in-memory 제외 |
 | **선행** | `prepare_deploy.py --dry-run` 권장 | 삭제될 skip 쌍 확인 | — |
 | **빌드** | `mkdocs build --strict` | 최종 미리보기 | CI 동일 |
 | **배포** | — | `main` merge·push **승인** | Render 자동 배포 |
@@ -161,12 +163,14 @@ flowchart TB
 
 - [ ] `prepare_deploy` exit 0
 - [ ] validate strict 통과
+- [ ] `python scripts/export_corpus.py --strict` 통과
 - [ ] `npm test` 또는 `cd scripts && python -m pytest tests/ -q` 통과
 
 **HITL 체크리스트**
 
 - [ ] Appendix A 보존 (skip 제거 대상 아님)
 - [ ] 공개 본문에 스킵 링크·마커 잔존 없음
+- [ ] corpus JSONL을 사이트와 같이 커밋할지 결정 (MCP Hosted는 커밋된 JSONL을 읽음)
 - [ ] 배포 후 [quality-updates.onrender.com](https://quality-updates.onrender.com) 샘플 확인
 
 ---
@@ -200,6 +204,7 @@ python scripts/prepare_deploy.py
 
 # 검증
 python scripts/validate_content.py --strict
+python scripts/export_corpus.py --strict
 cd scripts && python -m pytest tests/ -q
 mkdocs build --strict
 ```
@@ -219,6 +224,7 @@ npm: `npm run crawl`, `npm run prepare:deploy`, `npm test`, `npm run build:stric
 | G5 | `validate_content --strict` 통과 | 시스템 |
 | G6 | `pytest` 통과 | 시스템 |
 | G7 | `mkdocs build --strict` 통과 | Agent/HITL |
+| G7b | `export_corpus.py --strict` 통과 | 시스템 |
 | G8 | `main` push 승인 | HITL |
 
 **G1~G3 미충족 시 배포 금지.**
@@ -246,6 +252,8 @@ npm: `npm run crawl`, `npm run prepare:deploy`, `npm test`, `npm run build:stric
 | `.claude/skills/quality-updates-writer/SKILL.md` | 요약·스킵 제거 규칙 |
 | `scripts/prepare_deploy.py` | 배포 전처리 |
 | `scripts/validate_content.py` | 콘텐츠 스키마 검증 |
+| `scripts/export_corpus.py` | MCP 코퍼스 JSONL (skip 제외) |
+| `scripts/mcp_server/` | 읽기 전용 MCP (stdio + HTTP) |
 | `mkdocs.yml` | 사이트 탐색 |
 | `docs/quality-updates/` | 분기 문서 소스 |
 
@@ -255,4 +263,5 @@ npm: `npm run crawl`, `npm run prepare:deploy`, `npm test`, `npm run build:stric
 
 | 날짜 | 내용 |
 |------|------|
+| 2026-09-10 | Phase 5에 corpus export. 소비는 사이트+MCP. 렌즈 스킬 제거 |
 | 2026-06-25 | 초판 — 크롤러 통합·prepare_deploy 반영, Agent/HITL 역할 분담 |
