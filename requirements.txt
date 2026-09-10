@@ -13,7 +13,7 @@ bleach
 lxml>=5.1.0
 python-dateutil>=2.8.2
 pyyaml>=6.0
-mcp>=1.6.0
+mcp>=1.6.0,<2
 uvicorn>=0.30.0
 starlette>=0.37.0
 playwright>=1.40.0
