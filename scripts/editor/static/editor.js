@@ -641,8 +641,10 @@
       if (e.key === 'Tab') {
         const tr = document.querySelector('#link-tbody tr[data-idx="' + selectedIdx + '"]');
         if (!tr) return;
-        const focusables = panelControls(tr).filter((el) => el.tabIndex >= 0 && !el.disabled);
         const tabs = Array.prototype.slice.call(tr.querySelectorAll('.source-tab'));
+        const focusables = panelControls(tr).filter(
+          (el) => el.tabIndex >= 0 && !el.disabled && !el.classList.contains('source-tab')
+        );
         const list = tabs.concat(focusables);
         if (!list.length) return;
         const i = list.indexOf(document.activeElement);
