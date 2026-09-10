@@ -540,8 +540,18 @@
     }
   }
 
+  function isLinkTbodyControlTarget(el) {
+    if (!el || !el.closest) return false;
+    if (!el.closest('#link-tbody')) return false;
+    const tag = (el.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || tag === 'select' || tag === 'button') return true;
+    if (el.isContentEditable) return true;
+    return false;
+  }
+
   function focusSelectedRowIfRowMode() {
     if (uiMode !== 'row') return;
+    if (isLinkTbodyControlTarget(document.activeElement)) return;
     const tr = document.querySelector('#link-tbody tr[data-idx="' + selectedIdx + '"]');
     if (tr) tr.focus({ preventScroll: true });
   }
