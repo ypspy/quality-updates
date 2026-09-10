@@ -11,6 +11,7 @@ _SCRIPTS_DIR = Path(__file__).resolve().parent.parent
 if str(_SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPTS_DIR))
 
+from mcp.server.transport_security import TransportSecuritySettings
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
@@ -18,6 +19,26 @@ from starlette.responses import JSONResponse, Response
 from mcp_server.app import mcp
 
 API_KEY_ENV = "MCP_API_KEY"
+
+
+def _http_transport_security() -> TransportSecuritySettings:
+    hosts = ["127.0.0.1", "127.0.0.1:*", "localhost", "localhost:*", "[::1]:*"]
+    extras = [os.environ.get("RENDER_EXTERNAL_HOSTNAME", "").strip()]
+    extras.extend(
+        part.strip()
+        for part in os.environ.get("MCP_ALLOWED_HOSTS", "").split(",")
+        if part.strip()
+    )
+    for host in extras:
+        if not host:
+            continue
+        hosts.append(host)
+        if ":*" not in host:
+            hosts.append(f"{host}:*")
+    return TransportSecuritySettings(
+        enable_dns_rebinding_protection=True,
+        allowed_hosts=hosts,
+    )
 
 
 class BearerAuthMiddleware(BaseHTTPMiddleware):
@@ -41,6 +62,8 @@ async def health(_request: Request) -> JSONResponse:
     return JSONResponse({"status": "ok"})
 
 
+mcp.settings.transport_security = _http_transport_security()
+mcp._session_manager = None
 app = mcp.streamable_http_app()
 app.add_middleware(BearerAuthMiddleware)
 

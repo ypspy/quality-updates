@@ -327,6 +327,7 @@ python scripts/mcp_server/stdio.py
 # Start: uvicorn mcp_server.http:app --host 0.0.0.0 --port $PORT
 # Health: GET /health
 # MCP: POST /mcp  Authorization: Bearer <MCP_API_KEY>
+# Host 허용: RENDER_EXTERNAL_HOSTNAME(Render 주입) + 선택 MCP_ALLOWED_HOSTS
 # 실제 호스트 URL은 HITL이 Render에서 만든 뒤 이 절에 적는다.
 ```
 
