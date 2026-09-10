@@ -50,12 +50,11 @@
     toastHideTimer = setTimeout(() => {
       el.classList.remove('is-visible');
       toastHideTimer = null;
-    }, 1000);
+    }, 2500);
   }
 
   /** save_fetched(구 save_pdf) / kasb_file — JSON만 사용 (한글 메시지 UTF-8). */
   async function runSaveByPath(path, opts) {
-    const clearIframeOnSuccess = opts && opts.clearIframeOnSuccess;
     try {
       const r = await fetch(path, {
         headers: { Accept: 'application/json' },
@@ -67,14 +66,29 @@
         return;
       }
       showToast(data.message || '저장됨');
-      if (clearIframeOnSuccess) {
-        const iframe = document.getElementById('preview-iframe');
-        iframe.src = 'about:blank';
-      }
       await loadPdfFiles();
-      renderTable();
     } catch (_) {
       showToast('저장 요청 실패');
+    }
+  }
+
+  let lastGoodPreviewSrc = '';
+
+  function isSaveDelegateStub(doc) {
+    try {
+      return !!(doc && doc.body && /quality-updates-fetch-save/.test(doc.body.innerHTML));
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function restorePreviewIfStub() {
+    const iframe = document.getElementById('preview-iframe');
+    if (!iframe || !lastGoodPreviewSrc) return;
+    let doc = null;
+    try { doc = iframe.contentDocument; } catch (_) { doc = null; }
+    if (isSaveDelegateStub(doc) || !iframe.src || iframe.src === 'about:blank') {
+      iframe.src = lastGoodPreviewSrc;
     }
   }
 
@@ -83,7 +97,8 @@
       if (e.origin !== window.location.origin) return;
       const d = e.data;
       if (!d || d.type !== 'quality-updates-fetch-save' || !d.path) return;
-      runSaveByPath(String(d.path), { clearIframeOnSuccess: true });
+      runSaveByPath(String(d.path), {});
+      restorePreviewIfStub();
     });
   }
 
@@ -108,10 +123,33 @@
     }
     if (u.origin !== window.location.origin) return;
     const p = u.pathname || '';
-    if (p !== '/api/source/kasb_file' && p !== '/api/source/save_pdf' && p !== '/api/source/save_fetched') return;
-    ev.preventDefault();
-    ev.stopPropagation();
-    runSaveByPath(u.pathname + u.search, { clearIframeOnSuccess: false });
+    const savePaths = ['/api/source/kasb_file', '/api/source/save_pdf', '/api/source/save_fetched'];
+    if (savePaths.indexOf(p) !== -1) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      runSaveByPath(u.pathname + u.search, {});
+      return;
+    }
+    if (p === '/api/source/preview' || p === '/api/source/preview_fast') {
+      const nested = u.searchParams.get('url') || '';
+      if (nestedLooksLikeAttachment(nested)) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        runSaveByPath('/api/source/save_fetched?url=' + encodeURIComponent(nested), {});
+      }
+    }
+  }
+
+  function nestedLooksLikeAttachment(url) {
+    const path = String(url || '').split('?')[0].split('#')[0].toLowerCase();
+    const m = path.match(/\.[a-z0-9]+$/);
+    if (!m) return false;
+    const suffixes = {
+      '.pdf': 1, '.hwp': 1, '.hwpx': 1, '.hml': 1, '.zip': 1, '.7z': 1, '.rar': 1,
+      '.doc': 1, '.docx': 1, '.xls': 1, '.xlsx': 1, '.ppt': 1, '.pptx': 1,
+      '.png': 1, '.jpg': 1, '.jpeg': 1, '.gif': 1, '.webp': 1, '.tif': 1, '.tiff': 1
+    };
+    return !!suffixes[m[0]];
   }
 
   // ── Bootstrap ──────────────────────────────────────────────────────────────
@@ -663,6 +701,7 @@
     if (typeof onBeforeSrc === 'function') {
       onBeforeSrc(iframe, seq);
     }
+    lastGoodPreviewSrc = srcUrl;
     iframe.src = srcUrl;
     return seq;
   }
@@ -675,6 +714,9 @@
         if (s !== previewSeq) return;
         try {
           wireIframeDelegatedSaveClicks(iframe);
+          if (isSaveDelegateStub(iframe.contentDocument)) {
+            restorePreviewIfStub();
+          }
         } catch (_) { /* ignore */ }
       };
       iframe.onerror = null;
@@ -690,6 +732,9 @@
         if (s !== previewSeq) return;
         try {
           wireIframeDelegatedSaveClicks(iframe);
+          if (isSaveDelegateStub(iframe.contentDocument)) {
+            restorePreviewIfStub();
+          }
           const doc = iframe.contentDocument;
           if (doc && doc.body && doc.body.innerHTML === '') showFallback(url);
         } catch (e) {
@@ -774,7 +819,7 @@
           const clipId = data && data.id ? String(data.id).trim() : '';
           if (!shotPath && (!res.ok || !clipId)) {
             const extra = shotPath ? `\n(스크린샷 저장: ${shotPath})` : '';
-            alert(((data && data.error) ? data.error : '캡쳐 저장 실패') + extra);
+            showToast(((data && data.error) ? data.error : '캡쳐 저장 실패') + extra);
             return;
           }
           if (shotPath) {
@@ -789,12 +834,12 @@
           updateCounter();
           renderTable();
           if (!res.ok && data && data.error) {
-            alert(`${data.error}\n스크린샷은 연결되었습니다: ${shotPath}`);
+            showToast((data.error || '캡쳐 오류') + ' — 스크린샷은 연결됨: ' + shotPath);
           } else if (clipId) {
             openClipPreview(clipId);
           }
         } catch (_) {
-          alert('캡쳐 요청 실패 — 편집기 서버가 재시작 중이거나 연결이 끊겼을 수 있습니다. 잠시 후 다시 시도하세요.');
+          showToast('캡쳐 요청 실패 — 편집기 서버가 재시작 중이거나 연결이 끊겼을 수 있습니다. 잠시 후 다시 시도하세요.');
         } finally {
           // Button recreated on render; best-effort re-enable for no-render paths.
           try { webSaveClip.disabled = false; } catch (_) {}

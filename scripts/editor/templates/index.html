@@ -58,7 +58,7 @@
     <div id="right-panel">
       <div id="iframe-container">
         <!-- Preview docs: script/exec blocked by /api/* CSP + sanitize; no iframe sandbox (avoids about:blank + sandbox warnings). -->
-        <iframe id="preview-iframe" src="about:blank"></iframe>
+        <iframe id="preview-iframe" src="about:blank" tabindex="-1"></iframe>
         <div id="iframe-fallback" style="display:none">
           <p>이 사이트는 분할 화면을 지원하지 않습니다.</p>
           <a id="fallback-link" href="#" target="_blank" rel="noopener noreferrer">새 탭에서 열기 →</a>
@@ -67,6 +67,6 @@
     </div>
   </div>
 
-  <script src="/static/editor.js?v=4"></script>
+  <script src="/static/editor.js?v=5"></script>
 </body>
 </html>
