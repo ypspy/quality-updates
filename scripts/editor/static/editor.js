@@ -538,6 +538,12 @@
     }
   }
 
+  function focusSelectedRowIfRowMode() {
+    if (uiMode !== 'row') return;
+    const tr = document.querySelector('#link-tbody tr[data-idx="' + selectedIdx + '"]');
+    if (tr) tr.focus({ preventScroll: true });
+  }
+
   function moveSelection(delta) {
     if (!linksData.length) return;
     const next = Math.max(0, Math.min(linksData.length - 1, selectedIdx + delta));
@@ -845,6 +851,7 @@
           if (isSaveDelegateStub(iframe.contentDocument)) {
             restorePreviewIfStub();
           }
+          focusSelectedRowIfRowMode();
         } catch (_) { /* ignore */ }
       };
       iframe.onerror = null;
@@ -863,6 +870,7 @@
           if (isSaveDelegateStub(iframe.contentDocument)) {
             restorePreviewIfStub();
           }
+          focusSelectedRowIfRowMode();
           const doc = iframe.contentDocument;
           if (doc && doc.body && doc.body.innerHTML === '') showFallback(url);
         } catch (e) {
@@ -886,8 +894,7 @@
       }
     }, 3000);
 
-    const tr = document.querySelector('#link-tbody tr[data-idx="' + selectedIdx + '"]');
-    if (tr) tr.focus({ preventScroll: true });
+    focusSelectedRowIfRowMode();
   }
 
   function showFallback(url) {
