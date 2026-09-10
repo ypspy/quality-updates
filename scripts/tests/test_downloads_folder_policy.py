@@ -51,8 +51,8 @@ def test_downloads_list_newest_mtime_first(monkeypatch, tmp_path):
 
     downloads = tmp_path / "downloads"
     downloads.mkdir()
-    older = downloads / "older.pdf"
-    newer = downloads / "newer.pdf"
+    older = downloads / "aaa_old.pdf"
+    newer = downloads / "zzz_new.pdf"
     older.write_bytes(b"%PDF-1.7\n%...")
     newer.write_bytes(b"%PDF-1.7\n%...")
     os.utime(older, (1_000_000, 1_000_000))
@@ -62,7 +62,7 @@ def test_downloads_list_newest_mtime_first(monkeypatch, tmp_path):
     resp = client.get("/api/downloads")
     assert resp.status_code == 200
     files = resp.get_json()["files"]
-    assert files.index("downloads/newer.pdf") < files.index("downloads/older.pdf")
+    assert files.index("downloads/zzz_new.pdf") < files.index("downloads/aaa_old.pdf")
 
 
 def test_clear_downloads_only_configured_folder(monkeypatch, tmp_path):
