@@ -1,7 +1,7 @@
 # 큐레이션 편집기 — 행 단위 키보드 UX
 
 **날짜**: 2026-09-11  
-**상태**: 설계 합의 (파일 검토 대기)  
+**상태**: 승인됨  
 **범위**: `scripts/editor` 목록 탐색·처리 단축키, 미리보기 첨부 클릭 시 iframe 유지, 다운로드 목록 최신순  
 **선행**: [2026-03-24-quality-updates-editor-design.md](2026-03-24-quality-updates-editor-design.md), [2026-03-25-editor-pdf-picker-design.md](2026-03-25-editor-pdf-picker-design.md)
 

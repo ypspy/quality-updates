@@ -8,7 +8,9 @@
 
 - **파일 선택**: `/api/files` — `docs/quality-updates` 아래 `.md`를 **수정일 최신 → 과거** 순.
 - **설정**: `scripts/editor_config.json` — `downloads_folder`(저장소 루트 기준 `downloads/` 하위만 허용).
-- **WEB 미리보기**: `/api/source/preview` — HTML은 sanitize 후 iframe. **PDF·Zip·Office·이미지 등** 바이너리(HTML/JSON·`text/*` 제외)는 iframe이 저장 URL로 가지 않고, 부모 창이 `/api/source/save_fetched`를 `fetch`한 뒤 토스트(약 1초)·다운로드 목록 갱신. 하위 호환으로 `/api/source/save_pdf`도 동일 동작.
+- **WEB 미리보기**: `/api/source/preview` — HTML은 sanitize 후 iframe. **PDF·Zip·Office·이미지 등** 바이너리(HTML/JSON·`text/*` 제외)는 iframe이 저장 URL로 가지 않고, 부모 창이 `/api/source/save_fetched`를 `fetch`한 뒤 토스트(2.5초)·다운로드 목록 갱신. 하위 호환으로 `/api/source/save_pdf`도 동일 동작.
+- **키보드 (행 모드)**: `↑` `↓` 링크 선택, `Enter` 원문 미리보기(포커스는 행 유지), `Space` 상태 순환(미결정→스킵→요약 없음→요약 필요), `←` `→` 요약 필요일 때 PDF/WEB/CLIP 탭, `Tab` 해당 행 출처 편집, `Esc` 행 모드 복귀.
+- **다운로드 목록**: `/api/downloads`는 파일 수정 시간 **최신순**. PDF 피커 「전체」도 이 순서다.
 - **KASB 첨부**: `/api/source/kasb_file` — 동일하게 JSON 응답 + 부모 `fetch`; 미리보기 HTML 내 링크 클릭은 기본 네비게이션 대신 가로채서 저장.
 - **파일명**: `Content-Disposition`의 퍼센트 인코딩·Latin-1 깨짐 보정 후 로컬 저장.
 - **개발**: `FLASK_DEBUG=1`(기본)일 때 코드 수정으로 리로더가 돌아도 **브라우저 탭을 자동으로 반복 열지 않음**(리로더 부모에서만 최초 오픈). `FLASK_DEBUG=0`이면 단일 프로세스로 기존과 같이 오픈.
