@@ -15,11 +15,11 @@ if str(_SCRIPTS_DIR) not in sys.path:
 from mcp.server.fastmcp import FastMCP  # noqa: E402
 
 from mcp_server.core import (  # noqa: E402
-    get_regulatory_update,
-    list_quarterly_periods,
+    get_regulatory_update as core_get_regulatory_update,
+    list_quarterly_periods as core_list_quarterly_periods,
     load_corpus,
     period_item_ids,
-    search_regulatory_updates,
+    search_regulatory_updates as core_search_regulatory_updates,
 )
 
 CITATION_INSTRUCTIONS = (
@@ -45,10 +45,10 @@ def _store():
     return load_corpus()
 
 
-@mcp.tool()
+@mcp.tool(name="list_quarterly_periods")
 def list_quarterly_periods_tool() -> dict:
     """List indexed quarterly periods and corpus metadata."""
-    return list_quarterly_periods(_store())
+    return core_list_quarterly_periods(_store())
 
 
 @mcp.tool()
@@ -62,7 +62,7 @@ def search_regulatory_updates(
     limit: int = 20,
 ) -> list[dict]:
     """Search regulatory update items by keyword and filters."""
-    return search_regulatory_updates(
+    return core_search_regulatory_updates(
         _store(),
         query=query,
         agency=agency,
@@ -77,7 +77,7 @@ def search_regulatory_updates(
 @mcp.tool()
 def get_regulatory_update(id: str | None = None, url: str | None = None) -> dict | None:
     """Fetch one regulatory update by id or url (notes included)."""
-    return get_regulatory_update(_store(), id=id, url=url)
+    return core_get_regulatory_update(_store(), id=id, url=url)
 
 
 @mcp.resource("quality-updates://corpus/manifest")
