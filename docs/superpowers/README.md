@@ -12,12 +12,13 @@ Agent 진입·프롬프트: [AGENTS.md](../../AGENTS.md)
 
 | 날짜 | 파일 | 요약 |
 |------|------|------|
+| 2026-09-10 | [consumption-mcp-product-design.md](specs/2026-09-10-consumption-mcp-product-design.md) | 소비 정본=사이트+MCP, audit-regulatory-lens 삭제 |
 | 2026-09-09 | [fss-press-crawler-design.md](specs/2026-09-09-fss-press-crawler-design.md) | FSS 보도자료 목록 파서 KRDS 셀렉터 수정 |
 | 2026-07-23 | [summarize-slim-design.md](specs/2026-07-23-summarize-slim-design.md) | SUMMARIZE 비용 슬림 (발췌 gold·윈도우·온디맨드, 품질 게이트) |
 | 2026-07-23 | [summarize-economics-design.md](specs/2026-07-23-summarize-economics-design.md) | SUMMARIZE 비용 분해·슬림 후보 진단 (2016 Q1 표본) |
 | 2026-06-26 | [chronological-main-body-design.md](specs/2026-06-26-chronological-main-body-design.md) | 본문 과거→현재 정렬, Appendix 크롤 순 유지 |
 | 2026-06-26 | [admonition-expand-notes-design.md](specs/2026-06-26-admonition-expand-notes-design.md) | 링크 요약 `??? note` → `!!! note` (Appendix `??? info` 유지) |
-| 2026-06-27 | [audit-regulatory-lens-skill-design.md](specs/2026-06-27-audit-regulatory-lens-skill-design.md) | Planning/Execution/Reporting 감사 규제 렌즈 스킬 |
+| 2026-06-27 | [audit-regulatory-lens-skill-design.md](specs/2026-06-27-audit-regulatory-lens-skill-design.md) | 감사 규제 렌즈 스킬 (런타임 제거 2026-09-10) |
 | 2026-06-27 | [mcp-corpus-design.md](specs/2026-06-27-mcp-corpus-design.md) | Corpus export + 로컬 stdio + Hosted MCP |
 | 2026-06-26 | [remove-phase2-summaries-design.md](specs/2026-06-26-remove-phase2-summaries-design.md) | Phase 2(ES·기관별·시사점) 제거, MCP 코퍼스 정규화 |
 | 2026-06-26 | [quarterly-update-list-spacing-design.md](specs/2026-06-26-quarterly-update-list-spacing-design.md) | 분기 동향 문서 리스트 항목 간격 (extra.css/js) |
@@ -36,11 +37,12 @@ Agent 진입·프롬프트: [AGENTS.md](../../AGENTS.md)
 
 | 날짜 | 파일 | 요약 |
 |------|------|------|
+| 2026-09-10 | [consumption-mcp-product.md](plans/2026-09-10-consumption-mcp-product.md) | 소비 정본=사이트+MCP, 렌즈 런타임 삭제 |
 | 2026-09-09 | [fss-press-crawler.md](plans/2026-09-09-fss-press-crawler.md) | FSS 보도자료 목록 파서 KRDS 셀렉터 수정 |
 | 2026-07-23 | [summarize-slim.md](plans/2026-07-23-summarize-slim.md) | SUMMARIZE 비용 슬림 (발췌·윈도우·게이트) |
 | 2026-07-23 | [summarize-economics.md](plans/2026-07-23-summarize-economics.md) | SUMMARIZE 비용 분해·슬림 후보 진단 |
 | 2026-06-27 | [mcp-corpus.md](plans/2026-06-27-mcp-corpus.md) | Corpus export + MCP stdio/HTTP |
-| 2026-06-27 | [audit-regulatory-lens-skill.md](plans/2026-06-27-audit-regulatory-lens-skill.md) | 감사 규제 렌즈 ADVISORY 스킬 |
+| 2026-06-27 | [audit-regulatory-lens-skill.md](plans/2026-06-27-audit-regulatory-lens-skill.md) | 감사 규제 렌즈 ADVISORY 스킬 (런타임 제거 2026-09-10) |
 | 2026-06-26 | [admonition-expand-notes.md](plans/2026-06-26-admonition-expand-notes.md) | `??? note` → `!!! note` 백필 |
 | 2026-06-26 | [remove-phase2-summaries.md](plans/2026-06-26-remove-phase2-summaries.md) | Phase 2(ES·기관별·시사점) 제거 |
 | 2026-06-26 | [quarterly-update-list-spacing.md](plans/2026-06-26-quarterly-update-list-spacing.md) | 분기 문서 리스트 간격 CSS/JS |

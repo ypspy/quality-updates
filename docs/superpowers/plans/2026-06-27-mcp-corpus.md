@@ -20,4 +20,4 @@
 
 ## Follow-up (v1.1)
 
-- [ ] `audit-regulatory-lens` SKILL — MCP 우선 retrieve 활성화
+- [x] `audit-regulatory-lens` SKILL — MCP 우선 retrieve 활성화 — **취소** (스킬 런타임 제거, 2026-09-10)
