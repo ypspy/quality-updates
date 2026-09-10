@@ -533,7 +533,9 @@
     applyRowTabStops();
     const tr = document.querySelector('#link-tbody tr[data-idx="' + idx + '"]');
     if (tr && uiMode === 'row') {
-      tr.focus({ preventScroll: true });
+      if (!(opts && opts.skipFocus)) {
+        tr.focus({ preventScroll: true });
+      }
       tr.scrollIntoView({ block: 'nearest' });
     }
   }
@@ -640,7 +642,13 @@
       const tr = document.createElement('tr');
       tr.dataset.idx = idx;
       tr.className = stateClass(link.state);
-      tr.addEventListener('mousedown', () => selectRow(idx, { keepMode: true }));
+      tr.addEventListener('mousedown', (event) => {
+        const t = event.target;
+        const tag = ((t && t.tagName) || '').toLowerCase();
+        const skipFocus = tag === 'input' || tag === 'textarea' || tag === 'select' || tag === 'button'
+          || !!(t && t.closest && t.closest('.title-link'));
+        selectRow(idx, { keepMode: true, skipFocus: skipFocus });
+      });
 
       tr.innerHTML = `
         <td colspan="5" class="link-row-td">
@@ -701,11 +709,13 @@
   }
 
   function sourceKind(link) {
+    // Visible tab follows sourcePanel when set; attached source stays intact.
+    if (link.sourcePanel === 'pdf' || link.sourcePanel === 'web' || link.sourcePanel === 'clip') {
+      return link.sourcePanel;
+    }
     if (link.source && link.source.type === 'web') return 'web';
     if (link.source && link.source.type === 'clip') return 'clip';
     if (link.source && link.source.type === 'shot') return 'web';
-    if (link.sourcePanel === 'web') return 'web';
-    if (link.sourcePanel === 'clip') return 'clip';
     return 'pdf';
   }
 
@@ -1474,7 +1484,7 @@
     if (!l.pdf_path) l.pdf_path = null;
 
     l.sourcePanel =
-      l.source && l.source.type === 'web' ? 'web'
+      l.source && (l.source.type === 'web' || l.source.type === 'shot') ? 'web'
         : l.source && l.source.type === 'clip' ? 'clip'
           : 'pdf';
 
