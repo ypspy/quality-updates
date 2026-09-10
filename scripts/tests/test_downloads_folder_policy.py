@@ -65,6 +65,27 @@ def test_downloads_list_newest_mtime_first(monkeypatch, tmp_path):
     assert files.index("downloads/zzz_new.pdf") < files.index("downloads/aaa_old.pdf")
 
 
+def test_downloads_list_equal_mtime_breaks_tie_by_lowercase_path(monkeypatch, tmp_path):
+    monkeypatch.setattr(editor_config, "CONFIG_PATH", tmp_path / "editor_config.json")
+    monkeypatch.setattr(editor_config, "repo_root", lambda: tmp_path)
+
+    downloads = tmp_path / "downloads"
+    downloads.mkdir()
+    zed = downloads / "Zed.pdf"
+    alpha = downloads / "alpha.pdf"
+    zed.write_bytes(b"%PDF-1.7\n%...")
+    alpha.write_bytes(b"%PDF-1.7\n%...")
+    same_mtime = 1_500_000
+    os.utime(zed, (same_mtime, same_mtime))
+    os.utime(alpha, (same_mtime, same_mtime))
+
+    client = editor_app.app.test_client()
+    resp = client.get("/api/downloads")
+    assert resp.status_code == 200
+    files = resp.get_json()["files"]
+    assert files == ["downloads/alpha.pdf", "downloads/Zed.pdf"]
+
+
 def test_clear_downloads_only_configured_folder(monkeypatch, tmp_path):
     monkeypatch.setattr(editor_config, "CONFIG_PATH", tmp_path / "editor_config.json")
     monkeypatch.setattr(editor_config, "repo_root", lambda: tmp_path)
