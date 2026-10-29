@@ -31,6 +31,8 @@ Quality Updates **저장소 운영·개발·Agent**용 문서 목록입니다.
 |------|------|
 | [quarterly-operations-guide.md](quarterly-operations-guide.md) | **분기 파이프라인** — Agent/HITL, Phase 1~5, 품질 게이트 |
 | [editor-curation-workflow.md](editor-curation-workflow.md) | **편집기** — 마커, skip, prepare_deploy |
+| [curation-rules.md](curation-rules.md) | **큐레이션 규칙** — 스킵·링크만·요약·출처 제안. 편집기를 대체하지 않음 |
+| [curation-backtest.md](curation-backtest.md) | 위 규칙의 과거 분기 일치도 |
 
 README·CONTRIBUTING·AGENTS.md의 운영·큐레이션 요약은 위 문서를 정본으로 한다.
 

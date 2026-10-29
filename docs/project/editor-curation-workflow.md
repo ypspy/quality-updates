@@ -33,9 +33,16 @@
 - MkDocs 기본 동작만으로는 **`<!-- skip -->` 줄은 HTML 주석으로 렌더에 안 보이지만**, **위 링크 불릿 한 줄은 그대로 사이트에 노출**된다.
 - **배포본에서 항목까지 없애려면** SKILL·에이전트 패스에서 **링크 줄 + `<!-- skip -->` 줄**을 함께 제거하거나, 마크다운에서 링크 줄을 직접 삭제한다.
 
+## 자동 제안 (편집기를 대신하지 않음)
+
+`python scripts/auto_curate.py <분기.md>` 는 같은 마커(`<!-- skip -->`, `<!-- no_summary -->`, `<!-- source: type|ref -->`)를 **표준출력으로만** 제안한다. 분기 파일을 고치지 않고, 편집기 저장·상태 순환도 바꾸지 않는다. 제안의 `pending` 은 원문 파일을 아직 모른다는 뜻이라, 사람이 편집기에서 PDF·화면 캡처로 바꾼다.
+
+규칙과 한계: [curation-rules.md](curation-rules.md). 과거 분기와의 일치도: [curation-backtest.md](curation-backtest.md).
+
 ## 관련 코드
 
 - 진입점: `scripts/editor.py`
+- 제안만: `scripts/auto_curate.py` (파일 미수정)
 - 앱: `scripts/editor/app.py`, 정적: `scripts/editor/static/editor.{js,css}`, 템플릿: `scripts/editor/templates/index.html`
 - 파서·저장: `scripts/editor/parser.py`, `scripts/editor/saver.py`
 - 테스트: `scripts/tests/test_preview_endpoint.py` 등
