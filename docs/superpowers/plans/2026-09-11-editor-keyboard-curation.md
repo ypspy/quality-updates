@@ -46,12 +46,14 @@
 ### Task 1: 다운로드 목록 mtime 최신순
 
 **Files:**
+
 - Modify: `scripts/editor/routes/files.py`
 - Modify: `scripts/tests/test_downloads_folder_policy.py`
 - Modify: `scripts/editor/static/editor.js` (`filterAndSortPdfPaths`)
 - Test: `scripts/tests/test_downloads_folder_policy.py`
 
 **Interfaces:**
+
 - Consumes: `GET /api/downloads` → `{ "files": list[str], "folder_exists": bool }`
 - Produces: `files`는 `st_mtime` 내림차순. `filterAndSortPdfPaths(paths, rawQuery)`는 검색어가 있으면 원배열 순서를 유지한 채 파일명 부분일치만 남긴다.
 
@@ -165,12 +167,14 @@ git commit -m "fix(editor): list downloads newest-first by mtime"
 ### Task 2: 미리보기 첨부 링크를 save_fetched로 rewrite
 
 **Files:**
+
 - Modify: `scripts/editor/download_helpers.py`
 - Modify: `scripts/editor/html_sanitize.py`
 - Modify: `scripts/tests/test_html_sanitize.py`
 - Test: `scripts/tests/test_html_sanitize.py`
 
 **Interfaces:**
+
 - Consumes: `sanitize_html_for_web_preview(html: str, base_url: str) -> str`
 - Produces: `url_looks_like_attachment(url: str) -> bool`. 참이면 첨부 href는 `/api/source/save_fetched?url=…`, 아니면 기존 `/api/source/preview?url=…`.
 
@@ -290,11 +294,13 @@ git commit -m "fix(editor): rewrite preview file links to save_fetched"
 ### Task 3: 저장 후 미리보기 유지와 토스트 2.5초
 
 **Files:**
+
 - Modify: `scripts/editor/static/editor.js`
 - Modify: `scripts/editor/templates/index.html`
 - Test: 없음 (JS). 회귀: `cd scripts && python -m pytest tests/test_preview_endpoint.py tests/test_html_sanitize.py -q`
 
 **Interfaces:**
+
 - Consumes: iframe 클릭 위임 `onIframeSaveLinkClick`, `runSaveByPath(path, opts)`, `showToast`, `postMessage` `quality-updates-fetch-save`
 - Produces: `lastGoodPreviewSrc` (string). 저장 성공 시 iframe을 `about:blank`로 바꾸지 않음. stub 로드 시 `lastGoodPreviewSrc`로 복구. 토스트 `2500ms`. 캡쳐 성공/실패는 `alert` 대신 `showToast`.
 
@@ -423,11 +429,13 @@ git commit -m "fix(editor): keep preview HTML after attachment save"
 ### Task 4: 행 모드 키보드 (↑↓ Enter Space ←→)
 
 **Files:**
+
 - Modify: `scripts/editor/static/editor.js`
 - Modify: `scripts/editor/static/editor.css`
 - Test: 없음 (JS). 회귀: `cd scripts && python -m pytest tests/ -q`
 
 **Interfaces:**
+
 - Consumes: `linksData`, `cycleState(idx)`, `openPreview(url)`, `sourceKind(link)`
 - Produces: `selectedIdx: number`, `selectedLineIndex: number|null`, `uiMode: 'row'|'source-edit'` (이 태스크에서는 `'row'`만 사용). `moveSelection(delta)`, `cycleSourcePanel(idx, delta)`, `applyRowTabStops()`, `restoreSelectionAfterRender()`. 좌우는 `sourcePanel`만 변경.
 
@@ -619,10 +627,12 @@ git commit -m "feat(editor): row-mode arrow keys for curation"
 ### Task 5: 출처 편집 모드 (Tab / Esc)
 
 **Files:**
+
 - Modify: `scripts/editor/static/editor.js`
 - Test: 없음 (JS). 회귀: `cd scripts && python -m pytest tests/ -q`
 
 **Interfaces:**
+
 - Consumes: Task 4의 `uiMode`, `selectedIdx`, `applyRowTabStops`, `selectRow`
 - Produces: `enterSourceEdit() -> boolean`, `exitSourceEdit()`. Tab은 선택 행 활성 패널 첫 컨트롤로. Esc는 피커가 열려 있으면 닫기만, 아니면 행 모드. 출처 편집 중 ↑↓는 행 이동에 쓰지 않음 (`onEditorKeyDown`이 `uiMode === 'source-edit'`에서 return).
 
@@ -787,11 +797,13 @@ git commit -m "feat(editor): Tab/Esc source-edit mode for link rows"
 ### Task 6: 워크플로 문서와 spec 상태
 
 **Files:**
+
 - Modify: `docs/project/editor-curation-workflow.md`
 - Modify: `docs/superpowers/specs/2026-09-11-editor-keyboard-curation-design.md`
 - Modify: `docs/superpowers/README.md`
 
 **Interfaces:**
+
 - Consumes: 구현된 키맵·토스트 2.5초·mtime 목록
 - Produces: HITL 문서에 키보드 절. spec 상태 `승인됨`. Plans 색인 행.
 

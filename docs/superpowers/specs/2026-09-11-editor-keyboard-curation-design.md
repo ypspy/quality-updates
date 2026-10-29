@@ -203,7 +203,7 @@ KASB `kasb_file` 등은 클릭을 가로채 JSON 저장하는 길이 있으나, 
 
 ## 8. 변경 파일 (예상)
 
-```
+```text
 scripts/editor/static/editor.js
 scripts/editor/static/editor.css          # 선택 행 강조
 scripts/editor/templates/index.html      # iframe tabindex 등 최소

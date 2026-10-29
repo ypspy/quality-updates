@@ -141,7 +141,7 @@ AGENTS.md 보완 기획 템플릿(A–D)과 writer 스킬은 유지한다.
 
 ## 6. 구현 순서 (plan 작성용)
 
-```
+```text
 P1  audit-regulatory-lens 디렉터리 삭제 + AGENTS/README/docs/project 렌즈 참조 제거
 P2  소비 정본·인용 계약·Hosted 부착을 README/AGENTS/quarterly-operations에 반영
 P3  FastMCP instructions 갱신 + mcp-corpus plan follow-up 취소 + superpowers 색인

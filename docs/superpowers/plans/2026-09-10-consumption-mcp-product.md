@@ -43,10 +43,12 @@
 ### Task 1: 소비 계약 회귀 테스트 (실패 확인)
 
 **Files:**
+
 - Create: `scripts/tests/test_consumption_contract.py`
 - Test: `scripts/tests/test_consumption_contract.py`
 
 **Interfaces:**
+
 - Consumes: 없음
 - Produces: `REPO_ROOT = Path(__file__).resolve().parents[2]`. 이후 태스크가 맞출 문자열: `CITATION_INSTRUCTIONS` in `scripts/mcp_server/app.py` (Task 3에서 생성). 본 태스크는 `app.py`를 수정하지 않는다.
 
@@ -135,6 +137,7 @@ git commit -m "test: add consumption contract regression (lens off, MCP cite)"
 ### Task 2: 렌즈 삭제와 런타임 라우팅
 
 **Files:**
+
 - Delete: `.claude/skills/audit-regulatory-lens/SKILL.md`
 - Delete: `.claude/skills/audit-regulatory-lens/reference/keywords.md`
 - Delete: `.claude/skills/audit-regulatory-lens/reference/output-samples.md`
@@ -142,6 +145,7 @@ git commit -m "test: add consumption contract regression (lens off, MCP cite)"
 - Modify: `docs/project/README.md`
 
 **Interfaces:**
+
 - Consumes: Task 1 needles `LENS_DIR`, `LENS_PATH_NEEDLE`
 - Produces: 런타임 진입점에 렌즈 경로 없음. `AGENTS.md` MCP 행이 다른 Agent 읽기 전용 소비를 가리킴.
 
@@ -191,7 +195,8 @@ python scripts/validate_content.py --strict
 python scripts/export_corpus.py --strict
 mkdocs build --strict
 ```
-```
+
+```text
 
 Leave templates A–D and the writer routing row unchanged.
 
@@ -243,11 +248,13 @@ git commit -m "remove audit-regulatory-lens skill from runtime routing"
 ### Task 3: README 인용 계약, Phase 5 export, FastMCP instructions
 
 **Files:**
+
 - Modify: `README.md` (MCP 절, lines around 300–320)
 - Modify: `docs/project/quarterly-operations-guide.md`
 - Modify: `scripts/mcp_server/app.py`
 
 **Interfaces:**
+
 - Consumes: Task 1 tests `test_readme_has_citation_contract_and_hosted_attach`, `test_quarterly_ops_export_corpus_strict`, `test_fastmcp_citation_instructions`, `test_runtime_docs_do_not_route_to_lens`
 - Produces: `mcp_server.app.CITATION_INSTRUCTIONS: str` — FastMCP `instructions=` 인자로 전달되는 모듈 상수
 
@@ -290,7 +297,8 @@ python scripts/mcp_server/stdio.py
 ```
 
 설계: [docs/superpowers/specs/2026-06-27-mcp-corpus-design.md](docs/superpowers/specs/2026-06-27-mcp-corpus-design.md) · [소비 제품 spec](docs/superpowers/specs/2026-09-10-consumption-mcp-product-design.md)
-```
+
+```text
 
 Do not mention `audit-regulatory-lens` in `README.md`.
 
@@ -414,11 +422,13 @@ git commit -m "docs: MCP citation contract and Phase 5 corpus export"
 ### Task 4: 이력 표기, spec 상태, 전체 게이트
 
 **Files:**
+
 - Modify: `docs/superpowers/plans/2026-06-27-mcp-corpus.md`
 - Modify: `docs/superpowers/README.md`
 - Modify: `docs/superpowers/specs/2026-09-10-consumption-mcp-product-design.md`
 
 **Interfaces:**
+
 - Consumes: Task 1–3 완료 상태
 - Produces: 렌즈 MCP follow-up 취소, plan 색인, spec `상태: 승인됨`
 

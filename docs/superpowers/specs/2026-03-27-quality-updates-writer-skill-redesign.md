@@ -49,7 +49,7 @@
 
 ## 파일 구조 (새 SKILL.md)
 
-```
+```text
 [블록 1] Frontmatter + RIGID 선언 + Gold standard 기준 파일
 [블록 2] 세션 시작 의식
          - Announce 텍스트
@@ -141,6 +141,7 @@ digraph quality_updates {
 ### SUMMARIZE
 
 **STEP 1 — Phase 0: 소스 경로 결정**
+
 - TaskUpdate: in_progress
 - 우선순위 표로 PDF/WEB/CLIP 소스 경로 결정
 - PDF: `scripts/pdf_path.txt` 저장 → `extract_pdf.py` 실행
@@ -148,6 +149,7 @@ digraph quality_updates {
 - TaskUpdate: completed
 
 **STEP 2 — Phase 1: 링크별 요약 블록 생성** (링크마다 반복)
+
 - TaskUpdate: in_progress (링크별 개별 태스크)
 - 요약 대상 여부 판단 → REFERENCE C 참조
 - `!!!` / `???` 블록 생성 → REFERENCE A, B 참조
@@ -156,6 +158,7 @@ digraph quality_updates {
 - TaskUpdate: completed
 
 **STEP 3 — Phase 2: 분기 요약 생성**
+
 - TaskUpdate: in_progress
 - Executive Summary (음/슴체, 3~5문장, 불릿 금지) → REFERENCE F 참조
 - 기관별 요약 (`!!! success` + 탭 구조) → REFERENCE F 참조
@@ -165,30 +168,36 @@ digraph quality_updates {
 ### BOILERPLATE
 
 **STEP 1 — 연도·분기 확인**
+
 - 사용자 요청에서 대상 연도 추출
 - `docs/quality-updates/{연도}/` 내 기존 파일 목록 확인
 - 없는 분기만 생성 대상으로 설정
 
 **STEP 2 — 분기 파일 생성** (없는 분기마다 반복)
+
 - TaskCreate: "Q{N} 파일 생성"
 - YAML frontmatter + 플레이스홀더 구조 생성
 - 기존 파일 덮어쓰기 절대 금지
 
 **STEP 3 — 완료 검증**
+
 - 생성된 파일 경로 목록 출력
 
 ### SKIP_REMOVAL
 
 **STEP 1 — 대상 파일 스캔**
+
 - `docs/quality-updates/**/*.md`에서 skip 쌍 탐색
 - Appendix A 구역은 스캔 제외
 
 **STEP 2 — 삭제 실행**
+
 - 링크 줄 + `<!-- skip -->` 줄 쌍 삭제
 - 미결정 링크(skip 없음)는 보존
 - 앞뒤 빈 줄 정리
 
 **STEP 3 — 완료 검증**
+
 - Appendix A 원본 링크 보존 확인
 
 ---
@@ -214,6 +223,7 @@ digraph quality_updates {
 완료 전 TaskCreate로 생성되는 항목:
 
 ### SUMMARIZE 유형
+
 - [ ] 유효한 MkDocs 마크다운 (admonition 중첩, 들여쓰기 4칸)
 - [ ] 요약 블록 내 URL 없음
 - [ ] `!!!` / `???` 선택이 길이·유형에 적합
@@ -228,11 +238,13 @@ digraph quality_updates {
 - [ ] Appendix A 파일 말미 배치, 원본 링크 보존
 
 ### BOILERPLATE 유형
+
 - [ ] 기존 파일 덮어쓰기 없음
 - [ ] YAML frontmatter 완전 작성 (period_label, agencies 포함)
 - [ ] 4개 기관 섹션 헤더 완전 포함
 
 ### SKIP_REMOVAL 유형
+
 - [ ] Appendix A 구역 링크 삭제 없음
 - [ ] 미결정 링크(skip 없음) 보존
 - [ ] 삭제 전후 빈 줄 정리 완료

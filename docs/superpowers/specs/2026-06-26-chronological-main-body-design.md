@@ -47,7 +47,7 @@
 
 ### 변경 파일
 
-```
+```text
 scripts/crawler/
 ├── unified.py           # sort_* 헬퍼, collect_* 본문만 정렬
 └── KICPA_Standards.py   # 역순 sort 제거
@@ -67,7 +67,7 @@ docs/quality-updates/2026/2026-01-01_to_2026-03-31.md  # 1회 reorder
 
 ### 데이터 흐름
 
-```
+```text
 crawl.py
   → agency modules (최신순 수집)
   → APPENDIX dict (수집 순 그대로)

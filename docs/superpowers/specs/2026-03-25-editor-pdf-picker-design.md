@@ -214,4 +214,3 @@ PDF 선택 UX 가속을 위해 최근 목록을 제공한다.
 - `scripts/editor/static/editor.js`
 - `scripts/editor/static/editor.css`
 - `scripts/editor/app.py`
-

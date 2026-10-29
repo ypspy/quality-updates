@@ -15,6 +15,7 @@
 **목적**: 분기별 운영 파이프라인을 단일 저장소에서 end-to-end로 실행 가능하게 하고, 품질 게이트(CI·validate·pytest)와 배포 전처리를 자동화하며, 편집기 유지보수성을 높인다.
 
 **범위 외 (이번 릴리스)**:
+
 - 콘텐츠 백필 (2023 Q2, 2024 Q1·Q2 gold standard화)
 - fss-review·홈 “추가 예정” 정리
 - mkdocs nav/index **자동 적용** (diff 힌트만 제공)
@@ -108,7 +109,7 @@ python scripts/prepare_deploy.py docs/quality-updates/2025/2025-10-01_to_2025-12
 
 ### 목표 구조
 
-```
+```text
 scripts/editor/
   app.py              # create_app(), blueprint 등록 (~80줄)
   config.py           # load/save config, repo_root, downloads policy

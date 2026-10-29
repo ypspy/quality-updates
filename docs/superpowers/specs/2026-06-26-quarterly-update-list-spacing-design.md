@@ -57,7 +57,7 @@ Material for MkDocs 기본값:
 
 ### 아키텍처
 
-```
+```text
 마크다운 (변경 없음)
     → MkDocs/Material 렌더
     → extra.js: 분기 문서 URL이면 article에 .quarterly-update

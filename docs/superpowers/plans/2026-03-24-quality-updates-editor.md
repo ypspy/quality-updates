@@ -17,6 +17,7 @@
 ### Task 1: 프로젝트 스캐폴드
 
 **Files:**
+
 - Modify: `requirements.txt`
 - Create: `scripts/editor/__init__.py`
 - Create: `scripts/editor/templates/index.html` (빈 플레이스홀더)
@@ -26,7 +27,8 @@
 - [ ] **Step 1: requirements.txt에 flask 추가**
 
 `requirements.txt` 끝에 추가:
-```
+
+```text
 flask>=3.0
 ```
 
@@ -46,6 +48,7 @@ echo "" > scripts/editor/static/editor.css
 pip install flask
 python -c "import flask; print(flask.__version__)"
 ```
+
 Expected: 버전 출력 (3.x)
 
 - [ ] **Step 4: 커밋**
@@ -60,10 +63,12 @@ git commit -m "chore: scaffold quality-updates editor structure"
 ### Task 2: .md 파서
 
 **Files:**
+
 - Create: `scripts/editor/parser.py`
 - Create: `scripts/tests/test_parser.py`
 
 #### 파서 스펙 요약
+
 - 링크 패턴: `- (YY-MM-DD) [제목](URL)` (들여쓰기 허용)
 - `## Appendix` 헤더 이후 라인 무시
 - 각 링크 다음 줄 주석으로 상태 복원:
@@ -76,6 +81,7 @@ git commit -m "chore: scaffold quality-updates editor structure"
 - [ ] **Step 1: 실패하는 테스트 작성**
 
 `scripts/tests/test_parser.py`:
+
 ```python
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
@@ -173,11 +179,13 @@ def test_line_index():
 cd /c/Users/yoont/source/03_Development/audit-quality/quality-updates
 python -m pytest scripts/tests/test_parser.py -v
 ```
+
 Expected: `ImportError` 또는 `ModuleNotFoundError`
 
 - [ ] **Step 3: parser.py 구현**
 
 `scripts/editor/parser.py`:
+
 ```python
 # -*- coding: utf-8 -*-
 """Parse quality-updates .md files to extract link items."""
@@ -275,6 +283,7 @@ def parse_links(content: str) -> list[dict]:
 ```bash
 python -m pytest scripts/tests/test_parser.py -v
 ```
+
 Expected: 8개 모두 PASS
 
 - [ ] **Step 5: 커밋**
@@ -289,10 +298,12 @@ git commit -m "feat(editor): add .md link parser with Appendix boundary"
 ### Task 3: .md 저장 로직
 
 **Files:**
+
 - Create: `scripts/editor/saver.py`
 - Create: `scripts/tests/test_saver.py`
 
 #### 저장 전략
+
 - 원본 텍스트를 라인 단위로 순회
 - Appendix 이전까지만 주석 삽입/삭제
 - 기존 `<!-- skip -->` / `<!-- pdf: ... -->` 제거 후 새 상태에 맞게 재삽입
@@ -302,6 +313,7 @@ git commit -m "feat(editor): add .md link parser with Appendix boundary"
 - [ ] **Step 1: 실패하는 테스트 작성**
 
 `scripts/tests/test_saver.py`:
+
 ```python
 import sys, os, tempfile, shutil
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
@@ -388,11 +400,13 @@ def test_bak_created(tmp_path):
 ```bash
 python -m pytest scripts/tests/test_saver.py -v
 ```
+
 Expected: `ImportError`
 
 - [ ] **Step 3: saver.py 구현**
 
 `scripts/editor/saver.py`:
+
 ```python
 # -*- coding: utf-8 -*-
 """Apply curation results to .md file content."""
@@ -483,6 +497,7 @@ def save_with_backup(file_path: str, original_content: str, curation: list[dict]
 ```bash
 python -m pytest scripts/tests/test_saver.py -v
 ```
+
 Expected: 7개 모두 PASS
 
 - [ ] **Step 5: 커밋**
@@ -499,12 +514,14 @@ git commit -m "feat(editor): add .md curation saver with bak backup"
 ### Task 4: Flask 앱
 
 **Files:**
+
 - Create: `scripts/editor.py` (진입점)
 - Create: `scripts/editor/app.py` (Flask routes)
 
 - [ ] **Step 1: app.py 구현**
 
 `scripts/editor/app.py`:
+
 ```python
 # -*- coding: utf-8 -*-
 """Flask routes for the quality-updates editor."""
@@ -621,6 +638,7 @@ def config():
 - [ ] **Step 2: editor.py 진입점 작성**
 
 `scripts/editor.py`:
+
 ```python
 # -*- coding: utf-8 -*-
 """Entry point: python scripts/editor.py"""
@@ -647,7 +665,9 @@ if __name__ == '__main__':
 cd /c/Users/yoont/source/03_Development/audit-quality/quality-updates
 python scripts/editor.py
 ```
+
 Expected:
+
 - 브라우저가 `http://localhost:5000`으로 열림
 - `http://localhost:5000/api/files` → JSON 배열 반환
 - `http://localhost:5000/api/config` → `{"downloads_folder": "downloads/", "last_file": ""}` 반환
@@ -664,6 +684,7 @@ git commit -m "feat(editor): add Flask app with API routes"
 ### Task 5: 프론트엔드 UI
 
 **Files:**
+
 - Modify: `scripts/editor/templates/index.html`
 - Modify: `scripts/editor/static/editor.js`
 - Modify: `scripts/editor/static/editor.css`
@@ -671,6 +692,7 @@ git commit -m "feat(editor): add Flask app with API routes"
 - [ ] **Step 1: index.html 작성**
 
 `scripts/editor/templates/index.html`:
+
 ```html
 <!DOCTYPE html>
 <html lang="ko">
@@ -737,6 +759,7 @@ git commit -m "feat(editor): add Flask app with API routes"
 - [ ] **Step 2: editor.css 작성**
 
 `scripts/editor/static/editor.css`:
+
 ```css
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Noto Sans KR', sans-serif; font-size: 13px; height: 100vh; display: flex; flex-direction: column; }
@@ -782,6 +805,7 @@ tr.state-done td { color: #888; font-style: italic; }
 - [ ] **Step 3: editor.js 작성**
 
 `scripts/editor/static/editor.js`:
+
 ```javascript
 /* Quality Updates Editor — main JS */
 (function () {
@@ -1063,6 +1087,7 @@ python scripts/editor.py
 ```
 
 확인 항목:
+
 1. 브라우저가 열리고 파일 드롭다운에 `.md` 파일이 표시됨
 2. 파일 선택 시 링크 테이블이 기관별 섹션으로 표시됨
 3. 상태 배지 클릭 시 미결정→요약 필요→스킵→미결정 순환
@@ -1083,6 +1108,7 @@ git commit -m "feat(editor): add frontend UI with split pane and state managemen
 ### Task 6: 마무리 및 문서화
 
 **Files:**
+
 - Modify: `README.md` (에디터 사용법 섹션 추가)
 
 - [ ] **Step 1: README에 에디터 실행 방법 추가**
@@ -1102,13 +1128,15 @@ python scripts/editor.py
 - 파일 선택 → 링크 목록에서 요약 필요 / 스킵 결정
 - PDF 다운로드 후 드롭다운에서 연결
 - 저장 → Claude Code에서 SKILL.md Phase 0·1 수행
-```
+
+```text
 
 - [ ] **Step 2: 전체 테스트 재실행**
 
 ```bash
 python -m pytest scripts/tests/ -v
 ```
+
 Expected: 모든 테스트 PASS
 
 - [ ] **Step 3: 최종 커밋**

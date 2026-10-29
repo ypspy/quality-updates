@@ -28,6 +28,7 @@
 ### Task 1: SKILL.md 골격
 
 **Files:**
+
 - Create: `.claude/skills/audit-regulatory-lens/SKILL.md`
 
 - [ ] **Step 1:** Front matter
@@ -60,6 +61,7 @@ description: 감사 Planning·Execution·Reporting(품질검토 포함) 단계�
 ### Task 2: 3모드 출력 스키마 (SKILL.md 본문)
 
 **Files:**
+
 - Modify: `.claude/skills/audit-regulatory-lens/SKILL.md`
 
 - [ ] **Step 1:** PLANNING — 출력 스키마 + 추가 brief + retrieve 초점 + 체크list 최소 5항 가이드 (spec §3.1)
@@ -75,6 +77,7 @@ description: 감사 Planning·Execution·Reporting(품질검토 포함) 단계�
 ### Task 3: reference/keywords.md
 
 **Files:**
+
 - Create: `.claude/skills/audit-regulatory-lens/reference/keywords.md`
 
 - [ ] **Step 1:** 표 작성 (최소 12행)
@@ -93,6 +96,7 @@ description: 감사 Planning·Execution·Reporting(품질검토 포함) 단계�
 ### Task 4: reference/output-samples.md
 
 **Files:**
+
 - Create: `.claude/skills/audit-regulatory-lens/reference/output-samples.md`
 
 - [ ] **Step 1:** PLANNING 예시 1블록 — `2026-01-01_to_2026-03-31.md` 운영계획 note 인용 (실 URL)
@@ -108,6 +112,7 @@ description: 감사 Planning·Execution·Reporting(품질검토 포함) 단계�
 ### Task 5: AGENTS.md · docs/project/README.md
 
 **Files:**
+
 - Modify: `AGENTS.md`
 - Modify: `docs/project/README.md`
 

@@ -236,7 +236,7 @@ period_label: YYYY-QN
 
 ## 구현 순서
 
-```
+```text
 P1  strip_phase2_summaries.py + 12개 분기 백필
 P2  validate_content Phase 2 금지 + pytest
 P3  quality-updates-writer SKILL.md 개정

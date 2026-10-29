@@ -40,11 +40,13 @@
 ### Task 1: `gold-excerpts.md` 큐레이션
 
 **Files:**
+
 - Create: `.claude/skills/quality-updates-writer/reference/gold-excerpts.md`
 - Read: `docs/quality-updates/2023/2023-04-01_to_2023-06-30.md`
 - Read: `docs/quality-updates/2025/2025-10-01_to_2025-12-31.md`
 
 **Interfaces:**
+
 - Produces: 파일 내 `### Excerpt N — …` 블록 8–12개, 각 블록에 `source:` 경로와 대략 줄 번호
 
 - [ ] **Step 1: reference 디렉터리 생성**
@@ -96,7 +98,8 @@ New-Item -ItemType Directory -Force -Path .claude/skills/quality-updates-writer/
 ```markdown
 <원문 그대로>
 ```
-```
+
+```text
 
 (내부 펜스 충돌 시 Excerpt 본문은 4-backtick fence 사용.)
 
@@ -128,9 +131,11 @@ EOF
 ### Task 2: 체크리스트 파일
 
 **Files:**
+
 - Create: `.claude/skills/quality-updates-writer/reference/gold-excerpts-checklist.md`
 
 **Interfaces:**
+
 - Consumes: Task 1 Excerpt IDs
 - Produces: 커버리지 표 + 게이트 3축 표 (빈 결과열)
 
@@ -161,10 +166,12 @@ EOF
 ### Task 3: SKILL.md Dual 모드
 
 **Files:**
+
 - Modify: `.claude/skills/quality-updates-writer/SKILL.md`
 - Modify: `docs/superpowers/specs/2026-07-23-summarize-slim-design.md` (상태 → Dual 구현)
 
 **Interfaces:**
+
 - Consumes: `reference/gold-excerpts.md` 경로
 - Produces: SUMMARIZE가 Dual 규칙으로 동작
 
@@ -245,12 +252,14 @@ EOF
 ### Task 4: 품질 게이트 대조 (스크래치)
 
 **Files:**
+
 - Read: 경제성 스펙 §9.2 표본 `#1 #2 #5` 및 해당 `downloads/` pdf
 - Write (untracked OK): `.superpowers/sdd/slim-gate-drafts.md`
 - Modify: `reference/gold-excerpts-checklist.md` Gate runs
 - Modify: `docs/superpowers/specs/2026-07-23-summarize-slim-design.md` §8
 
 **Interfaces:**
+
 - Consumes: Dual SKILL rules
 - Produces: §8 채워진 표; Pass/Fail 판정
 
@@ -269,6 +278,7 @@ EOF
 (a) legacy: 발췌 대신 전문 gold 규칙을 **가정**한 초안 (실제 전문 2파일 전부 읽지 말고, “구규칙 의도”로 동일 원문·동일 REFERENCE로 초안 — **공정 비교를 위해 원문·윈도우는 (b)와 동일**하게 맞출 것; 차이는 스타일 앵커만 excerpts vs 기억/발췌).
 
 실용적 공정 비교 (컨트롤러 해석):
+
 - **공통:** 동일 pdf extract, 동일 ±80줄 md 윈도우, 동일 REFERENCE 온디맨드
 - **차이:** (a)는 Excerpt 대신 gold 파일에서 **해당 유형 유사 note 1–2개만** 추가 참조; (b)는 `gold-excerpts`만
 
@@ -296,6 +306,7 @@ EOF
 ### Task 5: Excerpt-only 전환 + 문서 1줄
 
 **Files:**
+
 - Modify: `.claude/skills/quality-updates-writer/SKILL.md`
 - Modify: `docs/superpowers/specs/2026-07-23-summarize-slim-design.md`
 - Modify: `AGENTS.md` (권장)

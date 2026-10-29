@@ -9,6 +9,7 @@
 **Tech Stack:** Python 3.11, Flask, pytest, MkDocs, argparse, PyYAML (front matter), 기존 requests/bs4/lxml
 
 **Specs:**
+
 - `docs/superpowers/specs/2026-06-25-platform-hardening-design.md`
 - `docs/superpowers/specs/2026-06-25-crawler-integration-design.md` (P1)
 
@@ -43,6 +44,7 @@
 ### Task P1-1: crawler 패키지 스캐폴드
 
 **Files:**
+
 - Create: `scripts/crawler/__init__.py`
 - Create: `scripts/crawler/unified.py` (from `quality-updates-crawler/unified_crawler.py`)
 - Copy: `quality-updates-crawler/crawlers/*.py` → `scripts/crawler/`
@@ -87,6 +89,7 @@ git commit -m "feat(crawler): move crawler modules into scripts/crawler"
 ### Task P1-2: crawl.py CLI
 
 **Files:**
+
 - Create: `scripts/crawl.py`
 - Create: `scripts/tests/test_crawl.py`
 
@@ -146,6 +149,7 @@ def main():
 ```
 
 argparse 규칙:
+
 - `--year` + `--quarter` 또는 `--start` + `--end`
 - 둘 다 없으면 `date.today()` 기준 현재 분기
 - `--year`만 있으면 exit 2
@@ -158,7 +162,7 @@ cd scripts && python -m pytest tests/test_crawl.py -v
 
 - [ ] **Step 5: requirements.txt에 lxml, python-dateutil 추가**
 
-```
+```text
 lxml>=5.1.0
 python-dateutil>=2.8.2
 ```
@@ -175,6 +179,7 @@ git commit -m "feat(crawler): add crawl.py CLI with quarter dates and skip-if-ex
 ### Task P1-3: 정리 및 문서 (P1)
 
 **Files:**
+
 - Delete: `quality-updates-crawler/` (전체)
 - Modify: `README.md`, `CONTRIBUTING.md`, `package.json`
 - Modify: `.claude/skills/quality-updates-writer/SKILL.md` (BOILERPLATE 절)
@@ -219,6 +224,7 @@ git commit -m "chore(crawler): remove nested repo, document crawl CLI"
 ### Task P2-1: validate 이슈 스캔 및 수정
 
 **Files:**
+
 - Modify: `docs/quality-updates/**/*.md` (포맷만)
 - Modify: `scripts/validate_content.py` (필요 시)
 
@@ -253,6 +259,7 @@ git commit -m "fix(docs): satisfy validate_content --strict"
 ### Task P2-2: CI workflow 갱신
 
 **Files:**
+
 - Modify: `.github/workflows/ci.yml`
 - Modify: `package.json`
 
@@ -311,6 +318,7 @@ git commit -m "ci: add pytest job, enforce validate_content --strict"
 ### Task P3-1: skip_removal 모듈
 
 **Files:**
+
 - Create: `scripts/skip_removal.py`
 - Create: `scripts/tests/test_skip_removal.py`
 
@@ -351,6 +359,7 @@ git commit -m "feat(deploy): add skip pair removal for prepare_deploy"
 ### Task P3-2: deploy_hints 모듈
 
 **Files:**
+
 - Create: `scripts/deploy_hints.py`
 - Create: `scripts/tests/test_deploy_hints.py`
 
@@ -382,6 +391,7 @@ git commit -m "feat(deploy): add mkdocs nav and index diff hints"
 ### Task P3-3: prepare_deploy CLI
 
 **Files:**
+
 - Create: `scripts/prepare_deploy.py`
 - Modify: `README.md`, `CONTRIBUTING.md`, `docs/editor-curation-workflow.md`
 - Modify: `.claude/skills/quality-updates-writer/SKILL.md`
@@ -425,6 +435,7 @@ git commit -m "feat(deploy): add prepare_deploy orchestration and docs"
 ### Task P4-1: config·helpers 추출
 
 **Files:**
+
 - Create: `scripts/editor/config.py`
 - Create: `scripts/editor/download_helpers.py`
 - Create: `scripts/editor/preview_helpers.py`
@@ -462,6 +473,7 @@ git commit -m "refactor(editor): extract config and helper modules from app.py"
 ### Task P4-2: Blueprint 라우트 분리
 
 **Files:**
+
 - Create: `scripts/editor/routes/__init__.py`
 - Create: `scripts/editor/routes/pages.py`
 - Create: `scripts/editor/routes/files.py`
