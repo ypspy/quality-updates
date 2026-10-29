@@ -8,6 +8,11 @@ updates:
       pip:
         patterns:
           - "*"
+    # mcp 2.x removed mcp.server.fastmcp; stay on the 1.x line.
+    ignore:
+      - dependency-name: "mcp"
+        update-types:
+          - "version-update:semver-major"
     labels:
       - dependencies
       - python
