@@ -37,6 +37,7 @@
 ### Task 1: 정적 규모 맵 (바이트·토큰)
 
 **Files:**
+
 - Read: `.claude/skills/quality-updates-writer/SKILL.md`
 - Read: `docs/quality-updates/2023/2023-04-01_to_2023-06-30.md`
 - Read: `docs/quality-updates/2025/2025-10-01_to_2025-12-31.md`
@@ -44,6 +45,7 @@
 - Modify: `docs/superpowers/specs/2026-07-23-summarize-economics-design.md` (§9.1에 측정 원숫자 메모 가능; 본 태스크는 표 초안 행까지)
 
 **Interfaces:**
+
 - Produces: `StaticSizes` — 각 경로의 `bytes`, `tok_div4 = bytes/4`, `tok_div3 = bytes/3` (정수 반올림)
 
 - [ ] **Step 1: 크기 측정 실행**
@@ -121,11 +123,13 @@ EOF
 ### Task 2: 2016 Q1 실측 링크 3~5건 선정 + 원문 크기
 
 **Files:**
+
 - Read: `docs/quality-updates/2016/2016-01-01_to_2016-03-31.md`
 - Run: `scripts/extract_pdf.py` (pdf 샘플)
 - Modify: 스펙 §9.2 링크 열 채움 (관측 열은 Task 3)
 
 **Interfaces:**
+
 - Consumes: Task 1 `StaticSizes`, 스펙 §3 선정 규칙
 - Produces: `SampleLinks[]` — 각 `{id, date, title_short, source_type, source_path, extract_bytes?}`
 
@@ -188,12 +192,14 @@ Expected: `pdf_extracted.txt` 생성; 길이를 SampleLinks.extract_bytes에 기
 ### Task 3: 현행 SUMMARIZE 짧은 실측 (관측 로그)
 
 **Files:**
+
 - Read: `.claude/skills/quality-updates-writer/SKILL.md` (SUMMARIZE Phase 0–1만)
 - Read: gold 2파일 — **스킬이 요구하는 대로** 실측 세션에서 읽을지 여부를 관측 기록 (전체 vs 발췌는 변경하지 말고, “실제로 무엇을 읽었는지”만 기록)
 - Modify: 스펙 §9.2 관측 열
 - Optional scratch: `docs/superpowers/specs/_summarize-economics-live-notes.md` (gitignore 대상 아님 — 쓰지 않거나 실측 후 삭제; **2016 md에 note를 쓰지 않는 것을 기본**)
 
 **Interfaces:**
+
 - Consumes: `SampleLinks[]`
 - Produces: 링크당 관측 문자열 (고정비 재발생 여부, 원문 토큰 체감, 실패/재시도)
 
@@ -237,10 +243,12 @@ Expected (기본): `0` (실측 전후 동일).
 ### Task 4: 백로그·판정·스펙 마감
 
 **Files:**
+
 - Modify: `docs/superpowers/specs/2026-07-23-summarize-economics-design.md` (§9.1 우선순위 확정, §9.3, §9.4)
 - Modify: `docs/superpowers/README.md` (Plans 행 — 아직 없으면 추가)
 
 **Interfaces:**
+
 - Consumes: §9.1·§9.2 채움 결과
 - Produces: §9.3 백로그 ≥1행(또는 “슬림 후보 없음” 명시), §9.4 세 줄 판정
 

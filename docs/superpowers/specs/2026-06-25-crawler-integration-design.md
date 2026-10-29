@@ -38,7 +38,7 @@
 
 ### 통합 후 디렉터리
 
-```
+```text
 quality-updates/
 ├── scripts/
 │   ├── crawl.py              # CLI 진입점 (신규)
@@ -64,7 +64,7 @@ quality-updates/
 
 ### 통합 후 파이프라인
 
-```
+```text
 python scripts/crawl.py --year YYYY --quarter N
     → docs/quality-updates/YYYY/YYYY-MM-DD_to_YYYY-MM-DD.md (신규만)
     → mkdocs.yml nav 수동 등록
@@ -146,10 +146,12 @@ python scripts/crawl.py --year 2026 --quarter 1 --dry-run
 
 - 사용자는 **저장소 루트**에서 `python scripts/crawl.py` 실행 (README·CONTRIBUTING 예시와 동일).
 - `scripts/crawl.py` 진입점:
+
   ```python
   sys.path.insert(0, os.path.dirname(__file__))  # scripts/ on path
   from crawler.unified import main  # scripts/crawler/ 패키지
   ```
+
 - 출력 경로는 `Path(__file__).resolve().parent.parent / "docs" / "quality-updates" / …` 로 **repo root 기준** 해석 (`scripts/editor/app.py`의 `repo_root()`와 동일: `scripts/`의 부모).
 
 ### Front matter (기존 유지)
@@ -204,7 +206,7 @@ generated_at: {END}
 
 `requirements.txt`에 추가:
 
-```
+```text
 lxml>=5.1.0
 python-dateutil>=2.8.2
 ```

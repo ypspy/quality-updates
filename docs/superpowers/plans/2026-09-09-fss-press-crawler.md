@@ -39,11 +39,13 @@
 ### Task 1: KRDS 픽스처와 실패하는 파서 테스트
 
 **Files:**
+
 - Create: `scripts/tests/fixtures/fss_press_list_krds.html`
 - Create: `scripts/tests/test_fss_press_list.py`
 - Test: `scripts/tests/test_fss_press_list.py`
 
 **Interfaces:**
+
 - Consumes: 없음
 - Produces: 테스트가 import할 `crawler.FSS.parse_press_list_html(html: str) -> list[dict]` (`title: str`, `href: str`, `posted_on: datetime`). 이 태스크에서는 함수를 아직 만들지 않는다.
 
@@ -172,10 +174,12 @@ git commit -m "Add failing tests for FSS KRDS press-list parser."
 ### Task 2: `parse_press_list_html` 구현
 
 **Files:**
+
 - Modify: `scripts/crawler/FSS.py` (보도자료 함수 바로 위, `fetch_press_release` 앞)
 - Test: `scripts/tests/test_fss_press_list.py`
 
 **Interfaces:**
+
 - Consumes: Task 1 픽스처 HTML과 테스트 시그니처
 - Produces: `parse_press_list_html(html: str) -> list[dict]` where each dict is `{"title": str, "href": str, "posted_on": datetime}`
 
@@ -229,6 +233,7 @@ git commit -m "Parse FSS press-list rows from KRDS table markup."
 ### Task 3: `fetch_press_release`가 헬퍼를 쓰게 연결
 
 **Files:**
+
 - Modify: `scripts/crawler/FSS.py` (`fetch_press_release`, 기존 약 22–72행)
 - Modify: `scripts/tests/test_fss_press_list.py`
 - Modify: `docs/superpowers/README.md` (Plans 표)
@@ -236,6 +241,7 @@ git commit -m "Parse FSS press-list rows from KRDS table markup."
 - Test: `scripts/tests/test_fss_press_list.py`
 
 **Interfaces:**
+
 - Consumes: `parse_press_list_html(html: str) -> list[dict]` from Task 2; module globals `session`, `START_DATE`, `END_DATE`, `start_dt`
 - Produces: `fetch_press_release(max_page=50) -> list[dict]` with each item `{"date": "yy-mm-dd", "title": str, "link": str}` (절대 URL). 헬퍼가 `[]`이면 페이지 루프 `break`. `posted_on < start_dt`이면 그때까지 결과 반환.
 

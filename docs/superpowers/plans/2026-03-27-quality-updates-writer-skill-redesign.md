@@ -24,6 +24,7 @@
 ## Task 1: 새 SKILL.md 작성 — 블록 1~3 (헤더·세션 시작·흐름도)
 
 **Files:**
+
 - Modify: `.claude/skills/quality-updates-writer/SKILL.md`
 
 - [ ] **Step 1: 현재 SKILL.md 읽기**
@@ -140,7 +141,8 @@ digraph quality_updates {
     "품질 검증" -> "완료";
 }
 ```
-```
+
+```text
 
 - [ ] **Step 3: 블록 1~3 자가 검토**
 
@@ -224,6 +226,7 @@ TaskUpdate → completed.
 - [ ] **Step 2: 블록 4 자가 검토**
 
 확인 항목:
+
 - Phase 0 우선순위 표가 현행 스킬과 동일한가
 - OCR fallback 4단계가 모두 포함되었는가
 - 링크 상태 코드 표가 현행 스킬 §큐레이션 편집기·링크 상태와 일치하는가
@@ -234,6 +237,7 @@ TaskUpdate → completed.
 ## Task 3: SKILL.md 작성 — 블록 5~6 (WORKFLOW — BOILERPLATE, SKIP_REMOVAL)
 
 **Files:**
+
 - Modify: `.claude/skills/quality-updates-writer/SKILL.md` (Task 2 이어서 추가)
 
 - [ ] **Step 1: Task 2의 내용 끝에 아래 섹션 추가**
@@ -406,6 +410,7 @@ tags:
 - [ ] **Step 2: 블록 5~6 자가 검토**
 
 확인 항목:
+
 - BOILERPLATE 필수 구조 템플릿에 YAML frontmatter 필드 누락 없는가 (period_label, agencies 등)
 - 4개 기관 섹션과 각 기관별 하위 헤더가 모두 포함되었는가
 - SKIP_REMOVAL STEP 3의 Appendix 보존 규칙이 현행 스킬과 동일한가
@@ -415,6 +420,7 @@ tags:
 ## Task 4: SKILL.md 작성 — 블록 7~13 (REFERENCE A-G)
 
 **Files:**
+
 - Modify: `.claude/skills/quality-updates-writer/SKILL.md` (Task 3 이어서 추가)
 
 - [ ] **Step 1: Task 3의 내용 끝에 아래 섹션 추가**
@@ -592,6 +598,7 @@ Type A/B 표와 **별도 링크**에 대해 `!!! note "주요 내용"` 작성. �
 - [ ] **Step 2: REFERENCE 블록 자가 검토**
 
 확인 항목:
+
 - REFERENCE A~G 레이블이 WORKFLOW 내 참조(→ REFERENCE A, B, C 등)와 일치하는가
 - Type A/B 표 스키마가 현행 스킬 §1.4와 동일한가
 - Phase 2 탭 구조(기관별 4개, 시사점 2개)가 현행 스킬과 동일한가
@@ -601,6 +608,7 @@ Type A/B 표와 **별도 링크**에 대해 `!!! note "주요 내용"` 작성. �
 ## Task 5: SKILL.md 작성 — 블록 14 (품질 검증 체크리스트) + 마무리
 
 **Files:**
+
 - Modify: `.claude/skills/quality-updates-writer/SKILL.md` (Task 4 이어서 추가)
 
 - [ ] **Step 1: Task 4의 내용 끝에 아래 섹션 추가**
@@ -654,6 +662,7 @@ Type A/B 표와 **별도 링크**에 대해 `!!! note "주요 내용"` 작성. �
 - [ ] **Step 2: 전체 SKILL.md 최종 자가 검토**
 
 확인 항목:
+
 - 파일이 Frontmatter로 시작하는가
 - RIGID 선언과 gold standard 경로가 상단에 있는가
 - 세션 시작 의식 (Announce → 유형 감지 → TaskCreate) 순서가 맞는가
@@ -678,6 +687,7 @@ git commit -m "feat(skill): rewrite quality-updates-writer as Superpowers-native
 ## Task 6: boilerplate.md deprecated 처리
 
 **Files:**
+
 - Modify: `.claude/skills/quality-updates-writer/boilerplate.md`
 
 - [ ] **Step 1: boilerplate.md 상단에 deprecated 주석 추가**

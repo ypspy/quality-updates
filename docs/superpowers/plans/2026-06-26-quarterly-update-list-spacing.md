@@ -15,6 +15,7 @@
 ### Task 1: 페이지 스코프 JS
 
 **Files:**
+
 - Modify: `docs/assets/javascripts/extra.js`
 
 - [ ] **Step 1:** `QUARTERLY_PATH` 정규식과 `applyQuarterlyUpdateScope()` 구현
@@ -24,6 +25,7 @@
 ### Task 2: 스코프 CSS
 
 **Files:**
+
 - Modify: `docs/assets/stylesheets/extra.css`
 
 - [ ] **Step 1:** `.md-content__inner.quarterly-update ul > li` 여백 규칙 5종 추가
@@ -32,6 +34,7 @@
 ### Task 3: 문서·검증
 
 **Files:**
+
 - Modify: `docs/superpowers/README.md`
 
 - [ ] **Step 1:** specs 테이블에 본 스펙 행 추가

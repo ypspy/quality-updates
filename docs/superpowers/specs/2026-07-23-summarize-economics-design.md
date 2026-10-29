@@ -123,7 +123,7 @@ Cursor에서 Phase 3 SUMMARIZE가 **고정·반복 컨텍스트로 비싸게 설
 
 ## 8. 워크플로
 
-```
+```text
 정적: SKILL + gold + 2016 Q1 규모 맵
   → 분해표 초안 + 핫스팟 Top N
   → 2016 Q1에서 3~5링크 현행 SUMMARIZE 실측

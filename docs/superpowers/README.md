@@ -57,6 +57,6 @@ Agent 진입·프롬프트: [AGENTS.md](../../AGENTS.md)
 
 ## 워크플로
 
-```
+```text
 /brainstorming → spec (specs/) → 사용자 검토 → plan (plans/) → 구현 → pytest / validate / mkdocs
 ```

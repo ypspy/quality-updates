@@ -28,7 +28,7 @@
 
 ### 1. 파일 시스템 변경
 
-```
+```text
 quality-updates/
 │
 ├── .claude/
@@ -49,6 +49,7 @@ quality-updates/
 ### 2. SKILL.md 구조
 
 **frontmatter**:
+
 ```yaml
 ---
 name: quality-updates-writer
@@ -59,6 +60,7 @@ description: Use when creating or updating quarterly regulatory update documents
 ```
 
 **본문 섹션**:
+
 1. Overview — 역할 + 기준 파일 참조
 2. 작업 순서 — Phase 0/1/2 표
 3. Phase 0: PDF 경로 결정 — AGENT_INSTRUCTION Phase 0 표 + AGENT_PDF 전체 내용 통합 (중복 제거)
@@ -69,6 +71,7 @@ description: Use when creating or updating quarterly regulatory update documents
 8. 말미: `> 보일러플레이트 생성은 boilerplate.md 참조.`
 
 **핵심 변경점 (현재 대비)**:
+
 - `AGENT_PDF.md` 23줄 → Phase 0에 완전 흡수, 별도 파일 삭제
 - frontmatter description에 한국어 트리거 키워드 포함 → 자동 발견 가능
 - 인코딩 예외처리(U+2019 fallback) Phase 0 내 통합

@@ -42,7 +42,7 @@
 
 ### 1.1 위치
 
-```
+```text
 .claude/skills/audit-regulatory-lens/
   SKILL.md           # RIGID-lite 워크플로·출력·guardrail
   reference/
@@ -341,7 +341,7 @@ MCP [corpus spec](2026-06-27-mcp-corpus-design.md) 구현 시 스킬이 **우선
 
 ## 7. 구현 순서 (plan 작성용)
 
-```
+```text
 P1  SKILL.md — 공통 워크플로 + 3모드 출력 스키마 + guardrail
 P2  reference/output-samples.md (선택) — 2025 Q4·2026 Q1 실제 note 기반 예시
 P3  AGENTS.md · docs/project/README.md 라우팅

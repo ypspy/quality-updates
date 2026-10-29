@@ -45,7 +45,7 @@
 
 ### 변경 파일
 
-```
+```text
 scripts/crawler/
 ├── KASB.py          # crawl_schedule(), parse_schedule_page() 추가
 └── unified.py       # collect_kasb()에 주요일정 섹션·Appendix 키 추가
@@ -56,7 +56,7 @@ scripts/tests/
 
 ### 데이터 흐름
 
-```
+```text
 crawl.py --year YYYY --quarter N
   → unified.collect_kasb()
       → KASB.crawl_board(공지·보도)     # 기존
@@ -132,7 +132,7 @@ SCHEDULE = {
 
 ### 로그
 
-```
+```text
 === [주요일정] 크롤링 시작 ===
 === [주요일정] 완료: N건 ===
 ```

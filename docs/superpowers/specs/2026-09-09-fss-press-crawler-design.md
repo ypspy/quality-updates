@@ -48,7 +48,7 @@
 
 ### 변경 파일
 
-```
+```text
 scripts/crawler/FSS.py                 # fetch_press_release() 행 선택자 (+ 테스트용 HTML 파서 분리)
 scripts/tests/test_fss_press_list.py   # 픽스처 단위 테스트 (신규)
 scripts/tests/fixtures/fss_press_list_krds.html
@@ -77,7 +77,7 @@ scripts/tests/fixtures/fss_press_list_krds.html
 
 ### 데이터 흐름
 
-```
+```text
 crawl.py
   → unified.collect_fss()
     → FSS.fetch_press_release()

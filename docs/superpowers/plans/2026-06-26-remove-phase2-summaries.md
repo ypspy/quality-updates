@@ -33,6 +33,7 @@
 ### Task 1: Phase 2 strip 스크립트
 
 **Files:**
+
 - Create: `scripts/strip_phase2_summaries.py`
 - Create: `scripts/tests/test_strip_phase2_summaries.py`
 
@@ -168,6 +169,7 @@ Expected: 삭제 줄 수 출력, `Executive Summary` 구간만
 ### Task 2: 분기 콘텐츠 백필
 
 **Files:**
+
 - Modify: 12× `docs/quality-updates/{year}/*.md` (2023 Q2 제외)
 
 - [ ] **Step 1: Apply strip to all quarter files**
@@ -200,6 +202,7 @@ Expected: no matches (index.md 제외)
 ### Task 3: validate_content Phase 2 금지
 
 **Files:**
+
 - Modify: `scripts/validate_content.py`
 - Create: `scripts/tests/test_validate_phase2.py`
 
@@ -274,12 +277,14 @@ Expected: exit 0
 ### Task 4: quality-updates-writer 스킬 개정
 
 **Files:**
+
 - Modify: `.claude/skills/quality-updates-writer/SKILL.md`
 - Modify: `.claude/skills/quality-updates-writer/boilerplate.md`
 
 - [ ] **Step 1: Remove Phase 2 from SUMMARIZE workflow**
 
 삭제 대상:
+
 - TaskCreate 항목 `"Phase 2: 분기 요약 생성"`
 - dot 그래프의 `Phase 2: 분기 요약` 노드·엣지
 - `### Phase 2: 분기 요약 생성` 섹션 전체
@@ -313,6 +318,7 @@ Expected: BOILERPLATE 설명·이력 맥락 외 불필요 매치 없음
 ### Task 5: 운영·메타 문서
 
 **Files:**
+
 - Modify: `README.md` (line ~70 workflow table)
 - Modify: `docs/project/quarterly-operations-guide.md` (Phase 3)
 - Modify: `docs/project/README.md` (SSOT table)
@@ -337,6 +343,7 @@ Expected: BOILERPLATE 설명·이력 맥락 외 불필요 매치 없음
 ### Task 6: Legacy scripts
 
 **Files:**
+
 - Modify: `scripts/apply_q1_2026_summaries.py`
 - Modify: `scripts/patch_2023_q1_md.py`
 

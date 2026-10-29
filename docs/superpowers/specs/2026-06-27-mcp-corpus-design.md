@@ -295,7 +295,7 @@ Hosted는 **Git에 커밋된 corpus**를 읽음 — 별도 DB 불필요.
 
 ## 6. 구현 순서 (plan 작성용)
 
-```
+```text
 P1  corpus/parse.py + export_corpus.py + tests + data/corpus/ 초기 생성
 P2  mcp_server/core.py + stdio.py + tests
 P3  mcp_server/http.py + Render 문서 + env MCP_API_KEY

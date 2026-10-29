@@ -39,7 +39,7 @@
 
 ## 정보 구조 (IA)
 
-```
+```text
 quality-updates/
 ├── AGENTS.md                         # [신규] Agent 진입·프롬프트 템플릿
 ├── README.md                         # 사람 온보딩 (워크플로 요약+링크)
