@@ -259,9 +259,12 @@ class SplitMetrics:
     source_given_summary_correct: int = 0
     family_n: int = 0
     family_correct: int = 0
+    review_n: int = 0
 
     def add(self, row: Scored) -> None:
         self.n += 1
+        if row.predicted == "review":
+            self.review_n += 1
         pred_skip = row.predicted == "skip"
         act_skip = row.actual == "skip"
         if pred_skip and act_skip:
@@ -310,6 +313,10 @@ class SplitMetrics:
             ),
             "source_type_when_summarized_n": self.source_given_summary_n,
             "source_family_accuracy": _ratio(self.family_correct, self.family_n),
+            "review_n": self.review_n,
+            "three_way_accuracy_excluding_review": (
+                self.three_correct / (self.n - self.review_n) if (self.n - self.review_n) else 0.0
+            ),
             "confusion": {
                 f"{a}->{p}": n for (a, p), n in sorted(self.confusion.items())
             },
@@ -323,6 +330,8 @@ def bucket_of(state: str) -> str:
         return "no_summary"
     if state in {"needs_summary", "done", "summarize"}:
         return "summarize"
+    if state == "review":
+        return "review"
     return state
 
 
@@ -523,24 +532,41 @@ def _hard_skip(folded: str) -> str | None:
 def decide_one(item: Item) -> Decision:
     """Classify one link. Duplicate demotion is applied later in ``decide_all``."""
     folded = strip_orgs(squash(item.title))
+    raw = squash(item.title)
     section = item.section
     agency = item.agency or ""
     hit = accounting_hit(item.title)
 
+    if _sustainability_excluded(item, folded):
+        return _decision(
+            "skip",
+            "R8-sustainability",
+            "SASB·IFRS S2·지속가능성 포럼·지속가능성 일정은 범위 밖이라 스킵",
+            0.9,
+        )
+
+    if "소유주식" in folded:
+        return _decision(
+            "skip",
+            "R16-ownership-filing",
+            "지배주주 등 소유주식 현황 제출은 요약 키워드로 넣지 않고 스킵",
+            0.9,
+        )
+
     if "세칙" in section:
-        if any(token in folded for token in ("외부감사", "회계감사", "회계등에관한")):
+        if any(token in folded for token in ("외부감사", "회계감사", "회계등에관한", "공인회계사")):
             return _decision(
                 "needs_summary",
                 "R12-sechik-accounting",
-                "외부감사·회계 시행세칙 개정은 요약 대상",
-                0.84,
+                "회계·외부감사·공인회계사 관련 시행세칙 개정만 요약",
+                0.88,
                 item,
             )
         return _decision(
             "skip",
             "R12-sechik-other",
-            "회계·외부감사 외 시행세칙은 스킵 제안. 일부 분기는 세칙 묶음을 통째로 요약해 저신뢰",
-            0.46,
+            "회계·외부감사·공인회계사와 무관한 시행세칙은 스킵",
+            0.86,
         )
 
     if "주요일정" in section:
@@ -560,9 +586,9 @@ def decide_one(item: Item) -> Decision:
         if "지속가능" in folded:
             return _decision(
                 "skip",
-                "R8-kssb-meeting",
-                "지속가능성기준위원회 일정은 2025년 이후 본문에서 빠지는 경향. 그 이전엔 링크만 남긴 분기도 있음",
-                0.62,
+                "R8-sustainability",
+                "지속가능성 일정은 범위 밖이라 스킵",
+                0.9,
             )
         return _decision(
             "skip",
@@ -778,6 +804,31 @@ def decide_one(item: Item) -> Decision:
             item,
         )
 
+    if _unfair_trading_action(folded):
+        return _decision(
+            "skip",
+            "R16-unfair-trading",
+            "불공정거래 조치·적발·조사는 스킵. 회계부정 제재 선진화처럼 제도 개편 문서는 예외",
+            0.9,
+        )
+
+    if _focus_inspection(folded):
+        return _decision(
+            "review",
+            "R18-focus-inspection",
+            "중점 점검은 자동 판정하지 않음. 재무제표·비상장 중점 점검분야와 사업보고서 중점 점검사항은 과거에 종종 남았고, 공시 실태·시장·교육·정책금융 중점 점검은 대개 스킵",
+            0.35,
+        )
+
+    if agency == "한국공인회계사회" and "금융감독원" in raw and (hit or "유의사항" in folded):
+        return _decision(
+            "needs_summary",
+            "R14-kicpa-relay",
+            "한공회가 금감원 회계·감사 자료를 재안내한 항목은 요약",
+            0.82,
+            item,
+        )
+
     if "유의사항" in folded and any(
         token in folded for token in ("재무제표", "감사", "회계", "결산", "외부감사")
     ):
@@ -878,7 +929,39 @@ def decide_one(item: Item) -> Decision:
 
 
 def _similar(left: Item, right: Item) -> float:
-    return SequenceMatcher(None, squash(left.title), squash(right.title)).ratio()
+    """Title similarity. A long title contained in the other counts as the same release."""
+    left_key = strip_orgs(squash(left.title))
+    right_key = strip_orgs(squash(right.title))
+    if min(len(left_key), len(right_key)) >= 20 and (left_key in right_key or right_key in left_key):
+        # 0.80 requires a nearby date in apply_fss_demotion (the 0.86 path stays for ratio alone).
+        return 0.80
+    return SequenceMatcher(None, left_key, right_key).ratio()
+
+
+def _sustainability_excluded(item: Item, folded: str) -> bool:
+    """Owner: SASB, IFRS S2, and sustainability forums/schedules are out of scope."""
+    if "회계기준위원회" in folded and "sasb" not in folded and "ifrss2" not in folded:
+        return False
+    if "sasb" in folded or "ifrss2" in folded:
+        return True
+    if "주요일정" in item.section and "지속가능" in folded:
+        return True
+    if "지속가능" in folded and any(token in folded for token in ("포럼", "forum", "세미나")):
+        return True
+    return False
+
+
+def _unfair_trading_action(folded: str) -> bool:
+    if "불공정" not in folded:
+        return False
+    if "회계부정" in folded and any(token in folded for token in ("선진화", "tf", "방안")):
+        return False
+    return any(token in folded for token in ("조치", "적발", "과징금", "고발", "협의회", "점검", "조사"))
+
+
+def _focus_inspection(folded: str) -> bool:
+    """중점 점검, not 중점심사. The owner asked not to auto-decide these."""
+    return "중점점검" in folded and "중점심사" not in folded
 
 
 def apply_fss_demotion(items: list[Item], decisions: list[Decision]) -> list[Decision]:
@@ -910,8 +993,8 @@ def apply_fss_demotion(items: list[Item], decisions: list[Decision]) -> list[Dec
             adjusted[index] = _decision(
                 "no_summary",
                 "R13-fss-duplicate",
-                f"같은 보도의 금융위 항목을 요약하므로 금감원은 링크만 유지(유사도 {best_ratio:.2f})",
-                0.76,
+                f"같은 보도의 금융위 항목을 요약하고 금감원은 링크만 유지(유사도 {best_ratio:.2f})",
+                0.84,
             )
     return adjusted
 
@@ -1193,11 +1276,15 @@ def _mismatch_line(row: Scored) -> str:
 
 def render_report(payload: dict) -> str:
     holdout_rows: list[Scored] = payload["rows"].get("holdout", [])
-    mismatches = [row for row in holdout_rows if row.actual != row.predicted]
+    reviews = [row for row in holdout_rows if row.predicted == "review"]
+    mismatches = [
+        row for row in holdout_rows if row.predicted != "review" and row.actual != row.predicted
+    ]
     source_misses = [
         row
         for row in holdout_rows
-        if row.actual_source
+        if row.predicted != "review"
+        and row.actual_source
         and not (
             row.predicted == "summarize" and row.predicted_source == row.actual_source
         )
@@ -1206,9 +1293,9 @@ def render_report(payload: dict) -> str:
         "# 큐레이션 규칙 백테스트",
         "",
         "자동 제안 스크립트 `scripts/auto_curate.py`를 사람이 이미 끝낸 분기와 비교한 결과다. "
-        "규칙은 2023–2026 Q1에서 관찰한 패턴으로 고정했고, 가장 최근의 완전 큐레이션 분기인 "
-        f"`{payload['holdout']}` 는 채점용이다. 지표를 본 뒤에 규칙을 다시 맞추지는 않았다. "
-        "다만 규칙을 설계하기 전에 이 분기의 본문 구성을 함께 봤으므로, 완전한 맹목 홀드아웃은 아니다.",
+        "규칙은 2023–2026 본문과 Appendix에서 읽은 패턴에 소유자 확정을 더한 것이다. "
+        "가장 최근의 완전 큐레이션 분기인 "
+        f"`{payload['holdout']}` 는 채점용이다. 세칙·지속가능성·금감원 중복·한공회 재안내·불공정거래·소유주식·중점 점검에 대한 소유자 확정을 반영한 뒤의 수치다.",
         "",
         "콘텐츠 파일은 수정하지 않는다. 마커는 편집기 저장 형식과 같고, 제안의 `pending` 은 "
         "실제 PDF·캡처 경로를 아직 모른다는 뜻이다.",
@@ -1269,6 +1356,8 @@ def render_report(payload: dict) -> str:
         f"- 출처 유형: {hold.get('source_type_n', 0)}건 중 정확도 {_pct(hold.get('source_type_accuracy'))}. "
         f"요약을 맞춘 뒤의 유형 정확도 {_pct(hold.get('source_type_accuracy_when_summarized'))} "
         f"(n={hold.get('source_type_when_summarized_n', 0)}).",
+        f"- 보류(중점 점검, 마커 없음): {hold.get('review_n', 0)}건. "
+        f"보류를 분모에서 뺀 3분류 정확도 {_pct(hold.get('three_way_accuracy_excluding_review'))}.",
         "",
         "3분류 혼동 (실제 → 제안, 홀드아웃):",
         "",
@@ -1286,14 +1375,32 @@ def render_report(payload: dict) -> str:
         "",
         "## 홀드아웃 불일치",
         "",
-        f"3분류가 어긋난 항목 {len(mismatches)}건. 정밀도에 닿는 것은 실제로는 남겼는데 스킵으로 제안한 경우(FP)이고, "
-        "재현율에 닿는 것은 실제 스킵을 남긴 경우(FN)다.",
+        f"자동 판정이 과거 선별과 다른 항목 {len(mismatches)}건. "
+        "`review` 는 중점 점검이라 마커를 내지 않으며 아래 보류 목록으로 뺀다. "
+        "정밀도에 닿는 것은 실제로는 남겼는데 스킵으로 제안한 경우이고, "
+        "재현율에 닿는 것은 실제 스킵을 남긴 경우다.",
         "",
         "| 날짜 | 기관 | 섹션 | 실제 | 제안 | 규칙 | 신뢰 | 제목 |",
         "|------|------|------|------|------|------|-----:|------|",
     ]
     if mismatches:
         for row in sorted(mismatches, key=lambda r: (r.actual, r.predicted, r.item.agency or "", r.item.date)):
+            lines.append(_mismatch_line(row))
+    else:
+        lines.append("| - | - | - | - | - | - | - | 없음 |")
+
+    lines += [
+        "",
+        "## 홀드아웃 보류 (중점 점검)",
+        "",
+        "마커를 쓰지 않는다. 재무제표·비상장 중점 점검분야와 사업보고서 중점 점검사항은 과거에 종종 남았고, "
+        "공시 실태·시장·교육·정책금융 중점 점검은 대개 스킵이었다.",
+        "",
+        "| 날짜 | 기관 | 섹션 | 과거 선별 | 제안 | 규칙 | 신뢰 | 제목 |",
+        "|------|------|------|-----------|------|------|-----:|------|",
+    ]
+    if reviews:
+        for row in sorted(reviews, key=lambda r: (r.item.agency or "", r.item.date, r.item.title)):
             lines.append(_mismatch_line(row))
     else:
         lines.append("| - | - | - | - | - | - | - | 없음 |")
@@ -1364,7 +1471,8 @@ def _public_row(item: Item, decision: Decision) -> dict:
 def _print_table(rows: list[dict]) -> None:
     counts = Counter(row["bucket"] for row in rows)
     print(
-        f"# 제안 {len(rows)}건 | 스킵 {counts['skip']} | 링크만 {counts['no_summary']} | 요약 {counts['summarize']}"
+        f"# 제안 {len(rows)}건 | 스킵 {counts.get('skip', 0)} | 링크만 {counts.get('no_summary', 0)} | "
+        f"요약 {counts.get('summarize', 0)} | 보류 {counts.get('review', 0)}"
     )
     print("date\tagency\tsection\tstate\tmarker\tconf\trule\treason\ttitle")
     for row in rows:
@@ -1372,7 +1480,7 @@ def _print_table(rows: list[dict]) -> None:
         reason = row["reason"].replace("\t", " ")
         print(
             f"{row['date']}\t{row['agency']}\t{row['section']}\t{row['state']}\t"
-            f"{row['marker']}\t{row['confidence']:.2f}\t{row['rule_id']}\t{reason}\t{title}"
+            f"{row['marker'] or ''}\t{row['confidence']:.2f}\t{row['rule_id']}\t{reason}\t{title}"
         )
 
 
