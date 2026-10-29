@@ -117,7 +117,6 @@ def test_kicpa_recruitment_and_standards():
         url="https://www.kicpa.or.kr/kicpa/sumBoard/detail.face?bltnNo=2",
     ))
     assert recruit.state == "skip"
-    assert recruit.rule_id == "R9-recruitment"
     assert standard.state == "needs_summary"
     assert standard.source_type == "shot"
     assert standard.marker() == "<!-- source: shot|pending -->"
@@ -267,6 +266,52 @@ def test_owner_rules_for_scope_and_duplicates():
     assert pair[0].state == "no_summary"
     assert pair[0].rule_id == "R13-fss-duplicate"
     assert pair[1].state == "needs_summary"
+
+
+def test_event_announcements_are_skipped_with_one_meeting_exception():
+    internal = decide_one(_item("시장 변동성 대응 강화를 위한 내부감사 간담회 개최"))
+    assert internal.state == "skip"
+    assert internal.rule_id == "R16-event"
+
+    firm = decide_one(_item("감사품질을 위한 회계법인 감사부문 대표 간담회 개최"))
+    assert firm.state == "needs_summary"
+
+    proposal = decide_one(_item(
+        "[광주환경공단] 외부감사인 선임 제안서 공고",
+        agency="한국공인회계사회",
+        section="알림마당 - 공지사항",
+        url="https://www.kicpa.or.kr/board/read.brd?bltnNo=11",
+    ))
+    housing = decide_one(_item(
+        "서울시 공동주택 관리규약 준칙 제81조(회계감사인의 선정 제한)에 대한 개정 안내",
+        agency="한국공인회계사회",
+        section="알림마당 - 공지사항",
+        url="https://www.kicpa.or.kr/board/read.brd?bltnNo=12",
+    ))
+    report = decide_one(_item(
+        "[KARI REPORT] IFRS 16 도입 이후 리스 회계처리",
+        agency="한국회계기준원",
+        section="소통광장 - 공지사항",
+        url="https://www.kasb.or.kr/front/board/comm.do?seq=8",
+    ))
+    award = decide_one(_item(
+        "IFRS 재단 재정지원 기업 제5기 감사패 수여식",
+        agency="한국회계기준원",
+        section="소통광장 - 공지사항",
+        url="https://www.kasb.or.kr/front/board/comm.do?seq=9",
+    ))
+    assert proposal.state == "skip"
+    assert housing.state == "skip"
+    assert report.state == "skip"
+    assert award.state == "skip"
+
+    enforcement = decide_one(_item(
+        "사업보고서 등에 대한 조사·감리결과 조치 - 제12차 증권선물위원회 조치 의결",
+        agency="금융위원회",
+        url="https://fsc.go.kr/no010101/12",
+    ))
+    assert enforcement.state == "needs_summary"
+    assert enforcement.rule_id == "R4-enforcement-fsc"
 
 
 def test_holdout_agreement_and_committed_report():

@@ -553,6 +553,15 @@ def decide_one(item: Item) -> Decision:
             0.9,
         )
 
+    event = _event_announcement(folded)
+    if event:
+        return _decision(
+            "skip",
+            "R16-event",
+            f"행사·안내({event})는 스킵. 예외는 회계법인 간담회뿐",
+            0.88,
+        )
+
     if "세칙" in section:
         if any(token in folded for token in ("외부감사", "회계감사", "회계등에관한", "공인회계사")):
             return _decision(
@@ -964,6 +973,34 @@ def _focus_inspection(folded: str) -> bool:
     return "중점점검" in folded and "중점심사" not in folded
 
 
+def _event_announcement(folded: str) -> str | None:
+    """Owner: roundtables, forums, ceremonies, proposal notices, and report launches are skipped.
+
+    The only repeated exception in 2023–2026 is an 회계법인 간담회 (CEO or audit-practice head),
+    which was summarized in every quarter it appeared. 내부감사 간담회 was not.
+    """
+    if "간담회" in folded and "회계법인" in folded:
+        return None
+    for token in ("간담회", "토론회", "포럼", "forum", "수여식", "세미나"):
+        if token in folded:
+            return token
+    if "행사" in folded and "안내" in folded:
+        return "행사안내"
+    if "제안서" in folded and any(token in folded for token in ("공고", "모집", "입찰")):
+        return "제안서공고"
+    if "공동주택" in folded:
+        return "공동주택"
+    if ("회계감사인" in folded or "외부감사인선임" in folded) and any(
+        token in folded for token in ("선정", "제안서", "공고", "모집")
+    ):
+        if "유의사항" in folded or "제도" in folded:
+            return None
+        return "감사인선정안내"
+    if "리포트" in folded or "report" in folded or "발간" in folded:
+        return "리포트발간"
+    return None
+
+
 def apply_fss_demotion(items: list[Item], decisions: list[Decision]) -> list[Decision]:
     """When FSC will summarize a near-duplicate press item, keep FSS as a link only."""
     fsc_kept = [
@@ -1295,7 +1332,7 @@ def render_report(payload: dict) -> str:
         "자동 제안 스크립트 `scripts/auto_curate.py`를 사람이 이미 끝낸 분기와 비교한 결과다. "
         "규칙은 2023–2026 본문과 Appendix에서 읽은 패턴에 소유자 확정을 더한 것이다. "
         "가장 최근의 완전 큐레이션 분기인 "
-        f"`{payload['holdout']}` 는 채점용이다. 세칙·지속가능성·금감원 중복·한공회 재안내·불공정거래·소유주식·중점 점검에 대한 소유자 확정을 반영한 뒤의 수치다.",
+        f"`{payload['holdout']}` 는 채점용이다. 세칙·지속가능성·금감원 중복·한공회 재안내·불공정거래·소유주식·중점 점검·행사·안내에 대한 소유자 확정을 반영한 뒤의 수치다.",
         "",
         "콘텐츠 파일은 수정하지 않는다. 마커는 편집기 저장 형식과 같고, 제안의 `pending` 은 "
         "실제 PDF·캡처 경로를 아직 모른다는 뜻이다.",
