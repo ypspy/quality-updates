@@ -103,6 +103,7 @@ flowchart TB
 **Agent**
 
 - 이 단계에서 Agent가 `.md`의 스킵·출처를 **임의로 대량 변경하지 않는다**.
+- 사전 제안이 필요하면 `python scripts/auto_curate.py <분기.md>` 로 마커 후보만 출력한다. 콘텐츠에 써 넣지 않는다. 규칙: [curation-rules.md](curation-rules.md).
 - HITL이 지정한 `<!-- source: … -->`만 Phase 3 입력으로 사용한다.
 
 상세 UI·마커 규칙: [editor-curation-workflow.md](editor-curation-workflow.md)
