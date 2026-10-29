@@ -132,11 +132,26 @@ TaskUpdate → in_progress. 아래 우선순위 표 적용. 결정 후 TaskUpdat
 | 우선순위 | 조건 | 동작 |
 |----------|------|------|
 | 1 | 사용자가 경로 지정 | 해당 경로 사용 |
-| 2 | 요약 지시 (경로 미지정) | `downloads/*.pdf`에서 링크 제목 키워드 포함 파일 검색 → 매칭 시 사용 |
-| 3 | "관련 PDF" 요청 | `downloads/1.pdf` 사용. 없으면 경로 확인 요청 |
-| 4 | "최근 PDF" 요청 | `downloads/` 수정일 내림차순 첫 번째 파일 사용. 0건이면 경로 요청 |
+| 2 | 해당 링크 아래 `<!-- source: … -->` 가 하나 이상 | 마커를 **모두** 사용 (아래 「여러 첨부」) |
+| 3 | 요약 지시 (경로·마커 없음) | `downloads/*.pdf`에서 링크 제목 키워드 포함 파일 검색 → 매칭 시 사용 |
+| 4 | "관련 PDF" 요청 | `downloads/1.pdf` 사용. 없으면 경로 확인 요청 |
+| 5 | "최근 PDF" 요청 | `downloads/` 수정일 내림차순 첫 번째 파일 사용. 0건이면 경로 요청 |
 
-**PDF 추출**: `scripts/pdf_path.txt`에 UTF-8로 경로 저장 → `scripts/extract_pdf.py` 실행 → `scripts/pdf_extracted.txt` 사용. `pypdf` 미설치 시 `pip install pypdf`.
+**여러 첨부**: 링크 바로 아래에 마커를 한 줄에 하나씩 연속으로 둔다. 마커가 하나인 기존 파일도 그대로 읽는다.
+
+```
+<!-- source: pdf|downloads/a.pdf -->
+<!-- source: pdf|downloads/b.pdf -->
+<!-- source: hwp|downloads/c.hwp -->
+```
+
+- `pdf` 마커마다 `scripts/pdf_path.txt`에 그 경로를 쓰고 `scripts/extract_pdf.py`로 추출한다. 순서는 마커 순서. 요약에는 추출에 성공한 PDF를 모두 반영한다.
+- `hwp` 마커(경로가 `.hwp` `.hwpx` `.hml`)는 같은 항목에 파일명이 대응하는 PDF 마커가 없을 때만 수동 변환 대상이다. 대응은 확장자와 `(한글)` `(hwp)` `(pdf)` 같은 형식 표기를 뺀 파일명(또는 제목)이 같은 경우다. 대응 PDF가 있으면 그 PDF만 쓰고 HWP는 건너뛴다.
+- HWP 변환은 네이버 웨일에서 PDF로 저장한 뒤, 그 PDF를 같은 `pdf` 추출 절차로 읽는다. LibreOffice 등으로 변환하지 않는다.
+- `file` 마커(zip·오피스 등)는 받아 둔 첨부다. 본문 근거는 PDF·변환한 PDF·WEB·CLIP·shot 에서 확인한다.
+- `web` `clip` `shot` 은 아래 기존 규칙을 따른다. 파일 마커와 함께 있으면 파일 추출을 먼저 하고, 파일에서 확인되지 않은 부분만 미리보기·클립을 본다.
+
+**PDF 추출**: `scripts/pdf_path.txt`에 UTF-8로 경로 저장 → `scripts/extract_pdf.py` 실행 → `scripts/pdf_extracted.txt` 사용. `pypdf` 미설치 시 `pip install pypdf`. 마커가 여러 개면 이 절차를 마커마다 반복한다.
 
 **추출 실패 시 OCR fallback (필수)**:
 1. `scripts/pdf_extracted.txt`가 비어 있거나 의미 파악 불가 → 추출 실패로 간주
@@ -146,7 +161,7 @@ TaskUpdate → in_progress. 아래 우선순위 표 적용. 결정 후 TaskUpdat
 
 **경로 인코딩 이슈**: 파일명에 특수 유니코드(U+2019 등) 있으면 `FileNotFoundError` 발생 가능. 스크립트는 날짜 접두어(`250827*.pdf`) 패턴으로 glob 재시도함.
 
-**HWP**: 수동으로 PDF 변환 후 PDF 추출 워크플로우 사용.
+**HWP**: 같은 항목에 대응 PDF 마커가 있으면 그 PDF를 쓴다. 없을 때만 네이버 웨일에서 PDF로 변환한 뒤 PDF 추출 워크플로우를 쓴다.
 
 **WEB 소스**: 큐레이션 편집기에서 해당 링크의 WEB 미리보기(iframe) 내용을 원문 근거로 삼아 요약. 불안정 시 캡처(스크린샷) 저장 → `<!-- source: shot|downloads/...png -->`.
 
@@ -165,7 +180,7 @@ TaskUpdate → in_progress. 아래 우선순위 표 적용. 결정 후 TaskUpdat
 | 상태 | 표시 | 처리 |
 |------|------|------|
 | 미결정 | 링크 줄만, source/요약 블록 없음 | 처리 전 — 제목·링크만 노출 수준 |
-| 요약 필요 | `<!-- source: pdf\|… -->`, `web`, `clip` 등 | Phase 0·1 요약·원문 연결 큐 |
+| 요약 필요 | `<!-- source: pdf\|… -->` 를 한 줄에 하나, 여러 첨부는 연속. `hwp`, `web`, `clip` 등 | Phase 0·1에서 붙은 파일을 모두 원문으로 사용 |
 | 요약 없음 | `<!-- no_summary -->` | 요약하지 않음 |
 | 스킵 | `<!-- skip -->` | 편집기 저장 시 기록; 배포 전 제거 대상 |
 | 완료 | `!!! note` | 기존 Phase 1 규칙대로 유지·보강 |

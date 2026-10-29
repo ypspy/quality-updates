@@ -40,22 +40,30 @@ def fix_mkdocs_source_layout(content: str) -> tuple[str, int]:
 
         if LINK_RE.match(core):
             src_idx = _next_non_blank(lines, i + 1)
-            if src_idx is not None:
-                src_match = SOURCE_RE.match(lines[src_idx].rstrip("\r\n"))
-                if src_match and src_match.group("indent") == "":
-                    note_idx = _next_non_blank(lines, src_idx + 1)
-                    if note_idx is not None and NOTE_RE.match(lines[note_idx].rstrip("\r\n")):
-                        out.append(line if line.endswith("\n") else line + "\n")
-                        if i + 1 < len(lines) and lines[i + 1].strip() == "":
-                            i += 1
-                        out.append("\n")
+            if src_idx is not None and SOURCE_RE.match(lines[src_idx].rstrip("\r\n")):
+                run_end = src_idx
+                run: list[int] = []
+                while run_end < len(lines) and SOURCE_RE.match(lines[run_end].rstrip("\r\n")):
+                    run.append(run_end)
+                    run_end += 1
+                note_idx = _next_non_blank(lines, run_end)
+                unsafe = (
+                    note_idx is not None
+                    and NOTE_RE.match(lines[note_idx].rstrip("\r\n"))
+                    and any(SOURCE_RE.match(lines[k].rstrip("\r\n")).group("indent") == "" for k in run)
+                )
+                if unsafe:
+                    out.append(line if line.endswith("\n") else line + "\n")
+                    out.append("\n")
+                    for k in run:
+                        src_match = SOURCE_RE.match(lines[k].rstrip("\r\n"))
                         out.append(f"    <!-- source: {src_match.group(2).strip()} -->\n")
-                        out.append("\n")
-                        fixes += 1
-                        i = src_idx + 1
-                        while i < len(lines) and lines[i].strip() == "":
-                            i += 1
-                        continue
+                    out.append("\n")
+                    fixes += 1
+                    i = run_end
+                    while i < len(lines) and lines[i].strip() == "":
+                        i += 1
+                    continue
 
         out.append(line if line.endswith("\n") else line + "\n")
         i += 1
@@ -76,15 +84,27 @@ def find_unsafe_source_layout(lines: list[str]) -> list[tuple[int, str]]:
         if src_idx is None:
             i += 1
             continue
-        src_match = SOURCE_RE.match(lines[src_idx].rstrip("\r\n"))
-        if not src_match or src_match.group("indent") != "":
+        if not SOURCE_RE.match(lines[src_idx].rstrip("\r\n")):
             i += 1
             continue
-        note_idx = _next_non_blank(lines, src_idx + 1)
-        if note_idx is not None and NOTE_RE.match(lines[note_idx].rstrip("\r\n")):
+        run_end = src_idx
+        run: list[int] = []
+        while run_end < len(lines) and SOURCE_RE.match(lines[run_end].rstrip("\r\n")):
+            run.append(run_end)
+            run_end += 1
+        note_idx = _next_non_blank(lines, run_end)
+        unsafe_at = next(
+            (
+                k
+                for k in run
+                if SOURCE_RE.match(lines[k].rstrip("\r\n")).group("indent") == ""
+            ),
+            None,
+        )
+        if unsafe_at is not None and note_idx is not None and NOTE_RE.match(lines[note_idx].rstrip("\r\n")):
             issues.append(
                 (
-                    src_idx + 1,
+                    unsafe_at + 1,
                     "source 마커가 링크 직후 열 0에 있으면 !!! note가 MkDocs에서 렌더되지 않음 "
                     "(링크 다음 빈 줄 → 4칸 들여쓰기 source → note)",
                 )
@@ -120,18 +140,21 @@ def _format_link_entry(entry_lines: list[str]) -> list[str]:
         rest = _trim_leading_blanks(rest[1:])
 
     note_idx = next((i for i, line in enumerate(rest) if NOTE_RE.match(line.rstrip("\r\n"))), None)
-    source_line = next((line for line in rest if SOURCE_RE.match(line.rstrip("\r\n"))), None)
+    pre_note = rest[:note_idx] if note_idx is not None else rest
+    source_lines = [line for line in pre_note if SOURCE_RE.match(line.rstrip("\r\n"))]
 
     if note_idx is None:
         out = [link]
         if no_summary:
             out.append(no_summary)
+        elif source_lines:
+            out.extend(source_lines)
         return out
 
     note_block = rest[note_idx:]
     out = [link, ""]
-    if source_line:
-        out.append(source_line)
+    if source_lines:
+        out.extend(source_lines)
         out.append("")
     out.extend(note_block)
     return out

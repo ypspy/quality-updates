@@ -9,11 +9,12 @@
   let autoSaveTimer = null;
   const AUTO_SAVE_INTERVAL_MS = 60 * 1000;
   // Each link:
-  // - source: null | { type: 'pdf'|'web'|'clip', ref: string }
-  // - pdf_path: kept for backward-compatible save payload (derived from source when type==='pdf')
+  // - sources: [{ type, ref }, ...]  — several attachments (pdf/hwp/file/shot) plus optional web/clip
+  // - source: first entry, kept for older save payloads
+  // - pdf_path: first pdf ref, kept for backward-compatible save payload
   // sourcePanel: 'pdf'|'web'|'clip' — editor-only; which SOURCE tab is shown (not sent to API).
   // clipDraft: optional string — unsaved CLIP textarea (not sent to API).
-  let linksData = [];   // [{date, title, url, state, source, pdf_path, sourcePanel, clipDraft?, agency, line_index}]
+  let linksData = [];   // [{date, title, url, state, sources, source, pdf_path, sourcePanel, clipDraft?, agency, line_index}]
   let pdfFiles = [];    // string[] (Option A)
   let pdfFolderExists = false;
   let lastPdfFilesLoadedAt = 0;
@@ -71,9 +72,24 @@
       }
       showToast(data.message || '저장됨');
       await loadPdfFiles();
+      attachSavedPathToSelected(data && data.path);
     } catch (_) {
       showToast('저장 요청 실패');
     }
+  }
+
+  function attachSavedPathToSelected(savedPath) {
+    const rel = String(savedPath || '').trim();
+    const link = linksData[selectedIdx];
+    if (!rel || !link || link.state === 'done') return;
+    if (sourcesOf(link).some((s) => s.ref === rel)) {
+      showToast('이미 연결된 파일');
+      return;
+    }
+    upsertSource(link, sourceTypeForPath(rel), rel);
+    link.sourcePanel = 'pdf';
+    updateCounter();
+    renderTable();
   }
 
   let lastGoodPreviewSrc = '';
@@ -239,31 +255,92 @@
     if (currentFile) await loadLinks(currentFile);
   }
 
+  function sourcesOf(link) {
+    if (!link) return [];
+    if (!Array.isArray(link.sources)) link.sources = [];
+    return link.sources;
+  }
+
+  function sourceTypeForPath(path) {
+    const name = String(path || '').split(/[\\/]/).pop().toLowerCase();
+    if (name.endsWith('.pdf')) return 'pdf';
+    if (name.endsWith('.hwp') || name.endsWith('.hwpx') || name.endsWith('.hml')) return 'hwp';
+    if (/\.(png|jpe?g|gif|webp|tiff?)$/.test(name)) return 'shot';
+    return 'file';
+  }
+
+  function dedupeSources(list) {
+    const out = [];
+    const seen = {};
+    (list || []).forEach((s) => {
+      if (!s || !s.type || !String(s.ref || '').trim()) return;
+      const ref = String(s.ref).trim();
+      const key = s.type + '\n' + ref;
+      if (seen[key]) return;
+      seen[key] = 1;
+      out.push({ type: s.type, ref: ref });
+    });
+    return out;
+  }
+
+  function syncSourceFields(link) {
+    const list = dedupeSources(sourcesOf(link));
+    link.sources = list;
+    const pdf = list.find((s) => s.type === 'pdf');
+    link.pdf_path = pdf ? pdf.ref : null;
+    link.source = list[0] || null;
+  }
+
+  function upsertSource(link, type, ref) {
+    const r = String(ref || '').trim();
+    if (!link || !type || !r) return;
+    let list = sourcesOf(link).slice();
+    if (type === 'web' || type === 'clip') {
+      list = list.filter((s) => s.type !== type);
+    }
+    if (!list.some((s) => s.type === type && s.ref === r)) {
+      list.push({ type: type, ref: r });
+    }
+    link.sources = list;
+    syncSourceFields(link);
+    if (link.state !== 'done') link.state = 'needs_summary';
+  }
+
+  function removeSource(link, type, ref) {
+    link.sources = sourcesOf(link).filter((s) => !(s.type === type && s.ref === ref));
+    syncSourceFields(link);
+    if (link.state !== 'done') {
+      link.state = link.sources.length ? 'needs_summary' : 'undecided';
+    }
+  }
+
+  function fileSources(link) {
+    return sourcesOf(link).filter((s) => s.type === 'pdf' || s.type === 'hwp' || s.type === 'file' || s.type === 'shot');
+  }
+
   function hasResolvedWebSource(entry) {
-    const s = entry.source;
-    return !!(s && s.type === 'web' && String(s.ref || '').trim());
+    return sourcesOf(entry).some((s) => s.type === 'web' && String(s.ref || '').trim());
   }
 
   function hasResolvedShotSource(entry) {
-    const s = entry.source;
-    return !!(s && s.type === 'shot' && String(s.ref || '').trim());
+    return sourcesOf(entry).some((s) => s.type === 'shot' && String(s.ref || '').trim());
   }
 
   function hasResolvedClipSource(entry) {
-    const s = entry.source;
-    return !!(s && s.type === 'clip' && String(s.ref || '').trim());
+    return sourcesOf(entry).some((s) => s.type === 'clip' && String(s.ref || '').trim());
   }
 
-  /** needs_summary rows that still need a PDF path (WEB/CLIP with ref counts as resolved). */
+  /** needs_summary rows that still have no file, web, clip, or shot. */
   function isUnresolvedNeedsPdf(entry) {
     if (entry.state !== 'needs_summary') return false;
-    if (hasResolvedWebSource(entry)) return false;
-    if (hasResolvedShotSource(entry)) return false;
-    if (hasResolvedClipSource(entry)) return false;
-    const pdfRef =
-      entry.pdf_path ||
-      (entry.source && entry.source.type === 'pdf' ? entry.source.ref : null);
-    return !pdfRef;
+    const sources = Array.isArray(entry.sources)
+      ? entry.sources
+      : (entry.source ? [entry.source] : []);
+    return !sources.some((s) => {
+      if (!s || !String(s.ref || '').trim()) return false;
+      return s.type === 'web' || s.type === 'shot' || s.type === 'clip'
+        || s.type === 'pdf' || s.type === 'hwp' || s.type === 'file';
+    });
   }
 
   async function onSave() {
@@ -313,7 +390,11 @@
           state: l.state,
           pdf_path: getPdfPathForSave(l),
         };
-        if (l.source) row.source = l.source;
+        const sources = dedupeSources(sourcesOf(l));
+        if (sources.length) {
+          row.sources = sources;
+          row.source = sources[0];
+        }
         return row;
       });
   }
@@ -338,7 +419,7 @@
     const curation = buildCuration();
     const unresolved = curation.filter(isUnresolvedNeedsPdf);
     if (!isAuto && unresolved.length > 0) {
-      const ok = confirm(`${unresolved.length}개 항목이 "요약 필요"이지만 PDF가 선택되지 않았습니다.\n저장하면 미결정으로 처리됩니다. 계속할까요?`);
+      const ok = confirm(`${unresolved.length}개 항목이 "요약 필요"이지만 연결된 출처가 없습니다.\n저장하면 미결정으로 처리됩니다. 계속할까요?`);
       if (!ok) {
         isSaving = false;
         return { ok: false };
@@ -814,17 +895,16 @@
   function sourceCell(link, idx) {
     if (link.state === 'done') return '';
     const kind = sourceKind(link);
-    const shotPath = link.source && link.source.type === 'shot' ? String(link.source.ref || '').trim() : '';
+    const shot = sourcesOf(link).find((s) => s.type === 'shot');
+    const shotPath = shot ? String(shot.ref || '').trim() : '';
     const webLinked = hasResolvedWebSource(link) || !!shotPath;
-    const clipId = link.source && link.source.type === 'clip' ? String(link.source.ref || '') : '';
+    const clipHit = sourcesOf(link).find((s) => s.type === 'clip');
+    const clipId = clipHit ? String(clipHit.ref || '') : '';
     const clipDraft = link.clipDraft != null ? String(link.clipDraft) : '';
-
-    const selectedPath = link.source && link.source.type === 'pdf' ? link.source.ref : (link.pdf_path || '');
-    const fileName = selectedPath ? basename(selectedPath) : '';
-    const inputValue = selectedPath ? fileName : '';
+    const attachedFiles = fileSources(link);
 
     const listId = `source-list-${idx}`;
-    const pdfBlock = !pdfFolderExists
+    const picker = !pdfFolderExists
       ? '<span class="source-no-pdf">폴더 없음</span>'
       : pdfFiles.length === 0
       ? '<span class="source-no-pdf">파일 없음</span>'
@@ -834,8 +914,8 @@
           <input
             class="source-input"
             type="text"
-            value="${escHtml(inputValue)}"
-            placeholder="PDF 검색…"
+            value=""
+            placeholder="파일 추가 검색…"
             autocomplete="off"
             role="combobox"
             aria-autocomplete="list"
@@ -843,10 +923,17 @@
             aria-controls="${listId}"
           />
           <button class="source-btn source-btn-open" type="button" title="열기">▼</button>
-          <button class="source-btn source-btn-clear" type="button" title="비우기"${selectedPath ? '' : ' disabled'}>×</button>
+          <button class="source-btn source-btn-clear" type="button" title="첨부 비우기"${attachedFiles.some((s) => s.type !== 'shot') ? '' : ' disabled'}>×</button>
         </div>
         <div class="source-dropdown" id="${listId}" role="listbox" style="display:none"></div>
       </div>
+    `;
+    const pdfBlock = `
+      ${renderFileList(attachedFiles)}
+      <div class="source-attach-row">
+        <button class="source-btn source-btn-attach-all" type="button"${link.url ? '' : ' disabled'}>페이지 첨부 모두 연결</button>
+      </div>
+      ${picker}
     `;
 
     const clipLinked = clipId
@@ -901,6 +988,7 @@
     const cur = STATE_CYCLE.indexOf(link.state);
     link.state = STATE_CYCLE[(cur + 1) % STATE_CYCLE.length];
     if (link.state !== 'needs_summary') {
+      link.sources = [];
       link.pdf_path = null;
       link.source = null;
       link.sourcePanel = 'pdf';
@@ -1067,9 +1155,7 @@
           }
           const link = linksData[idx];
           link.sourcePanel = 'web';
-          link.source = { type: 'shot', ref: shotPath };
-          link.pdf_path = null;
-          link.state = 'needs_summary';
+          if (shotPath) upsertSource(link, 'shot', shotPath);
           link.clipDraft = null;
           updateCounter();
           renderTable();
@@ -1121,16 +1207,15 @@
         }
         const link = linksData[idx];
         link.sourcePanel = 'clip';
-        link.source = { type: 'clip', ref: data.id };
-        link.pdf_path = null;
-        link.state = 'needs_summary';
+        upsertSource(link, 'clip', data.id);
         link.clipDraft = null;
         updateCounter();
         renderTable();
       });
       clipPrev.addEventListener('click', () => {
         const link = linksData[idx];
-        const id = link.source && link.source.type === 'clip' ? String(link.source.ref || '').trim() : '';
+        const clipHit = sourcesOf(link).find((s) => s.type === 'clip');
+        const id = clipHit ? String(clipHit.ref || '').trim() : '';
         if (!id) return;
         openClipPreview(id);
       });
@@ -1141,40 +1226,91 @@
       });
     }
 
+    cell.querySelectorAll('.source-file-remove').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        let ref = btn.getAttribute('data-ref') || '';
+        try { ref = decodeURIComponent(ref); } catch (_) { /* keep raw */ }
+        removeSource(linksData[idx], btn.getAttribute('data-type'), ref);
+        updateCounter();
+        renderTable();
+      });
+    });
+    const attachAll = cell.querySelector('.source-btn-attach-all');
+    if (attachAll) {
+      attachAll.addEventListener('click', () => { void attachAllFromPage(idx); });
+    }
+
     wireSourcePicker(tr, idx);
+  }
+
+  function renderFileList(items) {
+    if (!items || !items.length) {
+      return '<p class="source-file-empty">연결된 첨부 없음</p>';
+    }
+    const rows = items.map((s) => {
+      const refAttr = escHtml(encodeURIComponent(s.ref));
+      return `<li><code title="${escHtml(s.ref)}">${escHtml(basename(s.ref))}</code><span class="source-file-type">${escHtml(s.type)}</span><button type="button" class="source-btn source-file-remove" data-type="${escHtml(s.type)}" data-ref="${refAttr}">제거</button></li>`;
+    }).join('');
+    return `<ul class="source-file-list">${rows}</ul>`;
+  }
+
+  async function attachAllFromPage(idx) {
+    const link = linksData[idx];
+    if (!link) return;
+    const url = String(link.url || '').trim();
+    if (!url) return;
+    showToast('첨부 받는 중…');
+    try {
+      const res = await fetch('/api/source/download_page_attachments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ url: url }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) {
+        showToast((data && data.message) || ('오류 (' + res.status + ')'));
+        return;
+      }
+      const attached = Array.isArray(data.attached) ? data.attached : [];
+      attached.forEach((row) => {
+        if (row && row.type && row.ref) upsertSource(link, row.type, row.ref);
+      });
+      if (attached.length) link.sourcePanel = 'pdf';
+      await loadPdfFiles();
+      updateCounter();
+      renderTable();
+      const skipped = (data.skipped_hwp || []).length;
+      const failed = (data.failed || []).length;
+      let msg = data.message || ('첨부 ' + attached.length + '건 연결');
+      if (skipped) msg += ' · HWP ' + skipped + '건은 PDF와 같아 건너뜀';
+      if (failed) msg += ' · 실패 ' + failed + '건';
+      showToast(msg);
+    } catch (_) {
+      showToast('첨부 요청 실패');
+    }
   }
 
   function setSourceKind(idx, kind) {
     const link = linksData[idx];
+    if (!link || link.state === 'done') return;
     const cur = sourceKind(link);
     if (cur === kind) return;
 
     link.sourcePanel = kind;
-
-    if (kind !== 'pdf' && link.source && link.source.type === 'pdf') {
-      link.source = null;
-      link.pdf_path = null;
-      link.state = 'undecided';
-    }
-    if (kind !== 'web' && link.source && link.source.type === 'web') {
-      link.source = null;
-      link.pdf_path = null;
-      link.state = 'undecided';
-    }
-    if (kind !== 'clip' && link.source && link.source.type === 'clip') {
-      link.source = null;
-      link.pdf_path = null;
-      link.state = 'undecided';
+    if (kind !== 'web') {
+      link.sources = sourcesOf(link).filter((s) => s.type !== 'web');
     }
     if (kind !== 'clip') {
-      link.clipDraft = null;
+      link.sources = sourcesOf(link).filter((s) => s.type !== 'clip');
     }
-    if (kind === 'web') {
-      link.sourcePanel = 'web';
-      link.source = { type: 'web', ref: link.url };
-      link.pdf_path = null;
-      link.state = 'needs_summary';
+    if (kind !== 'clip') link.clipDraft = null;
+    if (kind === 'web' && link.url) {
+      const list = sourcesOf(link).filter((s) => s.type !== 'web');
+      list.push({ type: 'web', ref: link.url });
+      link.sources = list;
     }
+    syncSourceFields(link);
+    link.state = sourcesOf(link).length ? 'needs_summary' : 'undecided';
     closeOpenPicker();
     updateCounter();
     renderTable();
@@ -1183,20 +1319,24 @@
   function clearWebSource(idx) {
     const link = linksData[idx];
     link.sourcePanel = 'web';
-    link.source = null;
-    link.pdf_path = null;
+    link.sources = sourcesOf(link).filter((s) => s.type !== 'web' && s.type !== 'shot');
     link.clipDraft = null;
-    link.state = 'undecided';
+    syncSourceFields(link);
+    if (link.state !== 'done') {
+      link.state = link.sources.length ? 'needs_summary' : 'undecided';
+    }
     closeOpenPicker();
   }
 
   function clearClipSource(idx) {
     const link = linksData[idx];
     link.sourcePanel = 'clip';
-    link.source = null;
-    link.pdf_path = null;
+    link.sources = sourcesOf(link).filter((s) => s.type !== 'clip');
     link.clipDraft = null;
-    link.state = 'undecided';
+    syncSourceFields(link);
+    if (link.state !== 'done') {
+      link.state = link.sources.length ? 'needs_summary' : 'undecided';
+    }
     closeOpenPicker();
   }
 
@@ -1210,9 +1350,7 @@
     const btnClear = root.querySelector('.source-btn-clear');
     const list = root.querySelector('.source-dropdown');
 
-    const link = linksData[idx];
-    const selectedPath = link.source && link.source.type === 'pdf' ? link.source.ref : (link.pdf_path || '');
-    input.dataset.fullPath = selectedPath || '';
+    input.dataset.fullPath = '';
 
     btnOpen.addEventListener('click', async () => {
       await ensureFreshPdfFiles(true);
@@ -1483,10 +1621,14 @@
 
   function selectPdfSource(idx, fullPath) {
     const link = linksData[idx];
+    const type = sourceTypeForPath(fullPath);
+    if (sourcesOf(link).some((s) => s.ref === fullPath)) {
+      showToast('이미 연결된 파일');
+      closeOpenPicker();
+      return;
+    }
     link.sourcePanel = 'pdf';
-    link.source = { type: 'pdf', ref: fullPath };
-    link.state = 'needs_summary';
-    link.pdf_path = fullPath; // keep legacy payload behavior
+    upsertSource(link, type, fullPath);
     link.clipDraft = null;
     pushRecentPdfPath(fullPath);
     closeOpenPicker();
@@ -1495,10 +1637,12 @@
   function clearPdfSource(idx) {
     const link = linksData[idx];
     link.sourcePanel = 'pdf';
-    link.source = null;
-    link.pdf_path = null;
+    link.sources = sourcesOf(link).filter((s) => s.type !== 'pdf' && s.type !== 'hwp' && s.type !== 'file');
     link.clipDraft = null;
-    link.state = 'undecided';
+    syncSourceFields(link);
+    if (link.state !== 'done') {
+      link.state = link.sources.length ? 'needs_summary' : 'undecided';
+    }
     closeOpenPicker();
   }
 
@@ -1554,41 +1698,43 @@
     return String(p || '').split(/[\\/]/).pop() || '';
   }
 
+  function normalizeOneSource(src, pageUrl) {
+    if (!src || typeof src.type !== 'string' || typeof src.ref !== 'string') return null;
+    const ref = src.type === 'web' ? String(pageUrl || src.ref || '').trim() : String(src.ref || '').trim();
+    if (!ref) return null;
+    let type = src.type === 'url' ? 'web' : src.type;
+    if (type === 'hwpx' || type === 'hml') type = 'hwp';
+    return { type: type, ref: ref };
+  }
+
   function normalizeLink(link) {
     const l = Object.assign({}, link);
+    let sources = [];
+    if (Array.isArray(l.sources)) {
+      sources = l.sources.map((s) => normalizeOneSource(s, l.url)).filter(Boolean);
+    }
+    if (!sources.length && l.source) {
+      const one = normalizeOneSource(l.source, l.url);
+      if (one) sources.push(one);
+    }
+    if (!sources.length && l.pdf_path) {
+      sources.push({ type: 'pdf', ref: l.pdf_path });
+    }
+    l.sources = dedupeSources(sources);
+    syncSourceFields(l);
 
-    // Back-compat: if backend provides `source`, use it.
-    // If not, but legacy `pdf_path` exists, treat it as PDF source.
-    if (!l.source && l.pdf_path) {
-      l.source = { type: 'pdf', ref: l.pdf_path };
-    }
-    if (l.source && l.source.type === 'pdf' && !l.pdf_path) {
-      l.pdf_path = l.source.ref;
-    }
-    if (l.source && l.source.type === 'web') {
-      l.pdf_path = null;
-      l.source = { type: 'web', ref: l.url };
-    }
-    if (l.source && l.source.type === 'shot') {
-      l.pdf_path = null;
-    }
-    if (l.source && l.source.type === 'clip') {
-      l.pdf_path = null;
-    }
-    if (!l.source) l.source = null;
-    if (!l.pdf_path) l.pdf_path = null;
-
-    l.sourcePanel =
-      l.source && (l.source.type === 'web' || l.source.type === 'shot') ? 'web'
-        : l.source && l.source.type === 'clip' ? 'clip'
-          : 'pdf';
+    if (l.sources.some((s) => s.type === 'pdf' || s.type === 'hwp' || s.type === 'file')) l.sourcePanel = 'pdf';
+    else if (l.sources.some((s) => s.type === 'web' || s.type === 'shot')) l.sourcePanel = 'web';
+    else if (l.sources.some((s) => s.type === 'clip')) l.sourcePanel = 'clip';
+    else l.sourcePanel = 'pdf';
 
     return l;
   }
 
   function getPdfPathForSave(link) {
     if (!link) return null;
-    if (link.source && link.source.type === 'pdf' && link.source.ref) return link.source.ref;
+    const pdf = sourcesOf(link).find((s) => s.type === 'pdf' && s.ref);
+    if (pdf) return pdf.ref;
     return link.pdf_path || null;
   }
 

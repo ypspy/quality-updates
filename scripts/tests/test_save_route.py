@@ -150,6 +150,47 @@ def test_import_from_md_writes_sidecar(tmp_path, monkeypatch):
     assert '"type": "pdf"' in text
 
 
+def test_multiple_sources_roundtrip_through_sidecar(tmp_path, monkeypatch):
+    root = tmp_path
+    md = root / "docs" / "x.md"
+    md.parent.mkdir(parents=True)
+    md.write_text("- (25-01-01) [T](https://example.com/a)\n", encoding="utf-8")
+    monkeypatch.setattr(editor_config, "repo_root", lambda: root)
+    client = editor_app.app.test_client()
+
+    save_resp = client.post(
+        "/api/save",
+        json={
+            "file": "docs/x.md",
+            "curation": [
+                {
+                    "line_index": 0,
+                    "state": "needs_summary",
+                    "sources": [
+                        {"type": "pdf", "ref": "downloads/a.pdf"},
+                        {"type": "hwp", "ref": "downloads/b.hwp"},
+                    ],
+                    "source": {"type": "pdf", "ref": "downloads/a.pdf"},
+                    "pdf_path": "downloads/a.pdf",
+                }
+            ],
+        },
+    )
+    assert save_resp.status_code == 200
+    row = client.get("/api/links?file=docs/x.md").get_json()["links"][0]
+    assert row["sources"] == [
+        {"type": "pdf", "ref": "downloads/a.pdf"},
+        {"type": "hwp", "ref": "downloads/b.hwp"},
+    ]
+    assert row["source"] == {"type": "pdf", "ref": "downloads/a.pdf"}
+
+    export_resp = client.post("/api/sync/export_to_md", json={"file": "docs/x.md"})
+    assert export_resp.status_code == 200
+    body = md.read_text(encoding="utf-8")
+    assert "<!-- source: pdf|downloads/a.pdf -->" in body
+    assert "<!-- source: hwp|downloads/b.hwp -->" in body
+
+
 def test_no_summary_roundtrip_export_import(tmp_path, monkeypatch):
     root = tmp_path
     md = root / "docs" / "x.md"

@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import editor.app as editor_app
 import editor.config as editor_config
+import editor.page_attachments as page_attachments
 import editor.routes.source as source_routes
 import editor.source_fetch as source_fetch
 
@@ -280,7 +281,7 @@ def test_kasb_file_proxy_saves_to_configured_downloads_folder(monkeypatch, tmp_p
 
     monkeypatch.setattr(editor_config, "repo_root", lambda: root)
     monkeypatch.setattr(editor_config, "load_config", lambda: {"downloads_folder": "downloads/kasb_test/"})
-    monkeypatch.setattr(source_routes.requests, "post", fake_post)
+    monkeypatch.setattr(page_attachments.requests, "post", fake_post)
 
     client = editor_app.app.test_client()
     resp = client.get("/api/source/kasb_file?fileNo=-99&fileSeq=2")

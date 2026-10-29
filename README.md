@@ -55,22 +55,37 @@ python scripts/editor.py   # http://localhost:5000
 
 ```mermaid
 flowchart LR
-    A[crawl.py] --> B[editor.py]
-    B --> C[quality-updates-writer]
-    C --> D[nav / index.md]
-    D --> E[prepare_deploy.py]
-    E --> F[mkdocs build --strict]
-    F --> G[main push → Render]
+    A[crawl.py] --> B[auto_curate.py]
+    B --> C[fetch_attachments.py]
+    C --> D[editor.py]
+    D --> E[quality-updates-writer]
+    E --> F[nav / index.md]
+    F --> G[prepare_deploy.py]
+    G --> H[mkdocs build --strict]
+    H --> I[main push → Render]
 ```
 
 | 단계 | 명령·도구 | 산출물 |
 |------|-----------|--------|
 | 1. 수집 | `python scripts/crawl.py --year YYYY --quarter N` | `docs/quality-updates/YYYY/*.md` (신규만) |
-| 2. 큐레이션 | `python scripts/editor.py` | `<!-- skip -->`, `<!-- source: … -->` 마커 |
-| 3. 요약 | `quality-updates-writer` 스킬 (SUMMARIZE) | 링크별 note |
-| 4. 사이트 등록 | `mkdocs.yml` nav, `docs/index.md` | 사이드바·홈 최신 링크 |
-| 5. 배포 전처리 | `python scripts/prepare_deploy.py` | skip 제거, validate, nav/index diff 힌트 |
-| 6. 빌드·배포 | `mkdocs build --strict` → `main` push | [quality-updates.onrender.com](https://quality-updates.onrender.com) |
+| 2. 큐레이션 제안 | `python scripts/auto_curate.py <분기.md>` | 표준출력 마커 제안 (파일은 수정하지 않음) |
+| 3. 첨부 수집 | `python scripts/fetch_attachments.py <분기.md>` | `downloads/` 파일, 항목별 `<!-- source: … -->`, 보고 |
+| 4. 큐레이션 편집 | `python scripts/editor.py` | `<!-- skip -->`, 여러 source 마커 |
+| 5. 요약 | `quality-updates-writer` 스킬 (SUMMARIZE) | 링크별 note |
+| 6. 사이트 등록 | `mkdocs.yml` nav, `docs/index.md` | 사이드바·홈 최신 링크 |
+| 7. 배포 전처리 | `python scripts/prepare_deploy.py` | skip 제거, validate, nav/index diff 힌트 |
+| 8. 빌드·배포 | `mkdocs build --strict` → `main` push | [quality-updates.onrender.com](https://quality-updates.onrender.com) |
+
+`fetch_attachments.py` 는 스킵(`<!-- skip -->`)과 링크만(`<!-- no_summary -->`), 이미 요약이 있는 항목은 건너뛴다. 마커가 없는 링크는 `auto_curate.py` 와 같은 규칙으로 요약 대상만 고른다. 원문 페이지의 첨부를 모두 `downloads/` 에 받고, 항목 아래에 source 마커를 한 줄에 하나씩 붙인다. 같은 문서가 HWP/HWPX 와 PDF 로 같이 있으면 PDF 만 받고 HWP 는 받지 않는다. PDF 가 없는 HWP/HWPX 만 보고의 「수동 변환 필요」에 적는다. 변환은 네이버 웨일에서 한다.
+
+```bash
+python scripts/fetch_attachments.py docs/quality-updates/2026/2026-07-01_to_2026-09-30.md
+python scripts/fetch_attachments.py <분기.md> --report downloads/fetch-attachments-report.md
+```
+
+보고 기본 경로는 설정된 다운로드 폴더의 `fetch-attachments-report.md` 다. 받은 PDF, PDF가 아닌 기타 첨부, 웨일 변환이 필요한 HWP/HWPX, 다운로드 실패 항목이 나뉜다.
+
+편집기 PDF 탭에서는 첨부를 여러 개 더하거나 뺄 수 있다. 「페이지 첨부 모두 연결」은 그 행의 원문 페이지에서 같은 규칙으로 첨부를 받아 항목에 붙인다.
 
 **npm 단축** (Node.js 설치 시):
 
@@ -232,6 +247,7 @@ quality-updates/
 │   ├── crawler/                   # FSS·FSC·KICPA·KASB 수집 모듈
 │   ├── editor.py                  # 큐레이션 편집기 진입점 (Flask)
 │   ├── editor/                    # 편집기 앱·정적 파일
+│   ├── fetch_attachments.py       # 요약 대상 원문 첨부 일괄 다운로드
 │   ├── extract_pdf.py             # PDF 텍스트 추출
 │   ├── extract_hwp.py             # HWP 텍스트 추출
 │   ├── reorder_chronological.py   # 콘텐츠 시계열 정렬
