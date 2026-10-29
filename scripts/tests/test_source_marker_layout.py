@@ -110,6 +110,42 @@ def test_normalize_spacing_preserves_agency_header_after_no_summary():
     assert fixed.index("### 금융위원회") < fixed.index("https://fsc.go.kr/")
 
 
+def test_fix_layout_indents_every_source_marker():
+    md = """\
+- (26-03-29) [title](https://example.com/a)
+<!-- source: pdf|downloads/a.pdf -->
+<!-- source: hwp|downloads/a.hwp -->
+
+    !!! note "주요 내용"
+
+        - bullet
+"""
+    fixed, n = fix_mkdocs_source_layout(md)
+    assert n == 1
+    assert "    <!-- source: pdf|downloads/a.pdf -->" in fixed
+    assert "    <!-- source: hwp|downloads/a.hwp -->" in fixed
+    assert fixed.index("a.pdf") < fixed.index("a.hwp")
+    assert find_unsafe_source_layout(fixed.splitlines()) == []
+
+
+def test_normalize_keeps_every_source_marker():
+    md = """\
+- (26-03-29) [title](https://example.com/a)
+
+    <!-- source: pdf|downloads/a.pdf -->
+    <!-- source: pdf|downloads/b.pdf -->
+
+    !!! note "주요 내용"
+
+        - bullet
+"""
+    fixed, _ = normalize_quarterly_spacing(md)
+    assert "downloads/a.pdf" in fixed
+    assert "downloads/b.pdf" in fixed
+    assert fixed.index("a.pdf") < fixed.index("b.pdf")
+    assert "b.pdf -->\n\n    !!!" in fixed
+
+
 def test_parser_done_with_indented_source():
     md = """\
 ### 금융감독원

@@ -3,6 +3,8 @@
 import re
 import shutil
 
+from .parser import coerce_sources
+
 SKIP_RE = re.compile(r'^<!-- skip -->$')
 NO_SUMMARY_RE = re.compile(r'^<!-- no_summary -->$')
 PDF_RE = re.compile(r'^<!-- pdf: .+ -->$')
@@ -79,20 +81,17 @@ def apply_curation(content: str, curation: list[dict]) -> str:
             # Skip blank lines + old comments immediately after link
             # Track whether we consumed a blank line (to restore it after)
             consumed_blank = False
-            preserved_marker_line = None
+            preserved_marker_lines: list[str] = []
             while i < len(lines):
                 next_core = _line_core(lines[i])
                 if next_core == '':
                     consumed_blank = True
                     i += 1
                 elif _is_comment(lines[i]):
-                    # Preserve an existing marker if the incoming curation doesn't
-                    # provide enough info to re-write it. This prevents losing
-                    # source markers until the frontend sends `source`.
-                    if preserved_marker_line is None and (
-                        SOURCE_RE.match(next_core) or PDF_RE.match(next_core)
-                    ):
-                        preserved_marker_line = lines[i]
+                    # Preserve existing markers when the payload has no source.
+                    # Several consecutive markers belong to the same item.
+                    if SOURCE_RE.match(next_core) or PDF_RE.match(next_core):
+                        preserved_marker_lines.append(_ensure_newline(lines[i]))
                     i += 1
                 else:
                     break
@@ -104,15 +103,12 @@ def apply_curation(content: str, curation: list[dict]) -> str:
             elif state == 'no_summary':
                 result.append('<!-- no_summary -->\n')
             elif state == 'needs_summary':
-                src = entry.get('source')
-                if isinstance(src, dict) and src.get('type') and src.get('ref'):
-                    result.append(f"<!-- source: {src['type']}|{src['ref']} -->\n")
-                elif entry.get('pdf_path'):
-                    # Migration/normalization: even if the UI only sends `pdf_path`,
-                    # write the unified source marker.
-                    result.append(f"<!-- source: pdf|{entry['pdf_path']} -->\n")
-                elif preserved_marker_line is not None:
-                    result.append(preserved_marker_line)
+                sources = _sources_from_entry(entry)
+                if sources:
+                    for src in sources:
+                        result.append(f"<!-- source: {src['type']}|{src['ref']} -->\n")
+                elif preserved_marker_lines:
+                    result.extend(preserved_marker_lines)
             # undecided → no comment
 
             # Restore blank line separator between items
@@ -125,6 +121,21 @@ def apply_curation(content: str, curation: list[dict]) -> str:
         i += 1
 
     return ''.join(result)
+
+
+def _ensure_newline(line: str) -> str:
+    return line if line.endswith('\n') else line + '\n'
+
+
+def _sources_from_entry(entry: dict) -> list[dict] | None:
+    """Sources to write, or None when the payload should keep the markers already on disk."""
+    if isinstance(entry.get('sources'), list) and entry['sources']:
+        normalized = coerce_sources(entry['sources'])
+        return normalized or None
+    if entry.get('source') or entry.get('pdf_path'):
+        normalized = coerce_sources(None, source=entry.get('source'), pdf_path=entry.get('pdf_path'))
+        return normalized or None
+    return None
 
 
 def save_with_backup(file_path: str, original_content: str, curation: list[dict]) -> None:

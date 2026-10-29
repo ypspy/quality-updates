@@ -212,7 +212,13 @@ tr.state-done td { color: #888; font-style: italic; }
   border-radius: 4px;
 }
 
-/* SOURCE picker (PDF combobox) */
+/* SOURCE picker (file combobox) */
+.source-file-list { list-style: none; margin: 0 0 6px; padding: 0; }
+.source-file-list li { display: flex; gap: 6px; align-items: center; font-size: 12px; margin: 0 0 3px; }
+.source-file-list code { font-size: 11px; background: #f3f3f3; padding: 1px 6px; border-radius: 4px; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.source-file-type { color: #666; font-size: 10px; text-transform: uppercase; }
+.source-file-empty { margin: 0 0 6px; color: #888; font-size: 12px; }
+.source-attach-row { margin: 0 0 6px; }
 .source-picker { position: relative; min-width: 260px; }
 .source-picker-top { display: flex; gap: 4px; align-items: center; }
 .source-input {

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """Source preview, proxy, download, and web-to-clip routes."""
-import re
 import threading
 import uuid
 from time import perf_counter
@@ -9,14 +8,13 @@ from urllib.parse import quote
 import requests
 from flask import Blueprint, Response, jsonify, request
 
-from .. import config, download_helpers, preview_helpers, source_fetch
+from .. import config, download_helpers, page_attachments, preview_helpers, source_fetch
 from ..clip_store import create_clip
 from ..html_sanitize import narrow_preview_html, sanitize_html_for_web_preview
 
 bp = Blueprint("source", __name__)
 
-_KASB_DOWNLOAD_POST_URL = "https://www.kasb.or.kr/commonFile/fileDownload.do"
-_KASB_ATTACHMENT_MAX_BYTES = 30 * 1024 * 1024
+_KASB_DOWNLOAD_POST_URL = page_attachments.KASB_DOWNLOAD_POST_URL
 
 
 @bp.route("/api/source/kasb_file")
@@ -26,47 +24,12 @@ def kasb_file_proxy():
     file_seq = (request.args.get("fileSeq") or "").strip()
     if not file_no or not file_seq:
         return download_helpers.json_save_result(False, "Missing query params: fileNo, fileSeq", status=400)
-    if not re.match(r"^-?[0-9]+$", file_no) or not re.match(r"^[0-9]+$", file_seq):
-        return download_helpers.json_save_result(False, "Invalid fileNo/fileSeq.", status=400)
     try:
-        source_fetch.validate_url(_KASB_DOWNLOAD_POST_URL)
-    except ValueError:
-        return download_helpers.json_save_result(False, "Download URL policy error.", status=500)
-
-    try:
-        r = requests.post(
-            _KASB_DOWNLOAD_POST_URL,
-            data={"fileNo": file_no, "fileSeq": file_seq},
-            headers={
-                "User-Agent": source_fetch._DEFAULT_BROWSER_UA,
-                "Accept": "*/*",
-                "Accept-Encoding": "identity",
-                "Connection": "close",
-            },
-            timeout=(10, 120),
-            stream=True,
-        )
-    except requests.RequestException as e:
-        return download_helpers.json_save_result(False, preview_helpers.fetch_exception_user_message(e), status=502)
-
-    try:
-        if not (200 <= r.status_code < 300):
-            return download_helpers.json_save_result(False, f"Upstream error: remote HTTP {r.status_code}", status=502)
-        data = bytearray()
-        for chunk in r.iter_content(chunk_size=64 * 1024):
-            if not chunk:
-                continue
-            data.extend(chunk)
-            if len(data) > _KASB_ATTACHMENT_MAX_BYTES:
-                return download_helpers.json_save_result(False, "Attachment too large.", status=413)
-    finally:
-        r.close()
-
-    if len(data) == 0:
-        return download_helpers.json_save_result(False, "Empty file from server.", status=502)
-
-    body = bytes(data)
-    content_disp = r.headers.get("content-disposition")
+        body, content_disp = page_attachments.fetch_kasb_bytes(file_no, file_seq)
+    except page_attachments.AttachmentFetchError as exc:
+        return download_helpers.json_save_result(False, exc.message, status=exc.status)
+    except requests.RequestException as exc:
+        return download_helpers.json_save_result(False, preview_helpers.fetch_exception_user_message(exc), status=502)
     hint = download_helpers.parse_content_disposition_filename(content_disp)
     fname = download_helpers.safe_attachment_storage_name(hint, body, fallback_stem="kasb-attachment")
 
@@ -86,6 +49,23 @@ def kasb_file_proxy():
 
     rel = out_path.relative_to(root.resolve()).as_posix()
     return download_helpers.json_save_result(True, f"첨부 저장: {out_path.name}", rel_posix=rel)
+
+
+@bp.route("/api/source/download_page_attachments", methods=["POST"])
+def download_page_attachments():
+    """원문 페이지의 첨부를 모두 받아 downloads에 저장한다. HWP는 같은 PDF가 있으면 받지 않는다."""
+    data = request.get_json(silent=True) or {}
+    url = (data.get("url") or "").strip()
+    if not url:
+        return jsonify({"ok": False, "message": "url이 필요합니다."}), 400
+    root = config.repo_root()
+    try:
+        folder = page_attachments.downloads_dir(root)
+    except OSError as exc:
+        return jsonify({"ok": False, "message": f"다운로드 폴더를 만들 수 없습니다: {exc}"}), 500
+    result = page_attachments.fetch_page_attachments(url, root=root, folder=folder)
+    status = 200 if result.ok else 502
+    return jsonify(result.to_json()), status
 
 
 @bp.route("/api/source/preview")

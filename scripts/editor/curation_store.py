@@ -4,9 +4,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from .parser import coerce_sources
 
 ALLOWED_STATES = {"skip", "no_summary", "needs_summary"}
-ALLOWED_SOURCE_TYPES = {"pdf", "web", "clip", "url", "shot"}
 
 
 def _item_key(item: dict) -> tuple[str, str, str]:
@@ -59,15 +59,11 @@ def apply_sidecar_to_links(links: list[dict], curation_map: dict[tuple[str, str,
         state = saved.get("state")
         if state in ALLOWED_STATES:
             row["state"] = state
-        source = saved.get("source")
-        if isinstance(source, dict):
-            src_type = source.get("type")
-            src_ref = source.get("ref")
-            if isinstance(src_type, str) and isinstance(src_ref, str) and src_type in ALLOWED_SOURCE_TYPES and src_ref.strip():
-                if src_type == "url":
-                    src_type = "web"
-                row["source"] = {"type": src_type, "ref": src_ref.strip()}
-                row["pdf_path"] = src_ref.strip() if src_type == "pdf" else None
+        sources = coerce_sources(saved.get("sources"), source=saved.get("source"))
+        if sources:
+            row["sources"] = sources
+            row["source"] = sources[0]
+            row["pdf_path"] = next((item["ref"] for item in sources if item["type"] == "pdf"), None)
         out.append(row)
     return out
 
@@ -101,14 +97,14 @@ def save_curation_for_links(root: Path, rel_md_path: str, links: list[dict], cur
         }
 
         if state == "needs_summary":
-            src = entry.get("source")
-            if isinstance(src, dict):
-                src_type = src.get("type")
-                src_ref = src.get("ref")
-                if isinstance(src_type, str) and isinstance(src_ref, str) and src_type in ALLOWED_SOURCE_TYPES and src_ref.strip():
-                    item["source"] = {"type": src_type, "ref": src_ref.strip()}
-            elif entry.get("pdf_path"):
-                item["source"] = {"type": "pdf", "ref": str(entry["pdf_path"]).strip()}
+            sources = coerce_sources(
+                entry.get("sources"),
+                source=entry.get("source"),
+                pdf_path=entry.get("pdf_path"),
+            )
+            if sources:
+                item["sources"] = sources
+                item["source"] = sources[0]
 
         items.append(item)
 
@@ -139,11 +135,10 @@ def curation_payload_from_links(links: list[dict]) -> list[dict]:
             "pdf_path": link.get("pdf_path"),
             "title": link.get("title") or "",
         }
-        src = link.get("source")
-        if isinstance(src, dict):
-            src_type = src.get("type")
-            src_ref = src.get("ref")
-            if isinstance(src_type, str) and isinstance(src_ref, str) and src_type in ALLOWED_SOURCE_TYPES and src_ref.strip():
-                row["source"] = {"type": src_type, "ref": src_ref.strip()}
+        sources = coerce_sources(link.get("sources"), source=link.get("source"), pdf_path=link.get("pdf_path"))
+        if sources:
+            row["sources"] = sources
+            row["source"] = sources[0]
+            row["pdf_path"] = next((item["ref"] for item in sources if item["type"] == "pdf"), None)
         out.append(row)
     return out
