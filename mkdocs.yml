@@ -77,9 +77,7 @@ nav:
           - 2분기 (04–06월): quality-updates/2015/2015-04-01_to_2015-06-30.md
           - 1분기 (01–03월): quality-updates/2015/2015-01-01_to_2015-03-31.md
 
-  - 품질관리감리:
-      - 품질관리감리 개요: fss-review/index.md
-      - 2022년 품질관리감리: fss-review/fr2022.md
+  - 품질관리감리: fss-review/index.md
 
 # Editor creates `.md.bak` backups in-place; exclude from MkDocs build/serve.
 exclude_docs: |

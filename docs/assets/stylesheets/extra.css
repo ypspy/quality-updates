@@ -88,6 +88,103 @@ iframe {
   margin-bottom: 0;
 }
 
+/* 품질관리감리 한 페이지 */
+.fss-review { margin-top: 1rem; }
+.fss-search { position: relative; margin-bottom: 1.25rem; }
+.fss-search label { display: block; font-size: 0.75rem; color: var(--md-default-fg-color--light); margin-bottom: 0.35rem; }
+.fss-search-row { display: flex; gap: 0.5rem; }
+.fss-search input[type="search"] {
+  flex: 1;
+  width: 100%;
+  font: inherit;
+  font-size: 1rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.4rem;
+  background: var(--md-default-bg-color);
+  color: var(--md-default-fg-color);
+}
+.fss-clear, .fss-badge, .fss-year-btn {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 999px;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  background: var(--md-default-bg-color);
+  color: var(--md-default-fg-color);
+}
+.fss-clear { padding: 0.55rem 0.8rem; border-radius: 0.4rem; }
+.fss-suggest {
+  display: none;
+  position: absolute;
+  z-index: 3;
+  left: 0;
+  right: 4.5rem;
+  top: calc(100% - 0.6rem);
+  max-height: 16rem;
+  overflow: auto;
+  background: var(--md-default-bg-color);
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.4rem;
+}
+.fss-suggest.open { display: block; }
+.fss-suggest button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  padding: 0.55rem 0.75rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.fss-suggest button[aria-selected="true"],
+.fss-suggest button:hover { background: var(--md-accent-fg-color--transparent); }
+.fss-years { display: flex; gap: 0.35rem; margin: 0.4rem 0 0.8rem; overflow-x: auto; }
+.fss-year-btn { padding: 0.2rem 0.75rem; }
+.fss-year-btn.on { background: var(--md-default-fg-color); color: var(--md-default-bg-color); }
+.fss-jung {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.6rem;
+  padding: 0.8rem 0.9rem;
+  margin: 0 0 0.8rem;
+}
+.fss-bundle-name, .fss-group-name, .fss-gun-name { font-weight: 700; margin: 0.6rem 0 0.35rem; }
+.fss-gun-name { font-size: 0.78rem; font-weight: 600; color: var(--md-default-fg-color--light); }
+.fss-none, .fss-empty { color: var(--md-default-fg-color--light); }
+.fss-group {
+  border: 1px solid var(--md-typeset-a-color);
+  border-left-width: 4px;
+  border-radius: 0.45rem;
+  padding: 0.7rem 0.8rem;
+  margin: 0.45rem 0;
+}
+.fss-group.hit { background: color-mix(in srgb, var(--md-accent-fg-color) 12%, transparent); }
+.fss-badges { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.45rem; }
+.fss-badge { order: 0; padding: 0.15rem 0.7rem; font-size: 0.82rem; }
+.fss-badge.on { background: var(--md-default-fg-color); color: var(--md-default-bg-color); }
+.fss-original {
+  order: 1;
+  flex: 1 0 100%;
+  width: 100%;
+  margin-top: 0.55rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--md-default-fg-color--lightest);
+}
+.fss-review.is-filtering .fss-dae,
+.fss-review.is-filtering .fss-jung,
+.fss-review.is-filtering .fss-year,
+.fss-review.is-filtering .fss-bundle,
+.fss-review.is-filtering .fss-gun,
+.fss-review.is-filtering .fss-group { display: none; }
+.fss-review.is-filtering .fss-show { display: block; }
+.fss-review.is-filtering .fss-badges.fss-show { display: flex; }
+@media screen and (max-width: 40em) {
+  .fss-search-row { flex-direction: column; }
+  .fss-suggest { right: 0; top: calc(100% - 2.8rem); }
+  .fss-clear { width: 100%; }
+}
+
 /* 인쇄 스타일 */
 @media print {
   iframe {
