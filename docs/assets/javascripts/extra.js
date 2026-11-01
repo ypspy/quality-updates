@@ -27,10 +27,25 @@
     return (el.getAttribute('data-names') || '').split('|').indexOf(name) !== -1;
   }
 
+  function clearFssRails() {
+    var firmRail = document.getElementById('fss-firm-rail');
+    if (firmRail) firmRail.remove();
+    var yearRail = document.getElementById('fss-year-rail');
+    if (yearRail) yearRail.remove();
+    document.querySelectorAll('.md-sidebar--primary .md-nav--primary').forEach(function (nav) {
+      if (nav.closest('header.md-header')) return;
+      nav.hidden = false;
+    });
+  }
+
   function initFssReview() {
     var root = document.getElementById('fss-review');
     var indexNode = document.getElementById('fss-firm-index');
-    if (!root || !indexNode || root.getAttribute('data-ready') === '1') {
+    if (!root || !root.classList.contains('fss-review') || !indexNode) {
+      clearFssRails();
+      return;
+    }
+    if (root.getAttribute('data-ready') === '1') {
       return;
     }
     root.setAttribute('data-ready', '1');
@@ -158,6 +173,16 @@
         empty.hidden = true;
       }
       root.classList.toggle('is-filtering', filtering);
+      document.querySelectorAll('#fss-firm-rail [data-firm]').forEach(function (btn) {
+        btn.setAttribute('aria-pressed', btn.getAttribute('data-firm') === state.name ? 'true' : 'false');
+      });
+      document.querySelectorAll('#fss-firm-rail [data-kind]').forEach(function (btn) {
+        btn.setAttribute('aria-pressed', btn.getAttribute('data-kind') === state.kind ? 'true' : 'false');
+      });
+      document.querySelectorAll('#fss-year-rail .fss-year-btn').forEach(function (btn) {
+        btn.classList.toggle('on', btn.getAttribute('data-year') === state.year);
+      });
+      applyYearLabels();
     }
 
     function clearFirm() {
@@ -198,23 +223,93 @@
       clearFirm();
       input.focus();
     });
-    root.addEventListener('click', function (e) {
-      var yearBtn = e.target.closest('.fss-year-btn');
-      if (yearBtn && root.contains(yearBtn)) {
-        var jung = yearBtn.closest('.fss-jung');
-        var year = yearBtn.getAttribute('data-year');
-        jung.querySelectorAll('.fss-year-btn').forEach(function (btn) {
-          btn.classList.toggle('on', btn === yearBtn);
+    if (!document.getElementById('fss-firm-rail')) {
+      var primaryInner = document.querySelector('.md-sidebar--primary .md-sidebar__inner');
+      if (primaryInner) {
+        var firmRail = document.createElement('div');
+        firmRail.id = 'fss-firm-rail';
+        window.FssFilter.REGISTERED.forEach(function (row) {
+          var gun = document.createElement('p');
+          gun.className = 'fss-rail-gun';
+          gun.textContent = row.gun;
+          firmRail.appendChild(gun);
+          row.firms.forEach(function (name) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'fss-rail-firm';
+            btn.setAttribute('data-firm', name);
+            btn.textContent = name;
+            firmRail.appendChild(btn);
+          });
         });
-        jung.querySelectorAll('.fss-year').forEach(function (panel) {
-          var match = panel.getAttribute('data-year') === year;
-          panel.hidden = !match;
-          if (root.classList.contains('is-filtering')) {
-            panel.classList.toggle('fss-show', match && panel.querySelector('.fss-group.hit'));
-          }
+        ['일반회계법인', '감사반'].forEach(function (kind) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'fss-rail-kind';
+          btn.setAttribute('data-kind', kind);
+          btn.textContent = kind;
+          firmRail.appendChild(btn);
         });
-        return;
+        primaryInner.insertBefore(firmRail, primaryInner.firstChild);
+        document.querySelectorAll('.md-sidebar--primary .md-nav--primary').forEach(function (nav) {
+          if (nav.closest('header.md-header')) return;
+          nav.hidden = true;
+        });
       }
+    }
+    if (!document.getElementById('fss-year-rail')) {
+      var secondaryInner = document.querySelector('.md-sidebar--secondary .md-sidebar__inner');
+      if (secondaryInner) {
+        var yearRail = document.createElement('div');
+        yearRail.id = 'fss-year-rail';
+        var seenYear = {};
+        var years = [];
+        root.querySelectorAll('[data-year]').forEach(function (el) {
+          var year = el.getAttribute('data-year') || '';
+          if (!/^\d{4}$/.test(year) || seenYear[year]) return;
+          seenYear[year] = true;
+          years.push(year);
+        });
+        years.sort(function (a, b) { return Number(b) - Number(a); });
+        years.forEach(function (year) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'fss-year-btn';
+          btn.setAttribute('data-year', year);
+          yearRail.appendChild(btn);
+        });
+        secondaryInner.insertBefore(yearRail, secondaryInner.firstChild);
+      }
+    }
+    var firmRailEl = document.getElementById('fss-firm-rail');
+    if (firmRailEl) {
+      firmRailEl.addEventListener('click', function (e) {
+        var firmBtn = e.target.closest('[data-firm]');
+        if (firmBtn && firmRailEl.contains(firmBtn)) {
+          state = window.FssFilter.reduceFilter(state, { type: 'name', value: firmBtn.getAttribute('data-firm') });
+          input.value = state.name || '';
+          showList([]);
+          paint();
+          return;
+        }
+        var kindBtn = e.target.closest('[data-kind]');
+        if (!kindBtn || !firmRailEl.contains(kindBtn)) return;
+        state = window.FssFilter.reduceFilter(state, { type: 'kind', value: kindBtn.getAttribute('data-kind') });
+        input.value = '';
+        showList([]);
+        paint();
+      });
+    }
+    var yearRailEl = document.getElementById('fss-year-rail');
+    if (yearRailEl) {
+      yearRailEl.addEventListener('click', function (e) {
+        var yearBtn = e.target.closest('.fss-year-btn');
+        if (!yearBtn || !yearRailEl.contains(yearBtn)) return;
+        state = window.FssFilter.reduceFilter(state, { type: 'year', value: yearBtn.getAttribute('data-year') });
+        paint();
+      });
+    }
+    root.addEventListener('click', function (e) {
       var badge = e.target.closest('.fss-badge');
       if (!badge || !root.contains(badge) || state.name) return;
       var group = badge.closest('.fss-group');

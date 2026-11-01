@@ -145,6 +145,43 @@ iframe {
 .fss-year-label { font-weight: 700; margin: 0.8rem 0 0.35rem; }
 .fss-year-btn { padding: 0.2rem 0.75rem; white-space: nowrap; flex: 0 0 auto; }
 .fss-year-btn.on { background: var(--md-default-fg-color); color: var(--md-default-bg-color); }
+#fss-firm-rail,
+#fss-year-rail { padding: 0.4rem 0.6rem 0.2rem; }
+.fss-rail-gun {
+  margin: 0.75rem 0 0.2rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--md-default-fg-color--light);
+}
+#fss-firm-rail .fss-rail-firm,
+#fss-firm-rail .fss-rail-kind,
+#fss-year-rail .fss-year-btn {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+}
+#fss-firm-rail .fss-rail-firm,
+#fss-firm-rail .fss-rail-kind {
+  font: inherit;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  cursor: pointer;
+  border: 0;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: var(--md-default-fg-color);
+  padding: 0.28rem 0.45rem;
+  white-space: normal;
+}
+#fss-firm-rail .fss-rail-firm + .fss-rail-kind { margin-top: 0.85rem; }
+#fss-firm-rail .fss-rail-kind + .fss-rail-kind { margin-top: 0.15rem; }
+#fss-firm-rail .fss-rail-firm[aria-pressed="true"],
+#fss-firm-rail .fss-rail-kind[aria-pressed="true"] {
+  background: var(--md-default-fg-color);
+  color: var(--md-default-bg-color);
+}
+#fss-year-rail .fss-year-btn + .fss-year-btn { margin-top: 0.35rem; }
 .fss-jung {
   border: 1px solid var(--md-default-fg-color--lightest);
   border-radius: 0.6rem;

@@ -48,3 +48,9 @@ test("groupVisible", function () {
 test("body year label stays four digits", function () {
   assert.equal(yearLabel("2019", false), "2019년");
 });
+
+test("gun labels are not firm names", function () {
+  var names = REGISTERED.flatMap(function (row) { return row.firms; });
+  assert.equal(names.indexOf("가군"), -1);
+  assert.equal(names.indexOf("일반회계법인"), -1);
+});
