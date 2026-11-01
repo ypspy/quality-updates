@@ -32,6 +32,8 @@
     if (firmRail) firmRail.remove();
     var yearRail = document.getElementById('fss-year-rail');
     if (yearRail) yearRail.remove();
+    var sectionRail = document.getElementById('fss-section-rail');
+    if (sectionRail) sectionRail.remove();
     document.querySelectorAll('.md-sidebar--primary .md-nav--primary').forEach(function (nav) {
       if (nav.closest('header.md-header')) return;
       nav.hidden = false;
@@ -182,6 +184,12 @@
       document.querySelectorAll('#fss-year-rail .fss-year-btn').forEach(function (btn) {
         btn.classList.toggle('on', btn.getAttribute('data-year') === state.year);
       });
+      document.querySelectorAll('#fss-section-rail a').forEach(function (link) {
+        var id = (link.getAttribute('href') || '').replace(/^#/, '');
+        var heading = id ? document.getElementById(id) : null;
+        var section = heading ? heading.parentElement : null;
+        link.hidden = Boolean(section && section.classList.contains('fss-dim'));
+      });
       applyYearLabels();
     }
 
@@ -280,6 +288,22 @@
         });
         secondaryInner.insertBefore(yearRail, secondaryInner.firstChild);
       }
+    }
+    var yearRailNode = document.getElementById('fss-year-rail');
+    if (yearRailNode && !document.getElementById('fss-section-rail')) {
+      var sectionRail = document.createElement('nav');
+      sectionRail.id = 'fss-section-rail';
+      var outline = root.querySelectorAll('.fss-dae > h2, .fss-jung > h3');
+      Array.prototype.forEach.call(outline, function (heading, index) {
+        if (!heading.id) heading.id = 'fss-h-' + index;
+        var link = document.createElement('a');
+        var isJung = heading.tagName.toUpperCase() === 'H3';
+        link.className = isJung ? 'fss-jung-link' : 'fss-dae-link';
+        link.href = '#' + heading.id;
+        link.textContent = heading.textContent;
+        sectionRail.appendChild(link);
+      });
+      yearRailNode.insertAdjacentElement('afterend', sectionRail);
     }
     var firmRailEl = document.getElementById('fss-firm-rail');
     if (firmRailEl) {

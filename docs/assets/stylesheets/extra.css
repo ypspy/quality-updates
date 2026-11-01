@@ -146,7 +146,8 @@ iframe {
 .fss-year-btn { padding: 0.2rem 0.75rem; white-space: nowrap; flex: 0 0 auto; }
 .fss-year-btn.on { background: var(--md-default-fg-color); color: var(--md-default-bg-color); }
 #fss-firm-rail,
-#fss-year-rail { padding: 0.4rem 0.6rem 0.2rem; }
+#fss-year-rail,
+#fss-section-rail { padding: 0.4rem 0.6rem 0.2rem; }
 .fss-rail-gun {
   margin: 0.75rem 0 0.2rem;
   font-size: 0.78rem;
@@ -182,6 +183,18 @@ iframe {
   color: var(--md-default-bg-color);
 }
 #fss-year-rail .fss-year-btn + .fss-year-btn { margin-top: 0.35rem; }
+#fss-section-rail a {
+  display: block;
+  box-sizing: border-box;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--md-default-fg-color);
+  text-decoration: none;
+  padding: 0.28rem 0.45rem;
+  white-space: normal;
+}
+#fss-section-rail a.fss-jung-link { padding-left: 1.2rem; }
+#fss-section-rail a[hidden] { display: none !important; }
 .fss-jung {
   border: 1px solid var(--md-default-fg-color--lightest);
   border-radius: 0.6rem;
