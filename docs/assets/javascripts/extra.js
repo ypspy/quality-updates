@@ -38,6 +38,26 @@
       if (nav.closest('header.md-header')) return;
       nav.hidden = false;
     });
+    document.querySelectorAll('.fss-year-drawer-btn').forEach(function (btn) {
+      btn.remove();
+    });
+    document.body.classList.remove('fss-year-open');
+  }
+
+  function ensureYearDrawerButton() {
+    if (document.querySelector('.fss-year-drawer-btn')) return;
+    var inner = document.querySelector('.md-header__inner');
+    if (!inner) return;
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'fss-year-drawer-btn';
+    btn.textContent = '연도';
+    btn.setAttribute('aria-expanded', 'false');
+    btn.addEventListener('click', function () {
+      var open = document.body.classList.toggle('fss-year-open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    inner.appendChild(btn);
   }
 
   function initFssReview() {
@@ -47,6 +67,7 @@
       clearFssRails();
       return;
     }
+    ensureYearDrawerButton();
     if (root.getAttribute('data-ready') === '1') {
       return;
     }

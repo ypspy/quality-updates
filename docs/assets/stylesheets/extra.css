@@ -256,6 +256,59 @@ iframe {
   .fss-clear { width: 100%; }
 }
 
+/* 품질관리감리만: 60em 미만에서 연도·목차는 오른쪽 서랍. 연도 축약(40em)과 끊는다. */
+.fss-year-drawer-btn {
+  flex: 0 0 auto;
+  align-self: center;
+  margin: 0.2rem 0.35rem 0.2rem 0.2rem;
+  padding: 0.35rem 0.5rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.8rem;
+  line-height: 1.2;
+  cursor: pointer;
+  white-space: nowrap;
+}
+@media screen and (max-width: 59.984375em) {
+  body:has(#fss-review.fss-review) .md-sidebar--secondary {
+    display: block;
+    position: fixed;
+    top: 2.4rem;
+    right: 0;
+    bottom: auto;
+    left: auto;
+    width: 12.1rem;
+    height: calc(100vh - 2.4rem);
+    height: calc(100dvh - 2.4rem);
+    margin: 0;
+    padding: 0;
+    background-color: var(--md-default-bg-color);
+    box-shadow: none;
+    z-index: 6;
+    transform: translateX(100%);
+    transition: transform .25s cubic-bezier(.4, 0, .2, 1), box-shadow .25s;
+    overflow: hidden;
+  }
+  body:has(#fss-review.fss-review) .md-sidebar--secondary .md-sidebar__scrollwrap {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: 0;
+    overflow-y: auto;
+  }
+  body.fss-year-open:has(#fss-review.fss-review) .md-sidebar--secondary {
+    transform: translateX(0);
+    box-shadow: var(--md-shadow-z3);
+  }
+}
+@media screen and (min-width: 60em) {
+  .fss-year-drawer-btn { display: none; }
+}
+
 /* 인쇄 스타일 */
 @media print {
   iframe {
