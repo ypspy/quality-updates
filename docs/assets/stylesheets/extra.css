@@ -141,7 +141,9 @@ iframe {
 .fss-suggest button[aria-selected="true"],
 .fss-suggest button:hover { background: var(--md-accent-fg-color--transparent); }
 .fss-years { display: flex; gap: 0.35rem; margin: 0.4rem 0 0.8rem; overflow-x: auto; }
-.fss-year-btn { padding: 0.2rem 0.75rem; }
+.fss-years[hidden] { display: none !important; }
+.fss-year-label { font-weight: 700; margin: 0.8rem 0 0.35rem; }
+.fss-year-btn { padding: 0.2rem 0.75rem; white-space: nowrap; flex: 0 0 auto; }
 .fss-year-btn.on { background: var(--md-default-fg-color); color: var(--md-default-bg-color); }
 .fss-jung {
   border: 1px solid var(--md-default-fg-color--lightest);
@@ -167,10 +169,26 @@ iframe {
   order: 1;
   flex: 1 0 100%;
   width: 100%;
+  overflow-wrap: anywhere;
   margin-top: 0.55rem;
   padding-top: 0.55rem;
   border-top: 1px solid var(--md-default-fg-color--lightest);
 }
+.fss-finding { margin: 0.7rem 0 0; }
+.fss-sev {
+  display: inline-block;
+  margin: 0 0.4rem 0.1rem 0;
+  padding: 0.02rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.5;
+  vertical-align: baseline;
+  border: 1px solid var(--md-default-fg-color--lightest);
+}
+.fss-sev-part { background: var(--md-accent-fg-color--transparent); }
+.fss-sev-off { background: var(--md-default-fg-color--lightest); }
+.fss-sev-miss { background: var(--md-default-fg-color); color: var(--md-default-bg-color); }
 .fss-review.is-filtering .fss-dae,
 .fss-review.is-filtering .fss-jung,
 .fss-review.is-filtering .fss-year,
@@ -179,6 +197,9 @@ iframe {
 .fss-review.is-filtering .fss-group { display: none; }
 .fss-review.is-filtering .fss-show { display: block; }
 .fss-review.is-filtering .fss-badges.fss-show { display: flex; }
+.fss-review.is-filtering .fss-badge.fss-show { display: inline-flex; }
+.fss-review.is-filtering .fss-original.fss-show { display: block; }
+.fss-dim { display: none !important; }
 @media screen and (max-width: 40em) {
   .fss-search-row { flex-direction: column; }
   .fss-suggest { right: 0; top: calc(100% - 2.8rem); }

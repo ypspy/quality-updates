@@ -44,3 +44,7 @@ test("groupVisible", function () {
   ), { show: true, open: false });
   assert.deepEqual(groupVisible(firm, empty), { show: true, open: false });
 });
+
+test("body year label stays four digits", function () {
+  assert.equal(yearLabel("2019", false), "2019년");
+});

@@ -58,67 +58,126 @@
       });
     }
 
-    function restore() {
-      root.classList.remove('is-filtering');
-      empty.hidden = true;
-      root.querySelectorAll('.fss-show').forEach(function (el) {
+    var state = { name: null, kind: null, year: null };
+
+    function groupPayload(group) {
+      var bundle = group.closest('.fss-bundle');
+      var kindNode = bundle ? bundle.querySelector('.fss-bundle-name') : null;
+      var yearNode = group.closest('.fss-year');
+      return {
+        names: (group.getAttribute('data-names') || '').split('|'),
+        kind: kindNode ? kindNode.textContent.trim() : '',
+        year: yearNode ? (yearNode.getAttribute('data-year') || '') : ''
+      };
+    }
+
+    function closeOriginals(group) {
+      group.querySelectorAll('.fss-original').forEach(function (el) {
+        el.hidden = true;
         el.classList.remove('fss-show');
       });
-      root.querySelectorAll('.fss-original').forEach(function (el) { el.hidden = true; });
-      root.querySelectorAll('.fss-badge.on, .fss-group.hit').forEach(function (el) {
-        el.classList.remove('on', 'hit');
-      });
-      root.querySelectorAll('.fss-jung').forEach(function (jung) {
-        jung.querySelectorAll('.fss-year').forEach(function (panel, i) {
-          panel.hidden = i !== 0;
-        });
-        jung.querySelectorAll('.fss-year-btn').forEach(function (btn, i) {
-          btn.classList.toggle('on', i === 0);
-          btn.hidden = false;
-        });
+      group.querySelectorAll('.fss-badge').forEach(function (el) {
+        el.classList.remove('on');
       });
     }
 
-    function apply(name) {
-      input.value = name;
-      showList([]);
-      restore();
-      root.classList.add('is-filtering');
-      var hits = 0;
+    function paint() {
+      var filtering = Boolean(state.name || state.kind || state.year);
+      document.querySelectorAll('.fss-years').forEach(function (el) {
+        el.hidden = true;
+      });
+      root.querySelectorAll('.fss-show').forEach(function (el) {
+        el.classList.remove('fss-show');
+      });
+      root.querySelectorAll('.fss-dim').forEach(function (el) {
+        el.classList.remove('fss-dim');
+      });
+      root.querySelectorAll('.fss-year').forEach(function (panel) {
+        var year = panel.getAttribute('data-year') || '';
+        panel.hidden = Boolean(state.year) && state.year !== year;
+        var label = panel.querySelector(':scope > p.fss-year-label');
+        if (!label) {
+          label = document.createElement('p');
+          label.className = 'fss-year-label';
+          panel.insertBefore(label, panel.firstChild);
+        }
+        label.textContent = window.FssFilter.yearLabel(year, false);
+      });
+      var visible = 0;
       root.querySelectorAll('.fss-group').forEach(function (group) {
-        if (!hasName(group, name)) return;
-        hits += 1;
-        group.classList.add('fss-show', 'hit');
-        group.querySelectorAll('.fss-badge, .fss-original, .fss-badges').forEach(function (el) {
-          if (hasName(el, name) || el.classList.contains('fss-badges')) {
-            el.classList.add('fss-show');
-            if (el.classList.contains('fss-original')) el.hidden = false;
-            if (el.classList.contains('fss-badge')) el.classList.add('on');
-          }
+        var vis = window.FssFilter.groupVisible(groupPayload(group), state);
+        if (!vis.show) {
+          group.classList.add('fss-dim');
+          closeOriginals(group);
+          return;
+        }
+        visible += 1;
+        if (vis.open) {
+          group.querySelectorAll('.fss-original').forEach(function (el) {
+            var match = hasName(el, state.name);
+            el.hidden = !match;
+            if (match) el.classList.add('fss-show');
+            else el.classList.remove('fss-show');
+          });
+          group.querySelectorAll('.fss-badge').forEach(function (el) {
+            el.classList.toggle('on', hasName(el, state.name));
+          });
+        } else {
+          closeOriginals(group);
+        }
+        if (!filtering) return;
+        group.classList.add('fss-show');
+        var badges = group.querySelector('.fss-badges');
+        if (badges) badges.classList.add('fss-show');
+        group.querySelectorAll('.fss-badge').forEach(function (el) {
+          el.classList.add('fss-show');
         });
         var node = group.parentElement;
         while (node && node !== root) {
           node.classList.add('fss-show');
-          if (node.classList.contains('fss-year')) node.hidden = false;
           node = node.parentElement;
         }
       });
-      root.querySelectorAll('.fss-jung').forEach(function (jung) {
-        jung.querySelectorAll('.fss-year-btn').forEach(function (btn) {
-          var panel = jung.querySelector('.fss-year[data-year="' + btn.getAttribute('data-year') + '"]');
-          var visible = panel && panel.classList.contains('fss-show');
-          btn.hidden = !visible;
-          btn.classList.toggle('on', visible);
+      if (filtering) {
+        ['.fss-year', '.fss-gun', '.fss-bundle', '.fss-jung', '.fss-dae'].forEach(function (sel) {
+          root.querySelectorAll(sel).forEach(function (el) {
+            if (!el.querySelector('.fss-group.fss-show')) {
+              el.classList.add('fss-dim');
+              el.classList.remove('fss-show');
+            }
+          });
         });
-      });
-      empty.hidden = hits > 0;
+        root.querySelectorAll('.fss-dim').forEach(function (el) {
+          el.classList.remove('fss-show');
+        });
+      }
+      if (filtering && visible === 0) {
+        empty.textContent = '이 조건에 해당하는 분류된 지적이 없습니다.';
+        empty.hidden = false;
+      } else {
+        empty.hidden = true;
+      }
+      root.classList.toggle('is-filtering', filtering);
+    }
+
+    function clearFirm() {
+      state = window.FssFilter.reduceFilter(state, { type: 'clearFirm' });
+      if (input.value) input.value = '';
+      showList([]);
+      paint();
+    }
+
+    function chooseName(value) {
+      state = window.FssFilter.reduceFilter(state, { type: 'name', value: value });
+      input.value = state.name || '';
+      showList([]);
+      paint();
     }
 
     input.addEventListener('input', function () {
       var q = input.value.trim();
       if (!q) {
-        showList([]);
-        restore();
+        clearFirm();
         return;
       }
       showList(firms.filter(function (name) { return name.indexOf(q) !== -1; }).slice(0, 8));
@@ -127,18 +186,16 @@
       if (!list.classList.contains('open')) return;
       if (e.key === 'ArrowDown') { e.preventDefault(); active = Math.min(active + 1, matches.length - 1); mark(); }
       if (e.key === 'ArrowUp') { e.preventDefault(); active = Math.max(active - 1, 0); mark(); }
-      if (e.key === 'Enter' && active >= 0) { e.preventDefault(); apply(matches[active]); }
+      if (e.key === 'Enter' && active >= 0) { e.preventDefault(); chooseName(matches[active]); }
       if (e.key === 'Escape') showList([]);
     });
     list.addEventListener('click', function (e) {
       var btn = e.target.closest('button');
       if (!btn) return;
-      apply(matches[Number(btn.getAttribute('data-i'))]);
+      chooseName(matches[Number(btn.getAttribute('data-i'))]);
     });
     clearBtn.addEventListener('click', function () {
-      input.value = '';
-      showList([]);
-      restore();
+      clearFirm();
       input.focus();
     });
     root.addEventListener('click', function (e) {
@@ -159,7 +216,7 @@
         return;
       }
       var badge = e.target.closest('.fss-badge');
-      if (!badge || !root.contains(badge) || root.classList.contains('is-filtering')) return;
+      if (!badge || !root.contains(badge) || state.name) return;
       var group = badge.closest('.fss-group');
       var name = (badge.getAttribute('data-names') || '').split('|')[0];
       var opening = true;
@@ -175,11 +232,30 @@
         badge.classList.add('on');
       }
     });
+    paint();
+  }
+
+  var yearQuery = window.matchMedia('(max-width: 40em)');
+
+  function applyYearLabels() {
+    var narrow = yearQuery.matches;
+    document.querySelectorAll('.fss-year-btn').forEach(function (btn) {
+      var year = btn.getAttribute('data-year') || '';
+      if (!/^\d{4}$/.test(year)) return;
+      btn.textContent = window.FssFilter.yearLabel(year, narrow);
+    });
   }
 
   function init() {
     applyQuarterlyUpdateScope();
     initFssReview();
+    applyYearLabels();
+  }
+
+  if (yearQuery.addEventListener) {
+    yearQuery.addEventListener('change', applyYearLabels);
+  } else if (yearQuery.addListener) {
+    yearQuery.addListener(applyYearLabels);
   }
 
   if (typeof document$ !== 'undefined') {
