@@ -256,6 +256,13 @@ iframe {
   .fss-clear { width: 100%; }
 }
 
+/* 품질관리감리만: 76.234375em 이하에서도 사이트 탭을 보인다. 왼쪽 서랍의 법인 목록은 숨긴 채로 둔다. */
+@media screen and (max-width: 76.234375em) {
+  body:has(#fss-review.fss-review) .md-tabs {
+    display: block;
+  }
+}
+
 /* 품질관리감리만: 60em 미만에서 연도·목차는 오른쪽 서랍. 연도 축약(40em)과 끊는다. */
 .fss-year-drawer-btn {
   flex: 0 0 auto;
@@ -286,10 +293,11 @@ iframe {
     padding: 0;
     background-color: var(--md-default-bg-color);
     box-shadow: none;
-    z-index: 6;
+    z-index: 4;
     transform: translateX(100%);
     transition: transform .25s cubic-bezier(.4, 0, .2, 1), box-shadow .25s;
     overflow: hidden;
+    visibility: hidden;
   }
   body:has(#fss-review.fss-review) .md-sidebar--secondary .md-sidebar__scrollwrap {
     position: absolute;
@@ -303,6 +311,7 @@ iframe {
   body.fss-year-open:has(#fss-review.fss-review) .md-sidebar--secondary {
     transform: translateX(0);
     box-shadow: var(--md-shadow-z3);
+    visibility: visible;
   }
 }
 @media screen and (min-width: 60em) {
