@@ -72,10 +72,23 @@ nav:
           - 1분기 (01–03월): quality-updates/2020/2020-01-01_to_2020-03-31.md
       - 2019년:
           - 4분기 (10–12월): quality-updates/2019/2019-10-01_to_2019-12-31.md
+          - 1분기 (01–03월): quality-updates/2019/2019-01-01_to_2019-03-31.md
           - 3분기 (07–09월): quality-updates/2019/2019-07-01_to_2019-09-30.md
           - 2분기 (04–06월): quality-updates/2019/2019-04-01_to_2019-06-30.md
           - 1분기 (01–03월): quality-updates/2019/2019-01-01_to_2019-03-31.md
+      - 2018년:
+          - 4분기 (10–12월): quality-updates/2018/2018-10-01_to_2018-12-31.md
+          - 3분기 (07–09월): quality-updates/2018/2018-07-01_to_2018-09-30.md
+          - 2분기 (04–06월): quality-updates/2018/2018-04-01_to_2018-06-30.md
+          - 1분기 (01–03월): quality-updates/2018/2018-01-01_to_2018-03-31.md
+      - 2017년:
+          - 4분기 (10–12월): quality-updates/2017/2017-10-01_to_2017-12-31.md
+          - 3분기 (07–09월): quality-updates/2017/2017-07-01_to_2017-09-30.md
+          - 2분기 (04–06월): quality-updates/2017/2017-04-01_to_2017-06-30.md
+          - 1분기 (01–03월): quality-updates/2017/2017-01-01_to_2017-03-31.md
       - 2016년:
+          - 4분기 (10–12월): quality-updates/2016/2016-10-01_to_2016-12-31.md
+          - 3분기 (07–09월): quality-updates/2016/2016-07-01_to_2016-09-30.md
           - 2분기 (04–06월): quality-updates/2016/2016-04-01_to_2016-06-30.md
           - 1분기 (01–03월): quality-updates/2016/2016-01-01_to_2016-03-31.md
       - 2015년:
@@ -84,9 +97,7 @@ nav:
           - 2분기 (04–06월): quality-updates/2015/2015-04-01_to_2015-06-30.md
           - 1분기 (01–03월): quality-updates/2015/2015-01-01_to_2015-03-31.md
 
-  - 품질관리감리:
-      - 품질관리감리 개요: fss-review/index.md
-      - 2022년 품질관리감리: fss-review/fr2022.md
+  - 품질관리감리: fss-review/index.md
 
 # Editor creates `.md.bak` backups in-place; exclude from MkDocs build/serve.
 exclude_docs: |
@@ -131,4 +142,5 @@ extra_css:
   - assets/stylesheets/extra.css
 
 extra_javascript:
+  - assets/javascripts/fss-filter.js
   - assets/javascripts/extra.js
