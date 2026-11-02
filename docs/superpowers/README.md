@@ -12,6 +12,7 @@ Agent 진입·프롬프트: [AGENTS.md](../../AGENTS.md)
 
 | 날짜 | 파일 | 요약 |
 |------|------|------|
+| 2026-11-02 | [cursor-summary-pr-design.md](specs/2026-11-02-cursor-summary-pr-design.md) | 지식체계 요약을 베지 리뷰 PR로 전달 |
 | 2026-11-01 | [fss-review-filter-rails-design.md](specs/2026-11-01-fss-review-filter-rails-design.md) | 품질관리감리 왼쪽 법인 목록과 오른쪽 연도 필터 |
 | 2026-09-11 | [editor-keyboard-curation-design.md](specs/2026-09-11-editor-keyboard-curation-design.md) | 편집기 행 단위 키보드, 첨부 토스트, PDF 최신순 |
 | 2026-09-10 | [consumption-mcp-product-design.md](specs/2026-09-10-consumption-mcp-product-design.md) | 소비 정본=사이트+MCP, audit-regulatory-lens 삭제 |
@@ -39,6 +40,7 @@ Agent 진입·프롬프트: [AGENTS.md](../../AGENTS.md)
 
 | 날짜 | 파일 | 요약 |
 |------|------|------|
+| 2026-11-02 | [cursor-summary-pr.md](plans/2026-11-02-cursor-summary-pr.md) | 지식체계 요약을 베지 리뷰 PR로 전달 |
 | 2026-11-01 | [fss-review-filter-rails.md](plans/2026-11-01-fss-review-filter-rails.md) | 품질관리감리 왼쪽 법인 목록과 오른쪽 연도 필터 |
 | 2026-09-11 | [editor-keyboard-curation.md](plans/2026-09-11-editor-keyboard-curation.md) | 편집기 행 키보드, 첨부 토스트, PDF 최신순 |
 | 2026-09-10 | [consumption-mcp-product.md](plans/2026-09-10-consumption-mcp-product.md) | 소비 정본=사이트+MCP, 렌즈 런타임 삭제 |

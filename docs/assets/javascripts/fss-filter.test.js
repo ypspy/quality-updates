@@ -1,6 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { REGISTERED, yearLabel, reduceFilter, groupVisible } = require("./fss-filter.js");
+const { REGISTERED, yearLabel, reduceFilter, groupVisible, findingYearCounts } = require("./fss-filter.js");
 
 const empty = { name: null, kind: null, year: null };
 
@@ -47,6 +47,18 @@ test("groupVisible", function () {
 
 test("body year label stays four digits", function () {
   assert.equal(yearLabel("2019", false), "2019년");
+});
+
+test("finding year counts follow the selected firm", function () {
+  var groups = [
+    { names: ["삼정회계법인"], year: "2024" },
+    { names: ["삼정회계법인", "안진회계법인"], year: "2024" },
+    { names: ["안진회계법인"], year: "2023" },
+    { names: ["삼정회계법인"], year: "" }
+  ];
+  assert.deepEqual(findingYearCounts(groups, "삼정회계법인"), { "2024": 2 });
+  assert.deepEqual(findingYearCounts(groups, "안진회계법인"), { "2024": 1, "2023": 1 });
+  assert.deepEqual(findingYearCounts(groups, null), {});
 });
 
 test("gun labels are not firm names", function () {
