@@ -46,10 +46,12 @@
 ### Task 1: 필터 상태 모듈
 
 **Files:**
+
 - Create: `docs/assets/javascripts/fss-filter.js`
 - Create: `docs/assets/javascripts/fss-filter.test.js`
 
 **Interfaces:**
+
 - Consumes: 없음
 - Produces:
   - `REGISTERED`: `{ gun: string, firms: string[] }[]` 길이 4. 군 순서는 `가군`, `나군`, `다군`, `라군`.
@@ -151,12 +153,14 @@ git commit -F C:\Users\yoont\AppData\Local\Temp\qu-commit.txt
 ### Task 2: 본문 연도를 쌓고 필터를 적용한다
 
 **Files:**
+
 - Modify: `mkdocs.yml` (`extra_javascript`)
 - Modify: `docs/assets/javascripts/extra.js`
 - Modify: `docs/assets/stylesheets/extra.css`
 - Test: `docs/assets/javascripts/fss-filter.test.js` (회귀)
 
 **Interfaces:**
+
 - Consumes: `window.FssFilter.reduceFilter`, `window.FssFilter.groupVisible`, `window.FssFilter.yearLabel`
 - Produces: `initFssReview`가 `state`를 갖고 `paint()`로 본문을 갱신한다. 중분류 연도 버튼(`.fss-years`)은 숨긴다. 각 `.fss-year` 앞에 `p.fss-year-label`을 한 번만 넣고 글자는 `FssFilter.yearLabel(year, false)`이다.
 
@@ -226,10 +230,12 @@ Expected: PASS.
 ### Task 3: 왼쪽 법인 레일과 오른쪽 연도 레일
 
 **Files:**
+
 - Modify: `docs/assets/javascripts/extra.js`
 - Modify: `docs/assets/stylesheets/extra.css`
 
 **Interfaces:**
+
 - Consumes: `FssFilter.REGISTERED`, `FssFilter.reduceFilter`, `FssFilter.yearLabel`, Task 2의 `state`와 `paint`
 - Produces: `#fss-firm-rail`, `#fss-year-rail`. 연도 레일 버튼은 `class="fss-year-btn"`와 `data-year`를 가진다.
 
@@ -288,10 +294,12 @@ Expected: PASS.
 ### Task 4: 브라우저에서 스펙 확인과 색인
 
 **Files:**
+
 - Modify: `docs/superpowers/README.md`
 - Modify: `docs/superpowers/specs/2026-11-01-fss-review-filter-rails-design.md` (상태 한 줄)
 
 **Interfaces:**
+
 - Consumes: Task 3의 레일
 - Produces: 스펙의 확인 목록을 로컬 `http://127.0.0.1:8000/fss-review/`에서 통과한 기록. 실패하면 Task 2 또는 3의 해당 분기만 고친다.
 
