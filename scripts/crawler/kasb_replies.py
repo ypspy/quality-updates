@@ -4,9 +4,10 @@ from __future__ import annotations
 import io
 import json
 import re
+import time
 import zipfile
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from xml.etree import ElementTree
 
@@ -380,3 +381,100 @@ def append_manifest(path: Path, record: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+
+def crawl_archive(
+    archive: Path,
+    *,
+    fetch_list,
+    fetch_detail,
+    fetch_file,
+    delay: float = 0.2,
+    limit: int | None = None,
+    retry_failed: bool = False,
+    sleep=time.sleep,
+    now=None,
+) -> dict[str, int]:
+    archive.mkdir(parents=True, exist_ok=True)
+    counts = {"saved": 0, "skipped": 0, "failed": 0}
+    seen: set[str] = set()
+    attempts = 0
+    first_http = True
+
+    def call(func, *args):
+        nonlocal first_http
+        if not first_http and delay:
+            sleep(delay)
+        first_http = False
+        return func(*args)
+
+    page = 1
+    last_page = 1
+    while page <= last_page:
+        html = call(fetch_list, page)
+        if page == 1:
+            last_page = last_page_number(html)
+        for row in parse_list_page(html):
+            if row.seq in seen:
+                continue
+            seen.add(row.seq)
+            directory = archive / row.seq
+            if not should_attempt(directory, retry_failed):
+                counts["skipped"] += 1
+                continue
+            if limit is not None and attempts >= limit:
+                return counts
+            attempts += 1
+            try:
+                detail = parse_detail_page(call(fetch_detail, row.seq, row.ctg_cd))
+                refs = detail.attachments or row.attachments
+                directory.mkdir(parents=True, exist_ok=True)
+                used: set[str] = set()
+                sections = []
+                for ref in refs:
+                    filename = attachment_filename(ref.name, ref.file_seq, used)
+                    payload = call(fetch_file, ref.file_no, ref.file_seq)
+                    (directory / filename).write_bytes(payload)
+                    text, status = extract_bytes(filename, payload)
+                    sections.append((filename, text, status))
+                moment = now() if now else datetime.now(timezone.utc)
+                if moment.tzinfo is None:
+                    moment = moment.replace(tzinfo=timezone.utc)
+                item = compose_item(row, detail, sections, moment.isoformat())
+                (directory / "item.md").write_text(item, encoding="utf-8")
+                meta = read_meta(directory) or {}
+                append_manifest(
+                    archive / "manifest.jsonl",
+                    {
+                        "seq": row.seq,
+                        "ctg_cd": row.ctg_cd,
+                        "number": row.number,
+                        "category": meta.get("category", row.category),
+                        "title": row.title,
+                        "reply_date": meta.get("reply_date", row.reply_date),
+                        "published_date": row.published_date,
+                        "extract_status": meta.get("extract_status", "failed"),
+                        "path": f"{row.seq}/item.md",
+                        "error": None,
+                    },
+                )
+                counts["saved"] += 1
+            except Exception as exc:
+                append_manifest(
+                    archive / "manifest.jsonl",
+                    {
+                        "seq": row.seq,
+                        "ctg_cd": row.ctg_cd,
+                        "number": row.number,
+                        "category": row.category,
+                        "title": row.title,
+                        "reply_date": row.reply_date,
+                        "published_date": row.published_date,
+                        "extract_status": "failed",
+                        "path": None,
+                        "error": str(exc),
+                    },
+                )
+                counts["failed"] += 1
+        page += 1
+    return counts

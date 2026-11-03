@@ -452,3 +452,124 @@ def test_should_attempt_and_manifest(tmp_path):
     record = json.loads(manifest.read_text(encoding="utf-8").splitlines()[-1])
     assert record["path"] == "40689/item.md"
     assert record["error"] is None
+
+
+from datetime import datetime, timedelta, timezone
+
+
+def _crawl_pages():
+    page1 = """
+    <table><tbody>
+    <tr>
+      <td>공지</td><td></td>
+      <td><a onclick="javascript:fn_Detail('40533','016009');">비교표</a></td>
+      <td><a onclick="fileDownload('-1','1'); return false;">compare.xlsx</a></td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td>2193</td><td>정착지원TF</td>
+      <td><a onclick="javascript:fn_Detail('40689','016008');">제목</a></td>
+      <td><a onclick="fileDownload('-49993299','1'); return false;">note.hwpx</a></td>
+      <td>2026-10-16</td><td></td>
+    </tr>
+    </tbody></table>
+    <li class="pag_last"><a href="javascript:G_MovePage(2);">Last</a></li>
+    """
+    page2 = """
+    <table><tbody>
+    <tr>
+      <td>공지</td><td></td>
+      <td><a onclick="javascript:fn_Detail('40533','016009');">비교표</a></td>
+      <td><a onclick="fileDownload('-1','1'); return false;">compare.xlsx</a></td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td>2192</td><td>정착지원TF</td>
+      <td><a onclick="javascript:fn_Detail('40690','016008');">다음</a></td>
+      <td><a onclick="fileDownload('-2','1'); return false;">next.hwpx</a></td>
+      <td>2026-08-18</td><td>2026-09-30</td>
+    </tr>
+    </tbody></table>
+    <li class="pag_last"><a href="javascript:G_MovePage(2);">Last</a></li>
+    """
+    return {1: page1, 2: page2}
+
+
+def test_crawl_archive_saves_once_and_skips_complete(tmp_path):
+    pages = _crawl_pages()
+    details = []
+    slept = []
+
+    def fetch_list(page):
+        return pages[page]
+
+    def fetch_detail(seq, ctg_cd):
+        details.append(seq)
+        return DETAIL_HTML.replace("40689", seq)
+
+    def fetch_file(file_no, file_seq):
+        return _hwpx("본문")
+
+    def sleep(seconds):
+        slept.append(seconds)
+
+    moment = datetime(2026, 11, 4, 7, 0, tzinfo=timezone(timedelta(hours=9)))
+    result = kasb_replies.crawl_archive(
+        tmp_path,
+        fetch_list=fetch_list,
+        fetch_detail=fetch_detail,
+        fetch_file=fetch_file,
+        delay=0.2,
+        sleep=sleep,
+        now=lambda: moment,
+    )
+    assert result == {"saved": 3, "skipped": 0, "failed": 0}
+    assert details == ["40533", "40689", "40690"]
+    item = (tmp_path / "40689" / "item.md").read_text(encoding="utf-8")
+    assert "fetched_at: '2026-11-04T07:00:00+09:00'" in item or "2026-11-04T07:00:00+09:00" in item
+    assert (tmp_path / "40689" / "261016_note.hwpx").is_file()
+    saved_next = yaml.safe_load((tmp_path / "40690" / "item.md").read_text(encoding="utf-8").split("---", 2)[1])
+    assert saved_next["published_date"] == "2026-09-30"
+    again = kasb_replies.crawl_archive(
+        tmp_path,
+        fetch_list=fetch_list,
+        fetch_detail=fetch_detail,
+        fetch_file=fetch_file,
+        delay=0,
+        sleep=lambda seconds: None,
+        now=lambda: moment,
+    )
+    assert again["skipped"] == 3
+    assert again["saved"] == 0
+    assert len(slept) == 7
+
+
+def test_crawl_archive_limit_and_download_failure(tmp_path):
+    pages = _crawl_pages()
+
+    def fetch_list(page):
+        return pages[page]
+
+    def fetch_detail(seq, ctg_cd):
+        if seq == "40689":
+            raise RuntimeError("detail down")
+        return DETAIL_HTML
+
+    def fetch_file(file_no, file_seq):
+        return _hwpx("본문")
+
+    result = kasb_replies.crawl_archive(
+        tmp_path,
+        fetch_list=fetch_list,
+        fetch_detail=fetch_detail,
+        fetch_file=fetch_file,
+        delay=0,
+        limit=2,
+        sleep=lambda seconds: None,
+    )
+    assert result["saved"] == 1
+    assert result["failed"] == 1
+    assert not (tmp_path / "40689" / "item.md").exists()
+    assert (tmp_path / "40690").exists() is False
+    lines = (tmp_path / "manifest.jsonl").read_text(encoding="utf-8").splitlines()
+    assert any(json.loads(line)["error"] == "detail down" for line in lines)
