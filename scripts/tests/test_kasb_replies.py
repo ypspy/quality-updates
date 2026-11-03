@@ -1,0 +1,63 @@
+# -*- coding: utf-8 -*-
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from crawler import kasb_replies
+
+LIST_HTML = """
+<table>
+<tbody>
+<tr>
+  <td>공지</td><td></td>
+  <td><a onclick="javascript:fn_Detail('40533','016009');">비교표</a></td>
+  <td><a onclick="javascript:fileDownload('-49990797','1'); return false;">compare.xlsx</a></td>
+  <td></td><td></td>
+</tr>
+<tr>
+  <td>2193</td><td>정착지원TF</td>
+  <td><a onclick="javascript:fn_Detail('40689','016008');">제1118호 정착지원 TF 논의 내용(5차)</a></td>
+  <td><a onclick="javascript:fileDownload('-49993299','1'); return false;">261016_note.hwpx</a></td>
+  <td>2026-10-16</td><td></td>
+</tr>
+<tr>
+  <td>1</td><td>없음</td><td><span>링크 없음</span></td><td></td><td></td><td></td>
+</tr>
+</tbody>
+</table>
+<div class="paging_wrap">
+  <li class="pag_last"><a href="javascript:G_MovePage(220);">Last</a></li>
+</div>
+"""
+
+
+def test_parse_list_page_reads_notice_and_item():
+    rows = kasb_replies.parse_list_page(LIST_HTML)
+    assert len(rows) == 2
+    notice, item = rows
+    assert notice.seq == "40533"
+    assert notice.ctg_cd == "016009"
+    assert notice.number == "공지"
+    assert notice.reply_date is None
+    assert notice.attachments[0].file_no == "-49990797"
+    assert notice.attachments[0].name == "compare.xlsx"
+    assert item.seq == "40689"
+    assert item.ctg_cd == "016008"
+    assert item.number == "2193"
+    assert item.category == "정착지원TF"
+    assert item.title == "제1118호 정착지원 TF 논의 내용(5차)"
+    assert item.reply_date == "2026-10-16"
+    assert item.published_date is None
+    assert item.attachments[0].file_seq == "1"
+
+
+def test_last_page_number_and_default():
+    assert kasb_replies.last_page_number(LIST_HTML) == 220
+    assert kasb_replies.last_page_number("<table></table>") == 1
+
+
+def test_dedupe_rows_keeps_first_seq():
+    rows = kasb_replies.parse_list_page(LIST_HTML)
+    merged = kasb_replies.dedupe_rows(rows + rows)
+    assert [row.seq for row in merged] == ["40533", "40689"]
