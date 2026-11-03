@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import io
+import json
 import re
 import zipfile
 from dataclasses import dataclass
@@ -9,6 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from xml.etree import ElementTree
 
+import yaml
 from bs4 import BeautifulSoup
 
 _DETAIL_RE = re.compile(r"fn_Detail\s*\(\s*'(\d+)'\s*,\s*'(\d+)'\s*\)")
@@ -277,3 +279,109 @@ def aggregate_status(statuses: list[str]) -> str:
     if all(status == "ok" for status in statuses):
         return "ok"
     return "failed"
+
+
+def attachment_filename(name: str, file_seq: str, used: set[str]) -> str:
+    cleaned = Path(name.replace("\\", "/")).name.strip() or f"attachment-{file_seq}"
+    cleaned = cleaned.replace("\x00", "")
+    if cleaned not in used:
+        used.add(cleaned)
+        return cleaned
+    stem = Path(cleaned).stem
+    suffix = Path(cleaned).suffix
+    candidate = f"{stem}-{file_seq}{suffix}"
+    number = 2
+    while candidate in used:
+        candidate = f"{stem}-{file_seq}-{number}{suffix}"
+        number += 1
+    used.add(candidate)
+    return candidate
+
+
+def compose_item(row: ListRow, detail: DetailPage, sections: list[tuple[str, str, str]], fetched_at: str) -> str:
+    category = detail.category or row.category
+    reply_date = row.reply_date or detail.registered_date
+    source = detail.attachments or row.attachments
+    names = []
+    used: set[str] = set()
+    for ref in source:
+        names.append(attachment_filename(ref.name, ref.file_seq, used))
+    by_saved = {filename: (text, status) for filename, text, status in sections}
+    attachments = []
+    body_sections = []
+    for index, (ref, filename) in enumerate(zip(source, names)):
+        if filename in by_saved:
+            text, status = by_saved[filename]
+        elif len(sections) == len(names) and index < len(sections):
+            text, status = sections[index][1], sections[index][2]
+        else:
+            text, status = ("missing extract", "failed")
+        attachments.append(
+            {
+                "name": filename,
+                "file_no": ref.file_no,
+                "file_seq": ref.file_seq,
+                "extract_status": status,
+            }
+        )
+        body_sections.append((filename, text, status))
+    meta = {
+        "seq": row.seq,
+        "ctg_cd": row.ctg_cd,
+        "number": row.number,
+        "category": category,
+        "title": row.title,
+        "standards": list(detail.standards),
+        "reply_date": reply_date,
+        "published_date": row.published_date,
+        "attachments": attachments,
+        "fetched_at": fetched_at,
+        "extract_status": aggregate_status([item["extract_status"] for item in attachments]),
+    }
+    dumped = yaml.safe_dump(meta, allow_unicode=True, sort_keys=False).strip()
+    lines = ["---", dumped, "---", "", "## 상세 안내", "", detail.notice.strip() or "(없음)", ""]
+    for filename, text, status in body_sections:
+        lines.extend([f"## 첨부: {filename}", ""])
+        if status in {"ok", "partial"} and text.strip():
+            lines.extend([text.rstrip(), ""])
+        else:
+            lines.extend([f"{status}: {text.strip() or status}", ""])
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def read_meta(directory: Path) -> dict | None:
+    item = directory / "item.md"
+    if not item.is_file():
+        return None
+    text = item.read_text(encoding="utf-8")
+    if not text.startswith("---\n"):
+        return None
+    parts = text.split("---", 2)
+    if len(parts) < 3:
+        return None
+    try:
+        meta = yaml.safe_load(parts[1])
+    except yaml.YAMLError:
+        return None
+    return meta if isinstance(meta, dict) else None
+
+
+def should_attempt(directory: Path, retry_failed: bool) -> bool:
+    meta = read_meta(directory)
+    if meta is None:
+        return True
+    status = meta.get("extract_status")
+    files_ok = all((directory / item["name"]).is_file() for item in meta.get("attachments") or [])
+    if status == "ok" and files_ok:
+        return False
+    if status == "ok" and not files_ok:
+        return True
+    if not files_ok:
+        return True
+    return retry_failed and status in {"failed", "partial", "empty"}
+
+
+def append_manifest(path: Path, record: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(record, ensure_ascii=False) + "\n")

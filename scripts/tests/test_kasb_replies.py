@@ -338,3 +338,117 @@ def test_extract_hwp_fails_on_invalid_utf16_prvtext():
 )
 def test_aggregate_status(statuses, expected):
     assert kasb_replies.aggregate_status(statuses) == expected
+
+
+import json
+
+import yaml
+
+
+def _sample_row():
+    return kasb_replies.ListRow(
+        seq="40689",
+        ctg_cd="016008",
+        number="2193",
+        category="",
+        title="제목",
+        reply_date=None,
+        published_date=None,
+        attachments=(),
+    )
+
+
+def _sample_detail():
+    return kasb_replies.DetailPage(
+        category="정착지원TF",
+        standards=("제1118호 재무제표 표시와 공시",),
+        registered_date="2026-10-16",
+        notice="",
+        attachments=(kasb_replies.AttachmentRef("note.hwpx", "-49993299", "1"),),
+    )
+
+
+def test_attachment_filename_strips_directories_and_dedupes():
+    used = set()
+    assert kasb_replies.attachment_filename(r"..\a\note.hwpx", "1", used) == "note.hwpx"
+    assert kasb_replies.attachment_filename("note.hwpx", "2", used) == "note-2.hwpx"
+
+
+def test_compose_item_uses_detail_category_and_registered_date():
+    text = kasb_replies.compose_item(
+        _sample_row(),
+        _sample_detail(),
+        [("note.hwpx", "본문", "ok")],
+        "2026-11-04T07:00:00+09:00",
+    )
+    meta, body = text.split("---", 2)[1:]
+    loaded = yaml.safe_load(meta)
+    assert loaded["seq"] == "40689"
+    assert loaded["category"] == "정착지원TF"
+    assert loaded["reply_date"] == "2026-10-16"
+    assert loaded["published_date"] is None
+    assert loaded["standards"] == ["제1118호 재무제표 표시와 공시"]
+    assert loaded["extract_status"] == "ok"
+    assert loaded["attachments"][0]["file_no"] == "-49993299"
+    assert loaded["attachments"][0]["extract_status"] == "ok"
+    assert "## 상세 안내" in body
+    assert "(없음)" in body
+    assert "## 첨부: note.hwpx" in body
+    assert "본문" in body
+
+
+def test_compose_item_writes_failed_attachment_line():
+    text = kasb_replies.compose_item(
+        _sample_row(),
+        _sample_detail(),
+        [("note.hwp", "PrvText missing", "failed")],
+        "2026-11-04T07:00:00+09:00",
+    )
+    assert "failed: PrvText missing" in text
+    assert yaml.safe_load(text.split("---", 2)[1])["extract_status"] == "failed"
+
+
+def test_should_attempt_and_manifest(tmp_path):
+    directory = tmp_path / "40689"
+    directory.mkdir()
+    assert kasb_replies.should_attempt(directory, retry_failed=False) is True
+    (directory / "note.hwpx").write_bytes(b"x")
+    item = kasb_replies.compose_item(
+        _sample_row(),
+        _sample_detail(),
+        [("note.hwpx", "본문", "ok")],
+        "2026-11-04T07:00:00+09:00",
+    )
+    (directory / "item.md").write_text(item, encoding="utf-8")
+    assert kasb_replies.should_attempt(directory, retry_failed=True) is False
+    (directory / "note.hwpx").unlink()
+    assert kasb_replies.should_attempt(directory, retry_failed=False) is True
+    partial = kasb_replies.compose_item(
+        _sample_row(),
+        _sample_detail(),
+        [("note.hwpx", "미리보기", "partial")],
+        "2026-11-04T07:00:00+09:00",
+    )
+    (directory / "item.md").write_text(partial, encoding="utf-8")
+    (directory / "note.hwpx").write_bytes(b"x")
+    assert kasb_replies.should_attempt(directory, retry_failed=False) is False
+    assert kasb_replies.should_attempt(directory, retry_failed=True) is True
+    manifest = tmp_path / "manifest.jsonl"
+    kasb_replies.append_manifest(
+        manifest,
+        {
+            "seq": "40689",
+            "ctg_cd": "016008",
+            "number": "2193",
+            "category": "정착지원TF",
+            "title": "제목",
+            "reply_date": "2026-10-16",
+            "published_date": None,
+            "extract_status": "ok",
+            "path": "40689/item.md",
+            "error": None,
+        },
+    )
+    record = json.loads(manifest.read_text(encoding="utf-8").splitlines()[-1])
+    assert record["path"] == "40689/item.md"
+    assert record["error"] is None
