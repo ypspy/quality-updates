@@ -41,23 +41,9 @@
     document.querySelectorAll('.fss-year-drawer-btn').forEach(function (btn) {
       btn.remove();
     });
+    var yearBar = document.getElementById('fss-year-bar');
+    if (yearBar) yearBar.remove();
     document.body.classList.remove('fss-year-open');
-  }
-
-  function ensureYearDrawerButton() {
-    if (document.querySelector('.fss-year-drawer-btn')) return;
-    var inner = document.querySelector('.md-header__inner');
-    if (!inner) return;
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'fss-year-drawer-btn';
-    btn.textContent = '연도';
-    btn.setAttribute('aria-expanded', 'false');
-    btn.addEventListener('click', function () {
-      var open = document.body.classList.toggle('fss-year-open');
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    });
-    inner.appendChild(btn);
   }
 
   function initFssReview() {
@@ -67,7 +53,6 @@
       clearFssRails();
       return;
     }
-    ensureYearDrawerButton();
     if (root.getAttribute('data-ready') === '1') {
       return;
     }
@@ -202,8 +187,11 @@
       document.querySelectorAll('#fss-firm-rail [data-kind]').forEach(function (btn) {
         btn.setAttribute('aria-pressed', btn.getAttribute('data-kind') === state.kind ? 'true' : 'false');
       });
-      document.querySelectorAll('#fss-year-rail .fss-year-btn').forEach(function (btn) {
-        btn.classList.toggle('on', btn.getAttribute('data-year') === state.year);
+      document.querySelectorAll('#fss-year-bar .fss-year-btn').forEach(function (btn) {
+        var on = btn.getAttribute('data-year') === state.year;
+        btn.classList.toggle('on', on);
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        btn.disabled = false;
       });
       document.querySelectorAll('#fss-section-rail a').forEach(function (link) {
         var id = (link.getAttribute('href') || '').replace(/^#/, '');
@@ -212,6 +200,42 @@
         link.hidden = Boolean(section && section.classList.contains('fss-dim'));
       });
       applyYearLabels();
+      markFindingYears();
+    }
+
+    function markFindingYears() {
+      var counts = window.FssFilter.findingYearCounts(
+        Array.prototype.map.call(root.querySelectorAll('.fss-group'), groupPayload),
+        state.name
+      );
+      document.querySelectorAll('#fss-year-bar .fss-year-btn').forEach(function (btn) {
+        var year = btn.getAttribute('data-year') || '';
+        var count = counts[year] || 0;
+        var text = btn.querySelector('.fss-year-text');
+        if (!text) {
+          text = document.createElement('span');
+          text.className = 'fss-year-text';
+          text.textContent = btn.textContent;
+          btn.textContent = '';
+          btn.appendChild(text);
+        }
+        var mark = btn.querySelector('.fss-year-mark');
+        if (!count) {
+          if (mark) mark.remove();
+          btn.classList.remove('has-finding');
+          btn.removeAttribute('aria-label');
+          return;
+        }
+        if (!mark) {
+          mark = document.createElement('span');
+          mark.className = 'fss-year-mark';
+          btn.appendChild(mark);
+        }
+        mark.textContent = String(count);
+        btn.classList.add('has-finding');
+        btn.setAttribute('aria-label', window.FssFilter.yearLabel(year, false) + ', 지적 ' + count + '건');
+      });
+      alignWrappedYearButtons();
     }
 
     function clearFirm() {
@@ -286,45 +310,55 @@
         });
       }
     }
-    if (!document.getElementById('fss-year-rail')) {
+    if (!document.getElementById('fss-section-rail')) {
       var secondaryInner = document.querySelector('.md-sidebar--secondary .md-sidebar__inner');
       if (secondaryInner) {
-        var yearRail = document.createElement('div');
-        yearRail.id = 'fss-year-rail';
-        var seenYear = {};
-        var years = [];
-        root.querySelectorAll('[data-year]').forEach(function (el) {
-          var year = el.getAttribute('data-year') || '';
-          if (!/^\d{4}$/.test(year) || seenYear[year]) return;
-          seenYear[year] = true;
-          years.push(year);
+        var sectionRail = document.createElement('nav');
+        sectionRail.id = 'fss-section-rail';
+        var outline = root.querySelectorAll('.fss-dae > h2, .fss-jung > h3');
+        Array.prototype.forEach.call(outline, function (heading, index) {
+          if (!heading.id) heading.id = 'fss-h-' + index;
+          var link = document.createElement('a');
+          var isJung = heading.tagName.toUpperCase() === 'H3';
+          link.className = isJung ? 'fss-jung-link' : 'fss-dae-link';
+          link.href = '#' + heading.id;
+          link.textContent = heading.textContent;
+          sectionRail.appendChild(link);
         });
-        years.sort(function (a, b) { return Number(b) - Number(a); });
-        years.forEach(function (year) {
-          var btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'fss-year-btn';
-          btn.setAttribute('data-year', year);
-          yearRail.appendChild(btn);
-        });
-        secondaryInner.insertBefore(yearRail, secondaryInner.firstChild);
+        secondaryInner.insertBefore(sectionRail, secondaryInner.firstChild);
       }
     }
-    var yearRailNode = document.getElementById('fss-year-rail');
-    if (yearRailNode && !document.getElementById('fss-section-rail')) {
-      var sectionRail = document.createElement('nav');
-      sectionRail.id = 'fss-section-rail';
-      var outline = root.querySelectorAll('.fss-dae > h2, .fss-jung > h3');
-      Array.prototype.forEach.call(outline, function (heading, index) {
-        if (!heading.id) heading.id = 'fss-h-' + index;
-        var link = document.createElement('a');
-        var isJung = heading.tagName.toUpperCase() === 'H3';
-        link.className = isJung ? 'fss-jung-link' : 'fss-dae-link';
-        link.href = '#' + heading.id;
-        link.textContent = heading.textContent;
-        sectionRail.appendChild(link);
+    var seenYear = {};
+    var years = [];
+    root.querySelectorAll('.fss-year[data-year]').forEach(function (el) {
+      var year = el.getAttribute('data-year') || '';
+      if (!/^\d{4}$/.test(year) || seenYear[year]) return;
+      seenYear[year] = true;
+      years.push(year);
+    });
+    years.sort(function (a, b) { return Number(b) - Number(a); });
+    if (!state.year && years.length) state.year = years[0];
+    if (!document.getElementById('fss-year-bar')) {
+      var yearBar = document.createElement('div');
+      yearBar.id = 'fss-year-bar';
+      yearBar.setAttribute('role', 'toolbar');
+      yearBar.setAttribute('aria-label', '연도');
+      years.forEach(function (year) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'fss-year-btn';
+        btn.setAttribute('data-year', year);
+        yearBar.appendChild(btn);
       });
-      yearRailNode.insertAdjacentElement('afterend', sectionRail);
+      var article = document.querySelector('.md-content__inner');
+      if (article) article.insertBefore(yearBar, article.firstChild);
+      else root.insertBefore(yearBar, root.firstChild);
+      yearBar.addEventListener('click', function (e) {
+        var yearBtn = e.target.closest('.fss-year-btn');
+        if (!yearBtn || !yearBar.contains(yearBtn)) return;
+        state.year = yearBtn.getAttribute('data-year');
+        paint();
+      });
     }
     var firmRailEl = document.getElementById('fss-firm-rail');
     if (firmRailEl) {
@@ -342,15 +376,6 @@
         state = window.FssFilter.reduceFilter(state, { type: 'kind', value: kindBtn.getAttribute('data-kind') });
         input.value = '';
         showList([]);
-        paint();
-      });
-    }
-    var yearRailEl = document.getElementById('fss-year-rail');
-    if (yearRailEl) {
-      yearRailEl.addEventListener('click', function (e) {
-        var yearBtn = e.target.closest('.fss-year-btn');
-        if (!yearBtn || !yearRailEl.contains(yearBtn)) return;
-        state = window.FssFilter.reduceFilter(state, { type: 'year', value: yearBtn.getAttribute('data-year') });
         paint();
       });
     }
@@ -377,19 +402,62 @@
 
   var yearQuery = window.matchMedia('(max-width: 40em)');
 
+  function alignWrappedYearButtons() {
+    var bar = document.getElementById('fss-year-bar');
+    if (!bar) return;
+    var buttons = Array.prototype.slice.call(bar.querySelectorAll('.fss-year-btn'));
+    buttons.forEach(function (btn) {
+      btn.style.marginLeft = '';
+      btn.style.marginRight = '';
+    });
+    if (!buttons.length) return;
+    var rows = [];
+    buttons.forEach(function (btn) {
+      var top = btn.offsetTop;
+      var row = rows[rows.length - 1];
+      if (!row || Math.abs(row.top - top) > 1) rows.push({ top: top, items: [btn] });
+      else row.items.push(btn);
+    });
+    if (rows.length < 2) return;
+    var anchor = rows[0].items[0].offsetLeft;
+    rows.slice(1).forEach(function (row) {
+      row.items[0].style.marginLeft = anchor + 'px';
+      row.items[row.items.length - 1].style.marginRight = 'auto';
+    });
+  }
+
   function applyYearLabels() {
     var narrow = yearQuery.matches;
     document.querySelectorAll('.fss-year-btn').forEach(function (btn) {
       var year = btn.getAttribute('data-year') || '';
       if (!/^\d{4}$/.test(year)) return;
-      btn.textContent = window.FssFilter.yearLabel(year, narrow);
+      var label = window.FssFilter.yearLabel(year, narrow);
+      var text = btn.querySelector('.fss-year-text');
+      if (text) text.textContent = label;
+      else btn.textContent = label;
     });
+    alignWrappedYearButtons();
+  }
+
+  var observedYearBar = null;
+  var yearBarObserver = window.ResizeObserver ? new ResizeObserver(function () {
+    alignWrappedYearButtons();
+  }) : null;
+
+  function watchYearBar() {
+    if (!yearBarObserver) return;
+    var bar = document.getElementById('fss-year-bar');
+    if (bar === observedYearBar) return;
+    if (observedYearBar) yearBarObserver.unobserve(observedYearBar);
+    observedYearBar = bar;
+    if (bar) yearBarObserver.observe(bar);
   }
 
   function init() {
     applyQuarterlyUpdateScope();
     initFssReview();
     applyYearLabels();
+    watchYearBar();
   }
 
   if (yearQuery.addEventListener) {

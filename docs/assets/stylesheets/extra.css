@@ -142,11 +142,10 @@ iframe {
 .fss-suggest button:hover { background: var(--md-accent-fg-color--transparent); }
 .fss-years { display: flex; gap: 0.35rem; margin: 0.4rem 0 0.8rem; overflow-x: auto; }
 .fss-years[hidden] { display: none !important; }
-.fss-year-label { font-weight: 700; margin: 0.8rem 0 0.35rem; }
+.fss-year-label { display: none; }
 .fss-year-btn { padding: 0.2rem 0.75rem; white-space: nowrap; flex: 0 0 auto; }
 .fss-year-btn.on { background: var(--md-default-fg-color); color: var(--md-default-bg-color); }
 #fss-firm-rail,
-#fss-year-rail,
 #fss-section-rail { padding: 0.4rem 0.6rem 0.2rem; }
 .fss-rail-gun {
   margin: 0.75rem 0 0.2rem;
@@ -155,8 +154,7 @@ iframe {
   color: var(--md-default-fg-color--light);
 }
 #fss-firm-rail .fss-rail-firm,
-#fss-firm-rail .fss-rail-kind,
-#fss-year-rail .fss-year-btn {
+#fss-firm-rail .fss-rail-kind {
   display: block;
   width: 100%;
   box-sizing: border-box;
@@ -182,7 +180,6 @@ iframe {
   background: var(--md-default-fg-color);
   color: var(--md-default-bg-color);
 }
-#fss-year-rail .fss-year-btn + .fss-year-btn { margin-top: 0.35rem; }
 #fss-section-rail a {
   display: block;
   box-sizing: border-box;
@@ -256,6 +253,44 @@ iframe {
   .fss-clear { width: 100%; }
 }
 
+#fss-year-bar {
+  position: sticky;
+  top: 2.4rem;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem 0.45rem;
+  overflow: visible;
+  margin: 0 0 0.8rem;
+  padding: 0.35rem 0;
+  background: var(--md-default-bg-color);
+}
+#fss-year-bar .fss-year-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+}
+#fss-year-bar .fss-year-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.28rem;
+  border-radius: 999px;
+  background: var(--md-accent-fg-color);
+  color: var(--md-accent-bg-color);
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+}
+#fss-year-bar .fss-year-btn.on .fss-year-mark {
+  background: var(--md-accent-bg-color);
+  color: var(--md-accent-fg-color);
+}
+
 /* 품질관리감리만: 76.234375em 이하에서도 사이트 탭을 보인다. 왼쪽 서랍의 법인 목록은 숨긴 채로 둔다. */
 @media screen and (max-width: 76.234375em) {
   body:has(#fss-review.fss-review) .md-tabs {
@@ -263,41 +298,12 @@ iframe {
   }
 }
 
-/* 품질관리감리만: 60em 미만에서 연도·목차는 오른쪽 서랍. 연도 축약(40em)과 끊는다. */
-.fss-year-drawer-btn {
-  flex: 0 0 auto;
-  align-self: center;
-  margin: 0.2rem 0.35rem 0.2rem 0.2rem;
-  padding: 0.35rem 0.5rem;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  font-size: 0.8rem;
-  line-height: 1.2;
-  cursor: pointer;
-  white-space: nowrap;
-}
-@media screen and (max-width: 59.984375em) {
+/* 품질관리감리만: 가운데를 내려도 왼쪽·오른쪽은 그 자리에 둔다. */
+@media screen and (min-width: 60em) {
   body:has(#fss-review.fss-review) .md-sidebar--secondary {
-    display: block;
-    position: fixed;
-    top: 2.4rem;
-    right: 0;
-    bottom: auto;
-    left: auto;
-    width: 12.1rem;
-    height: calc(100vh - 2.4rem);
     height: calc(100dvh - 2.4rem);
-    margin: 0;
-    padding: 0;
-    background-color: var(--md-default-bg-color);
-    box-shadow: none;
-    z-index: 4;
-    transform: translateX(100%);
-    transition: transform .25s cubic-bezier(.4, 0, .2, 1), box-shadow .25s;
+    max-height: calc(100dvh - 2.4rem);
     overflow: hidden;
-    visibility: hidden;
   }
   body:has(#fss-review.fss-review) .md-sidebar--secondary .md-sidebar__scrollwrap {
     position: absolute;
@@ -305,17 +311,28 @@ iframe {
     right: 0;
     bottom: 0;
     left: 0;
+    height: auto;
     margin: 0;
-    overflow-y: auto;
-  }
-  body.fss-year-open:has(#fss-review.fss-review) .md-sidebar--secondary {
-    transform: translateX(0);
-    box-shadow: var(--md-shadow-z3);
-    visibility: visible;
+    overflow: hidden;
   }
 }
-@media screen and (min-width: 60em) {
-  .fss-year-drawer-btn { display: none; }
+@media screen and (min-width: 76.25em) {
+  body:has(#fss-review.fss-review) .md-sidebar--primary {
+    height: calc(100dvh - 2.4rem);
+    max-height: calc(100dvh - 2.4rem);
+    overflow: hidden;
+  }
+  body:has(#fss-review.fss-review) .md-sidebar--primary .md-sidebar__scrollwrap {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: auto;
+    margin: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
 }
 
 /* 인쇄 스타일 */

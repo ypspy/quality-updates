@@ -42,6 +42,16 @@ function reduceFilter(state, action) {
   return next;
 }
 
+function findingYearCounts(groups, name) {
+  var counts = {};
+  if (!name) return counts;
+  groups.forEach(function (group) {
+    if (!group.year || group.names.indexOf(name) === -1) return;
+    counts[group.year] = (counts[group.year] || 0) + 1;
+  });
+  return counts;
+}
+
 function groupVisible(group, state) {
   if (state.year && state.year !== group.year) {
     return { show: false, open: false };
@@ -61,6 +71,12 @@ function groupVisible(group, state) {
   return { show: true, open: false };
 }
 
-var api = { REGISTERED: REGISTERED, yearLabel: yearLabel, reduceFilter: reduceFilter, groupVisible: groupVisible };
+var api = {
+  REGISTERED: REGISTERED,
+  yearLabel: yearLabel,
+  reduceFilter: reduceFilter,
+  groupVisible: groupVisible,
+  findingYearCounts: findingYearCounts
+};
 if (typeof module !== "undefined" && module.exports) module.exports = api;
 if (typeof window !== "undefined") window.FssFilter = api;
