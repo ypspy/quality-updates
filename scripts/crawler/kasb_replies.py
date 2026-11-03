@@ -434,12 +434,21 @@ def crawl_archive(
                 refs = detail.attachments or row.attachments
                 directory.mkdir(parents=True, exist_ok=True)
                 used: set[str] = set()
-                sections = []
+                pending: list[tuple[str, bytes | None]] = []
                 for ref in refs:
                     filename = attachment_filename(ref.name, ref.file_seq, used)
-                    payload = call(fetch_file, ref.file_no, ref.file_seq)
-                    (directory / filename).write_bytes(payload)
-                    text, status = extract_bytes(filename, payload)
+                    path = directory / filename
+                    if path.is_file():
+                        pending.append((filename, None))
+                    else:
+                        pending.append((filename, call(fetch_file, ref.file_no, ref.file_seq)))
+                sections = []
+                for filename, payload in pending:
+                    path = directory / filename
+                    data = path.read_bytes() if payload is None else payload
+                    if payload is not None:
+                        path.write_bytes(payload)
+                    text, status = extract_bytes(filename, data)
                     sections.append((filename, text, status))
                 moment = now() if now else datetime.now(timezone.utc)
                 if moment.tzinfo is None:

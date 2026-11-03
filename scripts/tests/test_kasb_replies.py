@@ -544,6 +544,106 @@ def test_crawl_archive_saves_once_and_skips_complete(tmp_path):
     assert len(slept) == 7
 
 
+def _one_item_page() -> str:
+    return """
+    <table><tbody>
+    <tr>
+      <td>2193</td><td>정착지원TF</td>
+      <td><a onclick="javascript:fn_Detail('40689','016008');">제목</a></td>
+      <td><a onclick="fileDownload('-49993299','1'); return false;">note.hwpx</a></td>
+      <td>2026-10-16</td><td></td>
+    </tr>
+    </tbody></table>
+    <li class="pag_last"><a href="javascript:G_MovePage(1);">Last</a></li>
+    """
+
+
+def _partial_item(names: list[str]) -> str:
+    lines = ["---", "seq: '40689'", "extract_status: partial", "attachments:"]
+    for name in names:
+        lines.extend(
+            [
+                f"- name: {name}",
+                "  file_no: '-1'",
+                "  file_seq: '1'",
+                "  extract_status: partial",
+            ]
+        )
+    lines.append("---")
+    return "\n".join(lines) + "\n"
+
+
+def test_retry_failed_reextracts_existing_file_without_download(tmp_path):
+    directory = tmp_path / "40689"
+    directory.mkdir()
+    payload = _hwpx("다시 추출")
+    (directory / "261016_note.hwpx").write_bytes(payload)
+    (directory / "item.md").write_text(_partial_item(["261016_note.hwpx"]), encoding="utf-8")
+    downloads = []
+
+    def fetch_file(file_no, file_seq):
+        downloads.append((file_no, file_seq))
+        return b"new"
+
+    result = kasb_replies.crawl_archive(
+        tmp_path,
+        fetch_list=lambda page: _one_item_page(),
+        fetch_detail=lambda seq, ctg_cd: DETAIL_HTML,
+        fetch_file=fetch_file,
+        delay=0,
+        retry_failed=True,
+        sleep=lambda seconds: None,
+    )
+    text = (directory / "item.md").read_text(encoding="utf-8")
+    meta = yaml.safe_load(text.split("---", 2)[1])
+    assert result["saved"] == 1
+    assert downloads == []
+    assert (directory / "261016_note.hwpx").read_bytes() == payload
+    assert meta["extract_status"] == "ok"
+    assert "다시 추출" in text
+
+
+def test_retry_failed_keeps_archive_when_a_later_download_fails(tmp_path):
+    directory = tmp_path / "40689"
+    directory.mkdir()
+    original = _hwpx("기존")
+    (directory / "a.hwpx").write_bytes(original)
+    (directory / "item.md").write_text(_partial_item(["a.hwpx", "b.hwpx"]), encoding="utf-8")
+    detail = """
+    <div class="board_view_wrap">
+      <table>
+        <tr><th>분류</th><td class="left">정착지원TF</td></tr>
+        <tr><th>첨부파일</th><td>
+          <a onclick="javascript:fileDownload('-11','1'); return false;"><span>a.hwpx</span></a>
+          <a onclick="javascript:fileDownload('-22','1'); return false;"><span>b.hwpx</span></a>
+        </td></tr>
+      </table>
+      <div class="board_view_cont"><p>안내</p></div>
+    </div>
+    """
+
+    def fetch_file(file_no, file_seq):
+        if file_no == "-22":
+            raise RuntimeError("second down")
+        return b"replacement"
+
+    before = (directory / "item.md").read_text(encoding="utf-8")
+    result = kasb_replies.crawl_archive(
+        tmp_path,
+        fetch_list=lambda page: _one_item_page(),
+        fetch_detail=lambda seq, ctg_cd: detail,
+        fetch_file=fetch_file,
+        delay=0,
+        retry_failed=True,
+        sleep=lambda seconds: None,
+    )
+    assert result["failed"] == 1
+    assert result["saved"] == 0
+    assert (directory / "a.hwpx").read_bytes() == original
+    assert not (directory / "b.hwpx").exists()
+    assert (directory / "item.md").read_text(encoding="utf-8") == before
+
+
 def test_crawl_archive_limit_and_download_failure(tmp_path):
     pages = _crawl_pages()
 
