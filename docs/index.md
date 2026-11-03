@@ -1,4 +1,4 @@
-﻿---
+---
 title: Quality Updates
 description: 회계·감사 분야 규제 모니터링 — 금융위·금감원·회계기준원 등 시기별 업데이트 허브
 ---
