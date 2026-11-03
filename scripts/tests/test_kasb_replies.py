@@ -252,11 +252,12 @@ def _ole_dir(name: str, typ: int, child: int, start: int, size: int) -> bytes:
     return bytes(buf)
 
 
-def _ole_with_prvtext(text: str) -> bytes:
-    data = text.encode("utf-16-le")
+def _ole_with_stream(stream_name: str, data: bytes) -> bytes:
     if len(data) > 64:
-        raise ValueError("fixture text must fit in one mini sector")
-    directory = _ole_dir("Root Entry", 5, 1, 3, 64) + _ole_dir("PrvText", 2, 0xFFFFFFFF, 0, len(data))
+        raise ValueError("fixture stream must fit in one mini sector")
+    directory = _ole_dir("Root Entry", 5, 1, 3, 64) + _ole_dir(
+        stream_name, 2, 0xFFFFFFFF, 0, len(data)
+    )
     directory += bytes(256)
     fat = struct.pack("<IIII", 0xFFFFFFFD, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE) + (b"\xff" * 4) * 124
     minifat = struct.pack("<I", 0xFFFFFFFE) + (b"\xff" * 4) * 127
@@ -277,6 +278,11 @@ def _ole_with_prvtext(text: str) -> bytes:
     struct.pack_into("<I", header, 0x4C, 0)
     mini = data + b"\x00" * (512 - len(data))
     return bytes(header) + fat + directory + minifat + mini
+
+
+def _ole_with_prvtext(text: str) -> bytes:
+    data = text.encode("utf-16-le")
+    return _ole_with_stream("PrvText", data)
 
 
 def test_extract_pdf_hwpx_and_xlsx():
@@ -304,6 +310,18 @@ def test_extract_hwp_preview_and_garbage():
     text, status = kasb_replies.extract_bytes("a.hwp", b"not-ole")
     assert status == "failed"
     text, status = kasb_replies.extract_bytes("a.zip", b"PK")
+    assert status == "failed"
+
+
+def test_extract_hwp_fails_without_prvtext_stream():
+    _, status = kasb_replies.extract_bytes(
+        "a.hwp", _ole_with_stream("OtherStream", b"\xff\xfe")
+    )
+    assert status == "failed"
+
+
+def test_extract_hwp_fails_on_invalid_utf16_prvtext():
+    _, status = kasb_replies.extract_bytes("a.hwp", _ole_with_stream("PrvText", b"\xff"))
     assert status == "failed"
 
 

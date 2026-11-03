@@ -236,7 +236,12 @@ def _extract_hwp(data: bytes) -> tuple[str, str]:
     if not ole.exists("PrvText"):
         return ("PrvText missing", "failed")
     raw = ole.openstream("PrvText").read()
-    text = raw.decode("utf-16-le", errors="replace").replace("\x00", "").strip()
+    try:
+        text = raw.decode("utf-16-le")
+    except UnicodeDecodeError as exc:
+        return (str(exc), "failed")
+    while text and (text[-1] == "\x00" or text[-1].isspace()):
+        text = text[:-1]
     if not text:
         return ("empty preview", "failed")
     return (text, "partial")
