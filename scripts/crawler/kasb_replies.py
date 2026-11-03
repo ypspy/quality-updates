@@ -130,10 +130,27 @@ def parse_detail_page(html: str) -> DetailPage:
             continue
         td = th.find_next("td")
         if td is not None:
-            for inner in td.find_all("td"):
-                text = inner.get_text(" ", strip=True)
+            inner_rows = td.find_all("tr")
+            if not inner_rows:
+                text = td.get_text(" ", strip=True)
                 if text:
                     standards.append(text)
+            else:
+                for row in inner_rows:
+                    label_th = row.find("th")
+                    label = label_th.get_text(strip=True) if label_th else ""
+                    td_texts = [
+                        cell.get_text(" ", strip=True)
+                        for cell in row.find_all("td")
+                        if cell.get_text(" ", strip=True)
+                    ]
+                    joined = " ".join(td_texts)
+                    if not joined:
+                        continue
+                    if label == "기준서 명" and standards:
+                        standards[-1] = f"{standards[-1]} {joined}"
+                    else:
+                        standards.append(joined)
         break
     notice_node = wrap.select_one(".board_view_cont")
     notice = notice_node.get_text(" ", strip=True) if notice_node else ""

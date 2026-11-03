@@ -101,3 +101,57 @@ def test_parse_detail_page_reads_standards_and_notice():
     assert len(detail.attachments) == 1
     assert detail.attachments[0].name == "261016_note.hwpx"
     assert detail.attachments[0].file_no == "-49993299"
+
+
+def test_parse_detail_page_joins_standard_code_and_name():
+    html = """
+    <div class="board_view_wrap">
+      <table>
+        <tr>
+          <th>관련기준서</th>
+          <td>
+            <table>
+              <tr><th>기준서 구분</th><td>제1118호</td></tr>
+              <tr><th>기준서 명</th><td>재무제표 표시와 공시</td></tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </div>
+    """
+    detail = kasb_replies.parse_detail_page(html)
+    assert detail.standards == ("제1118호 재무제표 표시와 공시",)
+
+
+def test_parse_detail_page_standards_direct_text_without_inner_table():
+    html = """
+    <div class="board_view_wrap">
+      <table>
+        <tr><th>관련기준서</th><td>제1001호 재무제표 표시</td></tr>
+      </table>
+    </div>
+    """
+    detail = kasb_replies.parse_detail_page(html)
+    assert detail.standards == ("제1001호 재무제표 표시",)
+
+
+def test_parse_detail_page_multiple_standards_from_separate_rows():
+    html = """
+    <div class="board_view_wrap">
+      <table>
+        <tr>
+          <th>관련기준서</th>
+          <td>
+            <table>
+              <tr><th>기준서 구분</th><td>제1118호</td></tr>
+              <tr><th>기준서 명</th><td></td></tr>
+              <tr><th>기준서 구분</th><td>제1001호</td></tr>
+              <tr><th>기준서 명</th><td></td></tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </div>
+    """
+    detail = kasb_replies.parse_detail_page(html)
+    assert detail.standards == ("제1118호", "제1001호")
