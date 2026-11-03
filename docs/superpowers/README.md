@@ -12,6 +12,7 @@ Agent 진입·프롬프트: [AGENTS.md](../../AGENTS.md)
 
 | 날짜 | 파일 | 요약 |
 |------|------|------|
+| 2026-11-04 | [kasb-reply-archive-design.md](specs/2026-11-04-kasb-reply-archive-design.md) | KASB 질의회신 항목 아카이브. 사이트 비게시, item.md만 옵시디안 raw |
 | 2026-11-02 | [cursor-summary-pr-design.md](specs/2026-11-02-cursor-summary-pr-design.md) | 지식체계 요약을 베지 리뷰 PR로 전달 |
 | 2026-11-01 | [fss-review-filter-rails-design.md](specs/2026-11-01-fss-review-filter-rails-design.md) | 품질관리감리 왼쪽 법인 목록과 오른쪽 연도 필터 |
 | 2026-09-11 | [editor-keyboard-curation-design.md](specs/2026-09-11-editor-keyboard-curation-design.md) | 편집기 행 단위 키보드, 첨부 토스트, PDF 최신순 |
@@ -40,6 +41,7 @@ Agent 진입·프롬프트: [AGENTS.md](../../AGENTS.md)
 
 | 날짜 | 파일 | 요약 |
 |------|------|------|
+| 2026-11-04 | [kasb-reply-archive.md](plans/2026-11-04-kasb-reply-archive.md) | KASB 질의회신 항목 아카이브 |
 | 2026-11-02 | [cursor-summary-pr.md](plans/2026-11-02-cursor-summary-pr.md) | 지식체계 요약을 베지 리뷰 PR로 전달 |
 | 2026-11-01 | [fss-review-filter-rails.md](plans/2026-11-01-fss-review-filter-rails.md) | 품질관리감리 왼쪽 법인 목록과 오른쪽 연도 필터 |
 | 2026-09-11 | [editor-keyboard-curation.md](plans/2026-09-11-editor-keyboard-curation.md) | 편집기 행 키보드, 첨부 토스트, PDF 최신순 |
