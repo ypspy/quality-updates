@@ -573,3 +573,83 @@ def test_crawl_archive_limit_and_download_failure(tmp_path):
     assert (tmp_path / "40690").exists() is False
     lines = (tmp_path / "manifest.jsonl").read_text(encoding="utf-8").splitlines()
     assert any(json.loads(line)["error"] == "detail down" for line in lines)
+
+
+import crawl_kasb_replies
+import export_kasb_replies_raw
+
+
+class _Resp:
+    def __init__(self, text="", content=b"", status=200):
+        self.text = text
+        self.content = content
+        self.status_code = status
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise RuntimeError(f"http {self.status_code}")
+
+
+def test_http_helpers_post_the_spec_forms():
+    calls = []
+
+    class Session:
+        def post(self, url, data, timeout):
+            calls.append((url, data, timeout))
+            return _Resp(text="ok", content=b"file")
+
+    session = Session()
+    assert kasb_replies.http_fetch_list(session, 3) == "ok"
+    assert kasb_replies.http_fetch_detail(session, "40689", "016008") == "ok"
+    assert kasb_replies.http_fetch_file(session, "-12", "1") == b"file"
+    assert calls[0][0] == kasb_replies.LIST_URL
+    assert calls[0][1]["siteCd"] == "002000000000000"
+    assert calls[0][1]["searchfield"] == "ALL"
+    assert calls[0][1]["searchword"] == ""
+    assert calls[0][1]["page"] == 3
+    assert calls[1][0] == "https://www.kasb.or.kr/front/board/View016008.do"
+    assert calls[1][1] == {"seq": "40689", "ctgCd": "016008"}
+    assert calls[2][0] == kasb_replies.DOWNLOAD_URL
+    assert calls[2][1] == {"fileNo": "-12", "fileSeq": "1"}
+
+
+def test_make_session_gets_list_once(monkeypatch):
+    calls = []
+
+    class Session:
+        def __init__(self):
+            self.headers = {}
+
+        def get(self, url, timeout):
+            calls.append(url)
+
+    monkeypatch.setattr(kasb_replies.requests, "Session", Session)
+    kasb_replies.make_session()
+    assert calls == [kasb_replies.LIST_URL]
+
+
+def test_copy_archive_markdown_skips_existing(tmp_path):
+    archive = tmp_path / "archive"
+    item = archive / "40689"
+    item.mkdir(parents=True)
+    (item / "item.md").write_text("hello", encoding="utf-8")
+    (item / "note.hwpx").write_bytes(b"bin")
+    dest = tmp_path / "raw"
+    copied, skipped = kasb_replies.copy_archive_markdown(archive, dest)
+    assert (copied, skipped) == (1, 0)
+    assert (dest / "40689.md").read_text(encoding="utf-8") == "hello"
+    assert not (dest / "note.hwpx").exists()
+    copied, skipped = kasb_replies.copy_archive_markdown(archive, dest)
+    assert (copied, skipped) == (0, 1)
+    assert (dest / "40689.md").read_text(encoding="utf-8") == "hello"
+
+
+def test_cli_defaults():
+    crawl_args = crawl_kasb_replies.parse_args([])
+    assert crawl_args.delay == 0.2
+    assert crawl_args.limit is None
+    assert crawl_args.retry_failed is False
+    assert crawl_args.archive == kasb_replies.default_archive()
+    export_args = export_kasb_replies_raw.parse_args([])
+    assert export_args.dest == kasb_replies.default_raw_dest()
+    assert str(export_args.dest).endswith(r"raw\kasb-replies") or str(export_args.dest).endswith("raw/kasb-replies")

@@ -11,8 +11,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from xml.etree import ElementTree
 
+import requests
 import yaml
 from bs4 import BeautifulSoup
+
+LIST_URL = "https://www.kasb.or.kr/front/board/allReplySummaryList.do"
+DOWNLOAD_URL = "https://www.kasb.or.kr/commonFile/fileDownload.do"
 
 _DETAIL_RE = re.compile(r"fn_Detail\s*\(\s*'(\d+)'\s*,\s*'(\d+)'\s*\)")
 _FILE_RE = re.compile(r"fileDownload\s*\(\s*'([^']+)'\s*,\s*'([^']+)'\s*\)")
@@ -478,3 +482,69 @@ def crawl_archive(
                 counts["failed"] += 1
         page += 1
     return counts
+
+
+def default_archive() -> Path:
+    return Path(__file__).resolve().parents[2] / "data" / "kasb-replies"
+
+
+def default_raw_dest() -> Path:
+    return Path(r"C:\dev\obsidian-valut\raw\kasb-replies")
+
+
+def make_session() -> requests.Session:
+    session = requests.Session()
+    session.headers["User-Agent"] = "Mozilla/5.0"
+    session.get(LIST_URL, timeout=30)
+    return session
+
+
+def _view_url(ctg_cd: str) -> str:
+    return f"https://www.kasb.or.kr/front/board/View{ctg_cd}.do"
+
+
+def http_fetch_list(session, page: int) -> str:
+    response = session.post(
+        LIST_URL,
+        data={
+            "siteCd": "002000000000000",
+            "searchfield": "ALL",
+            "searchword": "",
+            "page": page,
+        },
+        timeout=30,
+    )
+    response.raise_for_status()
+    return response.text
+
+
+def http_fetch_detail(session, seq: str, ctg_cd: str) -> str:
+    response = session.post(_view_url(ctg_cd), data={"seq": seq, "ctgCd": ctg_cd}, timeout=30)
+    response.raise_for_status()
+    return response.text
+
+
+def http_fetch_file(session, file_no: str, file_seq: str) -> bytes:
+    response = session.post(
+        DOWNLOAD_URL,
+        data={"fileNo": file_no, "fileSeq": file_seq},
+        timeout=120,
+    )
+    response.raise_for_status()
+    return response.content
+
+
+def copy_archive_markdown(archive: Path, dest: Path) -> tuple[int, int]:
+    dest.mkdir(parents=True, exist_ok=True)
+    copied = 0
+    skipped = 0
+    if not archive.is_dir():
+        return copied, skipped
+    for item in sorted(archive.glob("*/item.md")):
+        target = dest / f"{item.parent.name}.md"
+        if target.exists():
+            skipped += 1
+            continue
+        target.write_bytes(item.read_bytes())
+        copied += 1
+    return copied, skipped
