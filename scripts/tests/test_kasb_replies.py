@@ -653,3 +653,10 @@ def test_cli_defaults():
     export_args = export_kasb_replies_raw.parse_args([])
     assert export_args.dest == kasb_replies.default_raw_dest()
     assert str(export_args.dest).endswith(r"raw\kasb-replies") or str(export_args.dest).endswith("raw/kasb-replies")
+
+
+def test_site_index_does_not_promise_reply_pages():
+    index = Path(__file__).resolve().parents[2] / "docs" / "index.md"
+    text = index.read_text(encoding="utf-8")
+    assert "질의회신 원문은 이 사이트에 게시하지 않는다" in text
+    assert "질의회신 정리" not in text
