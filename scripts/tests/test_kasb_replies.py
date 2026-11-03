@@ -401,7 +401,7 @@ def test_compose_item_writes_failed_attachment_line():
     text = kasb_replies.compose_item(
         _sample_row(),
         _sample_detail(),
-        [("note.hwp", "PrvText missing", "failed")],
+        [("note.hwpx", "PrvText missing", "failed")],
         "2026-11-04T07:00:00+09:00",
     )
     assert "failed: PrvText missing" in text

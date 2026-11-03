@@ -309,13 +309,8 @@ def compose_item(row: ListRow, detail: DetailPage, sections: list[tuple[str, str
     by_saved = {filename: (text, status) for filename, text, status in sections}
     attachments = []
     body_sections = []
-    for index, (ref, filename) in enumerate(zip(source, names)):
-        if filename in by_saved:
-            text, status = by_saved[filename]
-        elif len(sections) == len(names) and index < len(sections):
-            text, status = sections[index][1], sections[index][2]
-        else:
-            text, status = ("missing extract", "failed")
+    for ref, filename in zip(source, names):
+        text, status = by_saved.get(filename, ("missing extract", "failed"))
         attachments.append(
             {
                 "name": filename,
