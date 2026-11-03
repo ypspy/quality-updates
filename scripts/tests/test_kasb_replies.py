@@ -207,8 +207,8 @@ startxref
 def _hwpx(inner: str) -> bytes:
     xml = (
         '<?xml version="1.0" encoding="UTF-8"?>'
-        '<hs:sec xmlns:hp="http://www.hancom.co.kr/hwpml/2011/paragraph">'
-        f"<hp:p><hp:run><hp:t>{inner}</hp:t></hp:run></hp:p></hs:sec>"
+        '<hp:sec xmlns:hp="http://www.hancom.co.kr/hwpml/2011/paragraph">'
+        f"<hp:p><hp:run><hp:t>{inner}</hp:t></hp:run></hp:p></hp:sec>"
     )
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w") as zf:

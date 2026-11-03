@@ -190,18 +190,10 @@ def _extract_hwpx(data: bytes) -> tuple[str, str]:
         )
         for name in names:
             raw = zf.read(name)
-            try:
-                root = ElementTree.fromstring(raw)
-                for el in root.iter():
-                    if el.tag.split("}")[-1] == "t" and el.text:
-                        texts.append(el.text)
-            except ElementTree.ParseError:
-                decoded = raw.decode("utf-8", errors="replace")
-                for match in re.finditer(
-                    r"<(?:[\w-]+:)?t\b[^>]*>([^<]*)</(?:[\w-]+:)?t>", decoded
-                ):
-                    if match.group(1):
-                        texts.append(match.group(1))
+            root = ElementTree.fromstring(raw)
+            for el in root.iter():
+                if el.tag.split("}")[-1] == "t" and el.text:
+                    texts.append(el.text)
     return _nonempty("\n".join(texts))
 
 
