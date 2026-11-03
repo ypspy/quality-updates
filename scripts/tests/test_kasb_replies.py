@@ -61,3 +61,43 @@ def test_dedupe_rows_keeps_first_seq():
     rows = kasb_replies.parse_list_page(LIST_HTML)
     merged = kasb_replies.dedupe_rows(rows + rows)
     assert [row.seq for row in merged] == ["40533", "40689"]
+
+
+DETAIL_HTML = """
+<nav>주메뉴로 가기</nav>
+<div class="board_view_wrap">
+  <table>
+    <tr><th>분류</th><td class="left">정착지원TF</td></tr>
+    <tr>
+      <th>관련기준서</th>
+      <td>
+        <table>
+          <tr><th>기준서 구분</th><td>제1118호 재무제표 표시와 공시</td></tr>
+          <tr><th>기준서 명</th><td></td></tr>
+        </table>
+      </td>
+    </tr>
+    <tr><th>등록일</th><td><p class="board_date">2026-10-16</p></td></tr>
+    <tr>
+      <th>첨부파일</th>
+      <td>
+        <a onclick="javascript:fileDownload('-49993299','1'); return false;"><span>261016_note.hwpx</span></a>
+        <a onclick="javascript:fn_fileViewer('abc');">미리보기</a>
+      </td>
+    </tr>
+  </table>
+  <div class="board_view_cont"><p>※ 본 자료는 참고 목적으로 정리한 것입니다.</p></div>
+</div>
+"""
+
+
+def test_parse_detail_page_reads_standards_and_notice():
+    detail = kasb_replies.parse_detail_page(DETAIL_HTML)
+    assert detail.category == "정착지원TF"
+    assert detail.standards == ("제1118호 재무제표 표시와 공시",)
+    assert detail.registered_date == "2026-10-16"
+    assert detail.notice == "※ 본 자료는 참고 목적으로 정리한 것입니다."
+    assert "주메뉴로 가기" not in detail.notice
+    assert len(detail.attachments) == 1
+    assert detail.attachments[0].name == "261016_note.hwpx"
+    assert detail.attachments[0].file_no == "-49993299"

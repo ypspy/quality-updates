@@ -101,3 +101,46 @@ def dedupe_rows(rows: list[ListRow]) -> list[ListRow]:
         seen.add(row.seq)
         kept.append(row)
     return kept
+
+
+@dataclass(frozen=True)
+class DetailPage:
+    category: str | None
+    standards: tuple[str, ...]
+    registered_date: str | None
+    notice: str
+    attachments: tuple[AttachmentRef, ...]
+
+
+def _labeled_text(wrap, label: str) -> str:
+    for th in wrap.find_all("th"):
+        if th.get_text(strip=True) == label:
+            td = th.find_next("td")
+            return td.get_text(" ", strip=True) if td else ""
+    return ""
+
+
+def parse_detail_page(html: str) -> DetailPage:
+    soup = BeautifulSoup(html, "html.parser")
+    wrap = soup.select_one(".board_view_wrap") or soup
+    category = _labeled_text(wrap, "분류") or None
+    standards: list[str] = []
+    for th in wrap.find_all("th"):
+        if th.get_text(strip=True) != "관련기준서":
+            continue
+        td = th.find_next("td")
+        if td is not None:
+            for inner in td.find_all("td"):
+                text = inner.get_text(" ", strip=True)
+                if text:
+                    standards.append(text)
+        break
+    notice_node = wrap.select_one(".board_view_cont")
+    notice = notice_node.get_text(" ", strip=True) if notice_node else ""
+    return DetailPage(
+        category=category,
+        standards=tuple(standards),
+        registered_date=parse_date(_labeled_text(wrap, "등록일")),
+        notice=notice,
+        attachments=tuple(_attachments_in(wrap)),
+    )
