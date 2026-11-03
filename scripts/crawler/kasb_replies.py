@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import io
 import re
+import zipfile
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
+from xml.etree import ElementTree
 
 from bs4 import BeautifulSoup
 
@@ -161,3 +165,118 @@ def parse_detail_page(html: str) -> DetailPage:
         notice=notice,
         attachments=tuple(_attachments_in(wrap)),
     )
+
+
+def _nonempty(text: str) -> tuple[str, str]:
+    cleaned = text.strip()
+    return (cleaned, "ok" if cleaned else "empty")
+
+
+def _extract_pdf(data: bytes) -> tuple[str, str]:
+    from pypdf import PdfReader
+
+    reader = PdfReader(io.BytesIO(data))
+    parts = [(page.extract_text() or "") for page in reader.pages]
+    return _nonempty("\n\n".join(parts))
+
+
+def _extract_hwpx(data: bytes) -> tuple[str, str]:
+    texts = []
+    with zipfile.ZipFile(io.BytesIO(data)) as zf:
+        names = sorted(
+            name
+            for name in zf.namelist()
+            if name.startswith("Contents/section") and name.endswith(".xml")
+        )
+        for name in names:
+            raw = zf.read(name)
+            try:
+                root = ElementTree.fromstring(raw)
+                for el in root.iter():
+                    if el.tag.split("}")[-1] == "t" and el.text:
+                        texts.append(el.text)
+            except ElementTree.ParseError:
+                decoded = raw.decode("utf-8", errors="replace")
+                for match in re.finditer(
+                    r"<(?:[\w-]+:)?t\b[^>]*>([^<]*)</(?:[\w-]+:)?t>", decoded
+                ):
+                    if match.group(1):
+                        texts.append(match.group(1))
+    return _nonempty("\n".join(texts))
+
+
+def _cell(value) -> str:
+    if value is None:
+        return ""
+    text = str(value).replace("\r\n", " ").replace("\n", " ").replace("\r", " ")
+    return text.replace("|", "\\|")
+
+
+def _extract_xlsx(data: bytes) -> tuple[str, str]:
+    from openpyxl import load_workbook
+
+    book = load_workbook(io.BytesIO(data), data_only=True, read_only=True)
+    chunks = []
+    for sheet in book.worksheets:
+        rows = []
+        for row in sheet.iter_rows(values_only=True):
+            if all(cell is None or str(cell).strip() == "" for cell in row):
+                continue
+            rows.append([_cell(cell) for cell in row])
+        if not rows:
+            continue
+        width = max(len(row) for row in rows)
+        rows = [row + [""] * (width - len(row)) for row in rows]
+        header = "| " + " | ".join(rows[0]) + " |"
+        rule = "| " + " | ".join("---" for _ in rows[0]) + " |"
+        body = ["| " + " | ".join(row) + " |" for row in rows[1:]]
+        chunks.append("### " + sheet.title + "\n\n" + "\n".join([header, rule, *body]))
+    return _nonempty("\n\n".join(chunks))
+
+
+def _extract_hwp(data: bytes) -> tuple[str, str]:
+    import olefile
+
+    try:
+        ole = olefile.OleFileIO(io.BytesIO(data))
+    except Exception as exc:
+        return (str(exc), "failed")
+    if not ole.exists("PrvText"):
+        return ("PrvText missing", "failed")
+    raw = ole.openstream("PrvText").read()
+    text = raw.decode("utf-16-le", errors="replace").replace("\x00", "").strip()
+    if not text:
+        return ("empty preview", "failed")
+    return (text, "partial")
+
+
+def extract_bytes(filename: str, data: bytes) -> tuple[str, str]:
+    suffix = Path(filename).suffix.lower()
+    try:
+        if suffix == ".pdf":
+            return _extract_pdf(data)
+        if suffix == ".hwpx":
+            return _extract_hwpx(data)
+        if suffix == ".xlsx":
+            return _extract_xlsx(data)
+        if suffix == ".hwp":
+            return _extract_hwp(data)
+    except Exception as exc:
+        return (str(exc), "failed")
+    return ("unsupported", "failed")
+
+
+def aggregate_status(statuses: list[str]) -> str:
+    if not statuses:
+        return "empty"
+    if any(status == "failed" for status in statuses):
+        return "failed"
+    if any(status == "partial" for status in statuses):
+        return "partial"
+    if all(status == "empty" for status in statuses):
+        return "empty"
+    if any(status == "empty" for status in statuses):
+        return "partial"
+    if all(status == "ok" for status in statuses):
+        return "ok"
+    return "failed"
