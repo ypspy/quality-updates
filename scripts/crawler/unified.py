@@ -173,12 +173,17 @@ def collect_fss() -> str:
     return "\n".join(lines)
 
 
+FSC_MAIN_HEADINGS = ["보도자료", "제재 의결", "고시/공고/훈령", "입법예고/규정변경예고"]
+
+
 def collect_fsc() -> str:
     lines = ["\n\n### 금융위원회\n"]
 
     press = FSC.crawl_board("보도자료", FSC.BASE_URLS["보도자료"])
     APPENDIX["금융위원회"]["보도자료"] = press
     lines += ["#### 보도자료\n", "\n".join(sort_md_link_lines(press))]
+
+    lines += ["\n#### 제재 의결\n"]
 
     rules = FSC.crawl_board("소관규정", FSC.BASE_URLS["소관규정"])
     APPENDIX["금융위원회"]["고시/공고/훈령"] = rules

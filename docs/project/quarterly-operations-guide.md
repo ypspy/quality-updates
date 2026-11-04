@@ -118,6 +118,8 @@ flowchart TB
 | **Phase 0** | PDF/WEB/CLIP 경로 결정 | 출처 파일 존재·적합성 확인 | `extract_pdf.py` 등 |
 | **Phase 1** | 링크별 `!!! note` 요약 | **사실 관계 최종 검증** | — |
 
+PDF가 없는 HWP/HWPX는 `fetch_attachments.py` 보고의 변환 목록이다. 그록 봇이 웨일에서 PDF로 저장하고 `pdf` 마커로 연결한다. 저장소 스크립트는 웨일을 실행하지 않는다. 조사·감리결과 조치는 금융위원회 `제재 의결`에 두고, 의사록 PDF가 공개되면 같은 분기 파일의 `위원 논의`에 보강한다.
+
 **Agent 체크리스트** (스킬 준수)
 
 - [ ] `reference/gold-excerpts.md` 세션 1회 Read; 분기 md ±80줄 윈도우; REFERENCE 온디맨드; 재주입 금지
