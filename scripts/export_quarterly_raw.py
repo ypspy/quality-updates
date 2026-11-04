@@ -14,7 +14,8 @@ from quarterly_handoff import export_quarter
 
 DEFAULT_DEST = Path(r"C:\dev\obsidian-valut\raw")
 _HERE = Path(__file__).resolve().parent
-_DEFAULT_DOWNLOADS = _HERE.parent / "downloads"
+_REPO_ROOT = _HERE.parent
+_DEFAULT_DOWNLOADS = _REPO_ROOT / "downloads"
 _DEFAULT_CLIPS = _HERE / "editor" / "clips"
 
 
@@ -35,6 +36,7 @@ def main(argv=None) -> int:
         args.clips,
         args.dest,
         date.today(),
+        repo_root=_REPO_ROOT,
     )
     for path in result.copied:
         print(f"copied {path}")

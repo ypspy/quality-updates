@@ -52,14 +52,17 @@ def test_export_copies_body_pdf_and_note_without_rereading(tmp_path: Path):
     result = export_quarter(md, downloads, root / "clips", dest, date(2026, 11, 5))
     copied_pdf = dest / "quality-updates-sources" / "2026-07-01_to_2026-09-30" / "ifrs.pdf"
     record = dest / "quality-updates-processed" / "2026-07-01_to_2026-09-30"
+    repo_record = root / "data" / "quarterly-processed" / "2026-07-01_to_2026-09-30"
     assert copied_pdf.read_bytes() == b"%PDF-1"
     assert not (dest / "quality-updates-sources" / "2026-07-01_to_2026-09-30" / "ifrs.hwpx").exists()
     assert not (dest / "quality-updates-sources" / "2026-07-01_to_2026-09-30" / "exam.pdf").exists()
     assert not (dest / "quality-updates-sources" / "2026-07-01_to_2026-09-30" / "appendix.pdf").exists()
     assert "매년 제출" in next(record.glob("*.md")).read_text(encoding="utf-8")
+    assert next(repo_record.glob("*.md")).read_bytes() == next(record.glob("*.md")).read_bytes()
     assert result.exit_code == 0
     again = export_quarter(md, downloads, root / "clips", dest, date(2026, 11, 5))
     assert again.copied == []
+    assert next(repo_record.glob("*.md")).read_bytes() == next(record.glob("*.md")).read_bytes()
 
 
 def _write_quarter(root: Path) -> tuple[Path, Path]:
@@ -83,6 +86,112 @@ def test_changed_bytes_get_a_dated_snapshot(tmp_path: Path):
     folder = dest / "quality-updates-sources" / "2026-07-01_to_2026-09-30"
     assert (folder / "ifrs.pdf").read_bytes() == b"%PDF-1"
     assert (folder / "ifrs--2026-11-06.pdf").read_bytes() == b"%PDF-2"
+
+
+HEADING_QUARTER = """---
+title: q
+---
+
+### 금융감독원
+
+#### 회계감독 동향자료
+
+- (26-09-11) [계리가정](https://fss.or.kr/1)
+
+    !!! note "주요 내용"
+
+        - (보고서) 매년 제출
+
+    !!! note "위원 논의"
+
+        - 미공개
+
+### 금융위원회
+
+#### 보도자료
+
+- (26-09-12) [다음 고시](https://fsc.go.kr/2)
+
+    !!! note "다음 노트"
+
+        - 다른 사실
+"""
+
+
+def test_record_is_stored_in_repo_root_then_copied(tmp_path: Path):
+    root = tmp_path / "repo"
+    md, downloads = _write_quarter(root)
+    explicit = tmp_path / "explicit-root"
+    dest = tmp_path / "raw"
+    dest.mkdir()
+    export_quarter(
+        md,
+        downloads,
+        root / "clips",
+        dest,
+        date(2026, 11, 5),
+        repo_root=explicit,
+    )
+    name = "26-09-11-계리가정.md"
+    stem = "2026-07-01_to_2026-09-30"
+    repo_file = explicit / "data" / "quarterly-processed" / stem / name
+    vault_file = dest / "quality-updates-processed" / stem / name
+    assert repo_file.read_bytes() == vault_file.read_bytes()
+    assert "매년 제출" in repo_file.read_text(encoding="utf-8")
+    assert not (root / "data").exists()
+
+
+def test_changed_record_updates_repo_and_snapshots_vault(tmp_path: Path):
+    root = tmp_path / "repo"
+    md, downloads = _write_quarter(root)
+    dest = tmp_path / "raw"
+    dest.mkdir()
+    export_quarter(md, downloads, root / "clips", dest, date(2026, 11, 5), repo_root=root)
+    md.write_text(QUARTER.replace("매년 제출", "매년 개정"), encoding="utf-8")
+    export_quarter(md, downloads, root / "clips", dest, date(2026, 11, 6), repo_root=root)
+    name = "26-09-11-계리가정.md"
+    stem = "2026-07-01_to_2026-09-30"
+    repo_file = root / "data" / "quarterly-processed" / stem / name
+    vault_dir = dest / "quality-updates-processed" / stem
+    assert "매년 개정" in repo_file.read_text(encoding="utf-8")
+    assert "매년 제출" in (vault_dir / name).read_text(encoding="utf-8")
+    snapshot = vault_dir / "26-09-11-계리가정--2026-11-06.md"
+    assert "매년 개정" in snapshot.read_text(encoding="utf-8")
+    assert not (repo_file.parent / "26-09-11-계리가정--2026-11-06.md").exists()
+
+
+def test_heading_after_note_is_not_stored_in_the_record(tmp_path: Path):
+    root = tmp_path / "repo"
+    downloads = root / "downloads"
+    downloads.mkdir(parents=True)
+    explicit = tmp_path / "explicit-root"
+    md = root / "2026-07-01_to_2026-09-30.md"
+    md.write_text(HEADING_QUARTER, encoding="utf-8")
+    dest = tmp_path / "raw"
+    dest.mkdir()
+    export_quarter(
+        md,
+        downloads,
+        root / "clips",
+        dest,
+        date(2026, 11, 5),
+        repo_root=explicit,
+    )
+    stem = "2026-07-01_to_2026-09-30"
+    repo_file = explicit / "data" / "quarterly-processed" / stem / "26-09-11-계리가정.md"
+    vault_file = dest / "quality-updates-processed" / stem / "26-09-11-계리가정.md"
+    text = repo_file.read_text(encoding="utf-8")
+    assert text == vault_file.read_text(encoding="utf-8")
+    assert '!!! note "주요 내용"' in text
+    assert '!!! note "위원 논의"' in text
+    assert "미공개" in text
+    assert "### 금융위원회" not in text
+    assert "#### 보도자료" not in text
+    nxt = (explicit / "data" / "quarterly-processed" / stem / "26-09-12-다음 고시.md").read_text(
+        encoding="utf-8"
+    )
+    assert "다음 노트" in nxt
+    assert "위원 논의" not in nxt
 
 
 def test_missing_vault_root_copies_nothing(tmp_path: Path):

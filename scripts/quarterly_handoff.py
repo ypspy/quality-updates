@@ -15,6 +15,7 @@ SOURCE_RE = re.compile(r"<!--\s*source:\s*([A-Za-z0-9_-]+)\|(.+?)\s*-->")
 APPENDIX_RE = re.compile(r"(?m)^## Appendix\b")
 SKIP_RE = re.compile(r"<!--\s*(?:skip|no_summary)\s*-->")
 NOTE_RE = re.compile(r"!!!\s*note")
+HEADING_RE = re.compile(r"^#{3,4}(?:\s|$)")
 INVALID_FILENAME = re.compile(r'[\\/:*?"<>|]')
 HWP_TYPES = {"hwp", "hwpx", "hml"}
 
@@ -28,10 +29,16 @@ class ExportResult:
 
 
 def record_from_item(link: str, body: str) -> str:
-    """Keep the link line, source markers, and note body as written."""
+    """Keep the link line, source markers, and note body as written.
+
+    A later ``###`` or ``####`` heading ends the item. Another indented
+    ``!!! note`` in the same item stays in the record.
+    """
     lines = [link.rstrip()]
     in_note = False
     for line in body.splitlines():
+        if HEADING_RE.match(line):
+            break
         if in_note:
             lines.append(line)
             continue
@@ -49,13 +56,30 @@ def _record_filename(date_text: str, title: str) -> str:
     return f"{date_text}-{slug}.md"
 
 
+def _derive_repo_root(md_path: Path) -> Path:
+    """Directory that receives ``data/quarterly-processed`` when no root is passed.
+
+    Tests place the quarter file in a temporary repo root. The CLI does not
+    use this; it passes the parent of ``scripts/``.
+    """
+    return Path(md_path).resolve().parent
+
+
+def _item_end(lines: list[str], start: int, next_link: int) -> int:
+    for index in range(start + 1, next_link):
+        if HEADING_RE.match(lines[index]):
+            return index
+    return next_link
+
+
 def _items(text: str) -> list[tuple[str, str, str, str]]:
     body = APPENDIX_RE.split(text, maxsplit=1)[0]
     lines = body.splitlines()
     starts = [index for index, line in enumerate(lines) if LINK_RE.match(line)]
     items: list[tuple[str, str, str, str]] = []
     for position, start in enumerate(starts):
-        end = starts[position + 1] if position + 1 < len(starts) else len(lines)
+        next_link = starts[position + 1] if position + 1 < len(starts) else len(lines)
+        end = _item_end(lines, start, next_link)
         link_line = lines[start]
         matched = LINK_RE.match(link_line)
         if matched is None:
@@ -163,15 +187,28 @@ def _copy_item_files(
     return missing
 
 
+def _write_repo_record(repo_root: Path, stem: str, filename: str, data: bytes) -> Path:
+    path = repo_root / "data" / "quarterly-processed" / stem / filename
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(data)
+    return path
+
+
 def export_quarter(
     md_path: Path,
     downloads: Path,
     clips: Path,
     dest: Path,
     today: date,
+    repo_root: Path | None = None,
 ) -> ExportResult:
     if not dest.parent.is_dir():
         return ExportResult(exit_code=2, copied=[], skipped=[], waiting=[])
+
+    if repo_root is None:
+        repo_root = _derive_repo_root(md_path)
+    else:
+        repo_root = Path(repo_root)
 
     dest.mkdir(exist_ok=True)
     copied: list[str] = []
@@ -196,8 +233,9 @@ def export_quarter(
         ):
             missing = True
         record = record_from_item(link_line, body)
-        record_path = records_dir / _record_filename(date_text, title)
-        _copy_bytes(record.encode("utf-8"), record_path, today, copied, skipped)
+        filename = _record_filename(date_text, title)
+        repo_path = _write_repo_record(repo_root, stem, filename, record.encode("utf-8"))
+        _copy_bytes(repo_path.read_bytes(), records_dir / filename, today, copied, skipped)
 
     return ExportResult(
         exit_code=1 if missing else 0,
