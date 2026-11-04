@@ -44,6 +44,8 @@ def main(argv=None) -> int:
         print(f"skipped {path}")
     for name in result.waiting:
         print(f"waiting {name}")
+    for path in result.conflicts:
+        print(f"conflict {path}")
     return result.exit_code
 
 

@@ -49,7 +49,7 @@ def test_export_copies_body_pdf_and_note_without_rereading(tmp_path: Path):
     md.write_text(QUARTER, encoding="utf-8")
     dest = tmp_path / "raw"
     dest.mkdir()
-    result = export_quarter(md, downloads, root / "clips", dest, date(2026, 11, 5))
+    result = export_quarter(md, downloads, root / "clips", dest, date(2026, 11, 5), repo_root=root)
     copied_pdf = dest / "quality-updates-sources" / "2026-07-01_to_2026-09-30" / "ifrs.pdf"
     record = dest / "quality-updates-processed" / "2026-07-01_to_2026-09-30"
     repo_record = root / "data" / "quarterly-processed" / "2026-07-01_to_2026-09-30"
@@ -60,7 +60,7 @@ def test_export_copies_body_pdf_and_note_without_rereading(tmp_path: Path):
     assert "매년 제출" in next(record.glob("*.md")).read_text(encoding="utf-8")
     assert next(repo_record.glob("*.md")).read_bytes() == next(record.glob("*.md")).read_bytes()
     assert result.exit_code == 0
-    again = export_quarter(md, downloads, root / "clips", dest, date(2026, 11, 5))
+    again = export_quarter(md, downloads, root / "clips", dest, date(2026, 11, 5), repo_root=root)
     assert again.copied == []
     assert next(repo_record.glob("*.md")).read_bytes() == next(record.glob("*.md")).read_bytes()
 
@@ -80,9 +80,9 @@ def test_changed_bytes_get_a_dated_snapshot(tmp_path: Path):
     md, downloads = _write_quarter(root)
     dest = tmp_path / "raw"
     dest.mkdir()
-    export_quarter(md, downloads, root / "clips", dest, date(2026, 11, 5))
+    export_quarter(md, downloads, root / "clips", dest, date(2026, 11, 5), repo_root=root)
     (downloads / "ifrs.pdf").write_bytes(b"%PDF-2")
-    export_quarter(md, downloads, root / "clips", dest, date(2026, 11, 6))
+    export_quarter(md, downloads, root / "clips", dest, date(2026, 11, 6), repo_root=root)
     folder = dest / "quality-updates-sources" / "2026-07-01_to_2026-09-30"
     assert (folder / "ifrs.pdf").read_bytes() == b"%PDF-1"
     assert (folder / "ifrs--2026-11-06.pdf").read_bytes() == b"%PDF-2"
@@ -141,7 +141,7 @@ def test_record_is_stored_in_repo_root_then_copied(tmp_path: Path):
     assert not (root / "data").exists()
 
 
-def test_changed_record_updates_repo_and_snapshots_vault(tmp_path: Path):
+def test_changed_site_note_does_not_rebuild_existing_record(tmp_path: Path):
     root = tmp_path / "repo"
     md, downloads = _write_quarter(root)
     dest = tmp_path / "raw"
@@ -152,12 +152,31 @@ def test_changed_record_updates_repo_and_snapshots_vault(tmp_path: Path):
     name = "26-09-11-계리가정.md"
     stem = "2026-07-01_to_2026-09-30"
     repo_file = root / "data" / "quarterly-processed" / stem / name
-    vault_dir = dest / "quality-updates-processed" / stem
-    assert "매년 개정" in repo_file.read_text(encoding="utf-8")
-    assert "매년 제출" in (vault_dir / name).read_text(encoding="utf-8")
-    snapshot = vault_dir / "26-09-11-계리가정--2026-11-06.md"
-    assert "매년 개정" in snapshot.read_text(encoding="utf-8")
-    assert not (repo_file.parent / "26-09-11-계리가정--2026-11-06.md").exists()
+    vault_file = dest / "quality-updates-processed" / stem / name
+    assert "매년 제출" in repo_file.read_text(encoding="utf-8")
+    assert "매년 개정" not in repo_file.read_text(encoding="utf-8")
+    assert vault_file.read_bytes() == repo_file.read_bytes()
+    assert not (vault_file.parent / "26-09-11-계리가정--2026-11-06.md").exists()
+
+
+def test_existing_record_with_extra_line_is_copied_unchanged(tmp_path: Path):
+    root = tmp_path / "repo"
+    md, downloads = _write_quarter(root)
+    stem = "2026-07-01_to_2026-09-30"
+    name = "26-09-11-계리가정.md"
+    repo_file = root / "data" / "quarterly-processed" / stem / name
+    repo_file.parent.mkdir(parents=True)
+    original = (
+        "- (26-09-11) [계리가정](https://fsc.go.kr/no010101/1)\n"
+        "preserved extra line\n"
+    ).encode("utf-8")
+    repo_file.write_bytes(original)
+    dest = tmp_path / "raw"
+    dest.mkdir()
+    export_quarter(md, downloads, root / "clips", dest, date(2026, 11, 5), repo_root=root)
+    vault_file = dest / "quality-updates-processed" / stem / name
+    assert repo_file.read_bytes() == original
+    assert vault_file.read_bytes() == original
 
 
 def test_heading_after_note_is_not_stored_in_the_record(tmp_path: Path):
@@ -194,11 +213,59 @@ def test_heading_after_note_is_not_stored_in_the_record(tmp_path: Path):
     assert "위원 논의" not in nxt
 
 
+def test_existing_snapshot_skips_only_when_bytes_match(tmp_path: Path):
+    root = tmp_path / "repo"
+    md, downloads = _write_quarter(root)
+    dest = tmp_path / "raw"
+    dest.mkdir()
+    export_quarter(md, downloads, root / "clips", dest, date(2026, 11, 5), repo_root=root)
+    folder = dest / "quality-updates-sources" / "2026-07-01_to_2026-09-30"
+    (downloads / "ifrs.pdf").write_bytes(b"%PDF-2")
+    export_quarter(md, downloads, root / "clips", dest, date(2026, 11, 6), repo_root=root)
+    snapshot = folder / "ifrs--2026-11-06.pdf"
+    assert snapshot.read_bytes() == b"%PDF-2"
+
+    (downloads / "ifrs.pdf").write_bytes(b"%PDF-3")
+    blocked = export_quarter(md, downloads, root / "clips", dest, date(2026, 11, 6), repo_root=root)
+    assert blocked.exit_code == 1
+    assert str(snapshot) in blocked.conflicts
+    assert str(snapshot) not in blocked.skipped
+    assert snapshot.read_bytes() == b"%PDF-2"
+
+    (downloads / "ifrs.pdf").write_bytes(b"%PDF-2")
+    same = export_quarter(md, downloads, root / "clips", dest, date(2026, 11, 6), repo_root=root)
+    assert same.exit_code == 0
+    assert str(snapshot) in same.skipped
+    assert str(snapshot) not in same.conflicts
+
+
+def test_default_repo_root_is_parent_of_scripts():
+    from quarterly_handoff import _default_repo_root
+
+    root = _default_repo_root()
+    assert root == Path(__file__).resolve().parents[2]
+    assert (root / "scripts" / "quarterly_handoff.py").is_file()
+
+
+def test_omitted_repo_root_is_not_the_markdown_parent(tmp_path: Path, monkeypatch):
+    root = tmp_path / "repo"
+    md, downloads = _write_quarter(root)
+    sentinel = tmp_path / "script-location-root"
+    monkeypatch.setattr("quarterly_handoff._default_repo_root", lambda: sentinel)
+    dest = tmp_path / "raw"
+    dest.mkdir()
+    export_quarter(md, downloads, root / "clips", dest, date(2026, 11, 5))
+    stem = "2026-07-01_to_2026-09-30"
+    saved = sentinel / "data" / "quarterly-processed" / stem / "26-09-11-계리가정.md"
+    assert saved.is_file()
+    assert not (root / "data").exists()
+
+
 def test_missing_vault_root_copies_nothing(tmp_path: Path):
     root = tmp_path / "repo"
     md, downloads = _write_quarter(root)
     missing = tmp_path / "no-such-vault" / "raw"
-    result = export_quarter(md, downloads, root / "clips", missing, date(2026, 11, 5))
+    result = export_quarter(md, downloads, root / "clips", missing, date(2026, 11, 5), repo_root=root)
     assert result.exit_code == 2
     assert not missing.exists()
 
@@ -262,7 +329,7 @@ def test_selected_editor_clip_json_copies_raw_text(tmp_path: Path):
     md.write_text(quarter, encoding="utf-8")
     dest = tmp_path / "raw"
     dest.mkdir()
-    result = export_quarter(md, downloads, clips, dest, date(2026, 11, 5))
+    result = export_quarter(md, downloads, clips, dest, date(2026, 11, 5), repo_root=root)
     folder = dest / "quality-updates-sources" / "2026-07-01_to_2026-09-30"
     for clip_id, _ref, raw in selected:
         assert (folder / f"{clip_id}.txt").read_text(encoding="utf-8") == raw
@@ -279,7 +346,7 @@ def test_selected_editor_clip_json_copies_raw_text(tmp_path: Path):
     )
     missing_dest = tmp_path / "raw-missing"
     missing_dest.mkdir()
-    missing = export_quarter(missing_md, downloads, clips, missing_dest, date(2026, 11, 5))
+    missing = export_quarter(missing_md, downloads, clips, missing_dest, date(2026, 11, 5), repo_root=root)
     assert missing.exit_code == 1
     assert not (
         missing_dest / "quality-updates-sources" / "missing-clip" / "clip_1700000077_11111111.txt"

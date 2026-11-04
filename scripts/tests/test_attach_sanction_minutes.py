@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from attach_sanction_minutes import DecisionPost, attach_minutes, select_minutes_pdf
+from attach_sanction_minutes import DecisionPost, attach_minutes, meeting_key, select_minutes_pdf
 
 PRESS = """### 금융위원회
 
@@ -75,3 +75,47 @@ def test_skips_only_when_minutes_filename_already_in_block():
     assert updated == marked
     assert report == []
     assert ZIP_URL not in updated
+
+
+def test_meeting_key_reads_year_after_the_committee_name():
+    title = (
+        "사업보고서 등에 대한 조사·감리결과 조치 - "
+        "제13차 증권선물위원회(\u201926.7.8.) 조치 의결"
+    )
+    assert title == "사업보고서 등에 대한 조사·감리결과 조치 - 제13차 증권선물위원회(’26.7.8.) 조치 의결"
+    assert meeting_key(title) == (2026, "증선위", "정기", 13)
+    assert meeting_key("제13차 증권선물위원회('26.7.8.) 조치 의결") == (
+        2026,
+        "증선위",
+        "정기",
+        13,
+    )
+
+
+def test_meeting_key_accepts_left_single_quote_before_year():
+    title = (
+        "사업보고서 등에 대한 조사·감리결과 조치 - "
+        "제16차 증권선물위원회(\u201826.9.16.) 조치 의결"
+    )
+    assert "\u201826" in title
+    assert meeting_key(title) == (2026, "증선위", "정기", 16)
+
+
+def test_query_minutes_url_uses_meeting_filename():
+    posts = [
+        DecisionPost(
+            2026,
+            "증선위",
+            "정기",
+            13,
+            "https://fsc.go.kr/comm/getFile?fileNo=9",
+            [ZIP_URL],
+        )
+    ]
+    updated, report = attach_minutes(PRESS, posts)
+    assert "downloads/minutes-2026-증선위-정기-13.pdf" in updated
+    assert "fileNo" not in updated
+    assert "getFile" not in updated
+    assert ZIP_URL not in updated
+    assert ZIP_URL not in " ".join(report)
+    assert report == ["attached 2026 증선위 정기 13"]

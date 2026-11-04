@@ -26,6 +26,7 @@ class ExportResult:
     copied: list[str]
     skipped: list[str]
     waiting: list[str]
+    conflicts: list[str]
 
 
 def record_from_item(link: str, body: str) -> str:
@@ -56,13 +57,9 @@ def _record_filename(date_text: str, title: str) -> str:
     return f"{date_text}-{slug}.md"
 
 
-def _derive_repo_root(md_path: Path) -> Path:
-    """Directory that receives ``data/quarterly-processed`` when no root is passed.
-
-    Tests place the quarter file in a temporary repo root. The CLI does not
-    use this; it passes the parent of ``scripts/``.
-    """
-    return Path(md_path).resolve().parent
+def _default_repo_root() -> Path:
+    """Parent of ``scripts/``, the directory that contains this module."""
+    return Path(__file__).resolve().parent.parent
 
 
 def _item_end(lines: list[str], start: int, next_link: int) -> int:
@@ -132,6 +129,7 @@ def _copy_bytes(
     today: date,
     copied: list[str],
     skipped: list[str],
+    conflicts: list[str],
 ) -> None:
     target.parent.mkdir(parents=True, exist_ok=True)
     if not target.exists():
@@ -143,7 +141,10 @@ def _copy_bytes(
         return
     snapshot = target.with_name(f"{target.stem}--{today.isoformat()}{target.suffix}")
     if snapshot.exists():
-        skipped.append(str(snapshot))
+        if snapshot.read_bytes() == data:
+            skipped.append(str(snapshot))
+            return
+        conflicts.append(str(snapshot))
         return
     snapshot.write_bytes(data)
     copied.append(str(snapshot))
@@ -162,6 +163,7 @@ def _copy_item_files(
     copied: list[str],
     skipped: list[str],
     waiting: list[str],
+    conflicts: list[str],
 ) -> bool:
     markers = _source_markers(body)
     has_pdf = any(kind == "pdf" for kind, _ref in markers)
@@ -176,22 +178,29 @@ def _copy_item_files(
             if not source.is_file():
                 missing = True
                 continue
-            _copy_bytes(source.read_bytes(), sources_dir / source.name, today, copied, skipped)
+            _copy_bytes(
+                source.read_bytes(), sources_dir / source.name, today, copied, skipped, conflicts
+            )
             continue
         if kind == "clip":
             dest_name, data = _clip_bytes(clips, ref)
             if data is None:
                 missing = True
                 continue
-            _copy_bytes(data, sources_dir / dest_name, today, copied, skipped)
+            _copy_bytes(data, sources_dir / dest_name, today, copied, skipped, conflicts)
     return missing
 
 
-def _write_repo_record(repo_root: Path, stem: str, filename: str, data: bytes) -> Path:
+def _repo_record_bytes(repo_root: Path, stem: str, filename: str, fresh: bytes | None) -> bytes:
+    """Return the saved record. Write ``fresh`` only when the repo file is absent."""
     path = repo_root / "data" / "quarterly-processed" / stem / filename
+    if path.is_file():
+        return path.read_bytes()
+    if fresh is None:
+        raise ValueError(f"missing quarterly record: {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_bytes(data)
-    return path
+    path.write_bytes(fresh)
+    return fresh
 
 
 def export_quarter(
@@ -203,10 +212,10 @@ def export_quarter(
     repo_root: Path | None = None,
 ) -> ExportResult:
     if not dest.parent.is_dir():
-        return ExportResult(exit_code=2, copied=[], skipped=[], waiting=[])
+        return ExportResult(exit_code=2, copied=[], skipped=[], waiting=[], conflicts=[])
 
     if repo_root is None:
-        repo_root = _derive_repo_root(md_path)
+        repo_root = _default_repo_root()
     else:
         repo_root = Path(repo_root)
 
@@ -214,11 +223,12 @@ def export_quarter(
     copied: list[str] = []
     skipped: list[str] = []
     waiting: list[str] = []
+    conflicts: list[str] = []
     missing = False
 
     quarter_bytes = Path(md_path).read_bytes()
     quarter_target = dest / f"quality-updates-{Path(md_path).stem}.md"
-    _copy_bytes(quarter_bytes, quarter_target, today, copied, skipped)
+    _copy_bytes(quarter_bytes, quarter_target, today, copied, skipped, conflicts)
 
     text = quarter_bytes.decode("utf-8")
     stem = Path(md_path).stem
@@ -229,17 +239,21 @@ def export_quarter(
         if SKIP_RE.search(link_line + "\n" + body):
             continue
         if _copy_item_files(
-            body, downloads, clips, sources_dir, today, copied, skipped, waiting
+            body, downloads, clips, sources_dir, today, copied, skipped, waiting, conflicts
         ):
             missing = True
-        record = record_from_item(link_line, body)
         filename = _record_filename(date_text, title)
-        repo_path = _write_repo_record(repo_root, stem, filename, record.encode("utf-8"))
-        _copy_bytes(repo_path.read_bytes(), records_dir / filename, today, copied, skipped)
+        repo_path = repo_root / "data" / "quarterly-processed" / stem / filename
+        fresh = None
+        if not repo_path.is_file():
+            fresh = record_from_item(link_line, body).encode("utf-8")
+        data = _repo_record_bytes(repo_root, stem, filename, fresh)
+        _copy_bytes(data, records_dir / filename, today, copied, skipped, conflicts)
 
     return ExportResult(
-        exit_code=1 if missing else 0,
+        exit_code=1 if missing or conflicts else 0,
         copied=copied,
         skipped=skipped,
         waiting=waiting,
+        conflicts=conflicts,
     )

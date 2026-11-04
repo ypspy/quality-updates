@@ -4,8 +4,11 @@ import re
 from dataclasses import dataclass
 
 LINK_RE = re.compile(r"^- \((\d{2})-(\d{2})-(\d{2})\) \[(.+?)\]\((https?://[^\)]+)\)")
+_YEAR_QUOTES = "'\u2018\u2019"
 KEY_RE = re.compile(
-    r"(20\d{2}|'\d{2}|’\d{2}).{0,40}?(제\s*(\d+)\s*차)\s*(증권선물위원회|금융위원회)"
+    rf"제\s*(\d+)\s*차\s*(증권선물위원회|금융위원회)"
+    rf"[^()\n]{{0,30}}?"
+    rf"\(\s*[{_YEAR_QUOTES}]\s*(\d{{2}})"
 )
 KIND_RE = re.compile(r"임시|서면")
 
@@ -21,17 +24,12 @@ class DecisionPost:
 
 
 def meeting_key(text: str) -> tuple[int, str, str, int] | None:
-    # Year follows 제N차 in the sample title, so the match reaches the same
-    # meeting on the next line. DOTALL lets '.' cross that newline, and the
-    # 40-character window fits after spaces are removed.
-    pattern = re.compile(KEY_RE.pattern, KEY_RE.flags | re.DOTALL)
-    matched = pattern.search(text) or pattern.search(text.replace(" ", ""))
+    """제N차 and 증권선물위원회 or 금융위원회, then a parenthetical '26, ‘26, or ’26."""
+    matched = KEY_RE.search(text) or KEY_RE.search(re.sub(r"\s+", "", text))
     if not matched:
         return None
-    raw_year, _nth, number, committee = matched.groups()
-    year = int(raw_year.replace("'", "20").replace("’", "20"))
-    if year < 100:
-        year += 2000
+    number, committee, year_digits = matched.groups()
+    year = 2000 + int(year_digits)
     if "임시" in text:
         kind = "임시"
     elif KIND_RE.search(text):
@@ -40,6 +38,15 @@ def meeting_key(text: str) -> tuple[int, str, str, int] | None:
         kind = "정기"
     name = "증선위" if committee == "증권선물위원회" else "금융위"
     return year, name, kind, int(number)
+
+
+def _minutes_filename(pdf_url: str, key: tuple[int, str, str, int]) -> str:
+    path = pdf_url.split("#", 1)[0].split("?", 1)[0]
+    segment = path.rstrip("/").rsplit("/", 1)[-1]
+    if segment.lower().endswith(".pdf"):
+        return segment
+    year, committee, kind, number = key
+    return f"minutes-{year}-{committee}-{kind}-{number}.pdf"
 
 
 def select_minutes_pdf(key, posts: list[DecisionPost]) -> str | None:
@@ -69,7 +76,7 @@ def attach_minutes(text: str, posts: list[DecisionPost]) -> tuple[str, list[str]
             block = "\n".join(lines[i:block_end])
             key = meeting_key(matched.group(4) + "\n" + block)
             pdf = select_minutes_pdf(key, posts) if key else None
-            name = pdf.rsplit("/", 1)[-1] if pdf else ""
+            name = _minutes_filename(pdf, key) if pdf and key else ""
             if name and f"downloads/{name}" not in block:
                 lines.insert(i + 1, "")
                 lines.insert(i + 2, f"    <!-- source: pdf|downloads/{name} -->")
