@@ -16,7 +16,7 @@ FRONTMATTER_RE = re.compile(r"^---\s*$")
 
 SECTIONS: list[tuple[str, list[str]]] = [
     ("금융감독원", ["보도자료", "세칙제ㆍ개정예고", "회계감독 동향자료"]),
-    ("금융위원회", ["보도자료", "고시/공고/훈령", "입법예고/규정변경예고"]),
+    ("금융위원회", ["보도자료", "제재 의결", "고시/공고/훈령", "입법예고/규정변경예고"]),
     ("한국공인회계사회", ["알림마당 - 공지사항", "회계감사 - 감사인증기준"]),
     (
         "한국회계기준원",
@@ -29,7 +29,7 @@ def _date_key(yy: str, mm: str, dd: str) -> tuple[int, int, int]:
     return (2000 + int(yy), int(mm), int(dd))
 
 
-def classify_url(url: str) -> tuple[str, str]:
+def classify_url(url: str, title: str = "") -> tuple[str, str]:
     if "fss.or.kr" in url:
         if "lrgRegItnPrvntc" in url or "lrgSlno" in url:
             return "금융감독원", "세칙제ㆍ개정예고"
@@ -41,6 +41,8 @@ def classify_url(url: str) -> tuple[str, str]:
             return "금융위원회", "입법예고/규정변경예고"
         if "/po040200/" in url or "po040200/" in url:
             return "금융위원회", "고시/공고/훈령"
+        if "조사·감리결과 조치" in title:
+            return "금융위원회", "제재 의결"
         return "금융위원회", "보도자료"
     if "kicpa.or.kr" in url:
         if "sumboard" in url.lower() or "cmpBrdId=sum" in url:
@@ -53,6 +55,15 @@ def classify_url(url: str) -> tuple[str, str]:
             return "한국회계기준원", "소통광장 - 보도자료"
         return "한국회계기준원", "소통광장 - 공지사항"
     raise ValueError(f"Unclassified URL: {url}")
+
+
+def classify_block(url: str, block: str) -> tuple[str, str]:
+    title = ""
+    first = block.splitlines()[0] if block else ""
+    matched = LINK_RE.match(first)
+    if matched:
+        title = matched.group(4)
+    return classify_url(url, title)
 
 
 def split_document(text: str) -> tuple[str, list[str], list[str]]:
@@ -119,7 +130,7 @@ def dedupe_blocks(
 def rebuild_main_body(blocks: list[tuple[tuple[int, int, int], str, str]]) -> str:
     grouped: dict[tuple[str, str], list[tuple[tuple[int, int, int], str, str]]] = {}
     for item in blocks:
-        agency, subsection = classify_url(item[1])
+        agency, subsection = classify_block(item[1], item[2])
         grouped.setdefault((agency, subsection), []).append(item)
 
     parts: list[str] = []
