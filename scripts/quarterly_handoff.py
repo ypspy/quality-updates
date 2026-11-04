@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass
 from datetime import date
@@ -72,16 +73,33 @@ def _download_file(downloads: Path, ref: str) -> Path:
     return downloads / relative
 
 
-def _clip_target(clips: Path, ref: str) -> tuple[str, Path]:
+def _clip_bytes(clips: Path, ref: str) -> tuple[str, bytes | None]:
+    """Read editor clip JSON and return vault `{id}.txt` bytes.
+
+    Markers may use `clip|{id}`, `clip|clips/{id}`, or the same paths with
+    `.json`. The file on disk is always `{id}.json`; its `raw` string is the
+    text copied into the vault. A missing file returns no bytes.
+    """
     relative = ref.strip().replace("\\", "/")
     if relative.startswith("clips/"):
         relative = relative[len("clips/") :]
     clip_id = Path(relative).name
-    source = clips / relative
-    if not source.is_file() and (clips / clip_id).is_file():
-        source = clips / clip_id
-    dest_name = clip_id if clip_id.endswith(".txt") else f"{clip_id}.txt"
-    return dest_name, source
+    if clip_id.endswith(".json"):
+        clip_id = clip_id[: -len(".json")]
+    dest_name = f"{clip_id}.txt"
+    source = clips / f"{clip_id}.json"
+    if not source.is_file():
+        return dest_name, None
+    try:
+        record = json.loads(source.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return dest_name, None
+    if not isinstance(record, dict):
+        return dest_name, None
+    raw = record.get("raw")
+    if not isinstance(raw, str):
+        return dest_name, None
+    return dest_name, raw.encode("utf-8")
 
 
 def _copy_bytes(
@@ -137,11 +155,11 @@ def _copy_item_files(
             _copy_bytes(source.read_bytes(), sources_dir / source.name, today, copied, skipped)
             continue
         if kind == "clip":
-            dest_name, source = _clip_target(clips, ref)
-            if not source.is_file():
+            dest_name, data = _clip_bytes(clips, ref)
+            if data is None:
                 missing = True
                 continue
-            _copy_bytes(source.read_bytes(), sources_dir / dest_name, today, copied, skipped)
+            _copy_bytes(data, sources_dir / dest_name, today, copied, skipped)
     return missing
 
 
