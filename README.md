@@ -15,6 +15,7 @@
 
 - [큐레이션 편집 도구](#큐레이션-편집-도구)
 - [분기 운영 워크플로](#분기-운영-워크플로)
+- [회계기준원 질의회신 아카이브](#회계기준원-질의회신-아카이브)
 - [로컬 개발 환경 설정](#로컬-개발-환경-설정)
 - [프로젝트 구조](#프로젝트-구조)
 - [콘텐츠 업데이트 가이드](#콘텐츠-업데이트-가이드)
@@ -27,6 +28,7 @@
 
 - **규제 업데이트**: 분기별(또는 기간별) 보도자료·제도 변경 정리 (2022년~현재)
 - **품질관리감리**: 금융감독원 회계법인 품질관리감리 관련 문서 요약
+- **질의회신 아카이브**: 회계기준원 질의회신 원문을 `data/kasb-replies/`에 저장한다. 사이트에는 게시하지 않는다.
 - **한국어 우선**: 검색·탐색·테마(라이트/다크) 한국어 지원
 - **반응형**: 데스크톱·태블릿·모바일 대응
 - **검색**: MkDocs Material 검색 (한국어 구분자 지원)
@@ -114,6 +116,25 @@ npm run build:strict       # MkDocs strict 빌드
 ```
 
 상세 절차·역할 분담·품질 게이트: [docs/project/quarterly-operations-guide.md](docs/project/quarterly-operations-guide.md) · [docs/project/README.md](docs/project/README.md) · [CONTRIBUTING.md](CONTRIBUTING.md)
+
+---
+
+## 회계기준원 질의회신 아카이브
+
+회계기준원 질의회신 요약 게시판 전체를 항목 폴더로 저장한다. 분기 크롤러와 별도다. 원문은 이 사이트에 게시하지 않고, 분기 문서와 MCP 코퍼스에도 넣지 않는다. 지식화는 옵시디안 볼트의 `raw/`에서 한다.
+
+```bash
+python scripts/crawl_kasb_replies.py
+python scripts/crawl_kasb_replies.py --limit 20
+python scripts/crawl_kasb_replies.py --retry-failed
+python scripts/export_kasb_replies_raw.py
+```
+
+`crawl_kasb_replies.py`는 `data/kasb-replies/{seq}/item.md`와 원본 첨부를 저장한다. 이 경로는 gitignore하지 않는다. `item.md`와 첨부가 이미 있으면 다시 받지 않는다. `--retry-failed`는 `failed`, `partial`, `empty`를 디스크의 원본으로 다시 추출하고, 없는 파일만 받는다.
+
+`export_kasb_replies_raw.py`는 `item.md`만 복사한다. 기본 목적지는 `C:\dev\obsidian-valut\raw\kasb-replies`이고, `--dest`로 바꿀 수 있다. 같은 `{seq}.md`가 있으면 덮어쓰지 않는다. 첨부 파일은 복사하지 않는다.
+
+설계: [docs/superpowers/specs/2026-11-04-kasb-reply-archive-design.md](docs/superpowers/specs/2026-11-04-kasb-reply-archive-design.md)
 
 ---
 
@@ -269,9 +290,12 @@ quality-updates/
 │   ├── workflows/ci.yml           # CI (lint, build, validate)
 │   └── dependabot.yml             # 의존성 자동 업데이트
 ├── data/
+│   ├── kasb-replies/              # 질의회신 원문 아카이브 (사이트 비게시)
 │   └── quarterly-processed/       # 요약 처리 기록 (사이트 빌드 제외)
 ├── scripts/                       # 유틸리티 스크립트
 │   ├── crawl.py                   # 규제 업데이트 크롤러 CLI
+│   ├── crawl_kasb_replies.py      # 질의회신 수집 CLI
+│   ├── export_kasb_replies_raw.py # item.md만 옵시디안 raw로 복사
 │   ├── crawler/                   # FSS·FSC·KICPA·KASB 수집 모듈
 │   ├── editor.py                  # 큐레이션 편집기 진입점 (Flask)
 │   ├── editor/                    # 편집기 앱·정적 파일
