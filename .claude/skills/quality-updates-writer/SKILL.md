@@ -461,6 +461,8 @@ Type A/B 표와 **별도 링크**에 대해 `!!! note "주요 내용"` 작성. �
 
 완료 전 TaskCreate로 생성 후 항목별 확인:
 
+`docs/` Markdown을 작성하거나 수정했으면 `npm run lint:md`를 실행하고, 실패하면 오류를 모두 고친 뒤 다시 통과시킨다. 절차는 `AGENTS.md`의 Markdown lint 제약을 따른다.
+
 ### SUMMARIZE 유형
 
 - [ ] 유효한 MkDocs 마크다운 (admonition 중첩, 들여쓰기 4칸)

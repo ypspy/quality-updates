@@ -49,10 +49,12 @@
 ### Task 1: 일곱 항목 파서
 
 **Files:**
+
 - Create: `C:\Users\yoont\.cursor\hooks\kale_inbox.py`
 - Create: `C:\Users\yoont\.cursor\hooks\test_kale_inbox.py`
 
 **Interfaces:**
+
 - Consumes: 없음
 - Produces:
   - `LABELS: list[str]` — `유형`, `프로젝트`, `날짜`, `요약`, `근거`, `다음 액션`, `미결`
@@ -67,7 +69,7 @@
 
 `C:\Users\yoont\.cursor\hooks\test_kale_inbox.py`:
 
-```python
+````python
 from kale_inbox import parse_summary
 
 SAMPLE = """앞말은 노트에 넣지 않는다.
@@ -139,7 +141,7 @@ def test_parse_uses_the_last_complete_block():
     earlier = SAMPLE.replace("프로젝트: quality-updates", "프로젝트: old-project")
     got = parse_summary(earlier + "\n" + SAMPLE)
     assert got["프로젝트"] == "quality-updates"
-```
+````
 
 - [ ] **Step 2: Run test to verify it fails**
 
@@ -246,10 +248,12 @@ Expected: PASS, 5 tests.
 ### Task 2: 슬러그, 노트, PR 제목과 본문
 
 **Files:**
+
 - Modify: `C:\Users\yoont\.cursor\hooks\kale_inbox.py`
 - Modify: `C:\Users\yoont\.cursor\hooks\test_kale_inbox.py`
 
 **Interfaces:**
+
 - Consumes: `parse_summary`, `LABELS`, `HANDOFF`
 - Produces:
   - `one_line(value: str) -> str`
@@ -401,10 +405,12 @@ Expected: PASS.
 ### Task 3: 장부, 설정, PR 인자 판단
 
 **Files:**
+
 - Modify: `C:\Users\yoont\.cursor\hooks\kale_inbox.py`
 - Modify: `C:\Users\yoont\.cursor\hooks\test_kale_inbox.py`
 
 **Interfaces:**
+
 - Consumes: `parse_summary`, `branch_name`, `note_path`, `note_markdown`, `pr_title`, `pr_body`, `short_id`, `DEFAULT_REPO`, `DEFAULT_BASE`, `HANDOFF`
 - Produces:
   - `load_config(data: dict | None) -> dict` — 키 `repo`, `reviewer`, `base`
@@ -566,10 +572,12 @@ Expected: PASS.
 ### Task 4: inbox 브랜치 명령
 
 **Files:**
+
 - Modify: `C:\Users\yoont\.cursor\hooks\kale_inbox.py`
 - Modify: `C:\Users\yoont\.cursor\hooks\test_kale_inbox.py`
 
 **Interfaces:**
+
 - Consumes: `build_args`의 키 `repo`, `base`, `branch`, `title`, `body`, `reviewer`, `path`, `commit_message`
 - Produces:
   - `commands_for(args: dict, workdir: str) -> list[list[str]]`
@@ -744,12 +752,14 @@ Expected: PASS.
 ### Task 5: stop 훅
 
 **Files:**
+
 - Modify: `C:\Users\yoont\.cursor\hooks\kale_inbox.py`
 - Modify: `C:\Users\yoont\.cursor\hooks\test_kale_inbox.py`
 - Create or modify: `C:\Users\yoont\.cursor\hooks.json`
 - Create when absent: `C:\Users\yoont\.cursor\kale-inbox.json`
 
 **Interfaces:**
+
 - Consumes: `decide`, `ledger_put`, `load_config`, `commands_for`, `list_pr_command`, `parse_pr_list`, `classify_failure`, `assert_workdir`, `HOOK_COMMAND`, `DEFAULT_REPO`, `DEFAULT_BASE`
 - Produces:
   - `last_assistant_text(raw: str) -> str` — JSONL에서 마지막 `role == "assistant"`의 `type == "text"`만 잇는다. `tool_use`는 버린다.

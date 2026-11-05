@@ -12,6 +12,7 @@ Agent 진입·프롬프트: [AGENTS.md](../../AGENTS.md)
 
 | 날짜 | 파일 | 요약 |
 |------|------|------|
+| 2026-11-05 | [sanction-resolution-wiki-handoff-design.md](specs/2026-11-05-sanction-resolution-wiki-handoff-design.md) | 제재 의결·의사록, 처리 기록 공유, 분기 PDF를 옵시디안 raw로 복사 |
 | 2026-11-04 | [kasb-reply-archive-design.md](specs/2026-11-04-kasb-reply-archive-design.md) | KASB 질의회신 항목 아카이브. 사이트 비게시, item.md만 옵시디안 raw |
 | 2026-11-02 | [cursor-summary-pr-design.md](specs/2026-11-02-cursor-summary-pr-design.md) | 지식체계 요약을 베지 리뷰 PR로 전달 |
 | 2026-11-01 | [fss-review-filter-rails-design.md](specs/2026-11-01-fss-review-filter-rails-design.md) | 품질관리감리 왼쪽 법인 목록과 오른쪽 연도 필터 |
@@ -41,6 +42,7 @@ Agent 진입·프롬프트: [AGENTS.md](../../AGENTS.md)
 
 | 날짜 | 파일 | 요약 |
 |------|------|------|
+| 2026-11-05 | [sanction-resolution-wiki-handoff.md](plans/2026-11-05-sanction-resolution-wiki-handoff.md) | 제재 의결 분류, 의사록 연결, 처리 기록과 raw 복사 |
 | 2026-11-04 | [kasb-reply-archive.md](plans/2026-11-04-kasb-reply-archive.md) | KASB 질의회신 항목 아카이브 |
 | 2026-11-02 | [cursor-summary-pr.md](plans/2026-11-02-cursor-summary-pr.md) | 지식체계 요약을 베지 리뷰 PR로 전달 |
 | 2026-11-01 | [fss-review-filter-rails.md](plans/2026-11-01-fss-review-filter-rails.md) | 품질관리감리 왼쪽 법인 목록과 오른쪽 연도 필터 |

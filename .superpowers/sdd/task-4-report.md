@@ -1,92 +1,96 @@
-# Task 4 Report: 이력 표기, spec 상태, 전체 게이트
+# Task 4 Report: item.md, 완료 판정, manifest
 
 ## Status
 
-DONE
+DONE_WITH_CONCERNS
 
-## Implemented
+## TDD Evidence
 
-- `docs/superpowers/plans/2026-06-27-mcp-corpus.md`
-  - 렌즈 MCP retrieve follow-up을 완료 체크하고 **취소** 이력으로 변경했다.
-- `docs/superpowers/README.md`
-  - 기존 2026-09-10 spec/plan 색인을 중복 없이 포함했다.
-  - 과거 렌즈 spec/plan 행의 “런타임 제거 2026-09-10” 이력을 유지했다.
-- `docs/superpowers/specs/2026-09-10-consumption-mcp-product-design.md`
-  - 상태를 `승인됨`으로 변경했다.
-- `docs/superpowers/plans/2026-09-10-consumption-mcp-product.md`
-  - brief에서 지정한 기존 untracked 구현 계획을 Task 4 커밋에 포함했다.
+### RED (Step 2)
 
-## Runtime lens-path check
-
-Command used the required venv interpreter from the repository root and scanned `AGENTS.md`, `README.md`, and all Markdown files under `docs/project/`.
+Command (cwd: `scripts`):
 
 ```text
-HITS none
+python -m pytest tests/test_kasb_replies.py::test_compose_item_uses_detail_category_and_registered_date -q
 ```
 
-Exit code: 0.
-
-## Verification gates
-
-All commands ran from the repository root with:
+Result:
 
 ```text
-C:\Users\yoont\OneDrive\문서\quality-updates\.venv\Scripts\python.exe
+FAILED tests/test_kasb_replies.py::test_compose_item_uses_detail_category_and_registered_date
+AttributeError: module 'crawler.kasb_replies' has no attribute 'compose_item'
+1 failed in 0.41s
 ```
 
-1. `cd scripts && python -m pytest tests/ -q`
-   - Result: `200 passed in 11.59s`
-   - Exit code: 0
-2. `python scripts/validate_content.py --strict`
-   - Result: completed without diagnostics
-   - Exit code: 0
-3. `python scripts/export_corpus.py --strict`
-   - Result: 1,029 items; 579 done, 120 no_summary, 330 undecided; 14 periods
-   - Exit code: 0
-   - The command rewrote `data/corpus/corpus.jsonl` and `data/corpus/manifest.json`; both remain unstaged as required.
-4. `mkdocs build --strict`
-   - Result: documentation built successfully in 18.94 seconds
-   - Exit code: 0
+### GREEN (Step 4)
 
-## Commit
+Command (cwd: `scripts`):
 
 ```text
-0b0e12f docs: approve consumption MCP spec and cancel lens follow-up
+python -m pytest tests/test_kasb_replies.py -q
 ```
 
-The commit contains only the four brief-listed documentation paths. Corpus JSONL and task archive files were not staged.
+Result:
 
-## Self-review
+```text
+21 passed in 0.86s
+```
 
-- Confirmed the plan index row appears once and precedes the 2026-09-09 plan.
-- Confirmed the 2026-09-10 spec is marked `승인됨`.
-- Confirmed the MCP lens follow-up uses the brief’s cancellation wording verbatim.
-- Confirmed runtime docs contain no `.claude/skills/audit-regulatory-lens` path.
-- Confirmed no crawler, editor, writer, MCP tool, or corpus schema file was included in the Task 4 commit.
-- Confirmed generated corpus changes remain outside the commit.
+Intermediate failure before fix (full suite after verbatim brief implementation):
+
+```text
+FAILED tests/test_kasb_replies.py::test_compose_item_writes_failed_attachment_line
+assert 'failed: PrvText missing' in text
+(body showed `failed: missing extract` because section key was `note.hwp` while composed attachment name was `note.hwpx`)
+20 passed, 1 failed
+```
+
+## Files Changed
+
+| File | Change |
+|------|--------|
+| `scripts/crawler/kasb_replies.py` | Added `json`/`yaml` imports; `attachment_filename`, `compose_item`, `read_meta`, `should_attempt`, `append_manifest` |
+| `scripts/tests/test_kasb_replies.py` | Appended Task 4 tests and helpers (`_sample_row`, `_sample_detail`) |
+
+## Implementation Summary
+
+- **`attachment_filename`**: Strips path segments, dedupes via `used` set with `-{file_seq}` suffix pattern.
+- **`compose_item`**: YAML front matter + markdown body (`## 상세 안내`, per-attachment `## 첨부:` sections); merges list/detail fields; `standards` as `list(detail.standards)`; overall `extract_status` from `aggregate_status`.
+- **`read_meta`**: Parses `item.md` front matter; returns `None` on missing/invalid input.
+- **`should_attempt`**: Skip when `extract_status == ok` and all attachment files exist; retry rules for missing files and `retry_failed` on non-ok statuses.
+- **`append_manifest`**: Appends one JSON line per record, UTF-8, `ensure_ascii=False`.
+
+## Self-Review
+
+- Parsers and extractors left untouched per brief.
+- `Path` not re-imported.
+- Commit scoped to the two Task 4 files only (other dirty workspace files unstaged).
 
 ## Concerns
 
-None. The generated corpus files remain modified in the working tree by design and were not committed.
+1. **`compose_item` section matching**: Brief used filename-only lookup in `by_saved`. `test_compose_item_writes_failed_attachment_line` passes `("note.hwp", ...)` while `_sample_detail` attachment is `note.hwpx`, so strict lookup fails. Added positional fallback when `len(sections) == len(names)` and filename is absent from `by_saved`. Production crawl always uses matching `attachment_filename` keys, so behavior is unchanged for the intended path; fallback only affects mismatched test (or manual) inputs.
 
-## Final-review fixes
+2. **Test imports**: `json` and `yaml` were appended mid-file per brief; could be consolidated at top in a later cleanup (out of scope).
 
-TDD RED:
+## Commit
 
-```text
-cd scripts
-C:\Users\yoont\OneDrive\문서\quality-updates\.venv\Scripts\python.exe -m pytest tests/test_mcp_app.py -v
-FAILED test_documented_tools_are_registered: missing 'list_quarterly_periods'
-FAILED test_search_regulatory_updates_round_trip: ToolError caused by multiple values for argument 'query'
-2 failed in 5.57s
-```
+- `feat: write KASB reply item markdown and manifest lines` (see git log for SHA)
 
-TDD GREEN and regression verification:
+## Fix: filename-only extract matching
+
+Removed positional fallback in `compose_item`; sections pair only via `by_saved.get(filename, ...)`. Test `test_compose_item_writes_failed_attachment_line` uses `note.hwpx` to match `_sample_detail`.
+
+Command (cwd: `scripts`):
 
 ```text
-C:\Users\yoont\OneDrive\문서\quality-updates\.venv\Scripts\python.exe -m pytest tests/test_consumption_contract.py tests/test_mcp_core.py tests/test_mcp_app.py -v
-8 passed in 4.92s
-
-C:\Users\yoont\OneDrive\문서\quality-updates\.venv\Scripts\python.exe -m pytest tests -q
-202 passed in 14.45s
+python -m pytest tests/test_kasb_replies.py -q
 ```
+
+Result:
+
+```text
+.....................                                                    [100%]
+21 passed in 0.73s
+```
+
+Commit: `12a48edef5cb6f12eda2e17c93f6bb8df8eb9bb3` — fix: match KASB reply extracts by attachment filename

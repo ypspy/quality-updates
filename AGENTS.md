@@ -16,7 +16,7 @@ Cursor·Claude 등 **AI 에이전트**가 이 저장소에서 작업할 때의 �
 | **큐레이션 사전 제안** | [docs/project/curation-rules.md](docs/project/curation-rules.md) | `scripts/auto_curate.py`는 마커를 출력만 한다. 본문에 대량으로 쓰지 않음 |
 | **프로젝트 점검·보완 기획** | 이 파일 + `/brainstorming` | 평가 → 2~3안 → **spec 승인** → plan → 구현 |
 | **승인된 기능 구현** | `docs/superpowers/specs/YYYY-MM-DD-*-design.md` | [plan](docs/superpowers/plans/) + Subagent-Driven |
-| **PR·CI·린트** | [CONTRIBUTING.md](CONTRIBUTING.md) | pytest, validate `--strict`, mkdocs `--strict` |
+| **PR·CI·린트** | [CONTRIBUTING.md](CONTRIBUTING.md) | pytest, validate `--strict`, mkdocs `--strict`, `npm run lint:md` |
 | **문서 지도** | [docs/project/README.md](docs/project/README.md) | — |
 
 ---
@@ -82,6 +82,7 @@ HITL 담당: editor 큐레이션, 요약 검증, nav/index, push 승인
 - **커밋**: 사용자가 요청할 때만. `quality-updates-writer`는 RIGID 스킬이다.
 - **SUMMARIZE 슬림** (요약 시): `gold-excerpts` + 분기 md ±80줄 윈도우 + REFERENCE 온디맨드; 재주입 금지 — [spec](docs/superpowers/specs/2026-07-23-summarize-slim-design.md)
 - **코퍼스 소비**: 다른 Agent는 MCP만 읽는다. 소비 경로로 `docs/quality-updates/`를 grep하지 않는다. 큐레이션·요약·nav 쓰기는 생산 레인만.
+- **Markdown lint**: `docs/` 아래 `.md`를 작성하거나 수정한 뒤 `npm run lint:md`를 실행한다. 실패하면 보고된 오류를 모두 고치고, 통과할 때까지 다시 실행한다. `.markdownlint.json` 규칙을 끄거나 오류 파일을 검사에서 빼지 않는다. 줄 끝 공백은 일괄로 지우지 않는다. 공백 2칸은 Markdown 하드 줄바꿈일 수 있으니 그 줄과 앞뒤를 보고 고친다.
 
 ---
 
@@ -104,4 +105,7 @@ cd scripts && python -m pytest tests/ -q
 python scripts/validate_content.py --strict
 python scripts/export_corpus.py --strict
 mkdocs build --strict
+npm run lint:md
 ```
+
+`docs/` Markdown을 바꿨으면 `npm run lint:md`가 통과해야 한다. 실패하면 위 Markdown lint 제약대로 고치고 다시 실행한다.
