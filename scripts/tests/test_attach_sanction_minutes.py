@@ -323,3 +323,34 @@ def test_bad_quarter_filename_exits_2(tmp_path):
     code, updated, report = run_minutes("x", "notes.md", lambda url: "", lambda url, dest: None, tmp_path)
     assert code == 2
     assert updated == "x"
+
+
+def test_main_writes_quarter_file_with_lf_newlines(tmp_path, monkeypatch):
+    import attach_sanction_minutes as asm
+
+    quarter_path = tmp_path / "2026-07-01_to_2026-09-30.md"
+    quarter_path.write_bytes(QUARTER.encode("utf-8"))
+
+    def fetch_text(url: str) -> str:
+        if "curPage=1" in url and "no020102" in url:
+            return LIST_HTML
+        if "curPage=" in url:
+            return "<ul></ul>"
+        if url.endswith("/88040"):
+            return DETAIL_MINUTES
+        if url.endswith("/87906"):
+            return DETAIL_SPECIAL
+        raise AssertionError(url)
+
+    def download(url: str, dest: Path) -> None:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(b"pdf")
+
+    monkeypatch.setattr(asm, "_http_text", fetch_text)
+    monkeypatch.setattr(asm, "_http_download", download)
+
+    assert asm.main([str(quarter_path)]) == 0
+
+    data = quarter_path.read_bytes()
+    assert b"\n" in data
+    assert b"\r\n" not in data

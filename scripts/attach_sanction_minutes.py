@@ -296,7 +296,7 @@ def main(argv: list[str] | None = None) -> int:
     downloads = Path(__file__).resolve().parent.parent / "downloads"
     code, updated, report = run_minutes(text, path.name, _http_text, _http_download, downloads)
     if code == 0 and updated != text:
-        path.write_text(updated, encoding="utf-8")
+        path.write_text(updated, encoding="utf-8", newline="\n")
     for line in report:
         print(line)
     return code
