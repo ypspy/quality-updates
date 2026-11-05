@@ -328,6 +328,17 @@ def test_bad_quarter_filename_exits_2(tmp_path):
 def test_main_writes_quarter_file_with_lf_newlines(tmp_path, monkeypatch):
     import attach_sanction_minutes as asm
 
+    repo_downloads = Path(__file__).resolve().parent.parent.parent / "downloads"
+    stand_in_names = (
+        "minutes-2026-증선위-정기-15.pdf",
+        "minutes-2026-증선위-임시-1.pdf",
+    )
+
+    fake_script = tmp_path / "scripts" / "attach_sanction_minutes.py"
+    fake_script.parent.mkdir(parents=True, exist_ok=True)
+    fake_script.write_text("# stub for __file__ redirect\n", encoding="utf-8")
+    monkeypatch.setattr(asm, "__file__", str(fake_script))
+
     quarter_path = tmp_path / "2026-07-01_to_2026-09-30.md"
     quarter_path.write_bytes(QUARTER.encode("utf-8"))
 
@@ -352,5 +363,10 @@ def test_main_writes_quarter_file_with_lf_newlines(tmp_path, monkeypatch):
     assert asm.main([str(quarter_path)]) == 0
 
     data = quarter_path.read_bytes()
-    assert b"\n" in data
+    assert b"<!-- source: pdf|downloads/minutes-2026-" in data
     assert b"\r\n" not in data
+
+    tmp_downloads = tmp_path / "downloads"
+    for name in stand_in_names:
+        assert (tmp_downloads / name).read_bytes() == b"pdf"
+        assert not (repo_downloads / name).exists()
