@@ -10,7 +10,7 @@
 
 분기 문서와 사이트는 질의회신 요약을 알리는 보도자료만 다룬다. 회신 결론은 첨부(hwp, hwpx, pdf, xlsx)에 있다. 게시판을 사이트에 미러링하지 않고, 항목마다 메타데이터·추출 텍스트·원본 첨부를 남긴다.
 
-옵시디안 볼트(`C:\dev\obsidian-valut`)는 그 마크다운을 `raw/kasb-replies/{seq}.md`로 가져간다. 위키 합성은 이 스펙 밖이다. 다른 프로젝트가 second brain으로 읽는 지식은 옵시디안 저장소의 위키다.
+옵시디안 볼트(`C:\dev\obsidian-vault`)는 그 마크다운을 `raw/kasb-replies/{seq}.md`로 가져간다. 위키 합성은 이 스펙 밖이다. 다른 프로젝트가 second brain으로 읽는 지식은 옵시디안 저장소의 위키다.
 
 **목적**
 
@@ -247,7 +247,7 @@ extract_status: ok
 python scripts/export_kasb_replies_raw.py [--dest PATH]
 ```
 
-`--dest` 기본값은 `C:\dev\obsidian-valut\raw\kasb-replies`. `{seq}/item.md`를 `{dest}/{seq}.md`로 복사한다. 대상 파일이 있으면 생략한다. 첨부 파일과 `wiki/`는 복사하지 않는다. 끝난 뒤 복사 건수와 생략 건수를 출력한다. 아카이브에서 사라진 항목을 dest에서 지우지 않는다.
+`--dest` 기본값은 `C:\dev\obsidian-vault\raw\kasb-replies`. `{seq}/item.md`를 `{dest}/{seq}.md`로 복사한다. 대상 파일이 있으면 생략한다. 첨부 파일과 `wiki/`는 복사하지 않는다. 끝난 뒤 복사 건수와 생략 건수를 출력한다. 아카이브에서 사라진 항목을 dest에서 지우지 않는다.
 
 테스트는 임시 디렉터리를 dest로 쓴다. 기본 경로에 쓰지 않는다.
 

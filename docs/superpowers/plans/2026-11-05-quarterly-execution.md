@@ -28,10 +28,12 @@
 ### Task 1: 크롤 때 제목 이동
 
 **Files:**
+
 - Modify: `scripts/crawler/unified.py` (`collect_fsc`, 새 `split_fsc_press`, 새 `render_fsc_press`)
 - Test: `scripts/tests/test_fsc_section_order.py`
 
 **Interfaces:**
+
 - Consumes: `repair_quarterly_structure.classify_url(url: str, title: str = "") -> tuple[str, str]`, `repair_quarterly_structure.LINK_RE`, `FSC_MAIN_HEADINGS`, `sort_md_link_lines(items: list[str]) -> list[str]`
 - Produces: `split_fsc_press(lines: list[str]) -> tuple[list[str], list[str]]`, `render_fsc_press(lines: list[str]) -> str`. 첫 목록은 보도자료, 둘째 목록은 제재 의결이다.
 
@@ -134,10 +136,12 @@ git commit -m "feat: place investigation sanctions while crawling FSC press"
 ### Task 2: 의결정보 제목 키와 논의 있는 항목 제외
 
 **Files:**
+
 - Modify: `scripts/attach_sanction_minutes.py`
 - Test: `scripts/tests/test_attach_sanction_minutes.py`
 
 **Interfaces:**
+
 - Consumes: 기존 `meeting_key`, `select_minutes_pdf`, `attach_minutes`, `DecisionPost`
 - Produces: `decision_key(title: str) -> tuple[int, str, str, int] | None`. 튜플은 `(연도, "금융위"|"증선위", "정기"|"임시"|"서면", 차수)`다. `attach_minutes`는 `위원 논의`가 있고 `미공개`가 없으면 마커를 넣지 않고 `skipped discussion {year} {committee} {kind} {number}`를 보고한다.
 
@@ -258,10 +262,12 @@ git commit -m "feat: read decision-board titles and skip filled discussions"
 ### Task 3: 의사록 PDF 수신
 
 **Files:**
+
 - Modify: `scripts/attach_sanction_minutes.py`
 - Test: `scripts/tests/test_attach_sanction_minutes.py`
 
 **Interfaces:**
+
 - Consumes: `decision_key`, `meeting_key`, `select_minutes_pdf`, `attach_minutes`, `_eligible_block`, `_minutes_filename`
 - Produces: `parse_decision_list(html: str) -> list[tuple[str, str]]`, `minutes_pdf_urls(detail_html: str) -> list[str]`, `collect_posts(fetch_text, start: date, end: date) -> list[DecisionPost]`, `pending_downloads(text: str, posts: list[DecisionPost]) -> list[tuple[str, str]]`, `run_minutes(text: str, quarter_name: str, fetch_text, download, downloads: Path) -> tuple[int, str, list[str]]`, `main(argv: list[str] | None = None) -> int`
 
@@ -667,10 +673,12 @@ git commit -m "feat: download one minutes PDF for an unpublished sanction"
 ### Task 4: 처리 기록 작성
 
 **Files:**
+
 - Create: `scripts/write_quarterly_record.py`
 - Test: `scripts/tests/test_write_quarterly_record.py`
 
 **Interfaces:**
+
 - Consumes: `quarterly_handoff.LINK_RE`, `SOURCE_RE`, `SKIP_RE`, `APPENDIX_RE`, `_record_filename(date_text: str, title: str) -> str`, `_items(text: str) -> list[tuple[str, str, str, str]]`
 - Produces: `write_record(quarter_text: str, quarter_stem: str, title: str, facts: list[str], date_text: str | None, mode: str, repo_root: Path) -> tuple[int, str]`. `mode`는 `"create"`, `"append-facts"`, `"append-minutes"` 중 하나다. 반환 문자열은 `kept`, `skipped`, `wrote` 중 하나로 시작하고 경로를 포함한다.
 
@@ -942,10 +950,12 @@ git commit -m "feat: write a quarter record without replacing an existing one"
 ### Task 5: 요약 스킬에 기록 명령 연결
 
 **Files:**
+
 - Modify: `.claude/skills/quality-updates-writer/SKILL.md` (Phase 0 표 다음, Phase 1 상태 표 다음, REFERENCE D 끝)
 - Test: `scripts/tests/test_writer_skill_record.py`
 
 **Interfaces:**
+
 - Consumes: `python scripts/write_quarterly_record.py <분기.md> --title <제목>`, `--append-facts`, `--append-minutes`
 - Produces: 스킬 문서 안의 그 명령 문구. 코드 함수는 추가하지 않는다.
 
