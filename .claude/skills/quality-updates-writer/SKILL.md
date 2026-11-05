@@ -137,7 +137,7 @@ TaskUpdate → in_progress. 아래 우선순위 표 적용. 결정 후 TaskUpdat
 | 4 | "관련 PDF" 요청 | `downloads/1.pdf` 사용. 없으면 경로 확인 요청 |
 | 5 | "최근 PDF" 요청 | `downloads/` 수정일 내림차순 첫 번째 파일 사용. 0건이면 경로 요청 |
 
-처리 기록 파일이 `data/quarterly-processed/{분기 stem}/{YY-MM-DD}-{제목}.md`에 있으면 그 파일을 읽고 노트를 쓴다. 노트에 필요한 사실이 기록에 없을 때만 해당 PDF를 연다. 새로 확인한 사실은 표준 입력으로 `python scripts/write_quarterly_record.py <분기.md> --title <제목> --append-facts`에 넘긴다. `pdf_extracted.txt` 전문은 넘기지 않는다.
+처리 기록 파일이 `data/quarterly-processed/{분기 stem}/{YY-MM-DD}-{제목 앞 40자}.md`에 있으면 그 파일을 읽고 노트를 쓴다. 노트에 필요한 사실이 기록에 없을 때만 해당 PDF를 연다. 새로 확인한 사실은 표준 입력으로 `python scripts/write_quarterly_record.py <분기.md> --title <제목> --append-facts`에 넘긴다. `pdf_extracted.txt` 전문은 넘기지 않는다.
 
 **여러 첨부**: 링크 바로 아래에 마커를 한 줄에 하나씩 연속으로 둔다. 마커가 하나인 기존 파일도 그대로 읽는다.
 
