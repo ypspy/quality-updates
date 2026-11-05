@@ -22,7 +22,7 @@
 - 기본 실행은 `item.md`가 있고, 첨부가 모두 있고, `extract_status`가 `ok`인 항목을 건너뛴다. `--retry-failed`는 `failed`, `partial`, `empty`만 다시 시도한다. `ok`이고 파일이 있는 항목은 다시 받지 않는다.
 - `--delay` 기본값 `0.2`. `--limit`는 이번에 시도하는 항목 수이고, 건너뛴 항목은 세지 않는다.
 - 상세·다운로드가 실패하면 `item.md`를 만들지 않는다. manifest에는 실패 한 줄을 추가한다.
-- 복사 기본 경로는 `C:\dev\obsidian-valut\raw\kasb-replies`. `{seq}.md`가 있으면 덮어쓰지 않는다. 첨부 파일은 복사하지 않는다.
+- 복사 기본 경로는 `C:\dev\obsidian-vault\raw\kasb-replies`. `{seq}.md`가 있으면 덮어쓰지 않는다. 첨부 파일은 복사하지 않는다.
 - `scripts/crawler/KASB.py`, `unified.py`, `scripts/crawl.py`, 분기 문서, MCP 코퍼스는 수정하지 않는다.
 - CI와 단위 테스트는 `kasb.or.kr`을 호출하지 않는다. 게시판 전체 수집은 이 계획의 완료 조건이 아니다.
 - 사이트 문장: `회계기준원(KASB) 질의회신 원문은 이 사이트에 게시하지 않는다. 유관기관 보도자료 확장은 추가 예정.`
@@ -1421,7 +1421,7 @@ def default_archive() -> Path:
 
 
 def default_raw_dest() -> Path:
-    return Path(r"C:\dev\obsidian-valut\raw\kasb-replies")
+    return Path(r"C:\dev\obsidian-vault\raw\kasb-replies")
 
 
 def make_session() -> requests.Session:
