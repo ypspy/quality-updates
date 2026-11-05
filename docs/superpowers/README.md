@@ -43,6 +43,7 @@ Agent 진입·프롬프트: [AGENTS.md](../../AGENTS.md)
 
 | 날짜 | 파일 | 요약 |
 |------|------|------|
+| 2026-11-05 | [quarterly-execution.md](plans/2026-11-05-quarterly-execution.md) | 크롤 때 제재 제목 분리, 의사록 PDF 수신, 요약 시 처리 기록 작성 |
 | 2026-11-05 | [sanction-resolution-wiki-handoff.md](plans/2026-11-05-sanction-resolution-wiki-handoff.md) | 제재 의결 분류, 의사록 연결, 처리 기록과 raw 복사 |
 | 2026-11-04 | [kasb-reply-archive.md](plans/2026-11-04-kasb-reply-archive.md) | KASB 질의회신 항목 아카이브 |
 | 2026-11-02 | [cursor-summary-pr.md](plans/2026-11-02-cursor-summary-pr.md) | 지식체계 요약을 베지 리뷰 PR로 전달 |
