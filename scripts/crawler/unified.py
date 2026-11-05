@@ -98,6 +98,36 @@ def sort_dated_tuples(items: list[tuple[str, str, str]]) -> list[tuple[str, str,
     return sorted(items, key=lambda t: _yy_mm_dd_key(t[0]))
 
 
+def split_fsc_press(lines: list[str]) -> tuple[list[str], list[str]]:
+    """Return press lines and sanction lines. Sanction titles contain 조사·감리결과 조치."""
+    import repair_quarterly_structure as repair
+
+    press: list[str] = []
+    sanctions: list[str] = []
+    for line in lines:
+        matched = repair.LINK_RE.match(line)
+        if matched is None:
+            press.append(line)
+            continue
+        _agency, section = repair.classify_url(matched.group(5), matched.group(4))
+        if section == "제재 의결":
+            sanctions.append(line)
+        else:
+            press.append(line)
+    return press, sanctions
+
+
+def render_fsc_press(lines: list[str]) -> str:
+    briefing, sanctions = split_fsc_press(lines)
+    parts = [
+        "#### 보도자료\n",
+        "\n".join(sort_md_link_lines(briefing)),
+        f"\n#### {FSC_MAIN_HEADINGS[1]}\n",
+        "\n".join(sort_md_link_lines(sanctions)),
+    ]
+    return "\n".join(parts)
+
+
 def sort_md_link_lines(items: list[str]) -> list[str]:
     def key(line: str) -> tuple[int, int, int]:
         m = re.match(r"^- \((\d{2})-(\d{2})-(\d{2})\)", line)
@@ -181,9 +211,7 @@ def collect_fsc() -> str:
 
     press = FSC.crawl_board("보도자료", FSC.BASE_URLS["보도자료"])
     APPENDIX["금융위원회"]["보도자료"] = press
-    lines += ["#### 보도자료\n", "\n".join(sort_md_link_lines(press))]
-
-    lines += [f"\n#### {FSC_MAIN_HEADINGS[1]}\n"]
+    lines += [render_fsc_press(press)]
 
     rules = FSC.crawl_board("소관규정", FSC.BASE_URLS["소관규정"])
     APPENDIX["금융위원회"]["고시/공고/훈령"] = rules
