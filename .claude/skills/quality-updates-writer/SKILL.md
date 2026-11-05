@@ -137,6 +137,8 @@ TaskUpdate → in_progress. 아래 우선순위 표 적용. 결정 후 TaskUpdat
 | 4 | "관련 PDF" 요청 | `downloads/1.pdf` 사용. 없으면 경로 확인 요청 |
 | 5 | "최근 PDF" 요청 | `downloads/` 수정일 내림차순 첫 번째 파일 사용. 0건이면 경로 요청 |
 
+처리 기록 파일이 `data/quarterly-processed/{분기 stem}/{YY-MM-DD}-{제목}.md`에 있으면 그 파일을 읽고 노트를 쓴다. 노트에 필요한 사실이 기록에 없을 때만 해당 PDF를 연다. 새로 확인한 사실은 표준 입력으로 `python scripts/write_quarterly_record.py <분기.md> --title <제목> --append-facts`에 넘긴다. `pdf_extracted.txt` 전문은 넘기지 않는다.
+
 **여러 첨부**: 링크 바로 아래에 마커를 한 줄에 하나씩 연속으로 둔다. 마커가 하나인 기존 파일도 그대로 읽는다.
 
 ```
@@ -184,6 +186,8 @@ TaskUpdate → in_progress. 아래 우선순위 표 적용. 결정 후 TaskUpdat
 | 요약 없음 | `<!-- no_summary -->` | 요약하지 않음 |
 | 스킵 | `<!-- skip -->` | 편집기 저장 시 기록; 배포 전 제거 대상 |
 | 완료 | `!!! note` | 기존 Phase 1 규칙대로 유지·보강 |
+
+노트를 쓴 뒤 처리 기록이 없고 항목이 `skip`, `no_summary`가 아니면 `python scripts/write_quarterly_record.py <분기.md> --title <제목>`을 호출한다. 표준 입력은 원문에서 확인한 사실이며, 사이트 노트에 넣지 않은 사실도 포함한다. `data/quarterly-processed/` 파일은 직접 편집하지 않는다. `위원 논의`를 의사록으로 채운 뒤에는 `python scripts/write_quarterly_record.py <분기.md> --title <제목> --append-minutes`를 호출한다.
 
 ---
 
@@ -409,7 +413,7 @@ tags:
 - **지적사항·조치**: 붙임(PDF/HWP)에서 구체 위반 내용·조치 추출
 - 한공회 위탁감리위원회 조치 → 회사 열에 `(한공회 위탁감리)`, 지적사항에 위반 유형·대상 회사 수
 
-`제재 의결` 항목은 Type A 또는 Type B 표 아래에 `!!! note "위원 논의"`를 둔다. 의사록을 읽지 않았으면 `미공개` 한 줄만 둔다. 다시 요약할 때 이 노트를 지우지 않는다. 표의 회사명과 금액은 고치지 않는다. 문체는 명사형, `~함`, `~임`, `~예정`이다.
+`제재 의결` 항목은 Type A 또는 Type B 표 아래에 `!!! note "위원 논의"`를 둔다. 의사록을 읽지 않았으면 `미공개` 한 줄만 둔다. 다시 요약할 때 이 노트를 지우지 않는다. 표의 회사명과 금액은 고치지 않는다. 문체는 명사형, `~함`, `~임`, `~예정`이다. 처리 기록이 있으면 그 기록의 `## 위원 논의`로 이 노트를 쓴다. 기록 파일은 `write_quarterly_record.py`로만 고친다.
 
 ---
 
