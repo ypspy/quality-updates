@@ -4,7 +4,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from attach_sanction_minutes import DecisionPost, attach_minutes, meeting_key, select_minutes_pdf
+from attach_sanction_minutes import (
+    DecisionPost,
+    attach_minutes,
+    decision_key,
+    meeting_key,
+    select_minutes_pdf,
+)
 
 PRESS = """### 금융위원회
 
@@ -119,3 +125,33 @@ def test_query_minutes_url_uses_meeting_filename():
     assert ZIP_URL not in updated
     assert ZIP_URL not in " ".join(report)
     assert report == ["attached 2026 증선위 정기 13"]
+
+
+def test_decision_key_reads_the_live_board_title():
+    assert decision_key("2026년 제15차 증권선물위원회 의사록, 안건 및 제재안건 의결서") == (
+        2026,
+        "증선위",
+        "정기",
+        15,
+    )
+    assert decision_key("2026년 제1차 임시증권선물위원회 의사록 및 안건") == (
+        2026,
+        "증선위",
+        "임시",
+        1,
+    )
+    assert decision_key("2026년 제2차 증권선물위원회 임시회의 회의결과") == (
+        2026,
+        "증선위",
+        "임시",
+        2,
+    )
+    assert decision_key("2026년 제14차 금융위원회 의사록") == (2026, "금융위", "정기", 14)
+    assert decision_key("회의 안내") is None
+
+
+def test_filled_discussion_does_not_receive_a_minutes_marker():
+    filled = PRESS.replace("미공개임", "회사 조치는 원안임")
+    updated, report = attach_minutes(filled, [POSTS[0]])
+    assert updated == filled
+    assert report == ["skipped discussion 2026 증선위 정기 13"]

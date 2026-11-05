@@ -11,6 +11,11 @@ KEY_RE = re.compile(
     rf"\(\s*[{_YEAR_QUOTES}]\s*(\d{{2}})"
 )
 KIND_RE = re.compile(r"임시|서면")
+DECISION_KEY_RE = re.compile(
+    r"(?P<year>\d{4})년\s*제\s*(?P<number>\d+)\s*차\s*"
+    r"(?P<early>임시|서면)?\s*"
+    r"(?P<committee>증권선물위원회|금융위원회)"
+)
 
 
 @dataclass(frozen=True)
@@ -38,6 +43,35 @@ def meeting_key(text: str) -> tuple[int, str, str, int] | None:
         kind = "정기"
     name = "증선위" if committee == "증권선물위원회" else "금융위"
     return year, name, kind, int(number)
+
+
+def decision_key(title: str) -> tuple[int, str, str, int] | None:
+    """Year, committee, kind, and number from a decision-board title."""
+    matched = DECISION_KEY_RE.search(title)
+    if matched is None:
+        return None
+    if matched.group("early"):
+        kind = matched.group("early")
+    elif "임시" in title:
+        kind = "임시"
+    elif "서면" in title:
+        kind = "서면"
+    else:
+        kind = "정기"
+    committee = "증선위" if matched.group("committee") == "증권선물위원회" else "금융위"
+    return int(matched.group("year")), committee, kind, int(matched.group("number"))
+
+
+def _eligible_block(block: str) -> bool:
+    marker = '!!! note "위원 논의"'
+    start = block.find(marker)
+    if start < 0:
+        return True
+    body = block[start + len(marker) :]
+    next_note = body.find("!!! note")
+    if next_note >= 0:
+        body = body[:next_note]
+    return "미공개" in body
 
 
 def _minutes_filename(pdf_url: str, key: tuple[int, str, str, int]) -> str:
@@ -74,6 +108,13 @@ def attach_minutes(text: str, posts: list[DecisionPost]) -> tuple[str, list[str]
             while block_end < len(lines) and not LINK_RE.match(lines[block_end]) and not lines[block_end].startswith("####"):
                 block_end += 1
             block = "\n".join(lines[i:block_end])
+            if not _eligible_block(block):
+                if key := meeting_key(matched.group(4) + "\n" + block):
+                    report.append(
+                        f"skipped discussion {key[0]} {key[1]} {key[2]} {key[3]}"
+                    )
+                i = block_end
+                continue
             key = meeting_key(matched.group(4) + "\n" + block)
             pdf = select_minutes_pdf(key, posts) if key else None
             name = _minutes_filename(pdf, key) if pdf and key else ""
