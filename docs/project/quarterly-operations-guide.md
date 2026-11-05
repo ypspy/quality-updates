@@ -20,7 +20,7 @@
 |------|------|------|
 | **Agent** | Cursor·Claude 등 AI 에이전트 | 반복·대량 처리: 크롤 실행, 스킬 기반 요약 초안, validate/build, diff 힌트 해석 보조 |
 | **전문가 (HITL)** | 회계·감사 실무 담당자 | 전문 판단: 링크 선별·스킵, 출처 적합성, 요약 사실 검증, 배포 승인 |
-| **시스템** | 스크립트·CI | 규칙 기계 검증: 포맷, pytest, MkDocs strict, skip 쌍 제거 |
+| **시스템** | 스크립트·CI | 규칙 기계 검증: 포맷, markdownlint, pytest, MkDocs strict, skip 쌍 제거 |
 
 **원칙**
 
@@ -168,6 +168,7 @@ PDF가 없는 HWP/HWPX는 `fetch_attachments.py` 보고의 변환 목록이다. 
 - [ ] validate strict 통과
 - [ ] `python scripts/export_corpus.py --strict` 통과
 - [ ] `npm test` 또는 `cd scripts && python -m pytest tests/ -q` 통과
+- [ ] `docs/` Markdown을 수정했으면 `npm run lint:md` 통과
 
 **HITL 체크리스트**
 
@@ -210,9 +211,10 @@ python scripts/validate_content.py --strict
 python scripts/export_corpus.py --strict
 cd scripts && python -m pytest tests/ -q
 mkdocs build --strict
+npm run lint:md
 ```
 
-npm: `npm run crawl`, `npm run prepare:deploy`, `npm test`, `npm run build:strict`
+npm: `npm run crawl`, `npm run prepare:deploy`, `npm test`, `npm run build:strict`, `npm run lint:md`
 
 ---
 
@@ -226,6 +228,7 @@ npm: `npm run crawl`, `npm run prepare:deploy`, `npm test`, `npm run build:stric
 | G4 | `prepare_deploy.py` 성공 | Agent 실행, HITL 확인 |
 | G5 | `validate_content --strict` 통과 | 시스템 |
 | G6 | `pytest` 통과 | 시스템 |
+| G6b | `npm run lint:md` 통과. 실패 시 [CONTRIBUTING.md](../../CONTRIBUTING.md)의 Markdown lint 절차로 고치고 재실행 | Agent |
 | G7 | `mkdocs build --strict` 통과 | Agent/HITL |
 | G7b | `export_corpus.py --strict` 통과 | 시스템 |
 | G8 | `main` push 승인 | HITL |
@@ -242,6 +245,7 @@ npm: `npm run crawl`, `npm run prepare:deploy`, `npm test`, `npm run build:stric
 | 원문(PDF/HWP) 접근 불가 | Agent: OCR fallback → 실패 시 HITL이 수동 확보 |
 | Agent 요약과 원문 불일치 | HITL이 수정 지시 후 Agent 재작성 |
 | validate strict 실패 | Agent가 포맷 수정; 내용 변경 없이 들여쓰기·날짜 형식만 |
+| `npm run lint:md` 실패 | Agent가 보고된 줄만 수정하고 재실행. 규칙 비활성화, 파일 제외, 줄 끝 공백 일괄 삭제는 하지 않음 |
 | nav 힌트와 실제 레이블 불일치 | HITL이 기존 nav 관례에 맞게 수동 조정 |
 
 ---

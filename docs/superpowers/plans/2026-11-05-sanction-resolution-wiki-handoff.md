@@ -28,10 +28,12 @@
 ### Task 1: 제재 의결 분류
 
 **Files:**
+
 - Modify: `scripts/repair_quarterly_structure.py`
 - Test: `scripts/tests/test_repair_quarterly_structure.py`
 
 **Interfaces:**
+
 - Consumes: 기존 `classify_url(url)`, `rebuild_main_body(blocks)`, `LINK_RE`
 - Produces: `classify_url(url: str, title: str = "") -> tuple[str, str]`, `classify_block(url: str, block: str) -> tuple[str, str]`. `rebuild_main_body`는 `classify_block`을 쓴다.
 
@@ -116,12 +118,14 @@ git commit -m "fix: keep investigation sanctions in the resolution section"
 ### Task 2: 골격과 요약 규칙
 
 **Files:**
+
 - Modify: `scripts/crawler/unified.py` (`collect_fsc`)
 - Modify: `.claude/skills/quality-updates-writer/SKILL.md`
 - Modify: `docs/project/quarterly-operations-guide.md`
 - Test: `scripts/tests/test_fsc_section_order.py`
 
 **Interfaces:**
+
 - Consumes: Task 1의 금융위원회 하위 순서
 - Produces: `unified.FSC_MAIN_HEADINGS`. `collect_fsc`가 보도자료 다음에 빈 `#### 제재 의결`을 쓴다.
 
@@ -202,10 +206,12 @@ git commit -m "docs: add the sanction resolution heading to the quarter skeleton
 ### Task 3: 의사록 PDF 연결
 
 **Files:**
+
 - Create: `scripts/attach_sanction_minutes.py`
 - Test: `scripts/tests/test_attach_sanction_minutes.py`
 
 **Interfaces:**
+
 - Consumes: 분기 마크다운 텍스트. 테스트가 넣는 `DecisionPost`.
 - Produces: `DecisionPost`, `meeting_key(text: str) -> tuple[int, str, str, int] | None`, `select_minutes_pdf(key, posts: list[DecisionPost]) -> str | None`, `attach_minutes(text: str, posts: list[DecisionPost]) -> tuple[str, list[str]]`. CLI `main(argv) -> int`는 이 계획에서 네트워크 구현을 비워 두고, 테스트는 `attach_minutes`만 호출한다. ZIP URL은 `select_minutes_pdf`의 반환값이 될 수 없다.
 
@@ -350,11 +356,13 @@ git commit -m "feat: attach one minutes PDF to a sanction item"
 ### Task 4: 처리 기록과 raw 복사
 
 **Files:**
+
 - Create: `scripts/quarterly_handoff.py`
 - Create: `scripts/export_quarterly_raw.py`
 - Test: `scripts/tests/test_export_quarterly_raw.py`
 
 **Interfaces:**
+
 - Consumes: 분기 마크다운, `downloads/` 파일, `scripts/editor/clips/{id}` 텍스트, 목적지 디렉터리, `today` 날짜
 - Produces: `record_from_item(link: str, body: str) -> str`, `export_quarter(md_path: Path, downloads: Path, clips: Path, dest: Path, today: date) -> ExportResult`. `ExportResult.exit_code`는 파일 누락이 있으면 `1`, 목적지 루트가 없으면 `2`, 아니면 `0`.
 
