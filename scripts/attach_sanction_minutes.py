@@ -17,6 +17,7 @@ DECISION_KEY_RE = re.compile(
     r"(?P<early>임시|서면)?\s*"
     r"(?P<committee>증권선물위원회|금융위원회)"
 )
+POST_TITLE_WORDS = ("의사록", "안건", "의결서")
 BOARDS = ("https://www.fsc.go.kr/no020101", "https://www.fsc.go.kr/no020102")
 QUARTER_NAME_RE = re.compile(r"(\d{4}-\d{2}-\d{2})_to_(\d{4}-\d{2}-\d{2})\.md$")
 
@@ -201,7 +202,7 @@ def collect_posts(fetch_text, start: date, end: date) -> list[DecisionPost]:
                 break
             for title, url in rows:
                 key = decision_key(title)
-                if key is None or "의사록" not in title:
+                if key is None or not any(word in title for word in POST_TITLE_WORDS):
                     continue
                 pdfs = minutes_pdf_urls(fetch_text(url))
                 if not pdfs:

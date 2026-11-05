@@ -419,3 +419,43 @@ def test_main_writes_quarter_file_with_lf_newlines(tmp_path, monkeypatch):
     for name in stand_in_names:
         assert (tmp_downloads / name).read_bytes() == b"pdf"
         assert not (repo_downloads / name).exists()
+
+
+LIST_NO_MINUTES_TITLE = """
+<ul>
+  <li><div class="inner"><div class="subject"><a href="/no020102/87581">2026년 제12차 증권선물위원회 안건 및 제재안건 의결서</a></div><div class="day">2026-08-21</div></div></li>
+</ul>
+"""
+
+DETAIL_87581 = """
+<a href="/comm/getFile?srvcId=BBSTY1&upperNo=87581&fileTy=ATTACH&fileNo=1">2026년 제12차 증권선물위원회 의사록(공개용)_수정.pdf</a>
+<a href="/comm/getFile?srvcId=BBSTY1&upperNo=87581&fileTy=ATTACH&fileNo=1">파일다운로드</a>
+<a href="/comm/getFile?srvcId=BBSTY1&upperNo=87581&fileTy=ATTACH&fileNo=2">2026년 제12차 증권선물위원회 안건 및 제재안건 의결서.Zip</a>
+"""
+
+
+def test_post_title_without_minutes_word_still_yields_minutes_pdf():
+    requested = []
+
+    def fetch_text(url: str) -> str:
+        requested.append(url)
+        if "curPage=1" in url and "no020102" in url:
+            return LIST_NO_MINUTES_TITLE
+        if "curPage=" in url:
+            return "<ul></ul>"
+        if url.endswith("/87581"):
+            return DETAIL_87581
+        raise AssertionError(url)
+
+    posts = collect_posts(fetch_text, date(2026, 4, 1), date(2026, 9, 9))
+    assert posts == [
+        DecisionPost(
+            2026,
+            "증선위",
+            "정기",
+            12,
+            "https://www.fsc.go.kr/comm/getFile?srvcId=BBSTY1&upperNo=87581&fileTy=ATTACH&fileNo=1",
+            [],
+        )
+    ]
+    assert not any("fileNo=2" in url for url in requested)
