@@ -157,6 +157,55 @@ def test_filled_discussion_does_not_receive_a_minutes_marker():
     assert report == ["skipped discussion 2026 증선위 정기 13"]
 
 
+PRESS_WITH_APPENDIX = """### 금융위원회
+
+#### 제재 의결
+
+- (26-07-09) [사업보고서 등에 대한 조사·감리결과 조치 - 제13차 증권선물위원회(’26.7.8.)](https://fsc.go.kr/no010101/87293)
+
+    !!! note "위원 논의"
+
+        - 미공개임
+
+## Appendix
+
+- (26-07-09) [사업보고서 등에 대한 조사·감리결과 조치 - 제13차 증권선물위원회(’26.7.8.)](https://fsc.go.kr/no010101/99999)
+
+    !!! note "위원 논의"
+
+        - 미공개임
+"""
+
+
+def test_appendix_links_outside_resolution_do_not_receive_minutes():
+    posts = [POSTS[0]]
+    updated, report = attach_minutes(PRESS_WITH_APPENDIX, posts)
+    assert MINUTES_PDF in updated
+    assert "no010101/99999" in updated
+    assert updated.count("source: pdf|downloads/") == 1
+    assert updated.index(MINUTES_PDF) < updated.index("99999")
+    assert report == ["attached 2026 증선위 정기 13"]
+
+
+def test_meeting_key_ignores_temporary_wording_in_note_body():
+    title = "사업보고서 등에 대한 조사·감리결과 조치 - 제13차 증권선물위원회(’26.7.8.)"
+    block = '\n\n    !!! note "위원 논의"\n\n        - 임시주주총회 일정 관련\n\n        - 미공개임'
+    assert meeting_key(title + "\n" + block) == (2026, "증선위", "정기", 13)
+
+    press = PRESS.replace("미공개임", "임시주주총회 일정 관련\n\n        - 미공개임")
+    updated_regular, report_regular = attach_minutes(press, [POSTS[0]])
+    assert MINUTES_PDF in updated_regular
+    assert report_regular == ["attached 2026 증선위 정기 13"]
+
+    wrong_kind = [
+        DecisionPost(2026, "증선위", "임시", 13, "https://fsc.go.kr/files/minutes-13.pdf", []),
+    ]
+    updated_wrong, report_wrong = attach_minutes(press, wrong_kind)
+    assert MINUTES_PDF not in updated_wrong
+    assert updated_wrong == press
+    assert report_wrong == ["unpublished 2026 증선위 정기 13"]
+
+
 from datetime import date
 from attach_sanction_minutes import (
     collect_posts,

@@ -8,3 +8,5 @@ def test_summarize_skill_calls_the_record_writer():
     assert "--append-facts" in text
     assert "--append-minutes" in text
     assert "data/quarterly-processed/" in text
+    assert "2026년 3분기" in text
+    assert "--date" in text

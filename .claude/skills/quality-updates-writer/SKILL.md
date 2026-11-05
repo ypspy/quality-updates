@@ -187,7 +187,7 @@ TaskUpdate → in_progress. 아래 우선순위 표 적용. 결정 후 TaskUpdat
 | 스킵 | `<!-- skip -->` | 편집기 저장 시 기록; 배포 전 제거 대상 |
 | 완료 | `!!! note` | 기존 Phase 1 규칙대로 유지·보강 |
 
-노트를 쓴 뒤 처리 기록이 없고 항목이 `skip`, `no_summary`가 아니면 `python scripts/write_quarterly_record.py <분기.md> --title <제목>`을 호출한다. 표준 입력은 원문에서 확인한 사실이며, 사이트 노트에 넣지 않은 사실도 포함한다. `data/quarterly-processed/` 파일은 직접 편집하지 않는다. `위원 논의`를 의사록으로 채운 뒤에는 `python scripts/write_quarterly_record.py <분기.md> --title <제목> --append-minutes`를 호출한다.
+노트를 쓴 뒤 처리 기록이 없고 항목이 `skip`, `no_summary`가 아니면 `python scripts/write_quarterly_record.py <분기.md> --title <제목>`을 호출한다. 표준 입력은 원문에서 확인한 사실이며, 사이트 노트에 넣지 않은 사실도 포함한다. `data/quarterly-processed/` 파일은 직접 편집하지 않는다. `위원 논의`를 의사록으로 채운 뒤에는 `python scripts/write_quarterly_record.py <분기.md> --title <제목> --append-minutes`를 호출한다. 2026년 3분기 항목에는 이 명령을 실행하지 않는다. 그 항목의 첫 기록은 내보내기가 기존 노트에서 만든다. 같은 제목이 둘이면 `--date YY-MM-DD`를 붙인다.
 
 ---
 

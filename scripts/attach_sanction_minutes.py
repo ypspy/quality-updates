@@ -12,7 +12,6 @@ KEY_RE = re.compile(
     rf"[^()\n]{{0,30}}?"
     rf"\(\s*[{_YEAR_QUOTES}]\s*(\d{{2}})"
 )
-KIND_RE = re.compile(r"임시|서면")
 DECISION_KEY_RE = re.compile(
     r"(?P<year>\d{4})년\s*제\s*(?P<number>\d+)\s*차\s*"
     r"(?P<early>임시|서면)?\s*"
@@ -39,9 +38,10 @@ def meeting_key(text: str) -> tuple[int, str, str, int] | None:
         return None
     number, committee, year_digits = matched.groups()
     year = 2000 + int(year_digits)
-    if "임시" in text:
+    span = matched.group(0)
+    if "임시" in span:
         kind = "임시"
-    elif KIND_RE.search(text):
+    elif "서면" in span:
         kind = "서면"
     else:
         kind = "정기"
@@ -107,9 +107,16 @@ def attach_minutes(text: str, posts: list[DecisionPost]) -> tuple[str, list[str]
         stripped = lines[i].strip()
         if stripped.startswith("#### "):
             in_resolution = stripped == "#### 제재 의결"
+        elif stripped.startswith("### ") or stripped.startswith("## "):
+            in_resolution = False
         if in_resolution and (matched := LINK_RE.match(lines[i])):
             block_end = i + 1
-            while block_end < len(lines) and not LINK_RE.match(lines[block_end]) and not lines[block_end].startswith("####"):
+            while block_end < len(lines) and not LINK_RE.match(lines[block_end]):
+                raw = lines[block_end]
+                if raw.startswith("####"):
+                    break
+                if raw.startswith("### ") or raw.startswith("## "):
+                    break
                 block_end += 1
             block = "\n".join(lines[i:block_end])
             key = meeting_key(matched.group(4) + "\n" + block)
@@ -215,10 +222,17 @@ def pending_downloads(text: str, posts: list[DecisionPost]) -> list[tuple[str, s
         stripped = lines[i].strip()
         if stripped.startswith("#### "):
             in_resolution = stripped == "#### 제재 의결"
+        elif stripped.startswith("### ") or stripped.startswith("## "):
+            in_resolution = False
         matched = LINK_RE.match(lines[i]) if in_resolution else None
         if matched:
             block_end = i + 1
-            while block_end < len(lines) and not LINK_RE.match(lines[block_end]) and not lines[block_end].startswith("####"):
+            while block_end < len(lines) and not LINK_RE.match(lines[block_end]):
+                raw = lines[block_end]
+                if raw.startswith("####"):
+                    break
+                if raw.startswith("### ") or raw.startswith("## "):
+                    break
                 block_end += 1
             block = "\n".join(lines[i:block_end])
             key = meeting_key(matched.group(4) + "\n" + block)
