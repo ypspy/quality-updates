@@ -498,7 +498,7 @@ def default_archive() -> Path:
 
 
 def default_raw_dest() -> Path:
-    return Path(r"C:\dev\obsidian-valut\raw\kasb-replies")
+    return Path(r"C:\dev\obsidian-vault\raw\kasb-replies")
 
 
 def make_session() -> requests.Session:
