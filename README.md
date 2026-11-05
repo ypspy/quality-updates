@@ -67,7 +67,7 @@ flowchart LR
 
 | 단계 | 명령·도구 | 산출물 |
 |------|-----------|--------|
-| 1. 수집 | `python scripts/crawl.py --year YYYY --quarter N` | `docs/quality-updates/YYYY/*.md` (신규만) |
+| 1. 수집 | `python scripts/crawl.py --year YYYY --quarter N` | `docs/quality-updates/YYYY/*.md` (신규만). 금융위 보도 중 `조사·감리결과 조치`는 `제재 의결` |
 | 2. 큐레이션 제안 | `python scripts/auto_curate.py <분기.md>` | 표준출력 마커 제안 (파일은 수정하지 않음) |
 | 3. 첨부 수집 | `python scripts/fetch_attachments.py <분기.md>` | `downloads/` 파일, 항목별 `<!-- source: … -->`, 보고 |
 | 4. 큐레이션 편집 | `python scripts/editor.py` | `<!-- skip -->`, 여러 source 마커 |
@@ -86,6 +86,23 @@ python scripts/fetch_attachments.py <분기.md> --report downloads/fetch-attachm
 보고 기본 경로는 설정된 다운로드 폴더의 `fetch-attachments-report.md` 다. 받은 PDF, PDF가 아닌 기타 첨부, 웨일 변환이 필요한 HWP/HWPX, 다운로드 실패 항목이 나뉜다.
 
 편집기 PDF 탭에서는 첨부를 여러 개 더하거나 뺄 수 있다. 「페이지 첨부 모두 연결」은 그 행의 원문 페이지에서 같은 규칙으로 첨부를 받아 항목에 붙인다.
+
+금융위 보도 제목에 `조사·감리결과 조치`가 있으면 크롤이 그 링크를 `제재 의결`에 둔다. 그 문구가 없는 금융위 보도와 금감원·한공회·회계기준원 링크는 `보도자료` 등 기존 제목에 둔다. 크롤은 새 분기 파일만 만들며, 이미 있는 분기 파일은 그대로 둔다.
+
+의사록은 보도자료 첨부가 아니다. 의결정보 게시판에 의사록 PDF가 나오면 `제재 의결`의 미공개 항목에 마커만 붙인다. 조치 표와 `위원 논의` 문장은 쓰지 않는다. `위원 논의`가 이미 채워져 있으면 건너뛴다. 한 회의의 의사록 PDF가 둘이면 마커를 붙이지 않는다.
+
+```bash
+python scripts/attach_sanction_minutes.py <분기.md>
+```
+
+요약 스킬은 확인한 사실을 `write_quarterly_record.py`로 `data/quarterly-processed/{분기 stem}/`에 남긴다. 파일명은 `{YY-MM-DD}-{제목 앞 40자}.md`다. 같은 경로가 있으면 바이트를 유지한다. 기록 파일은 직접 고치지 않는다. `skip`, `no_summary`, Appendix 항목은 만들지 않는다. 2026년 3분기 항목은 이 명령으로 만들지 않고, 내보내기가 기존 노트에서 만든다. 같은 제목이 둘이면 `--date YY-MM-DD`를 붙인다.
+
+```bash
+python scripts/write_quarterly_record.py <분기.md> --title "<링크 제목>"
+python scripts/export_quarterly_raw.py <분기.md>
+```
+
+`export_quarterly_raw.py`는 분기 마크다운, 처리 기록, PDF·캡처를 `C:\dev\obsidian-valut\raw`로 복사한다. 저장소 파일은 수정하지 않는다. `--dest`로 목적지를 바꿀 수 있다.
 
 **npm 단축** (Node.js 설치 시):
 
@@ -190,6 +207,15 @@ python scripts/validate_content.py
 
 # 배포 전처리 (skip 제거 + validate + nav/index 힌트)
 python scripts/prepare_deploy.py
+
+# 제재 의결의 미공개 항목에 의사록 PDF 마커
+python scripts/attach_sanction_minutes.py docs/quality-updates/2026/2026-07-01_to_2026-09-30.md
+
+# 요약에서 확인한 사실을 처리 기록으로 저장 (분기 파일은 수정하지 않음)
+python scripts/write_quarterly_record.py <분기.md> --title "<링크 제목>"
+
+# 분기 원문·처리 기록·PDF를 옵시디안 raw로 복사
+python scripts/export_quarterly_raw.py <분기.md>
 ```
 
 ### 6. 엄격 빌드 검증
@@ -242,12 +268,17 @@ quality-updates/
 ├── .github/
 │   ├── workflows/ci.yml           # CI (lint, build, validate)
 │   └── dependabot.yml             # 의존성 자동 업데이트
+├── data/
+│   └── quarterly-processed/       # 요약 처리 기록 (사이트 빌드 제외)
 ├── scripts/                       # 유틸리티 스크립트
 │   ├── crawl.py                   # 규제 업데이트 크롤러 CLI
 │   ├── crawler/                   # FSS·FSC·KICPA·KASB 수집 모듈
 │   ├── editor.py                  # 큐레이션 편집기 진입점 (Flask)
 │   ├── editor/                    # 편집기 앱·정적 파일
 │   ├── fetch_attachments.py       # 요약 대상 원문 첨부 일괄 다운로드
+│   ├── attach_sanction_minutes.py # 제재 의결에 의사록 PDF 마커
+│   ├── write_quarterly_record.py  # 처리 기록 생성·추가
+│   ├── export_quarterly_raw.py    # 분기 원문을 옵시디안 raw로 복사
 │   ├── extract_pdf.py             # PDF 텍스트 추출
 │   ├── extract_hwp.py             # HWP 텍스트 추출
 │   ├── reorder_chronological.py   # 콘텐츠 시계열 정렬
