@@ -553,6 +553,38 @@ def test_zip_listing_keeps_only_audit_agenda_and_decision_pdfs():
     assert whale == ["(공개용) 의결 190. 위탁감리결과 조치안.hwp"]
 
 
+def test_unfair_trading_and_rule_amendments_are_not_audit_files():
+    from attach_sanction_minutes import audit_zip_entries
+
+    names = [
+        "금융위 의결서(제2026-336호)_가상자산에 대한 불공정거래 조사결과 과징금부과 조치안(공개용).pdf",
+        "(공개용) 의결 401. 시세조종 조사결과 조치안.pdf",
+        "(공개용) 의결 402. 미공개정보 이용 조사결과 조치안.pdf",
+        "(공개용) 의결 214. 한국공인회계사회 「위탁감리위원회 운영규정」 및 「감리조사업무규정」 일부개정규정안.pdf",
+        "(공개용) 의결 403. 시장동향 조사.pdf",
+        "(공개용) 의결 249. 재무제표 제출의무 위반혐의 등에 대한 조사결과 조치안.pdf",
+        "(공개용) 의결 215. 대주회계법인의 감리결과 조치안.pdf",
+    ]
+    kept, whale = audit_zip_entries(names)
+    kept_names = [item.filename for item in kept]
+    assert any("249" in name for name in kept_names)
+    assert any("215" in name for name in kept_names)
+    assert whale == []
+    for token in ("불공정거래", "시세조종", "미공개정보", "214", "시장동향"):
+        assert not any(token in name for name in kept_names)
+
+
+def test_agenda_temp_name_uses_a_stable_sha256_prefix():
+    import hashlib
+
+    from attach_sanction_minutes import _agenda_temp_name
+
+    url = "https://www.fsc.go.kr/comm/getFile?fileNo=2"
+    digest = hashlib.sha256(url.encode()).hexdigest()[:16]
+    assert _agenda_temp_name(url) == f"_agenda-{digest}.zip"
+    assert _agenda_temp_name(url) == _agenda_temp_name(url)
+
+
 def test_agenda_number_parses_the_four_filename_forms():
     from attach_sanction_minutes import parse_agenda_number
 
@@ -692,8 +724,6 @@ def test_raw_bundle_does_not_overwrite_an_existing_snapshot(tmp_path):
         key,
         "회차 기록\n",
         [("agenda", "251.pdf", b"one")],
-        "https://www.fsc.go.kr/no020102/88040",
-        "https://www.fsc.go.kr/comm/getFile?fileNo=2",
     )
     assert first == [tmp_path / "2026-증선위-정기-15차"]
     second = place_sanction_bundle(
@@ -701,8 +731,6 @@ def test_raw_bundle_does_not_overwrite_an_existing_snapshot(tmp_path):
         key,
         "다른 기록\n",
         [("agenda", "251.pdf", b"two"), ("decision", "251-decision.pdf", b"new")],
-        "https://www.fsc.go.kr/no020102/88040",
-        "https://www.fsc.go.kr/comm/getFile?fileNo=2",
     )
     folder = tmp_path / "2026-증선위-정기-15차"
     assert (folder / "record.md").read_text(encoding="utf-8") == "회차 기록\n"

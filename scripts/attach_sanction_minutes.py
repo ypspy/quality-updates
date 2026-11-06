@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import io
 import re
 import zipfile
@@ -27,8 +28,9 @@ MEETING_DATE_RE = re.compile(
 )
 
 
-AUDIT_TERMS = ("조사", "감리", "위탁감리", "회계법인", "감사인")
-EXCLUDED_TERMS = ("불공정거래",)
+AUDIT_TERMS = ("감리", "회계법인", "감사인")
+INVESTIGATION_PHRASES = ("조사감리", "조사결과")
+EXCLUDED_TERMS = ("불공정거래", "시세조종", "미공개정보", "개정", "규정")
 _MASK_CHARS = set("○◯〇△▲▽▼◇◆■□●★＊*")
 _DOTS = "·ㆍ･‧"
 
@@ -295,7 +297,14 @@ def is_audit_related(name: str) -> bool:
     flattened = _flat_name(name)
     if any(term in flattened for term in EXCLUDED_TERMS):
         return False
+    if any(phrase in flattened for phrase in INVESTIGATION_PHRASES):
+        return True
     return any(term in flattened for term in AUDIT_TERMS)
+
+
+def _agenda_temp_name(url: str) -> str:
+    digest = hashlib.sha256(url.encode()).hexdigest()[:16]
+    return f"_agenda-{digest}.zip"
 
 
 def meeting_date(text: str) -> str:
@@ -448,10 +457,7 @@ def place_sanction_bundle(
     key: tuple[int, str, str, int],
     record: str,
     files: list[tuple[str, str, bytes]],
-    page_url: str = "",
-    zip_url: str = "",
 ) -> list[Path]:
-    del page_url, zip_url
     folder = root / sanction_folder(key)
     folder.mkdir(parents=True, exist_ok=True)
     record_path = folder / "record.md"
@@ -614,7 +620,7 @@ def _apply_agendas(text, posts, download, downloads: Path, written: list[Path]):
             if url in seen_zip:
                 continue
             seen_zip.add(url)
-            temporary = downloads / f"_agenda-{abs(hash(url))}.zip"
+            temporary = downloads / _agenda_temp_name(url)
             try:
                 download(url, temporary)
                 data = temporary.read_bytes()
@@ -680,8 +686,6 @@ def _apply_agendas(text, posts, download, downloads: Path, written: list[Path]):
                 rows,
             ),
             bundle_files,
-            page,
-            zip_urls[0] if zip_urls else "",
         )
         meeting_folder = downloads / "sanctions" / folder
         for kind, filename, _payload in bundle_files:
