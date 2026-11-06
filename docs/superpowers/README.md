@@ -12,6 +12,7 @@ Agent 진입·프롬프트: [AGENTS.md](../../AGENTS.md)
 
 | 날짜 | 파일 | 요약 |
 |------|------|------|
+| 2026-11-06 | [unpublished-sanction-items-design.md](specs/2026-11-06-unpublished-sanction-items-design.md) | 미연결 감리 의안을 제재 의결의 미보도 절에 두고, 요약 단계가 내용으로 연결 |
 | 2026-11-05 | [quarterly-execution-design.md](specs/2026-11-05-quarterly-execution-design.md) | 크롤 때 제재 제목 분리, 의사록 PDF 수신, 요약 시 처리 기록 작성 |
 | 2026-11-05 | [sanction-resolution-wiki-handoff-design.md](specs/2026-11-05-sanction-resolution-wiki-handoff-design.md) | 제재 의결·의사록, 처리 기록 공유, 분기 PDF를 옵시디안 raw로 복사 |
 | 2026-11-04 | [kasb-reply-archive-design.md](specs/2026-11-04-kasb-reply-archive-design.md) | KASB 질의회신 항목 아카이브. 사이트 비게시, item.md만 옵시디안 raw |
@@ -43,6 +44,7 @@ Agent 진입·프롬프트: [AGENTS.md](../../AGENTS.md)
 
 | 날짜 | 파일 | 요약 |
 |------|------|------|
+| 2026-11-06 | [unpublished-sanction-items.md](plans/2026-11-06-unpublished-sanction-items.md) | 미연결 감리 의안을 미보도 절에 두고 검증으로 빠짐을 막음 |
 | 2026-11-05 | [quarterly-execution.md](plans/2026-11-05-quarterly-execution.md) | 크롤 때 제재 제목 분리, 의사록 PDF 수신, 요약 시 처리 기록 작성 |
 | 2026-11-05 | [sanction-resolution-wiki-handoff.md](plans/2026-11-05-sanction-resolution-wiki-handoff.md) | 제재 의결 분류, 의사록 연결, 처리 기록과 raw 복사 |
 | 2026-11-04 | [kasb-reply-archive.md](plans/2026-11-04-kasb-reply-archive.md) | KASB 질의회신 항목 아카이브 |

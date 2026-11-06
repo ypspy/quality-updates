@@ -73,7 +73,7 @@ flowchart LR
 | 2. 큐레이션 제안 | `python scripts/auto_curate.py <분기.md>` | 표준출력 마커 제안 (파일은 수정하지 않음) |
 | 3. 첨부 수집 | `python scripts/fetch_attachments.py <분기.md>` | `downloads/` 파일, 항목별 `<!-- source: … -->`, 보고 |
 | 4. 큐레이션 편집 | `python scripts/editor.py` | `<!-- skip -->`, 여러 source 마커 |
-| 5. 요약 | `quality-updates-writer` 스킬 (SUMMARIZE) | 링크별 note |
+| 5. 요약 | `quality-updates-writer` 스킬 (SUMMARIZE). 의사록 공개 뒤 `attach_sanction_minutes.py`를 먼저 실행 | 링크별 note. 제재 의결은 조치 표, 안건 분석, 위원 논의. 미연결 의안은 `분기중 미보도 항목` |
 | 6. 사이트 등록 | `mkdocs.yml` nav, `docs/index.md` | 사이드바·홈 최신 링크 |
 | 7. 배포 전처리 | `python scripts/prepare_deploy.py` | skip 제거, validate, nav/index diff 힌트 |
 | 8. 빌드·배포 | `mkdocs build --strict` → `main` push | [quality-updates.onrender.com](https://quality-updates.onrender.com) |
@@ -93,7 +93,7 @@ python scripts/fetch_attachments.py <분기.md> --report downloads/fetch-attachm
 
 의사록은 보도자료 첨부가 아니다. 의결정보 게시판에 의사록 PDF가 나오면 `제재 의결`의 미공개 항목에 마커만 붙인다. 조치 표와 `위원 논의` 문장은 쓰지 않는다. `위원 논의`가 이미 채워져 있으면 의사록 마커는 건너뛴다. 제목에 `의사록(추가)`인 글은 회차 키가 같으면 같은 회의로 합치고, 합친 의사록 PDF마다 마커를 붙인다. 추가가 아닌 의사록 PDF가 같은 회의에 둘이면 마커를 붙이지 않는다.
 
-같은 글의 안건 ZIP(첨부 2번)은 받아서 조사·감리·위탁감리·회계법인·감사인 의안의 공개용 안건과 의결서 PDF만 `downloads/sanctions/{연도}-{위원회}-{정기|임시|서면}-{N}차/`에 둔다. `조사`만 있는 파일은 남기지 않고, `조사·감리` 또는 `조사결과`일 때만 본다. `불공정거래`, `시세조종`, `미공개정보`가 들어간 파일과 규정·개정 안건은 남기지 않는다. ZIP 원본은 남기지 않고 주소만 기록한다. 회차 폴더에는 의사록 PDF를 복사하고 `record.md`에 회의일을 적는다. 분기 문서에는 연결된 의안만 source 마커로 더한다. 보도자료에 의안번호가 있으면 그 번호로 잇고, 없으면 같은 회차에서 실명 회사명이 정확히 하나일 때만 잇는다. 가려진 이름은 추정하지 않는다. 대응이 없거나 둘 이상이면 unmatched로 보고하고, 그 PDF는 분기 문서에 마커로 넣지 않는다. HWP는 변환하지 않고 Whale 변환 필요 목록으로만 보고한다. 볼트로 보낼 때의 경로는 `raw/sanctions/`이고, 그 복사는 `export_quarterly_raw.py`에 들어가기 전까지 미룬다.
+같은 글의 안건 ZIP(첨부 2번)은 받아서 조사·감리·위탁감리·회계법인·감사인 의안의 공개용 안건과 의결서 PDF만 `downloads/sanctions/{연도}-{위원회}-{정기|임시|서면}-{N}차/`에 둔다. `조사`만 있는 파일은 남기지 않고, `조사·감리` 또는 `조사결과`일 때만 본다. `불공정거래`, `시세조종`, `미공개정보`가 들어간 파일과 규정·개정 안건은 남기지 않는다. ZIP 원본은 남기지 않고 주소만 기록한다. 회차 폴더에는 의사록 PDF를 복사하고 `record.md`에 회의일을 적는다. 분기 문서에는 연결된 의안만 source 마커로 더한다. 보도자료에 의안번호가 있으면 그 번호로 잇고, 없으면 같은 회차에서 실명 회사명이 정확히 하나일 때만 잇는다. 가려진 이름은 추정하지 않는다. 대응이 없거나 둘 이상이면 unmatched로 보고한다. 요약 단계가 그 PDF를 읽어 지적과 금액이 같은 회의 보도 한 건과만 맞으면 보도 항목에 붙인다. 나머지는 `제재 의결` 맨 끝의 `- 분기중 미보도 항목` 불릿에 둔다. 보도 항목은 조치 표 아래 `안건 분석`, 그 다음 `위원 논의`다. 안건 분석은 의안 번호, 지적, 조치안, 표의 어느 행과 맞는지를 적고, 위원 질의와 의결은 위원 논의에 둔다. 미보도 불릿 안에는 안건마다 `안건 분석` 상자를 두고, 안건과 제목을 한 줄로 엮은 뒤 요약, 의결정보를 적는다. 요약은 두 문장을 넘기지 않는다. 미보도에는 조치 표와 위원 논의를 만들지 않는다. 최종 모양은 2026년 3분기와 같다. `validate_content.py --strict`는 `record.md`가 있는 회의만 보고, unmatched 경로가 분기 문서에 있는지만 확인한다. 기록이 없으면 그 회의는 건너뛴다. HWP는 변환하지 않고 Whale 변환 필요 목록으로만 보고한다. 볼트로 보낼 때의 경로는 `raw/sanctions/`이고, 그 복사는 `export_quarterly_raw.py`에 들어가기 전까지 미룬다.
 
 ```bash
 python scripts/attach_sanction_minutes.py <분기.md>

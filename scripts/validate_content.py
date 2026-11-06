@@ -214,6 +214,55 @@ def validate_no_phase2(lines: list[str], path: Path) -> list[ValidationError]:
     return errors
 
 
+_MINUTES_FOLDER = re.compile(
+    r"downloads/minutes-(?P<year>\d{4})-(?P<committee>증선위|금융위)-(?P<kind>정기|임시|서면)-(?P<number>\d+)\.pdf"
+)
+_BUNDLE_FOLDER = re.compile(
+    r"downloads/sanctions/(?P<year>\d{4})-(?P<committee>증선위|금융위)-(?P<kind>정기|임시|서면)-(?P<number>\d+)차/"
+)
+
+
+def meeting_folders(text: str) -> set[str]:
+    found: set[str] = set()
+    for pattern in (_MINUTES_FOLDER, _BUNDLE_FOLDER):
+        for match in pattern.finditer(text):
+            found.add(
+                f"{match.group('year')}-{match.group('committee')}-{match.group('kind')}-{match.group('number')}차"
+            )
+    return found
+
+
+def unmatched_source_paths(record_text: str, folder: str) -> list[str]:
+    paths: list[str] = []
+    for line in record_text.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("|"):
+            continue
+        cells = [cell.strip() for cell in stripped.strip("|").split("|")]
+        if len(cells) < 5 or cells[1] not in {"agenda", "decision"} or cells[4] != "unmatched":
+            continue
+        paths.append(f"downloads/sanctions/{folder}/{cells[1]}/{cells[2]}")
+    return paths
+
+
+def validate_unpublished_sanctions(
+    lines: list[str], path: Path, sanctions_root: Path
+) -> list[ValidationError]:
+    del path
+    text = "\n".join(lines)
+    errors: list[ValidationError] = []
+    for folder in sorted(meeting_folders(text)):
+        record = sanctions_root / folder / "record.md"
+        if not record.is_file():
+            continue
+        for source in unmatched_source_paths(record.read_text(encoding="utf-8"), folder):
+            if source not in text:
+                errors.append(
+                    ValidationError(1, "UNPUBLISHED_SOURCE", f"미연결 의안이 분기 문서에 없음: {source}", "error")
+                )
+    return errors
+
+
 def validate_file(filepath: Path, strict: bool) -> list[ValidationError]:
     """단일 파일 검증."""
     try:
@@ -232,6 +281,8 @@ def validate_file(filepath: Path, strict: bool) -> list[ValidationError]:
         validate_no_collapsible_note,
     ]:
         all_errors.extend(fn(lines, filepath))
+    sanctions_root = Path(__file__).resolve().parent.parent / "downloads" / "sanctions"
+    all_errors.extend(validate_unpublished_sanctions(lines, filepath, sanctions_root))
     if strict:
         all_errors = [e for e in all_errors if e.severity in ("error", "warning")]
     else:

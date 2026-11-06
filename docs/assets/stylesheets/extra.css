@@ -23,11 +23,17 @@ iframe {
 
 
 /* CLASS */
-.admonition.note{
+.admonition.note,
+.admonition.info{
     font-size: 0.95em;
 }
 
-.md-typeset details.note {
+.md-typeset details.note,
+.md-typeset details.info {
+    font-size: 0.95em;
+}
+
+.md-content__inner.quarterly-update li > .md-typeset__scrollwrap table {
     font-size: 0.95em;
 }
 
