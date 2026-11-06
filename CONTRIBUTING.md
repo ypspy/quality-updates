@@ -168,7 +168,35 @@ mkdocs build --strict
 수동으로 파일을 만들 때는 아래를 참고합니다.
 
 - **파일 경로**: `docs/quality-updates/YYYY/YYYY-MM-DD_to_YYYY-MM-DD.md`
-- **프론트매터**: [README.md - 콘텐츠 업데이트 가이드](README.md#콘텐츠-업데이트-가이드)의 템플릿
+- **파일명**: `YYYY-MM-DD_to_YYYY-MM-DD.md` (예: `2025-01-01_to_2025-03-31.md`)
+
+**프론트매터 템플릿**
+
+```yaml
+---
+title: YYYY-MM-DD ~ YYYY-MM-DD 규제 업데이트
+description: [기간] 회계·감사 분야 규제 변화 및 주요 이슈 정리
+jurisdiction: KR
+year: YYYY
+frequency: quarterly
+period_label: YYYY-QX
+period:
+  start: YYYY-MM-DD
+  end: YYYY-MM-DD
+category: Quality Updates
+agencies: [FSS, FSC, KICPA, KASB]
+tags: [규제 업데이트, 회계기준, 감사감리, 금융감독]
+---
+```
+
+- **title**: 페이지 제목 (탐색·검색에 사용)
+- **description**: 요약 설명 (SEO·검색 결과용)
+- **jurisdiction**: 관할 (한국: KR)
+- **year**, **period_label**, **period**: 기간 정보
+- **agencies**: 언급 기관 (FSS, FSC, KICPA, KASB 등)
+- **tags**: 검색·필터용 태그
+
+문서 본문은 기존 분기별 파일과 같은 형식(금융감독원, 보도자료 등 섹션)을 따른다. 추가 후 `mkdocs.yml`의 `nav`에 등록해야 사이드바에 나온다. 운영 절차는 [분기 운영 작업지시서](docs/project/quarterly-operations-guide.md)다.
 
 ### 품질관리감리·기타 콘텐츠
 
