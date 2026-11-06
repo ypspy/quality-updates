@@ -55,6 +55,20 @@ python scripts/editor.py   # http://localhost:5000
 분기별 규제 업데이트 문서를 **수집 → 큐레이션 → 요약 → 사이트 반영 → 배포**까지 처리하는 표준 흐름입니다.  
 **Agent(에이전트)** 와 **전문가(HITL, Human-in-the-Loop)** 의 역할·체크리스트는 **[docs/project/quarterly-operations-guide.md](docs/project/quarterly-operations-guide.md)** (분기 운영 작업지시서)를 본다.
 
+**분기 규제 업데이트·제재 의결·질의회신 파이프라인**은 **Agent**와 **전문가(HITL)** 가 협업한다.
+
+- **Agent** — 수집·첨부, 제재 의결 안건 연결, 질의회신 수집(`data/kasb-replies/`), 요약 초안, 이 파이프라인을 돌릴 때의 validate/build
+- **전문가** — 큐레이션 판단, 요약 검증, 배포 승인. `nav`·`docs/index.md`와 사이트 구조는 수동 반영
+- 제재 의결의 조사·감리·위탁감리·회계법인·감사인 의안(의사록, 안건 ZIP, 미보도 항목, 증선위)은 품질관리감리(`docs/fss-review/`)와 별도이다
+- validate/build·markdownlint는 이 파이프라인과 품질관리감리 PR에서 같이 돌린다
+- 품질관리감리 결과 보도가 분기 규제 문서에 들어갈 때는 서로 알린다
+
+볼트에는 이 파이프라인이 직접 쓰지 않는다.
+
+- 질의회신 seq는 질의회신 식별자이다. 수집 PR이 머지된 뒤 새 seq 목록과 요약을 넘긴다. `data/kasb-replies/{seq}/item.md`를 `raw/kasb-replies/{seq}.md`로 넣되, 있는 파일은 유지하고 첨부는 이 저장소에 둔다
+- 제재는 회차이다. `downloads/sanctions/{회차}/`에 `record.md`와 의사록 PDF가 생기면 경로와 회차 목록을 넘긴다
+- `export_kasb_replies_raw.py`와 `export_quarterly_raw.py`는 복사 도구이다
+
 ```mermaid
 flowchart LR
     A[crawl.py] --> B[auto_curate.py]
@@ -124,6 +138,8 @@ npm run build:strict       # MkDocs strict 빌드
 ## 회계기준원 질의회신 아카이브
 
 회계기준원 질의회신 요약 게시판 전체를 항목 폴더로 저장한다. 분기 크롤러와 별도다. 원문은 이 사이트에 게시하지 않고, 분기 문서와 MCP 코퍼스에도 넣지 않는다. 지식화는 옵시디안 볼트의 `raw/`에서 한다.
+
+수집 PR이 머지된 뒤 seq 목록과 요약을 넘긴다. `data/kasb-replies/{seq}/item.md`는 볼트 `raw/kasb-replies/{seq}.md`로 넣되, 있는 파일은 유지하고 첨부는 이 저장소에 둔다.
 
 ```bash
 python scripts/crawl_kasb_replies.py
