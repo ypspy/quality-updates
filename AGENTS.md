@@ -11,7 +11,7 @@ Cursor·Claude 등 **AI 에이전트**가 이 저장소에서 작업할 때의 �
 | 하고 싶은 일 | 먼저 읽을 것 | 워크플로 |
 |--------------|--------------|----------|
 | **분기 보도자료 요약** | [.claude/skills/quality-updates-writer/SKILL.md](.claude/skills/quality-updates-writer/SKILL.md) | SUMMARIZE / SKIP_REMOVAL — SUMMARIZE: gold-excerpts + md ±80줄 윈도우 + REFERENCE 온디맨드; 재주입 금지. [상세](docs/superpowers/specs/2026-07-23-summarize-slim-design.md) |
-| **다른 Agent 소비 (MCP, 읽기 전용)** | [README MCP 절](README.md) · [mcp-corpus spec](docs/superpowers/specs/2026-06-27-mcp-corpus-design.md) | `export_corpus.py` → stdio/HTTP. 인용 계약. 코퍼스 쓰기는 생산 레인만. |
+| **다른 Agent 소비 (MCP, 읽기 전용)** | [문서 지도 MCP 절](docs/project/README.md#mcp-코퍼스) · [mcp-corpus spec](docs/superpowers/specs/2026-06-27-mcp-corpus-design.md) | `export_corpus.py` → stdio/HTTP. 인용 계약. 코퍼스 쓰기는 생산 레인만. |
 | **분기 파이프라인 전체** | [docs/project/quarterly-operations-guide.md](docs/project/quarterly-operations-guide.md) | crawl → editor → skill → prepare_deploy |
 | **큐레이션·편집기** | [docs/project/editor-curation-workflow.md](docs/project/editor-curation-workflow.md) | HITL 주도; Agent는 마커 임의 변경 금지 |
 | **큐레이션 사전 제안** | [docs/project/curation-rules.md](docs/project/curation-rules.md) | `scripts/auto_curate.py`는 마커를 출력만 한다. 본문에 대량으로 쓰지 않음 |

@@ -24,8 +24,10 @@ def test_runtime_docs_do_not_route_to_lens():
         assert LENS_PATH_NEEDLE not in text, path
 
 
-def test_readme_has_citation_contract_and_hosted_attach():
-    text = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+def test_doc_map_has_citation_contract_and_hosted_attach():
+    text = (REPO_ROOT / "docs" / "project" / "README.md").read_text(
+        encoding="utf-8"
+    )
     assert "no_summary" in text
     assert "MCP_API_KEY" in text
     assert "/health" in text

@@ -30,6 +30,7 @@
 - 분기 규제 업데이트·제재 의결·질의회신 파이프라인은 Agent와 전문가가 협업한다. 기능 구현·품질관리감리와는 일을 나눈다.
 - 제재 의결의 조사·감리·위탁감리·회계법인·감사인 의안은 품질관리감리(`docs/fss-review/`)와 별도이다.
 - validate/build·markdownlint는 이 파이프라인과 품질관리감리 PR에서 같이 돌린다.
+- 품질관리감리 결과 보도가 분기 규제 문서에 들어갈 때는 서로 알린다.
 - 파이프라인은 볼트에 직접 쓰지 않는다.
 - 질의회신 seq는 질의회신 식별자이다. 수집 PR이 머지된 뒤 새 seq 목록과 요약을 넘긴다. `data/kasb-replies/{seq}/item.md`를 볼트 `raw/kasb-replies/{seq}.md`로 넣되, 있는 파일은 유지하고 첨부는 저장소에 둔다.
 - 제재는 회차이다. `downloads/sanctions/{회차}/`에 `record.md`와 의사록 PDF가 생기면 경로와 회차 목록을 넘긴다.
@@ -77,6 +78,8 @@ flowchart TB
 | **정렬** | 본문 dated list는 **과거→현재** (`unified.py`) | — | Appendix A는 크롤 수집 순(최신→과거) **유지** |
 | **검토** | — | 기간·건수 이상 여부, 누락 기관 없는지 샘플 확인 | — |
 
+`조사·감리결과 조치`가 없는 금융위 보도와 금감원·한공회·회계기준원 링크는 `보도자료` 등 기존 제목에 둔다.
+
 **Agent 체크리스트**
 
 - [ ] 올바른 `--year` / `--quarter` (또는 `--start` / `--end`)
@@ -99,6 +102,15 @@ flowchart TB
 | **실행** | — | `python scripts/editor.py` | Flask 로컬 UI |
 | **판단** | — | 링크별 **스킵** / **요약 필요** / **완료** | 마커를 `.md`에 저장 |
 | **출처** | — | PDF·WEB·CLIP·KASB 첨부 연결 | `downloads/` 저장 |
+
+**첨부**
+
+- `fetch_attachments.py`는 skip(`<!-- skip -->`), 링크만(`<!-- no_summary -->`), 이미 요약이 있는 항목을 건너뛴다.
+- 마커가 없는 링크는 `auto_curate.py`와 같은 규칙으로 고른다.
+- 같은 문서가 HWP/HWPX와 PDF로 같이 있으면 PDF만 받는다.
+- PDF가 없는 HWP/HWPX만 보고의 「수동 변환 필요」에 적는다.
+- 보고 기본 경로는 설정된 다운로드 폴더의 `fetch-attachments-report.md`다. 받은 PDF, PDF가 아닌 기타 첨부, 웨일 변환이 필요한 HWP/HWPX, 다운로드 실패 항목이 나뉜다.
+- 편집기 PDF 탭에서는 첨부를 여러 개 더하거나 뺄 수 있다. 「페이지 첨부 모두 연결」은 그 행의 원문 페이지에서 같은 규칙으로 첨부를 받아 항목에 붙인다.
 
 **HITL 전용** — 이 단계는 전문가 판단이 핵심이다.
 
@@ -137,6 +149,18 @@ PDF가 없는 HWP/HWPX는 `fetch_attachments.py` 보고의 변환 목록이다. 
 미연결 의안은 `제재 의결` 맨 끝에 헤더 없이 `- 분기중 미보도 항목` 불릿 하나로 둔다. 다음 절은 `#### 고시/공고/훈령`이다. 불릿 안에는 안건마다 `!!! info "안건 분석"`을 회의일, 의안번호 순으로 둔다. 안건과 제목은 한 줄이다. 이어서 요약, 의결정보다. 요약은 두 문장을 넘기지 않는다. PDF 출처 주석은 그 불릿에 둔다. 같은 의안번호의 안건과 의결서는 한 상자다. 번호가 없는 보고는 파일마다 한 상자다. 미보도 상자에는 조치 표와 `위원 논의`를 만들지 않는다. 다시 요약할 때 안건 분석, 위원 논의, `분기중 미보도 항목`은 지우지 않는다. `record.md`는 고치지 않는다. PDF를 읽을 수 없으면 제목만 쓰고 출처 마커는 쓰지 않는다.
 
 `validate_content.py --strict`는 `record.md`가 있는 회의만 본다. unmatched 경로가 분기 문서 안에 있는지만 확인한다. 보도 항목에 있어도, 미보도 불릿에 있어도 통과한다. 기록이 없으면 그 회의는 건너뛴다.
+
+제목에 `의사록(추가)`인 글은 회차 키가 같으면 같은 회의로 합치고, 합친 의사록 PDF마다 마커를 붙인다. 추가가 아닌 의사록 PDF가 같은 회의에 둘이면 마커를 붙이지 않는다.
+
+같은 글의 안건 ZIP(첨부 2번)은 받아서 조사·감리·위탁감리·회계법인·감사인 의안의 공개용 안건과 의결서 PDF만 `downloads/sanctions/{연도}-{위원회}-{정기|임시|서면}-{N}차/`에 둔다. `조사`만 있는 파일은 남기지 않고, `조사·감리` 또는 `조사결과`일 때만 본다. `불공정거래`, `시세조종`, `미공개정보`가 들어간 파일과 규정·개정 안건은 남기지 않는다. ZIP 원본은 남기지 않고 주소만 기록한다. 회차 폴더에는 의사록 PDF를 복사하고 `record.md`에 회의일을 적는다. 보도자료에 의안번호가 있으면 그 번호로 잇고, 없으면 같은 회차에서 실명 회사명이 정확히 하나일 때만 잇는다.
+
+제재 안건 HWP는 변환하지 않고 Whale 변환 필요 목록으로만 보고한다.
+
+요약 스킬은 확인한 사실을 `write_quarterly_record.py`로 `data/quarterly-processed/{분기 stem}/`에 남긴다. 파일명은 `{YY-MM-DD}-{제목 앞 40자}.md`다. 같은 경로가 있으면 바이트를 유지한다. 기록 파일은 직접 고치지 않는다. `skip`, `no_summary`, Appendix 항목은 만들지 않는다. 2026년 3분기 항목은 이 명령으로 만들지 않고, 내보내기가 기존 노트에서 만든다. 같은 제목이 둘이면 `--date YY-MM-DD`를 붙인다.
+
+`export_quarterly_raw.py`는 분기 마크다운, 처리 기록, PDF·캡처를 `C:\dev\obsidian-valut\raw`로 복사한다. 저장소 파일은 수정하지 않는다. `--dest`로 목적지를 바꿀 수 있다.
+
+볼트로 보낼 때의 경로는 `raw/sanctions/`이고, 그 복사는 `export_quarterly_raw.py`에 들어가기 전까지 미룬다.
 
 **Agent 체크리스트** (스킬 준수)
 
@@ -233,7 +257,32 @@ python scripts/export_corpus.py --strict
 cd scripts && python -m pytest tests/ -q
 mkdocs build --strict
 npm run lint:md
+
+# 첨부
+python scripts/fetch_attachments.py docs/quality-updates/2026/2026-07-01_to_2026-09-30.md
+python scripts/fetch_attachments.py <분기.md> --report downloads/fetch-attachments-report.md
+
+# 제재 의결 의사록·처리 기록·raw 복사
+python scripts/attach_sanction_minutes.py <분기.md>
+python scripts/write_quarterly_record.py <분기.md> --title "<링크 제목>"
+python scripts/export_quarterly_raw.py <분기.md>
+
+# 질의회신. 분기 크롤러와 별도다. 원문은 사이트, 분기 문서, MCP 코퍼스에 넣지 않는다.
+python scripts/crawl_kasb_replies.py
+python scripts/crawl_kasb_replies.py --limit 20
+python scripts/crawl_kasb_replies.py --retry-failed
+python scripts/export_kasb_replies_raw.py
+
+# 텍스트 추출·정렬
+python scripts/extract_pdf.py
+python scripts/extract_hwp.py
+python scripts/extract_hwp.py --path "경로/파일.hwp"
+python scripts/reorder_chronological.py docs/quality-updates/2025/2025-01-01_to_2025-03-31.md
 ```
+
+`crawl_kasb_replies.py`는 `data/kasb-replies/{seq}/item.md`와 원본 첨부를 저장한다. 이 경로는 gitignore하지 않는다. `item.md`와 첨부가 이미 있으면 다시 받지 않는다. `--retry-failed`는 `failed`, `partial`, `empty`를 디스크의 원본으로 다시 추출하고, 없는 파일만 받는다.
+
+`export_kasb_replies_raw.py`는 `item.md`만 복사한다. 기본 목적지는 `C:\dev\obsidian-vault\raw\kasb-replies`이고, `--dest`로 바꿀 수 있다. 같은 `{seq}.md`가 있으면 덮어쓰지 않는다. 첨부 파일은 복사하지 않는다.
 
 npm: `npm run crawl`, `npm run prepare:deploy`, `npm test`, `npm run build:strict`, `npm run lint:md`
 
@@ -291,5 +340,6 @@ npm: `npm run crawl`, `npm run prepare:deploy`, `npm test`, `npm run build:stric
 
 | 날짜 | 내용 |
 |------|------|
+| 2026-11-07 | README에만 있던 첨부·제재 의결·질의회신·추출 명령을 해당 Phase와 6절로 옮김 |
 | 2026-09-10 | Phase 5에 corpus export. 소비는 사이트+MCP. 렌즈 스킬 제거 |
 | 2026-06-25 | 초판 — 크롤러 통합·prepare_deploy 반영, Agent/HITL 역할 분담 |

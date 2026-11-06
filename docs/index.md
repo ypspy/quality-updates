@@ -53,8 +53,12 @@ description: 회계·감사 분야 규제 모니터링 — 금융위·금감원�
 
 ---
 
-Contact
-피드백, 오류 제보, 개선 제안은 언제든지 환영합니다.
+## Contact
+
+피드백, 오류 제보, 개선 제안은 이메일 또는 GitHub 저장소로 보내 주세요.
+
+- 이메일: [yoontjr@gmail.com](mailto:yoontjr@gmail.com)
+- GitHub: [ypspy/quality-updates](https://github.com/ypspy/quality-updates)
 
 ---
 
