@@ -83,8 +83,8 @@ def test_runtime_docs_do_not_route_to_lens():
         assert LENS_PATH_NEEDLE not in text, path
 
 
-def test_readme_has_citation_contract_and_hosted_attach():
-    text = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+def test_doc_map_has_citation_contract_and_hosted_attach():
+    text = (REPO_ROOT / "docs" / "project" / "README.md").read_text(encoding="utf-8")
     assert "no_summary" in text
     assert "MCP_API_KEY" in text
     assert "/health" in text
@@ -123,7 +123,7 @@ cd scripts
 python -m pytest tests/test_consumption_contract.py -v
 ```
 
-Expected: FAIL. `test_lens_skill_directory_removed` because the directory exists. `test_runtime_docs_do_not_route_to_lens` because `AGENTS.md`, `README.md`, and `docs/project/README.md` still contain `.claude/skills/audit-regulatory-lens`. `test_readme_has_citation_contract_and_hosted_attach` because README has no `/health` and still points at the lens. `test_quarterly_ops_export_corpus_strict` because the ops guide has no `export_corpus.py --strict`. `test_fastmcp_citation_instructions` because `CITATION_INSTRUCTIONS` is not defined (`ImportError`).
+Expected: FAIL. `test_lens_skill_directory_removed` because the directory exists. `test_runtime_docs_do_not_route_to_lens` because `AGENTS.md`, `README.md`, and `docs/project/README.md` still contain `.claude/skills/audit-regulatory-lens`. `test_doc_map_has_citation_contract_and_hosted_attach` because README has no `/health` and still points at the lens. `test_quarterly_ops_export_corpus_strict` because the ops guide has no `export_corpus.py --strict`. `test_fastmcp_citation_instructions` because `CITATION_INSTRUCTIONS` is not defined (`ImportError`).
 
 - [ ] **Step 3: Commit (only if the user asked to commit)**
 
@@ -255,7 +255,7 @@ git commit -m "remove audit-regulatory-lens skill from runtime routing"
 
 **Interfaces:**
 
-- Consumes: Task 1 tests `test_readme_has_citation_contract_and_hosted_attach`, `test_quarterly_ops_export_corpus_strict`, `test_fastmcp_citation_instructions`, `test_runtime_docs_do_not_route_to_lens`
+- Consumes: Task 1 tests `test_doc_map_has_citation_contract_and_hosted_attach`, `test_quarterly_ops_export_corpus_strict`, `test_fastmcp_citation_instructions`, `test_runtime_docs_do_not_route_to_lens`
 - Produces: `mcp_server.app.CITATION_INSTRUCTIONS: str` — FastMCP `instructions=` 인자로 전달되는 모듈 상수
 
 - [ ] **Step 1: Replace the README MCP section**
