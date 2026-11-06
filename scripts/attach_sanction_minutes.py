@@ -26,6 +26,17 @@ QUARTER_NAME_RE = re.compile(r"(\d{4}-\d{2}-\d{2})_to_(\d{4}-\d{2}-\d{2})\.md$")
 MEETING_DATE_RE = re.compile(
     rf"\(\s*[{_YEAR_QUOTES}]?\s*(\d{{2}})\.(\d{{1,2}})\.(\d{{1,2}})\."
 )
+UNPUBLISHED_BULLET = "- 분기중 미보도 항목"
+
+
+def _resolution_item_boundary(raw: str) -> bool:
+    stripped = raw.strip()
+    return (
+        raw.startswith("####")
+        or stripped.startswith("### ")
+        or stripped.startswith("## ")
+        or stripped == UNPUBLISHED_BULLET
+    )
 
 
 AUDIT_TERMS = ("감리", "회계법인", "감사인")
@@ -170,9 +181,7 @@ def attach_minutes(text: str, posts: list[DecisionPost]) -> tuple[str, list[str]
             block_end = i + 1
             while block_end < len(lines) and not LINK_RE.match(lines[block_end]):
                 raw = lines[block_end]
-                if raw.startswith("####"):
-                    break
-                if raw.startswith("### ") or raw.startswith("## "):
+                if _resolution_item_boundary(raw):
                     break
                 block_end += 1
             block = "\n".join(lines[i:block_end])
@@ -492,7 +501,7 @@ def _iter_resolution_blocks(lines: list[str]):
         block_end = index + 1
         while block_end < len(lines) and not LINK_RE.match(lines[block_end]):
             raw = lines[block_end]
-            if raw.startswith("####") or raw.startswith("### ") or raw.startswith("## "):
+            if _resolution_item_boundary(raw):
                 break
             block_end += 1
         yield index, block_end, matched.group(4), "\n".join(lines[index:block_end])
@@ -744,9 +753,7 @@ def pending_downloads(text: str, posts: list[DecisionPost]) -> list[tuple[str, s
             block_end = i + 1
             while block_end < len(lines) and not LINK_RE.match(lines[block_end]):
                 raw = lines[block_end]
-                if raw.startswith("####"):
-                    break
-                if raw.startswith("### ") or raw.startswith("## "):
+                if _resolution_item_boundary(raw):
                     break
                 block_end += 1
             block = "\n".join(lines[i:block_end])

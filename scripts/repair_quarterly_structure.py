@@ -159,11 +159,80 @@ def rebuild_main_body(blocks: list[tuple[tuple[int, int, int], str, str]]) -> st
     return "\n".join(parts).rstrip() + "\n"
 
 
+def split_unpublished(main_lines: list[str]) -> tuple[list[str], list[str]]:
+    """Lift a ##### 미보도 block out of #### 제재 의결 before link extraction."""
+    start = None
+    end = None
+    in_resolution = False
+    for index, line in enumerate(main_lines):
+        stripped = line.strip()
+        if stripped == "#### 제재 의결":
+            in_resolution = True
+            continue
+        if in_resolution and (stripped.startswith("#### ") or stripped.startswith("### ")):
+            in_resolution = False
+        if in_resolution and stripped in ("##### 미보도", "- 분기중 미보도 항목") and start is None:
+            start = index
+            continue
+        if start is not None and (
+            stripped.startswith("#### ") or stripped.startswith("### ") or stripped.startswith("## ")
+        ):
+            end = index
+            break
+    if start is None:
+        return main_lines, []
+    if end is None:
+        end = len(main_lines)
+    while start > 0 and main_lines[start - 1].strip() == "":
+        start -= 1
+    block = main_lines[start:end]
+    while block and block[0].strip() == "":
+        block = block[1:]
+    while block and block[-1].strip() == "":
+        block = block[:-1]
+    return main_lines[:start] + main_lines[end:], block
+
+
+def append_unpublished(body: str, block: list[str]) -> str:
+    """Put the lifted block at the end of #### 제재 의결, creating that section if needed."""
+    if not block:
+        return body
+    lines = body.splitlines()
+    section_at = next((i for i, line in enumerate(lines) if line.strip() == "#### 제재 의결"), None)
+    if section_at is None:
+        chunk = ["#### 제재 의결", "", *block]
+        anchor = next((i for i, line in enumerate(lines) if line.strip() == "#### 고시/공고/훈령"), None)
+        if anchor is None:
+            anchor = next(
+                (
+                    i
+                    for i, line in enumerate(lines)
+                    if line.startswith("### ") and i > 0 and "금융위원회" in "\n".join(lines[:i])
+                ),
+                len(lines),
+            )
+        lines[anchor:anchor] = ["", *chunk, ""]
+    else:
+        insert_at = next(
+            (
+                i
+                for i in range(section_at + 1, len(lines))
+                if lines[i].startswith("#### ") or lines[i].startswith("### ")
+            ),
+            len(lines),
+        )
+        while insert_at > section_at + 1 and lines[insert_at - 1].strip() == "":
+            insert_at -= 1
+        lines[insert_at:insert_at] = ["", *block, ""]
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def repair_file(filepath: Path, dry_run: bool = False) -> bool:
     text = filepath.read_text(encoding="utf-8")
     frontmatter, main_lines, appendix_lines = split_document(text)
+    main_lines, unpublished = split_unpublished(main_lines)
     blocks = dedupe_blocks(extract_blocks(main_lines))
-    new_main = rebuild_main_body(blocks)
+    new_main = append_unpublished(rebuild_main_body(blocks), unpublished)
     appendix = "\n".join(appendix_lines).rstrip()
     new_text = frontmatter + "\n\n" + new_main
     if appendix:

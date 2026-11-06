@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from repair_quarterly_structure import classify_url, rebuild_main_body
+from repair_quarterly_structure import classify_url, rebuild_main_body, repair_file
 
 
 def test_classify_fsc_subsections():
@@ -49,3 +49,71 @@ def test_rebuild_keeps_discussion_note_under_resolution():
     body = rebuild_main_body([((2026, 7, 9), "https://fsc.go.kr/no010101/87293", block)])
     assert body.index("#### 제재 의결") < body.index("수정의결함")
     assert "#### 보도자료" not in body
+
+
+QUARTER = """---
+title: t
+---
+
+### 금융위원회
+
+#### 보도자료
+
+- (26-01-02) [일반 보도](https://fsc.go.kr/no010101/9)
+
+#### 제재 의결
+
+- (26-03-11) [감사보고서 등에 대한 조사·감리결과 조치](https://fsc.go.kr/no010101/1)
+
+##### 미보도
+
+- 제5차 증권선물위원회(2026.3.11.) 의결 66. 예시
+
+    <!-- source: pdf|downloads/sanctions/2026-증선위-정기-5차/decision/staff.pdf -->
+
+#### 고시/공고/훈령
+
+- (26-03-12) [고시](https://fsc.go.kr/po040200/2)
+"""
+
+
+def test_repair_keeps_unpublished_after_resolution_items(tmp_path):
+    path = tmp_path / "quarter.md"
+    path.write_text(QUARTER, encoding="utf-8", newline="\n")
+    repair_file(path)
+    text = path.read_text(encoding="utf-8")
+    assert text.index("#### 제재 의결") < text.index("##### 미보도")
+    assert text.index("##### 미보도") < text.index("staff.pdf")
+    assert text.index("staff.pdf") < text.index("#### 고시/공고/훈령")
+    assert text.index("- (26-03-11)") < text.index("##### 미보도")
+
+
+def test_repair_keeps_unpublished_bullet_without_heading(tmp_path):
+    source = QUARTER.replace(
+        "##### 미보도\n\n- 제5차 증권선물위원회(2026.3.11.) 의결 66. 예시",
+        "- 분기중 미보도 항목",
+    )
+    path = tmp_path / "quarter.md"
+    path.write_text(source, encoding="utf-8", newline="\n")
+    repair_file(path)
+    text = path.read_text(encoding="utf-8")
+    assert "##### 미보도" not in text
+    assert text.index("#### 제재 의결") < text.index("- 분기중 미보도 항목")
+    assert text.index("- 분기중 미보도 항목") < text.index("staff.pdf")
+    assert text.index("staff.pdf") < text.index("#### 고시/공고/훈령")
+    assert text.index("- (26-03-11)") < text.index("- 분기중 미보도 항목")
+
+
+def test_repair_keeps_unpublished_when_resolution_has_no_dated_link(tmp_path):
+    source = QUARTER.replace(
+        "- (26-03-11) [감사보고서 등에 대한 조사·감리결과 조치](https://fsc.go.kr/no010101/1)\n\n",
+        "",
+    )
+    path = tmp_path / "quarter.md"
+    path.write_text(source, encoding="utf-8", newline="\n")
+    repair_file(path)
+    text = path.read_text(encoding="utf-8")
+    assert "#### 제재 의결" in text
+    assert text.index("#### 제재 의결") < text.index("##### 미보도")
+    assert "staff.pdf" in text
+    assert text.index("staff.pdf") < text.index("#### 고시/공고/훈령")

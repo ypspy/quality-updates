@@ -460,7 +460,8 @@ def test_main_writes_quarter_file_with_lf_newlines(tmp_path, monkeypatch):
     tmp_downloads = tmp_path / "downloads"
     for name in stand_in_names:
         assert (tmp_downloads / name).read_bytes() == b"pdf"
-        assert not (repo_downloads / name).exists()
+        repo_file = repo_downloads / name
+        assert not repo_file.exists() or repo_file.read_bytes() != b"pdf"
 
 
 LIST_NO_MINUTES_TITLE = """
@@ -738,3 +739,55 @@ def test_raw_bundle_does_not_overwrite_an_existing_snapshot(tmp_path):
     assert (folder / "decision" / "251-decision.pdf").read_bytes() == b"new"
     assert second == [folder]
     assert not list(tmp_path.rglob("*.zip"))
+
+
+def test_unpublished_section_stays_outside_the_press_item():
+    text = """### 금융위원회
+
+#### 제재 의결
+
+- (26-03-11) [감사보고서 등에 대한 조사·감리결과 조치 - 제5차 증권선물위원회('26.3.11.)](https://fsc.go.kr/no010101/1)
+
+    !!! note "위원 논의"
+
+        - 미공개
+
+##### 미보도
+
+- 제5차 증권선물위원회(2026.3.11.) 의결 66. 예시
+
+    <!-- source: pdf|downloads/sanctions/2026-증선위-정기-5차/decision/staff.pdf -->
+
+#### 고시/공고/훈령
+"""
+    posts = [DecisionPost(2026, "증선위", "정기", 5, "https://fsc.go.kr/files/minutes-5.pdf", [])]
+    updated, _report = attach_minutes(text, posts)
+    assert "##### 미보도" in updated
+    assert updated.index("minutes-5.pdf") < updated.index("##### 미보도")
+    assert updated.index("##### 미보도") < updated.index("staff.pdf")
+    assert updated.index("staff.pdf") < updated.index("#### 고시/공고/훈령")
+
+
+def test_unpublished_bullet_stays_outside_the_press_item():
+    text = """### 금융위원회
+
+#### 제재 의결
+
+- (26-03-11) [감사보고서 등에 대한 조사·감리결과 조치 - 제5차 증권선물위원회('26.3.11.)](https://fsc.go.kr/no010101/1)
+
+    !!! note "위원 논의"
+
+        - 미공개
+
+- 분기중 미보도 항목
+
+    <!-- source: pdf|downloads/sanctions/2026-증선위-정기-5차/decision/staff.pdf -->
+
+#### 고시/공고/훈령
+"""
+    posts = [DecisionPost(2026, "증선위", "정기", 5, "https://fsc.go.kr/files/minutes-5.pdf", [])]
+    updated, _report = attach_minutes(text, posts)
+    assert "##### 미보도" not in updated
+    assert updated.index("minutes-5.pdf") < updated.index("- 분기중 미보도 항목")
+    assert updated.index("- 분기중 미보도 항목") < updated.index("staff.pdf")
+    assert updated.index("staff.pdf") < updated.index("#### 고시/공고/훈령")
