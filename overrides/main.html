@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+  window.goatcounter = {no_onload: true};
+</script>
+<script data-goatcounter="https://yoonseokseong.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+<script>
+  (function () {
+    if (window.__quGoatcounter || typeof document$ === "undefined") return;
+    window.__quGoatcounter = true;
+
+    var lastPath = "";
+    var lastAt = 0;
+
+    document$.subscribe(function () {
+      var path = location.pathname + location.search;
+      var now = Date.now();
+      if (path === lastPath && now - lastAt < 1000) return;
+      lastPath = path;
+      lastAt = now;
+
+      var tries = 0;
+      (function send() {
+        if (window.goatcounter && typeof window.goatcounter.count === "function") {
+          window.goatcounter.count({path: path});
+          return;
+        }
+        if (tries < 25) {
+          tries += 1;
+          setTimeout(send, 200);
+        }
+      })();
+    });
+  })();
+</script>
+{% endblock %}
