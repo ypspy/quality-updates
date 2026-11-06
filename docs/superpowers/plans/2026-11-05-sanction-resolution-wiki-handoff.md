@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 조사·감리 조치를 `제재 의결`로 유지하고, 의사록 PDF만 연결하며, 요약이 끝난 분기 본문의 처리 기록과 PDF를 옵시디안 `raw/`로 복사한다.
+**Goal:** 조사·감리 조치를 `제재 의결`로 유지하고, 의사록 PDF와 감리 의안의 공개용 안건·의결서 PDF를 연결하며, 요약이 끝난 분기 본문의 처리 기록과 PDF를 옵시디안 `raw/`로 복사한다.
 
 **Architecture:** 섹션 분류는 `repair_quarterly_structure.py`가 링크 제목으로 한다. 의사록 연결은 네트워크를 주입받는 순수 함수와 얇은 CLI다. 처리 기록은 분기 본문에서 만들고, 복사 CLI는 볼트에 이미 있는 파일을 덮어쓰지 않는다. 웨일 변환과 위키 페이지 작성은 이 계획에 없다.
 
@@ -14,7 +14,7 @@
 
 - 금융위원회 하위 순서는 `보도자료`, `제재 의결`, `고시/공고/훈령`, `입법예고/규정변경예고`.
 - `제재 의결` 제목 조건은 링크 텍스트에 `조사·감리결과 조치`가 있는 금융위 보도다. `불공정거래` 제목은 이 섹션으로 가지 않는다.
-- 의사록 연결 키는 연도, 금융위 또는 증선위, 정기·임시·서면, 제N차다. 받는 파일은 의사록 PDF뿐이다. 안건 ZIP은 요청하지 않는다.
+- 회차 키는 연도, 금융위 또는 증선위, 정기·임시·서면, 제N차다. 의안 키는 회차 키와 의안번호다. 안건 ZIP을 받아 감리 의안의 공개용 안건·의결서 PDF만 남기고, ZIP 원본은 요청 결과로 보관하지 않는다. `의사록(추가)`는 같은 회차로 합친다.
 - 표의 회사명, 위반내용, 금액은 고치지 않는다. 회사명이 가려진 안건을 표 행에 추정으로 붙이지 않는다.
 - 처리 기록 경로는 `data/quarterly-processed/{분기 파일 stem}/{YY-MM-DD}-{슬러그}.md`. gitignore하지 않는다. MkDocs에 포함되지 않는다.
 - 복사 기본 목적지는 `C:\dev\obsidian-valut\raw`. 같은 상대 경로가 있으면 덮어쓰지 않는다. 바이트가 같으면 건너뛰고, 다르면 이름에 `--YYYY-MM-DD`를 붙인 새 파일을 만든다.
@@ -213,7 +213,7 @@ git commit -m "docs: add the sanction resolution heading to the quarter skeleton
 **Interfaces:**
 
 - Consumes: 분기 마크다운 텍스트. 테스트가 넣는 `DecisionPost`.
-- Produces: `DecisionPost`, `meeting_key(text: str) -> tuple[int, str, str, int] | None`, `select_minutes_pdf(key, posts: list[DecisionPost]) -> str | None`, `attach_minutes(text: str, posts: list[DecisionPost]) -> tuple[str, list[str]]`. CLI `main(argv) -> int`는 이 계획에서 네트워크 구현을 비워 두고, 테스트는 `attach_minutes`만 호출한다. ZIP URL은 `select_minutes_pdf`의 반환값이 될 수 없다.
+- Produces: `DecisionPost`, `meeting_key(text: str) -> tuple[int, str, str, int] | None`, `select_minutes_pdf(key, posts: list[DecisionPost]) -> str | None`, `attach_minutes(text: str, posts: list[DecisionPost]) -> tuple[str, list[str]]`. 이 단계의 테스트는 `attach_minutes`만 호출한다. 의사록 마커에는 ZIP URL을 넣지 않는다. 안건 ZIP은 `parse_agenda_number`와 `link_agendas`로 감리 의안만 연결한다.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -338,7 +338,7 @@ def attach_minutes(text: str, posts: list[DecisionPost]) -> tuple[str, list[str]
     return "\n".join(lines) + ("\n" if text.endswith("\n") else ""), report
 ```
 
-파일명에 URL 쿼리가 들어가면 테스트의 `downloads/` 포함 조건은 통과하지만 경로는 지저분하다. 테스트 PDF URL을 경로만 쓰도록 위 테스트의 `pdf_url`을 `https://fsc.go.kr/files/minutes-13.pdf`로 두고, 구현의 마커는 `downloads/` 뒤에 URL의 마지막 경로 조각을 쓴다. ZIP은 `zip_urls`에만 있고 마커에 넣지 않는다.
+파일명에 URL 쿼리가 들어가면 테스트의 `downloads/` 포함 조건은 통과하지만 경로는 지저분하다. 테스트 PDF URL을 경로만 쓰도록 위 테스트의 `pdf_url`을 `https://fsc.go.kr/files/minutes-13.pdf`로 두고, 구현의 마커는 `downloads/` 뒤에 URL의 마지막 경로 조각을 쓴다. ZIP 원본 URL은 마커에 넣지 않는다. ZIP 안에서는 감리 의안의 공개용 안건·의결서 PDF만 꺼내 `downloads/sanctions/`에 둔다.
 
 - [ ] **Step 4: Run test to verify it passes**
 

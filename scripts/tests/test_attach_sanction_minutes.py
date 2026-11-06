@@ -8,6 +8,7 @@ from attach_sanction_minutes import (
     DecisionPost,
     attach_minutes,
     decision_key,
+    is_additional_minutes,
     meeting_key,
     select_minutes_pdf,
 )
@@ -147,6 +148,12 @@ def test_decision_key_reads_the_live_board_title():
         2,
     )
     assert decision_key("2026년 제14차 금융위원회 의사록") == (2026, "금융위", "정기", 14)
+    assert decision_key("2026년도 제13차 금융위원회 의사록, 안건 및 제재안건 의결서") == (
+        2026,
+        "금융위",
+        "정기",
+        13,
+    )
     assert decision_key("회의 안내") is None
 
 
@@ -286,7 +293,17 @@ def test_run_minutes_downloads_only_minutes_pdfs(tmp_path):
         raise AssertionError(url)
 
     def download(url: str, dest: Path) -> None:
-        assert "fileNo=2" not in url
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        if "fileNo=2" in url:
+            dest.write_bytes(
+                _zip_bytes(
+                    [
+                        "(공개용) 의결 251. 선진회계법인의 중요한 감사절차 위반혐의에 대한 감리결과 조치안.pdf",
+                        "(공개용) 의결 235. 교보증권㈜에 대한 정기검사 결과 조치안.pdf",
+                    ]
+                )
+            )
+            return
         assert url.endswith("fileNo=1")
         dest.write_bytes(b"pdf")
 
@@ -301,12 +318,30 @@ def test_run_minutes_downloads_only_minutes_pdfs(tmp_path):
     assert "minutes-2026-증선위-정기-15.pdf" in updated
     assert "minutes-2026-증선위-임시-1.pdf" in updated
     assert "fileNo=2" not in updated
+    assert "의결 251. 선진회계법인" not in updated
+    assert "정기검사" not in updated
     assert (tmp_path / "minutes-2026-증선위-정기-15.pdf").read_bytes() == b"pdf"
+    agenda = list((tmp_path / "sanctions").rglob("*의결 251*"))
+    assert len(agenda) == 1
+    bundle = tmp_path / "sanctions" / "2026-증선위-정기-15차"
+    assert (bundle / "minutes-2026-증선위-정기-15.pdf").read_bytes() == b"pdf"
+    record = (bundle / "record.md").read_text(encoding="utf-8")
+    assert "- 회의일: 2026-09-02" in record
+    assert "downloads/sanctions/2026-증선위-정기-15차/minutes-2026-증선위-정기-15.pdf" in record
+    temporary = tmp_path / "sanctions" / "2026-증선위-임시-1차"
+    assert (temporary / "minutes-2026-증선위-임시-1.pdf").read_bytes() == b"pdf"
+    assert "- 회의일: 2026-10-09" in (temporary / "record.md").read_text(encoding="utf-8")
+    assert not list(tmp_path.rglob("*.zip"))
     assert not any("88015" in url for url in requested)
     assert any("srchBeginDt=2026-07-01" in url and "srchEndDt=2026-12-09" in url for url in requested)
 
 
-def test_two_minutes_pdfs_for_one_meeting_do_not_attach(tmp_path):
+DETAIL_EXTRA = """
+<a href="/comm/getFile?srvcId=BBSTY1&upperNo=87747&fileTy=ATTACH&fileNo=1">2026년 제15차 증권선물위원회 의사록(추가_의결안건 117호_공개용)_F.pdf</a>
+"""
+
+
+def test_additional_minutes_post_merges_into_the_same_meeting(tmp_path):
     extra = LIST_HTML.replace(
         "</ul>",
         '<li><div class="inner"><div class="subject"><a href="/no020102/87747">2026년 제15차 증권선물위원회 의사록(추가)</a></div><div class="day">2026-09-18</div></div></li></ul>',
@@ -317,15 +352,19 @@ def test_two_minutes_pdfs_for_one_meeting_do_not_attach(tmp_path):
             return extra
         if "curPage=" in url:
             return "<ul></ul>"
-        if url.endswith("/88040") or url.endswith("/87747"):
+        if url.endswith("/88040"):
             return DETAIL_MINUTES
+        if url.endswith("/87747"):
+            return DETAIL_EXTRA
         if url.endswith("/87906"):
             return DETAIL_SPECIAL
         return "<ul></ul>"
 
     def download(url: str, dest: Path) -> None:
-        if "upperNo=88040" in url or "upperNo=87747" in url:
-            raise AssertionError("ambiguous minutes must not be downloaded")
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        if url.lower().endswith(".zip") or "fileNo=2" in url and ".pdf" not in url:
+            dest.write_bytes(_zip_bytes(["(공개용) 의결 235. 교보증권 정기검사.pdf"]))
+            return
         dest.write_bytes(b"pdf")
 
     code, updated, report = run_minutes(
@@ -336,8 +375,11 @@ def test_two_minutes_pdfs_for_one_meeting_do_not_attach(tmp_path):
         tmp_path,
     )
     assert code == 0
-    assert "정기-15.pdf" not in updated
-    assert any(line.startswith("ambiguous 2026 증선위 정기 15") for line in report)
+    assert "minutes-2026-증선위-정기-15.pdf" in updated
+    assert "minutes-2026-증선위-정기-15-추가.pdf" in updated
+    assert is_additional_minutes("2026년 제15차 증권선물위원회 의사록(추가)")
+    assert not any(line.startswith("ambiguous 2026 증선위 정기 15") for line in report)
+    assert any(line.startswith("attached 2026 증선위 정기 15") for line in report)
 
 
 def test_download_failure_leaves_the_quarter_text_unchanged(tmp_path):
@@ -455,7 +497,244 @@ def test_post_title_without_minutes_word_still_yields_minutes_pdf():
             "정기",
             12,
             "https://www.fsc.go.kr/comm/getFile?srvcId=BBSTY1&upperNo=87581&fileTy=ATTACH&fileNo=1",
-            [],
+            [
+                "https://www.fsc.go.kr/comm/getFile?srvcId=BBSTY1&upperNo=87581&fileTy=ATTACH&fileNo=2"
+            ],
+            "2026년 제12차 증권선물위원회 안건 및 제재안건 의결서",
+            "https://www.fsc.go.kr/no020102/87581",
         )
     ]
-    assert not any("fileNo=2" in url for url in requested)
+    assert not any(url.endswith("/87581") and "fileNo=2" in url for url in requested)
+
+
+def _zip_bytes(names: list[str]) -> bytes:
+    import io
+    import zipfile
+
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as archive:
+        for name in names:
+            archive.writestr(name, b"%PDF-1.4\n")
+    return buffer.getvalue()
+
+
+def test_zip_listing_keeps_only_audit_agenda_and_decision_pdfs():
+    from attach_sanction_minutes import audit_zip_entries
+
+    names = [
+        "(공개용) 의결 251. 선진회계법인의 중요한 감사절차 위반혐의에 대한 감리결과 조치안.pdf",
+        "(의결서) 의결 251. 선진회계법인의 중요한 감사절차 위반혐의에 대한 감리결과 조치안.pdf",
+        "(의결서) 의결 250. ㈜OO의 사업보고서 및 연결감사보고서 등에 대한 조사 감리 조치안.pdf",
+        "(공개용) 의결 249. 2024 회계연도 감사 前 재무제표 제출의무 위반혐의 등에 대한 조사결과 조치안.pdf",
+        "의결360 의왕백운프로젝트금융투자㈜의 감사보고서에 대한 위탁감리결과 조치안(공개용).pdf",
+        "금융위 의결서(제2026-359호)_OOOO㈜의 사업보고서 및 연결감사보고서 등에 대한 조사·감리결과 조치안(공개용).pdf",
+        "(공개용) 의결 188. ㈜아센디오의 사업보고서 및 감사보고서 등에 대한 조사･감리 결과 조치안.pdf",
+        "(공개용) 의결 235. 교보증권㈜에 대한 정기검사 결과 조치안.pdf",
+        "의결361 품질관리기준 개정안(공개용).pdf",
+        "의결368_경남은행에 대한 정기검사 결과 조치안(공개용).pdf",
+        "(공개용) 의결 190. 위탁감리결과 조치안.hwp",
+        "금융위 의결서(제2026-336호)_ ○○○ 가상자산에 대한 불공정거래 조사결과 과징금부과 조치안(공개용).pdf",
+        "(공개용) 의결 336. 가상자산 불공정거래 조사결과.hwp",
+        "readme.txt",
+    ]
+    kept, whale = audit_zip_entries(names)
+    kept_names = [item.filename for item in kept]
+    assert "(공개용) 의결 251. 선진회계법인의 중요한 감사절차 위반혐의에 대한 감리결과 조치안.pdf" in kept_names
+    assert "(의결서) 의결 251. 선진회계법인의 중요한 감사절차 위반혐의에 대한 감리결과 조치안.pdf" in kept_names
+    assert any(item.filename.startswith("(의결서) 의결 250") and item.kind == "decision" for item in kept)
+    assert any(item.filename.startswith("의결360") and item.kind == "agenda" for item in kept)
+    assert any("제2026-359호" in item.filename and item.kind == "decision" for item in kept)
+    assert any("아센디오" in item.filename for item in kept)
+    assert any("조사결과" in item.filename for item in kept)
+    assert not any("정기검사" in name for name in kept_names)
+    assert not any("품질관리기준" in name for name in kept_names)
+    assert not any("불공정거래" in name for name in kept_names)
+    assert not any(name.endswith(".hwp") for name in kept_names)
+    assert whale == ["(공개용) 의결 190. 위탁감리결과 조치안.hwp"]
+
+
+def test_unfair_trading_and_rule_amendments_are_not_audit_files():
+    from attach_sanction_minutes import audit_zip_entries
+
+    names = [
+        "금융위 의결서(제2026-336호)_가상자산에 대한 불공정거래 조사결과 과징금부과 조치안(공개용).pdf",
+        "(공개용) 의결 401. 시세조종 조사결과 조치안.pdf",
+        "(공개용) 의결 402. 미공개정보 이용 조사결과 조치안.pdf",
+        "(공개용) 의결 214. 한국공인회계사회 「위탁감리위원회 운영규정」 및 「감리조사업무규정」 일부개정규정안.pdf",
+        "(공개용) 의결 403. 시장동향 조사.pdf",
+        "(공개용) 의결 249. 재무제표 제출의무 위반혐의 등에 대한 조사결과 조치안.pdf",
+        "(공개용) 의결 215. 대주회계법인의 감리결과 조치안.pdf",
+    ]
+    kept, whale = audit_zip_entries(names)
+    kept_names = [item.filename for item in kept]
+    assert any("249" in name for name in kept_names)
+    assert any("215" in name for name in kept_names)
+    assert whale == []
+    for token in ("불공정거래", "시세조종", "미공개정보", "214", "시장동향"):
+        assert not any(token in name for name in kept_names)
+
+
+def test_agenda_temp_name_uses_a_stable_sha256_prefix():
+    import hashlib
+
+    from attach_sanction_minutes import _agenda_temp_name
+
+    url = "https://www.fsc.go.kr/comm/getFile?fileNo=2"
+    digest = hashlib.sha256(url.encode()).hexdigest()[:16]
+    assert _agenda_temp_name(url) == f"_agenda-{digest}.zip"
+    assert _agenda_temp_name(url) == _agenda_temp_name(url)
+
+
+def test_agenda_number_parses_the_four_filename_forms():
+    from attach_sanction_minutes import parse_agenda_number
+
+    assert parse_agenda_number("(공개용) 의결 251. 선진회계법인 감리결과 조치안.pdf") == 251
+    assert parse_agenda_number("의결361 품질관리기준 개정안(공개용).pdf") == 361
+    assert parse_agenda_number("의결368_경남은행에 대한 정기검사 결과 조치안(공개용).pdf") == 368
+    assert parse_agenda_number("금융위 의결서(제2026-359호)_OOOO㈜ 조사·감리결과 조치안.pdf") == 359
+    assert parse_agenda_number("제13차 증권선물위원회") is None
+
+
+PRESS_NAMED = """### 금융위원회
+
+#### 제재 의결
+
+- (26-09-02) [사업보고서 등에 대한 조사·감리결과 조치 - 제15차 증권선물위원회(’26.9.2.)](https://fsc.go.kr/no010101/87639)
+
+    <!-- source: pdf|downloads/press.pdf -->
+
+    | 회사명 | 구분 | 주요 지적사항 | 주요 조치 |
+    | --- | --- | --- | --- |
+    | ㈜금양 | 유가증권시장 상장 | 허위 매출 | 과징금 |
+    | 선진회계법인 | 감사 | 중요한 감사절차 위반 | 과징금 |
+
+    !!! note "위원 논의"
+
+        - 제250호는 회사명을 비공개로 두나 ㈜금양과 대응함
+"""
+
+
+def test_masked_company_names_are_not_linked():
+    from attach_sanction_minutes import AgendaFile, link_agendas
+
+    agendas = [
+        AgendaFile("(의결서) 의결 250. ㈜OO의 사업보고서 등에 대한 조사 감리 조치안.pdf", "decision", 250, True),
+        AgendaFile("(공개용) 의결 251. 선진회계법인의 중요한 감사절차 위반혐의에 대한 감리결과 조치안.pdf", "agenda", 251, False),
+        AgendaFile("금융위 의결서(제2026-359호)_OOOO㈜의 조사·감리결과 조치안.pdf", "decision", 359, True),
+    ]
+    linked, unmatched = link_agendas(PRESS_NAMED, (2026, "증선위", "정기", 15), agendas)
+    assert [item.filename for item, row in linked] == [
+        "(공개용) 의결 251. 선진회계법인의 중요한 감사절차 위반혐의에 대한 감리결과 조치안.pdf"
+    ]
+    assert linked[0][1] == "선진회계법인"
+    assert len(unmatched) == 2
+    assert all(item.number != 251 for item in unmatched)
+
+
+def test_source_marker_is_not_a_press_agenda_number():
+    from attach_sanction_minutes import AgendaFile, link_agendas
+
+    press = PRESS_NAMED.replace(
+        "<!-- source: pdf|downloads/press.pdf -->",
+        "<!-- source: pdf|downloads/의결 250. 가림.pdf -->",
+    )
+    agendas = [
+        AgendaFile("(의결서) 의결 250. ㈜OO의 사업보고서 등에 대한 조사 감리 조치안.pdf", "decision", 250, True),
+    ]
+    linked, unmatched = link_agendas(press, (2026, "증선위", "정기", 15), agendas)
+    assert linked == []
+    assert [item.number for item in unmatched] == [250]
+
+
+def test_press_agenda_number_is_the_primary_key():
+    from attach_sanction_minutes import AgendaFile, link_agendas
+
+    press = PRESS_NAMED.replace(
+        "| ㈜금양 | 유가증권시장 상장 | 허위 매출 | 과징금 |",
+        "| ㈜금양 | 유가증권시장 상장 | 허위 매출 | 과징금 의결 250 |",
+    )
+    agendas = [
+        AgendaFile("(의결서) 의결 250. ㈜OO의 사업보고서 등에 대한 조사 감리 조치안.pdf", "decision", 250, True),
+        AgendaFile("(공개용) 의결 249. 조사결과 조치안.pdf", "agenda", 249, False),
+    ]
+    linked, unmatched = link_agendas(press, (2026, "증선위", "정기", 15), agendas)
+    assert [row for _, row in linked] == ["의안 250"]
+    assert [item.number for item in unmatched] == [249]
+
+
+def test_unmatched_agendas_are_reported_and_discussion_notes_stay(tmp_path):
+    from attach_sanction_minutes import AgendaFile, attach_agenda_markers
+
+    agendas = [
+        AgendaFile("(공개용) 의결 251. 선진회계법인 감리결과 조치안.pdf", "agenda", 251, False),
+        AgendaFile("(의결서) 의결 250. ㈜OO 조사 감리 조치안.pdf", "decision", 250, True),
+    ]
+    text, report = attach_agenda_markers(
+        PRESS_NAMED,
+        (2026, "증선위", "정기", 15),
+        [
+            (agendas[0], "선진회계법인", "downloads/sanctions/2026-증선위-정기-15차/agenda/251.pdf"),
+            (agendas[1], "unmatched", "downloads/sanctions/2026-증선위-정기-15차/decision/250.pdf"),
+        ],
+    )
+    assert "251.pdf" in text
+    assert "250.pdf" not in text
+    assert "과징금" in text
+    assert "제250호는 회사명을 비공개로 두나 ㈜금양과 대응함" in text
+    assert "위원 논의" in text
+    assert any(line.startswith("unmatched 2026 증선위 정기 15 250") for line in report)
+    assert any(line.startswith("linked 2026 증선위 정기 15 251 선진회계법인") for line in report)
+    assert "fileNo=2" not in text
+    assert tmp_path is not None
+
+
+def test_masked_filename_does_not_link_by_company_name():
+    from attach_sanction_minutes import AgendaFile, link_agendas
+
+    agendas = [
+        AgendaFile(
+            "(공개용) 의결 249. 선진회계법인 ㈜OO 조사결과 조치안.pdf",
+            "agenda",
+            249,
+            False,
+        ),
+    ]
+    linked, unmatched = link_agendas(PRESS_NAMED, (2026, "증선위", "정기", 15), agendas)
+    assert linked == []
+    assert [item.number for item in unmatched] == [249]
+
+
+def test_cp949_zip_names_round_trip():
+    import zipfile
+
+    from attach_sanction_minutes import _zip_name
+
+    original = "(공개용) 의결 251. 감리결과 조치안.pdf"
+    info = zipfile.ZipInfo(original.encode("cp949").decode("cp437"))
+    info.flag_bits = 0
+    assert _zip_name(info) == original
+
+
+def test_raw_bundle_does_not_overwrite_an_existing_snapshot(tmp_path):
+    from attach_sanction_minutes import place_sanction_bundle
+
+    key = (2026, "증선위", "정기", 15)
+    first = place_sanction_bundle(
+        tmp_path,
+        key,
+        "회차 기록\n",
+        [("agenda", "251.pdf", b"one")],
+    )
+    assert first == [tmp_path / "2026-증선위-정기-15차"]
+    second = place_sanction_bundle(
+        tmp_path,
+        key,
+        "다른 기록\n",
+        [("agenda", "251.pdf", b"two"), ("decision", "251-decision.pdf", b"new")],
+    )
+    folder = tmp_path / "2026-증선위-정기-15차"
+    assert (folder / "record.md").read_text(encoding="utf-8") == "회차 기록\n"
+    assert (folder / "agenda" / "251.pdf").read_bytes() == b"one"
+    assert (folder / "decision" / "251-decision.pdf").read_bytes() == b"new"
+    assert second == [folder]
+    assert not list(tmp_path.rglob("*.zip"))
