@@ -142,8 +142,12 @@ plugins:
 
 extra:
   social:
-    - icon: fontawesome/solid/building
-      link: https://quality-updates.onrender.com
+    - icon: fontawesome/brands/github
+      link: https://github.com/ypspy/quality-updates
+      name: GitHub
+    - icon: fontawesome/solid/envelope
+      link: mailto:yoontjr@gmail.com
+      name: 이메일
   analytics:
     feedback:
       title: 페이지 도움 여부 평가
