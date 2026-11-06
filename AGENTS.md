@@ -1,7 +1,8 @@
 # Agent 가이드 (Quality Updates)
 
 Cursor·Claude 등 **AI 에이전트**가 이 저장소에서 작업할 때의 진입점입니다.  
-사람용 온보딩은 [README.md](README.md), 분기 운영은 [docs/project/quarterly-operations-guide.md](docs/project/quarterly-operations-guide.md)를 본다.
+사람용 온보딩은 [README.md](README.md), 분기 운영은 [docs/project/quarterly-operations-guide.md](docs/project/quarterly-operations-guide.md)를 본다.  
+분기 규제 업데이트·제재 의결·질의회신 파이프라인 실행은 **Mr. Cabbage**가 한다. 그 외 Agent는 승인된 기능 구현(노트북 Cursor 등)과 품질관리감리(Mr. Mint)이다.
 
 ---
 
@@ -68,6 +69,7 @@ Cursor·Claude 등 **AI 에이전트**가 이 저장소에서 작업할 때의 �
 ```markdown
 @docs/project/quarterly-operations-guide.md 기준으로 [YYYY QN] 분기 운영을 진행해줘.
 
+분기 규제·제재 의결·질의회신 파이프라인 실행은 Mr. Cabbage가 한다.
 Agent 담당: crawl.py 실행, prepare_deploy, validate/build
 HITL 담당: editor 큐레이션, 요약 검증, nav/index, push 승인
 ```
