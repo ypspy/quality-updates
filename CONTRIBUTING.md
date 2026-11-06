@@ -156,7 +156,7 @@ mkdocs build --strict
 
 ### 분기별 규제 업데이트 문서
 
-운영 절차·Agent/HITL 역할·품질 게이트는 **[docs/project/quarterly-operations-guide.md](docs/project/quarterly-operations-guide.md)** (정본). Agent는 **[AGENTS.md](AGENTS.md)** 도 참조. 분기 규제·제재 의결·질의회신 파이프라인 실행은 Mr. Cabbage가 한다.
+운영 절차·Agent/HITL 역할·품질 게이트는 **[docs/project/quarterly-operations-guide.md](docs/project/quarterly-operations-guide.md)** (정본). Agent는 **[AGENTS.md](AGENTS.md)** 도 참조. 분기 규제·제재 의결·질의회신 파이프라인은 Agent와 전문가가 협업한다.
 
 1. **수집**: `python scripts/crawl.py --year YYYY --quarter N` — 신규 파일만 생성. `--force`로 덮어쓰기.
 2. **큐레이션**: `python scripts/editor.py` — [editor-curation-workflow.md](docs/project/editor-curation-workflow.md)
@@ -171,8 +171,6 @@ mkdocs build --strict
 - **프론트매터**: [README.md - 콘텐츠 업데이트 가이드](README.md#콘텐츠-업데이트-가이드)의 템플릿
 
 ### 품질관리감리·기타 콘텐츠
-
-품질관리감리는 Mr. Mint 담당이다.
 
 - 새 파일에 `title`, `description` 등 최소 프론트매터를 넣습니다.
 - `mkdocs.yml`의 `nav`에 반드시 등록합니다.

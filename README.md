@@ -27,7 +27,7 @@
 ## 기능
 
 - **규제 업데이트**: 분기별(또는 기간별) 보도자료·제도 변경 정리 (2022년~현재)
-- **품질관리감리**: 금융감독원 회계법인 품질관리감리 관련 문서 요약. **Mr. Mint** 담당
+- **품질관리감리**: 금융감독원 회계법인 품질관리감리 관련 문서 요약
 - **질의회신 아카이브**: 회계기준원 질의회신 원문을 `data/kasb-replies/`에 저장한다. 사이트에는 게시하지 않는다.
 - **한국어 우선**: 검색·탐색·테마(라이트/다크) 한국어 지원
 - **반응형**: 데스크톱·태블릿·모바일 대응
@@ -55,9 +55,19 @@ python scripts/editor.py   # http://localhost:5000
 분기별 규제 업데이트 문서를 **수집 → 큐레이션 → 요약 → 사이트 반영 → 배포**까지 처리하는 표준 흐름입니다.  
 **Agent(에이전트)** 와 **전문가(HITL, Human-in-the-Loop)** 의 역할·체크리스트는 **[docs/project/quarterly-operations-guide.md](docs/project/quarterly-operations-guide.md)** (분기 운영 작업지시서)를 본다.
 
-저장소 전체가 아니라 **분기 규제 업데이트·제재 의결·질의회신 파이프라인**을 **Mr. Cabbage**가 담당하고 운영한다. 범위는 분기 규제 업데이트 수집과 첨부, 제재 의결 안건 연결, 회계기준원 질의회신 수집(`data/kasb-replies/`), 이 세 대상의 요약 초안, 그리고 이 파이프라인을 돌릴 때의 validate/build이다. 제재 의결 안건은 분기 문서의 조사·감리·위탁감리·회계법인·감사인 의안(의사록, 안건 ZIP, 미보도 항목, 증선위)이며, 품질관리감리(`docs/fss-review/`)가 아니다. Cabbage는 이 파이프라인을 돌릴 때 validate/build를 실행하고, **Mr. Mint**도 품질관리감리 PR에서 `validate_content.py --strict`, `mkdocs build --strict`, markdownlint를 돌린다. 전문가(HITL)가 큐레이션 판단, 요약 검증, 배포 승인을 한다. `nav`·`docs/index.md` 수동 반영과 사이트 구조 변경은 윤석님이 한다. 품질관리감리 결과 보도가 분기 규제 문서에 들어갈 때 Cabbage와 Mint는 서로 알린다(2026-11-05).
+**분기 규제 업데이트·제재 의결·질의회신 파이프라인**은 **Agent**와 **전문가(HITL)** 가 협업한다.
 
-Cabbage는 볼트에 직접 쓰지 않는다. **Mr. Kale**이 옵시디안 볼트 위키를 만든다. seq는 질의회신 식별자이고, 분기 규제 문서에는 seq가 없다. 질의회신은 분기 수집 PR이 머지된 뒤에 Cabbage가 새 seq 목록과 요약을 넘긴다. Kale은 `data/kasb-replies/{seq}/item.md`를 볼트 `raw/kasb-replies/{seq}.md`로 넣는다. 이미 있는 파일은 덮어쓰지 않고, 첨부는 빼 이 저장소에 둔다. 제재는 회차로 구분한다. `downloads/sanctions/{회차}/`에 `record.md`와 의사록 PDF가 생겼을 때 Cabbage는 그 경로와 회차 목록을 넘긴다. 이것은 식별자 인계이다. Kale이 raw 반입과 위키 작성을 한다. `export_kasb_replies_raw.py`와 `export_quarterly_raw.py`는 복사 도구이다.
+- **Agent** — 수집·첨부, 제재 의결 안건 연결, 질의회신 수집(`data/kasb-replies/`), 요약 초안, 이 파이프라인을 돌릴 때의 validate/build
+- **전문가** — 큐레이션 판단, 요약 검증, 배포 승인. `nav`·`docs/index.md`와 사이트 구조는 수동 반영
+- 제재 의결의 조사·감리·위탁감리·회계법인·감사인 의안(의사록, 안건 ZIP, 미보도 항목, 증선위)은 품질관리감리(`docs/fss-review/`)와 별도이다
+- validate/build·markdownlint는 이 파이프라인과 품질관리감리 PR에서 같이 돌린다
+- 품질관리감리 결과 보도가 분기 규제 문서에 들어갈 때는 서로 알린다
+
+볼트에는 이 파이프라인이 직접 쓰지 않는다.
+
+- 질의회신 seq는 질의회신 식별자이다. 수집 PR이 머지된 뒤 새 seq 목록과 요약을 넘긴다. `data/kasb-replies/{seq}/item.md`를 `raw/kasb-replies/{seq}.md`로 넣되, 있는 파일은 유지하고 첨부는 이 저장소에 둔다
+- 제재는 회차이다. `downloads/sanctions/{회차}/`에 `record.md`와 의사록 PDF가 생기면 경로와 회차 목록을 넘긴다
+- `export_kasb_replies_raw.py`와 `export_quarterly_raw.py`는 복사 도구이다
 
 ```mermaid
 flowchart LR
@@ -127,7 +137,9 @@ npm run build:strict       # MkDocs strict 빌드
 
 ## 회계기준원 질의회신 아카이브
 
-회계기준원 질의회신 요약 게시판 전체를 항목 폴더로 저장한다. 분기 크롤러와 별도다. 원문은 이 사이트에 게시하지 않고, 분기 문서와 MCP 코퍼스에도 넣지 않는다. 지식화는 옵시디안 볼트의 `raw/`에서 한다. 분기 수집 PR이 머지된 뒤 Mr. Cabbage가 새 seq 목록과 요약을 넘기면, Mr. Kale이 `data/kasb-replies/{seq}/item.md`를 볼트 `raw/kasb-replies/{seq}.md`로 넣는다. 이미 있는 파일은 덮어쓰지 않고 첨부는 이 저장소에 두며, Cabbage는 볼트에 직접 쓰지 않는다.
+회계기준원 질의회신 요약 게시판 전체를 항목 폴더로 저장한다. 분기 크롤러와 별도다. 원문은 이 사이트에 게시하지 않고, 분기 문서와 MCP 코퍼스에도 넣지 않는다. 지식화는 옵시디안 볼트의 `raw/`에서 한다.
+
+수집 PR이 머지된 뒤 seq 목록과 요약을 넘긴다. `data/kasb-replies/{seq}/item.md`는 볼트 `raw/kasb-replies/{seq}.md`로 넣되, 있는 파일은 유지하고 첨부는 이 저장소에 둔다.
 
 ```bash
 python scripts/crawl_kasb_replies.py
@@ -366,8 +378,6 @@ tags: [규제 업데이트, 회계기준, 감사감리, 금융감독]
 **전체 분기 운영 흐름·Agent/HITL 역할**: [분기 운영 워크플로](#분기-운영-워크플로) · [docs/project/quarterly-operations-guide.md](docs/project/quarterly-operations-guide.md) · [AGENTS.md](AGENTS.md)
 
 ### 품질관리감리·기타 문서
-
-품질관리감리는 **Mr. Mint** 담당이다.
 
 - 새 문서에도 `title`, `description` 등 최소 프론트매터를 두는 것을 권장합니다.
 - 이미지 추가 시 `CONTRIBUTING.md`의 이미지·alt 텍스트 가이드라인을 참고하세요.

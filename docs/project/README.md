@@ -29,7 +29,7 @@ Quality Updates **저장소 운영·개발·Agent**용 문서 목록입니다.
 
 | 문서 | 용도 |
 |------|------|
-| [quarterly-operations-guide.md](quarterly-operations-guide.md) | **분기 파이프라인** — Agent/HITL, Phase 1~5, 품질 게이트. 운영은 Mr. Cabbage이고, 볼트 위키 인계는 Mr. Kale이다 |
+| [quarterly-operations-guide.md](quarterly-operations-guide.md) | **분기 파이프라인** — Agent·전문가 협업, Phase 1~5, 품질 게이트 |
 | [editor-curation-workflow.md](editor-curation-workflow.md) | **편집기** — 마커, skip, prepare_deploy |
 | [curation-rules.md](curation-rules.md) | **큐레이션 규칙** — 스킵·링크만·요약·출처 제안. 편집기를 대체하지 않음 |
 | [curation-backtest.md](curation-backtest.md) | 위 규칙의 과거 분기 일치도 |
@@ -52,7 +52,7 @@ README·CONTRIBUTING·AGENTS.md의 운영·큐레이션 요약은 위 문서를 
 | 경로 | 용도 |
 |------|------|
 | `docs/quality-updates/` | 분기별 규제 업데이트 (MkDocs nav 등록) |
-| `docs/fss-review/` | 품질관리감리. Mr. Mint 담당 |
+| `docs/fss-review/` | 품질관리감리 |
 | `docs/index.md` | 홈 |
 
 ---
