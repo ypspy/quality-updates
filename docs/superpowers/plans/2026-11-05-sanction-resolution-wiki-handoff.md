@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 조사·감리 조치를 `제재 의결`로 유지하고, 의사록 PDF만 연결하며, 요약이 끝난 분기 본문의 처리 기록과 PDF를 옵시디안 `raw/`로 복사한다.
+**Goal:** 조사·감리 조치를 `제재 의결`로 유지하고, 의사록 PDF와 감리 의안의 공개용 안건·의결서 PDF를 연결하며, 요약이 끝난 분기 본문의 처리 기록과 PDF를 옵시디안 `raw/`로 복사한다.
 
 **Architecture:** 섹션 분류는 `repair_quarterly_structure.py`가 링크 제목으로 한다. 의사록 연결은 네트워크를 주입받는 순수 함수와 얇은 CLI다. 처리 기록은 분기 본문에서 만들고, 복사 CLI는 볼트에 이미 있는 파일을 덮어쓰지 않는다. 웨일 변환과 위키 페이지 작성은 이 계획에 없다.
 
@@ -213,7 +213,7 @@ git commit -m "docs: add the sanction resolution heading to the quarter skeleton
 **Interfaces:**
 
 - Consumes: 분기 마크다운 텍스트. 테스트가 넣는 `DecisionPost`.
-- Produces: `DecisionPost`, `meeting_key(text: str) -> tuple[int, str, str, int] | None`, `select_minutes_pdf(key, posts: list[DecisionPost]) -> str | None`, `attach_minutes(text: str, posts: list[DecisionPost]) -> tuple[str, list[str]]`. CLI `main(argv) -> int`는 이 계획에서 네트워크 구현을 비워 두고, 테스트는 `attach_minutes`만 호출한다. ZIP URL은 `select_minutes_pdf`의 반환값이 될 수 없다. 이후 안건 작업은 ZIP을 받아 `parse_agenda_number`와 `link_agendas`로 감리 의안만 연결한다.
+- Produces: `DecisionPost`, `meeting_key(text: str) -> tuple[int, str, str, int] | None`, `select_minutes_pdf(key, posts: list[DecisionPost]) -> str | None`, `attach_minutes(text: str, posts: list[DecisionPost]) -> tuple[str, list[str]]`. 이 단계의 테스트는 `attach_minutes`만 호출한다. 의사록 마커에는 ZIP URL을 넣지 않는다. 안건 ZIP은 `parse_agenda_number`와 `link_agendas`로 감리 의안만 연결한다.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -236,7 +236,7 @@ PRESS = """### 금융위원회
 """
 
 POSTS = [
-    DecisionPost(2026, "증선위", "정기", 13, "https://fsc.go.kr/comm/getFile?fileNo=1", ["https://fsc.go.kr/comm/getFile?fileNo=2"]),  # 의사록 URL만 마커에 쓴다. ZIP은 감리 의안 추출 대상이다.
+    DecisionPost(2026, "증선위", "정기", 13, "https://fsc.go.kr/comm/getFile?fileNo=1", ["https://fsc.go.kr/comm/getFile?fileNo=2"]),
     DecisionPost(2026, "증선위", "정기", 13, "https://fsc.go.kr/comm/getFile?other=1", []),
 ]
 
@@ -288,7 +288,7 @@ class DecisionPost:
     kind: str
     number: int
     pdf_url: str
-    zip_urls: list[str]  # 안건 ZIP URL. 의사록 마커에는 넣지 않고, 감리 의안 추출에 쓴다.
+    zip_urls: list[str]
 
 
 def meeting_key(text: str) -> tuple[int, str, str, int] | None:

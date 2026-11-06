@@ -22,9 +22,13 @@ DECISION_KEY_RE = re.compile(
 POST_TITLE_WORDS = ("의사록", "안건", "의결서")
 BOARDS = ("https://www.fsc.go.kr/no020101", "https://www.fsc.go.kr/no020102")
 QUARTER_NAME_RE = re.compile(r"(\d{4}-\d{2}-\d{2})_to_(\d{4}-\d{2}-\d{2})\.md$")
+MEETING_DATE_RE = re.compile(
+    rf"\(\s*[{_YEAR_QUOTES}]?\s*(\d{{2}})\.(\d{{1,2}})\.(\d{{1,2}})\."
+)
 
 
 AUDIT_TERMS = ("조사", "감리", "위탁감리", "회계법인", "감사인")
+EXCLUDED_TERMS = ("불공정거래",)
 _MASK_CHARS = set("○◯〇△▲▽▼◇◆■□●★＊*")
 _DOTS = "·ㆍ･‧"
 
@@ -289,7 +293,19 @@ def _flat_name(text: str) -> str:
 
 def is_audit_related(name: str) -> bool:
     flattened = _flat_name(name)
+    if any(term in flattened for term in EXCLUDED_TERMS):
+        return False
     return any(term in flattened for term in AUDIT_TERMS)
+
+
+def meeting_date(text: str) -> str:
+    matched = MEETING_DATE_RE.search(text)
+    if matched is None:
+        return "없음"
+    year = 2000 + int(matched.group(1))
+    month = int(matched.group(2))
+    day = int(matched.group(3))
+    return f"{year:04d}-{month:02d}-{day:02d}"
 
 
 def is_masked_label(text: str) -> bool:
@@ -399,7 +415,8 @@ def link_agendas(
     linked: list[tuple[AgendaFile, str]] = []
     unmatched: list[AgendaFile] = []
     for agenda in agendas:
-        hits = _name_hits(names, agenda.filename)
+        masked = agenda.masked or is_masked_label(agenda.filename)
+        hits = [] if masked else _name_hits(names, agenda.filename)
         if agenda.number is not None and agenda.number in numbers:
             linked.append((agenda, hits[0] if len(hits) == 1 else f"의안 {agenda.number}"))
         elif len(hits) == 1:
@@ -419,6 +436,13 @@ def _safe_filename(name: str) -> str:
     return cleaned.strip() or "attachment.pdf"
 
 
+def _bundle_file(folder: Path, kind: str, filename: str) -> Path:
+    safe = _safe_filename(filename)
+    if kind == "minutes":
+        return folder / safe
+    return folder / kind / safe
+
+
 def place_sanction_bundle(
     root: Path,
     key: tuple[int, str, str, int],
@@ -434,7 +458,7 @@ def place_sanction_bundle(
     if not record_path.exists():
         record_path.write_text(record, encoding="utf-8", newline="\n")
     for kind, filename, payload in files:
-        dest = folder / kind / _safe_filename(filename)
+        dest = _bundle_file(folder, kind, filename)
         dest.parent.mkdir(parents=True, exist_ok=True)
         if dest.exists():
             continue
@@ -486,7 +510,8 @@ def attach_agenda_markers(
     for index, block_end, title, block in _iter_resolution_blocks(lines):
         if _item_key(title, block) != key:
             continue
-        missing = [path for _, _, path in rows if path not in block]
+        marker_rows = [row for row in rows if row[1] != "unmatched"]
+        missing = [path for _, _, path in marker_rows if path not in block]
         if missing:
             insertions.append((index, missing))
         break
@@ -514,6 +539,7 @@ def _record_text(
     key: tuple[int, str, str, int],
     page_url: str,
     zip_url: str,
+    meeting_day: str,
     minutes: list[str],
     rows: list[tuple[AgendaFile, str, str]],
 ) -> str:
@@ -522,6 +548,7 @@ def _record_text(
         f"# {sanction_folder(key)}",
         "",
         f"- 회차: {year} {committee} {kind} {number}차",
+        f"- 회의일: {meeting_day}",
         f"- 게시 URL: {page_url or '없음'}",
         f"- ZIP URL: {zip_url or '없음'}",
         f"- 의사록: {', '.join(minutes) if minutes else '없음'}",
@@ -606,33 +633,59 @@ def _apply_agendas(text, posts, download, downloads: Path, written: list[Path]):
                 payloads.append((kind, filename, payload))
         for name in whale:
             report.append(f"Whale 변환 필요: {name}")
-        if not agendas and not whale:
+        folder = sanction_folder(key)
+        minute_urls = minutes_urls_for_key(key, posts)
+        minute_note = ""
+        if minute_urls is None:
+            minute_note = "모호"
+            minute_urls = []
+        minute_files: list[tuple[str, str, bytes]] = []
+        minute_paths: list[str] = []
+        for url in minute_urls:
+            name = _minutes_filename(url, key, _title_for_url(key, posts, url))
+            dest = downloads / name
+            if not dest.is_file():
+                download(url, dest)
+                written.append(dest)
+            minute_paths.append(f"downloads/sanctions/{folder}/{name}")
+            minute_files.append(("minutes", name, dest.read_bytes()))
+        if not agendas and not whale and not minute_files and not minute_note:
             continue
         linked, unmatched = link_agendas(block, key, agendas)
         labeled = [(item, row) for item, row in linked] + [(item, "unmatched") for item in unmatched]
         by_name = {item.filename: label for item, label in labeled}
-        folder = sanction_folder(key)
         rows: list[tuple[AgendaFile, str, str]] = []
         bundle_files: list[tuple[str, str, bytes]] = []
         for agenda, (kind, filename, payload) in zip(agendas, payloads):
             relative = f"downloads/sanctions/{folder}/{kind}/{filename}"
             rows.append((agenda, by_name.get(agenda.filename, "unmatched"), relative))
             bundle_files.append((kind, filename, payload))
-        minutes = [
-            f"downloads/{_minutes_filename(url, key, _title_for_url(key, posts, url))}"
-            for url in (minutes_urls_for_key(key, posts) or [])
-        ]
+        bundle_files.extend(minute_files)
+        if minute_paths:
+            minutes = minute_paths
+        elif minute_note:
+            minutes = [minute_note]
+        else:
+            minutes = []
         page = next((post.page_url for post in group if post.page_url), page_url)
         place_sanction_bundle(
             downloads / "sanctions",
             key,
-            _record_text(key, page, zip_urls[0] if zip_urls else "", minutes, rows),
+            _record_text(
+                key,
+                page,
+                zip_urls[0] if zip_urls else "",
+                meeting_date(block),
+                minutes,
+                rows,
+            ),
             bundle_files,
             page,
             zip_urls[0] if zip_urls else "",
         )
+        meeting_folder = downloads / "sanctions" / folder
         for kind, filename, _payload in bundle_files:
-            path = downloads / "sanctions" / folder / kind / filename
+            path = _bundle_file(meeting_folder, kind, filename)
             if path.is_file() and path not in written:
                 written.append(path)
         text, item_report = attach_agenda_markers(text, key, rows)

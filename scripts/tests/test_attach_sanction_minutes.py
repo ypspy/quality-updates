@@ -318,11 +318,19 @@ def test_run_minutes_downloads_only_minutes_pdfs(tmp_path):
     assert "minutes-2026-증선위-정기-15.pdf" in updated
     assert "minutes-2026-증선위-임시-1.pdf" in updated
     assert "fileNo=2" not in updated
-    assert "의결 251. 선진회계법인" in updated
+    assert "의결 251. 선진회계법인" not in updated
     assert "정기검사" not in updated
     assert (tmp_path / "minutes-2026-증선위-정기-15.pdf").read_bytes() == b"pdf"
     agenda = list((tmp_path / "sanctions").rglob("*의결 251*"))
     assert len(agenda) == 1
+    bundle = tmp_path / "sanctions" / "2026-증선위-정기-15차"
+    assert (bundle / "minutes-2026-증선위-정기-15.pdf").read_bytes() == b"pdf"
+    record = (bundle / "record.md").read_text(encoding="utf-8")
+    assert "- 회의일: 2026-09-02" in record
+    assert "downloads/sanctions/2026-증선위-정기-15차/minutes-2026-증선위-정기-15.pdf" in record
+    temporary = tmp_path / "sanctions" / "2026-증선위-임시-1차"
+    assert (temporary / "minutes-2026-증선위-임시-1.pdf").read_bytes() == b"pdf"
+    assert "- 회의일: 2026-10-09" in (temporary / "record.md").read_text(encoding="utf-8")
     assert not list(tmp_path.rglob("*.zip"))
     assert not any("88015" in url for url in requested)
     assert any("srchBeginDt=2026-07-01" in url and "srchEndDt=2026-12-09" in url for url in requested)
@@ -525,6 +533,8 @@ def test_zip_listing_keeps_only_audit_agenda_and_decision_pdfs():
         "의결361 품질관리기준 개정안(공개용).pdf",
         "의결368_경남은행에 대한 정기검사 결과 조치안(공개용).pdf",
         "(공개용) 의결 190. 위탁감리결과 조치안.hwp",
+        "금융위 의결서(제2026-336호)_ ○○○ 가상자산에 대한 불공정거래 조사결과 과징금부과 조치안(공개용).pdf",
+        "(공개용) 의결 336. 가상자산 불공정거래 조사결과.hwp",
         "readme.txt",
     ]
     kept, whale = audit_zip_entries(names)
@@ -538,6 +548,7 @@ def test_zip_listing_keeps_only_audit_agenda_and_decision_pdfs():
     assert any("조사결과" in item.filename for item in kept)
     assert not any("정기검사" in name for name in kept_names)
     assert not any("품질관리기준" in name for name in kept_names)
+    assert not any("불공정거래" in name for name in kept_names)
     assert not any(name.endswith(".hwp") for name in kept_names)
     assert whale == ["(공개용) 의결 190. 위탁감리결과 조치안.hwp"]
 
@@ -635,7 +646,7 @@ def test_unmatched_agendas_are_reported_and_discussion_notes_stay(tmp_path):
         ],
     )
     assert "251.pdf" in text
-    assert "250.pdf" in text
+    assert "250.pdf" not in text
     assert "과징금" in text
     assert "제250호는 회사명을 비공개로 두나 ㈜금양과 대응함" in text
     assert "위원 논의" in text
@@ -643,6 +654,22 @@ def test_unmatched_agendas_are_reported_and_discussion_notes_stay(tmp_path):
     assert any(line.startswith("linked 2026 증선위 정기 15 251 선진회계법인") for line in report)
     assert "fileNo=2" not in text
     assert tmp_path is not None
+
+
+def test_masked_filename_does_not_link_by_company_name():
+    from attach_sanction_minutes import AgendaFile, link_agendas
+
+    agendas = [
+        AgendaFile(
+            "(공개용) 의결 249. 선진회계법인 ㈜OO 조사결과 조치안.pdf",
+            "agenda",
+            249,
+            False,
+        ),
+    ]
+    linked, unmatched = link_agendas(PRESS_NAMED, (2026, "증선위", "정기", 15), agendas)
+    assert linked == []
+    assert [item.number for item in unmatched] == [249]
 
 
 def test_cp949_zip_names_round_trip():
