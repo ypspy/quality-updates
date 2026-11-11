@@ -30,9 +30,15 @@ Cursor(AI 코드 에디터)가 프로젝트 맥락으로 읽도록 만든 문서
    - PDF 본문(pdftotext)에는 감리대상기간과 권고일이 거의 없습니다.
    - 그래서 recommendation_date는 86건 모두 FSS 목록의 action_date로 채웠습니다(`data/undated_dates.csv`).
 5. 파일명 변경(2026-10-31, 이 폴더 안에서만)
-   - `pdf/2022`: 86개를 suggested_filename으로 바꿨습니다.
-   - `pdf/others`: 255개를 원본 파일명(.pdf)으로 바꿨습니다.
+   - 당시 `pdf/2022` 86개를 suggested_filename으로 바꿨습니다.
+   - 당시 `pdf/others` 255개를 원본 파일명(.pdf)으로 바꿨습니다.
    - 충돌은 0건이고, 로그를 남겼습니다.
+6. 폴더 재정리(2026-11-11, `git mv`)
+   - 업체별 PDF는 권고일 연도별 `pdf/firms/<연도>/`로 옮겼습니다 (333개).
+   - 일반회계법인·감사반 연간 종합본 8개는 `pdf/compilations/board-B0000291/`로 옮겼습니다.
+   - 등록법인 보도자료 별첨은 `pdf/compilations/press-B0000188/`로 옮겼습니다.
+   - 2019~2020년·2021년 모음집은 금감원 공식 별첨 PDF로 교체했고, 2022년 공식 별첨 PDF를 추가했습니다.
+   - 파일을 삭제하지는 않았습니다(교체된 두 사본의 내용만 공식본으로 바뀜).
 
 ## 4. 폴더/파일 안내
 | 경로 | 행 수 | 열 | 내용 |
@@ -41,21 +47,25 @@ Cursor(AI 코드 에디터)가 프로젝트 맥락으로 읽도록 만든 문서
 | `data/map_all_dedup.csv` | 341 | code, sha256, path | 중복 제거 후 전체 목록(n001~n341), 원본 경로 |
 | `data/map_2022.csv` | 86 | code, file_name, drive_id, pdf_file | m01~m86 → 원본명, Drive ID, 변경 후 PDF 경로 |
 | `data/map_2022.pre_rename.csv` | 86 | code, file_name, drive_id | 파일명 변경 전 백업 |
-| `data/todo_others.csv` | 255 | code, sha256, path | 2022년분 외 변환 대상 |
+| `data/todo_others.csv` | 255 | code, sha256, path | 2022년분 외 변환 대상 목록 |
+| `data/_map_others.csv` | 255 | code, sha256, path, pdf_file | n001~n255와 현재 PDF 경로 (2026-11-11에 `pdf/others/`에서 옮김) |
+| `data/_map_others.pre_rename.csv` | 255 | code, sha256, path | 파일명 변경 전 백업 |
 | `data/date_recovery.csv` | 86 | file_name, drive_id, firm, review_year, inferred_disclosure_date_or_range, method, confidence, evidence, action_date, action_date_basis | 2022년분 조치일과 근거 URL |
-| `data/compilations_dates.csv` | 4 | file_name, drive_id, release_date, action_date, confidence, evidence | 2023·2024년 모음집 날짜 |
+| `data/compilations_dates.csv` | 12 | file_name, drive_id, release_date, action_date, confidence, evidence | B0000291 2023~2025 종합본 6행 + B0000188 등록법인 별첨 6행 |
 | `data/undated_dates.csv` | 86 | code, original_filename, firm_name, review_period, recommendation_date, date_source, pdf_text_date, evidence_snippet, confidence, suggested_filename | 기간미상 파일의 기간·권고일 |
-| `data/rename_log.csv` | 86 | old_path, new_path | pdf/2022 파일명 변경 로그 |
-| `data/rename_log_others.csv` | 255 | old_path, new_path | pdf/others 파일명 변경 로그 |
-| `pdf/2022/` | 86 PDF | - | 2022년 감리분(기간미상 86건) |
-| `pdf/others/` | 255 PDF + CSV 2개 | - | 나머지. `_map_others.csv`(code, sha256, path, pdf_file)와 `_map_others.pre_rename.csv` |
-| `pdf/compilations/` | 2 PDF | - | 2019·2020년 모음집(2022.1.25), 2021년 모음집(2022.4.28) |
+| `data/rename_log.csv` | 86 | old_path, new_path | 2026-10-31 `pdf/2022` 파일명 변경 로그(당시 경로를 유지) |
+| `data/rename_log_others.csv` | 255 | old_path, new_path | 2026-10-31 `pdf/others` 파일명 변경 로그(당시 경로를 유지) |
+| `pdf/firms/<권고일 연도>/` | 333 PDF | - | 업체별 파일. 2023=87, 2024=80, 2025=88, 2026=78. 파일명 `회사명_기간_권고일` |
+| `pdf/compilations/board-B0000291/` | 8 PDF | - | 일반회계법인·감사반 연간 종합본(2022~2025) |
+| `pdf/compilations/press-B0000188/` | 3 PDF | - | 등록법인 보도자료 별첨 중 공식 PDF가 있는 2019~2020·2021·2022년분 |
 | `scripts/` | 3 | - | Whale 실행 스크립트(mine.sh, mine2.sh, next.sh) |
 
 ## 5. 핵심 사실
-- 2019~2021년 감리분은 등록 법인 모음집 형태로만 있습니다.
-  - 2019·2020년 모음집: 16곳, 2022-01-25 발표
-  - 2021년 모음집: 13곳(그중 11곳은 처음 공개), 2022-04-28 발표
+- 2019~2021년 감리분은 등록 법인 모음집 형태로만 있습니다. 파일은 `pdf/compilations/press-B0000188/`에 있습니다.
+  - 2019·2020년 모음집: 16곳, 게시판 목록일 2022-01-24(조간 관행 2022-01-25). 공식 FSS 별첨 PDF sha256 `4cd30d92dfba1fd738d4ace467c2d276dd164d0ba406a300d41ee30d047ce601`
+  - 2021년 모음집: 13곳(그중 11곳은 처음 공개), 게시판 목록일 2022-04-27(조간 관행 2022-04-28). 공식 FSS 별첨 PDF sha256 `a1cdd597a161dd17d23b151c66c36546c1a7ea9a12065b69e53b574bea9917a1`
+  - 2022년 등록법인 별첨(nttId 128593, 2023-07-03)도 같은 폴더에 공식 PDF로 있습니다. sha256 `afe2a7989e70b10e63bd6e8464abc3ff05677b00302b0fd539e29a51a81fd687`
+  - 2023~2025년 등록법인 별첨(nttId 137349, 194469, 218133)은 게시판에 공식 PDF가 없어 파일을 추가하지 않았습니다.
 - 업체별 게시글은 2022년 감리분부터 있습니다(nttId 127970~128040).
 - FSS 게시판 B0000291의 특이점
   - 2022년분 게시글은 목록에 보이지 않습니다.
@@ -63,7 +73,7 @@ Cursor(AI 코드 에디터)가 프로젝트 맥락으로 읽도록 만든 문서
   - nttId 127969 아래를 확인했지만 이전 게시글은 없었습니다.
   - 2023년 회계법인 게시판 날짜 2023-08-24는 오기로 보입니다.
   - 서상감사반은 게시글 제목이 제437호인데 첨부파일은 제506호입니다. 첨부파일 기준으로 반영했습니다.
-- 모음집 조치일: 2023년 모음집 2024-03-18, 2024년 모음집 2025-03-19
+- 모음집 조치일: 2023년 모음집 2024-03-18, 2024년 모음집 2025-03-19, 2025년 모음집 2026-03-20 (B0000291 일반·감사반 종합본)
 
 ## 6. 주의사항
 - date_source
