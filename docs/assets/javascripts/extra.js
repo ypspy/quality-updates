@@ -48,6 +48,7 @@
 
   function initFssReview() {
     var root = document.getElementById('fss-review');
+    // 이름 목록은 본문 script로 두지 않는다. instant navigation이 script의 id를 지운다.
     var indexNode = document.getElementById('fss-firm-index');
     if (!root || !root.classList.contains('fss-review') || !indexNode) {
       clearFssRails();

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 import sys
 from pathlib import Path
 
@@ -6,6 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from fss_review_cards import (  # noqa: E402
     BOILERPLATE,
+    PAGE,
     arrange_by_year,
     audit_review_html,
     collapse_document,
@@ -40,6 +42,17 @@ def _article(names, summary, bodies):
 
 def _gun(*articles):
     return '<div class="fss-gun"><p class="fss-gun-name">나군</p>' + "".join(articles) + "</div>"
+
+
+def test_firm_index_is_not_a_content_script():
+    text = PAGE.read_text(encoding="utf-8")
+    open_tag = '<div id="fss-firm-index" hidden>'
+    start = text.find(open_tag)
+    assert start >= 0
+    end = text.find("</div>", start)
+    names = json.loads(text[start + len(open_tag) : end])
+    assert names
+    assert "<script" not in text
 
 
 def test_severity_badge_keeps_a_space_before_the_sentence():
