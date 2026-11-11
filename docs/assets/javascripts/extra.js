@@ -153,7 +153,9 @@
         var badges = group.querySelector('.fss-badges');
         if (badges) badges.classList.add('fss-show');
         group.querySelectorAll('.fss-badge').forEach(function (el) {
-          el.classList.add('fss-show');
+          var match = !state.name || hasName(el, state.name);
+          if (match) el.classList.add('fss-show');
+          if (state.name && !match) el.classList.add('fss-dim');
         });
         var node = group.parentElement;
         while (node && node !== root) {
@@ -315,7 +317,7 @@
       if (secondaryInner) {
         var sectionRail = document.createElement('nav');
         sectionRail.id = 'fss-section-rail';
-        var outline = root.querySelectorAll('.fss-dae > h2, .fss-jung > h3');
+        var outline = root.querySelectorAll('.fss-year > h2, .fss-dae > h2, .fss-jung > h3');
         Array.prototype.forEach.call(outline, function (heading, index) {
           if (!heading.id) heading.id = 'fss-h-' + index;
           var link = document.createElement('a');

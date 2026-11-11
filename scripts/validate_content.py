@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 from typing import NamedTuple
 
+from fss_review_cards import audit_review_html
 from source_marker_layout import find_unsafe_source_layout
 
 
@@ -263,12 +264,22 @@ def validate_unpublished_sanctions(
     return errors
 
 
+def validate_fss_review_cards(text: str) -> list[ValidationError]:
+    """품질관리감리 카드 문장. 분기 문서 검사와 분리한다."""
+    return [
+        ValidationError(1, "FSS_REVIEW_CARD", message, "error")
+        for message in audit_review_html(text)
+    ]
+
+
 def validate_file(filepath: Path, strict: bool) -> list[ValidationError]:
     """단일 파일 검증."""
     try:
         text = filepath.read_text(encoding="utf-8")
     except Exception as e:
         return [ValidationError(0, "READ", str(e), "error")]
+    if filepath.parent.name == "fss-review" and filepath.name == "index.md":
+        return validate_fss_review_cards(text)
     lines = text.split("\n")
     all_errors: list[ValidationError] = []
     for fn in [
@@ -321,6 +332,9 @@ def main():
     else:
         paths = sorted(docs_dir.rglob("*.md"))
         paths = [p for p in paths if "AGENT_INSTRUCTION" not in p.name]
+        fss_page = repo_root / "docs" / "fss-review" / "index.md"
+        if fss_page.is_file():
+            paths.append(fss_page)
 
     total_errors = 0
     for fp in paths:
