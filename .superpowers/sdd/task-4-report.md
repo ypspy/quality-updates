@@ -1,96 +1,89 @@
-# Task 4 Report: item.md, 완료 판정, manifest
+# Task 4 Report: README six-section replacement
 
-## Status
+## Summary
 
-DONE_WITH_CONCERNS
+Replaced `README.md` with the verbatim six-section front door from `.superpowers/sdd/task-4-brief.md`. Staged and committed **only** `README.md`. Left `docs/index.md` and `mkdocs.yml` unstaged per instructions.
 
-## TDD Evidence
+## Commands and output
 
-### RED (Step 2)
-
-Command (cwd: `scripts`):
+### Branch and status
 
 ```text
-python -m pytest tests/test_kasb_replies.py::test_compose_item_uses_detail_category_and_registered_date -q
+$ cd C:\dev\quality-updates; git branch --show-current; git status -sb
+docs/readme-front-door
+## docs/readme-front-door
+ M docs/index.md
+ M mkdocs.yml
 ```
 
-Result:
+### Step 1 — long sections still in README (expected: three matches)
 
 ```text
-FAILED tests/test_kasb_replies.py::test_compose_item_uses_detail_category_and_registered_date
-AttributeError: module 'crawler.kasb_replies' has no attribute 'compose_item'
-1 failed in 0.41s
+$ rg -n "^## 프로젝트 구조|^## MCP 코퍼스|^## 회계기준원" README.md
+124:## 회계기준원 질의회신 아카이브
+257:## 프로젝트 구조
+373:## MCP 코퍼스 (다른 Agent)
 ```
 
-### GREEN (Step 4)
-
-Command (cwd: `scripts`):
+### Step 3 — line count and `##` headings
 
 ```text
-python -m pytest tests/test_kasb_replies.py -q
+$ (Get-Content README.md).Count; rg -n "^## " README.md
+79
+8:## 기능
+15:## 로컬에서 보기
+54:## 분기 운영
+63:## 배포
+71:## 기여
+76:## 라이선스·저작권
 ```
 
-Result:
+### Step 3 — forbidden-pattern search (expected: no matches)
 
 ```text
-21 passed in 0.86s
+$ rg -n "glightbox|bashrc|fetch_attachments|프로젝트 구조" README.md; echo "exit=$LASTEXITCODE"
+
+exit=1
 ```
 
-Intermediate failure before fix (full suite after verbatim brief implementation):
+(Empty matches; ripgrep exit code 1 means no matches.)
+
+### Markdown lint (`README.md` only path arg)
 
 ```text
-FAILED tests/test_kasb_replies.py::test_compose_item_writes_failed_attachment_line
-assert 'failed: PrvText missing' in text
-(body showed `failed: missing extract` because section key was `note.hwp` while composed attachment name was `note.hwpx`)
-20 passed, 1 failed
+$ npm run lint:md -- README.md 2>&1
+
+> quality-updates@0.1.0 lint:md
+> markdownlint "docs/**/*.md" -c .markdownlint.json README.md
 ```
 
-## Files Changed
+Exit code: 0.
 
-| File | Change |
-|------|--------|
-| `scripts/crawler/kasb_replies.py` | Added `json`/`yaml` imports; `attachment_filename`, `compose_item`, `read_meta`, `should_attempt`, `append_manifest` |
-| `scripts/tests/test_kasb_replies.py` | Appended Task 4 tests and helpers (`_sample_row`, `_sample_detail`) |
-
-## Implementation Summary
-
-- **`attachment_filename`**: Strips path segments, dedupes via `used` set with `-{file_seq}` suffix pattern.
-- **`compose_item`**: YAML front matter + markdown body (`## 상세 안내`, per-attachment `## 첨부:` sections); merges list/detail fields; `standards` as `list(detail.standards)`; overall `extract_status` from `aggregate_status`.
-- **`read_meta`**: Parses `item.md` front matter; returns `None` on missing/invalid input.
-- **`should_attempt`**: Skip when `extract_status == ok` and all attachment files exist; retry rules for missing files and `retry_failed` on non-ok statuses.
-- **`append_manifest`**: Appends one JSON line per record, UTF-8, `ensure_ascii=False`.
-
-## Self-Review
-
-- Parsers and extractors left untouched per brief.
-- `Path` not re-imported.
-- Commit scoped to the two Task 4 files only (other dirty workspace files unstaged).
-
-## Concerns
-
-1. **`compose_item` section matching**: Brief used filename-only lookup in `by_saved`. `test_compose_item_writes_failed_attachment_line` passes `("note.hwp", ...)` while `_sample_detail` attachment is `note.hwpx`, so strict lookup fails. Added positional fallback when `len(sections) == len(names)` and filename is absent from `by_saved`. Production crawl always uses matching `attachment_filename` keys, so behavior is unchanged for the intended path; fallback only affects mismatched test (or manual) inputs.
-
-2. **Test imports**: `json` and `yaml` were appended mid-file per brief; could be consolidated at top in a later cleanup (out of scope).
-
-## Commit
-
-- `feat: write KASB reply item markdown and manifest lines` (see git log for SHA)
-
-## Fix: filename-only extract matching
-
-Removed positional fallback in `compose_item`; sections pair only via `by_saved.get(filename, ...)`. Test `test_compose_item_writes_failed_attachment_line` uses `note.hwpx` to match `_sample_detail`.
-
-Command (cwd: `scripts`):
+### Commit
 
 ```text
-python -m pytest tests/test_kasb_replies.py -q
+$ git add -- README.md; git status -sb; git commit -m @"
+docs: README를 소개와 설치 앞문으로 줄인다
+
+"@
+## docs/readme-front-door
+M  README.md
+ M docs/index.md
+ M mkdocs.yml
+error: failed to delete '.git/worktrees/feat-consumption-mcp-product': Permission denied
+[docs/readme-front-door c8d42c6] docs: README를 소개와 설치 앞문으로 줄인다
+ 1 file changed, 17 insertions(+), 372 deletions(-)
+
+$ git log -1 --format="%H %s"; git status -sb
+c8d42c684994ea5c505b037e6c0e57100bdf526d docs: README를 소개와 설치 앞문으로 줄인다
+## docs/readme-front-door
+ M docs/index.md
+ M mkdocs.yml
 ```
 
-Result:
+## Self-review
 
-```text
-.....................                                                    [100%]
-21 passed in 0.73s
-```
-
-Commit: `12a48edef5cb6f12eda2e17c93f6bb8df8eb9bb3` — fix: match KASB reply extracts by attachment filename
+- **Brief adherence:** Content matches the replacement block in the task brief (six `##` headings: 기능, 로컬에서 보기, 분기 운영, 배포, 기여, 라이선스·저작권). Line count **79** (≤ 150).
+- **Verification:** Forbidden-pattern `rg` returned no lines; `npm run lint:md -- README.md` passed.
+- **Scope:** Only `README.md` was committed; `docs/index.md` and `mkdocs.yml` remain modified and unstaged.
+- **Concern:** Git printed `error: failed to delete '.git/worktrees/feat-consumption-mcp-product': Permission denied` during `git commit`, but the commit **succeeded** (`c8d42c6`). May warrant local investigation if it recurs.
