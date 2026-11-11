@@ -57,7 +57,7 @@ Cursor(AI 코드 에디터)가 프로젝트 맥락으로 읽도록 만든 문서
 | `data/rename_log_others.csv` | 255 | old_path, new_path | 2026-10-31 `pdf/others` 파일명 변경 로그(당시 경로를 유지) |
 | `pdf/firms/<권고일 연도>/` | 333 PDF | - | 업체별 파일. 2023=87, 2024=80, 2025=88, 2026=78. 파일명 `회사명_기간_권고일` |
 | `pdf/compilations/board-B0000291/` | 8 PDF | - | 일반회계법인·감사반 연간 종합본(2022~2025) |
-| `pdf/compilations/press-B0000188/` | 3 PDF | - | 등록법인 보도자료 별첨 중 공식 PDF가 있는 2019~2020·2021·2022년분 |
+| `pdf/compilations/press-B0000188/` | 6 PDF | - | 등록법인 보도자료 별첨: 공식 PDF 3(2019~2020·2021·2022년분) + 공식 hwp·hwpx의 Whale 변환본 3(2023~2025년분) |
 | `scripts/` | 3 | - | Whale 실행 스크립트(mine.sh, mine2.sh, next.sh) |
 
 ## 5. 핵심 사실
