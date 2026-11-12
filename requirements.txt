@@ -21,3 +21,5 @@ pytesseract>=0.3.13
 pypdf
 openpyxl
 olefile
+# 오프라인 HWP 추출은 pyhwp의 hwp5html --html을 쓴다. hwp5txt는 쓰지 않는다.
+pyhwp==0.1b15
