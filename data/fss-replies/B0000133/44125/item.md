@@ -14,9 +14,9 @@ attachments:
 - name: 2001-046(회계 제8360-32) 신종기업어음의 부도후 회계처리.hwp
   atch_file_id: 149aa7ee36ccea1ee6ca416932ccab5b
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:27:36.377921+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,16 @@ extract_status: pending_whale
 
 ## 첨부: 2001-046(회계 제8360-32) 신종기업어음의 부도후 회계처리.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2001-046(회계 제8360-32) |  |
+| --- | --- |
+| 신종기업어음의 부도후 회계처리 |  |
+
+Ⅰ. 질의요약
+
+◦ 회사는 2001.4월 중 신종기업어음(만기 3개월, 액면가 1억3백만원, 매입가 1억원)을 매입하여 단기금융상품의 과목으로 회계처리함
+
+◦ 상기 어음의 부도로 인하여 회수가 불가능한 경우 회계처리 방법은?
+
+Ⅱ. 회신요약
+
+◦ 단기금융상품평가손익으로 하여 당기손익에 반영함

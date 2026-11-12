@@ -14,9 +14,9 @@ attachments:
 - name: 2006-019 드라마 판권제공의 수익인식.hwp
   atch_file_id: 0b50ce0185160645d2ae758b85b633c3
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:24:52.280923+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,18 @@ extract_status: pending_whale
 
 ## 첨부: 2006-019 드라마 판권제공의 수익인식.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2006-019 |  |
+| --- | --- |
+| 드라마판권 제공의 수익인식에 대한 질의회신 |  |
+
+Ⅰ. 질의요약
+
+◦ 회사는 일본의 업체로부터 주문을 받아 A 프로덕션으로부터 ‘ B ’ 라는 드라마의 일 본 지역내 TV 방영권 및 비디오그램의 복제배포권을 판매
+
+- 이때 미니멈개런티를 선지불하고 5년간 독점권을 행사하기로 하여 2005년 중 1 차적으로 일본의 C 사에 TV 방영권을 판매하였으며, 방영권과 관련된 권리는 모두 C 사에 이전
+
+◦ 이 거래의 수익을 총액 또는 순액(수수료)으로 인식하여야 하는지?
+
+Ⅱ. 회신요약
+
+◦ 총액으로 인식하는 것이 타당함

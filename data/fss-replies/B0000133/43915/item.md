@@ -14,9 +14,9 @@ attachments:
 - name: 2002-036(회제일 8360-00107) 소프트웨어 공급시 수익인식 시점.hwp
   atch_file_id: b53db0a11275ac65e222ba46350bbe09
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:40:32.664626+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2002-036(회제일 8360-00107) 소프트웨어 공급시 수익인식 시점.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2002-036(회제일 8360-00107) |  |
+| --- | --- |
+| 소프트웨어 공급시 수익인식 시점 |  |
+
+Ⅰ. 질의요약
+
+◦ 소프트웨어 공급계약을 체결한 경우 매출수익의 인식가능 여부
+
+Ⅱ. 회신요약
+
+◦ 소프트웨어의 공급은 최종사용자가 소프트웨어를 사용가능하기까지 실질적 으로 필요한 기본적인 설치용역등 판매에 일반적으로 부수되는 서비스제공 의무가 종료되는 시점에 수익으로 인식하는 것이 타당함

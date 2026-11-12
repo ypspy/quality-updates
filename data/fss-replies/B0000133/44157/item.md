@@ -14,9 +14,9 @@ attachments:
 - name: 2001-089(회계제 8360-00316) 지분법 회계처리 질의.hwp
   atch_file_id: b1a18c54769eb46c383d67a8a9e28c32
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:25:26.781338+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2001-089(회계제 8360-00316) 지분법 회계처리 질의.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2001-089(회계제 8360-00316) |  |
+| --- | --- |
+| 지분법 회계처리 질의 |  |
+
+Ⅰ. 질의요약
+
+상장회사인 갑회사의 보통주 지분증권에 대하여 투자목적으로 2001.6.20일자에 22%를 취득하였으며, 동사앞 이익잉여금 분배나 내부유보에 관한 사항을 제외한 기타의 의결권에 대하여 다른 주주앞 위임장을 발급하여 일정기간동안 의결권 행사를 위임키로 한 경우 지분법적용여부
+
+Ⅱ. 회신요약
+
+피투자회사의 주식은 지분법을 적용하여 평가하여야 함

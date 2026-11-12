@@ -14,9 +14,9 @@ attachments:
 - name: 2005-079 소멸시효완성된 휴면보험금 회계처리에 대한 질의.hwp
   atch_file_id: d386a2750a5d35d4001a25410e940415
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:18:07.926222+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2005-079 소멸시효완성된 휴면보험금 회계처리에 대한 질의.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2005-079 |  |
+| --- | --- |
+| 소멸시효완성된 휴면보험금 회계처리에 대한 질의 |  |
+
+Ⅰ. 질의요약
+
+◦ 지급준비금으로 적립해오던 보험계약중 소멸시효의 완성으로 인하여 보험회사의 지급의무가 소멸하여 지급준비금을 환입할 때, 지급준비금전입액 조정항목으로 할 것인지, 별도의 수익(예: 잡이익)으로 회계처리할 것인지?
+
+Ⅱ. 회신요약
+
+◦ 지급준비금으로 계상되었던 소멸시효완성에 따라 발생된 휴면보험금은 지급준 비금전입액의 조정으로 회계처리하는 것이 타당 함.

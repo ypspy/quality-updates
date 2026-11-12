@@ -14,9 +14,9 @@ attachments:
 - name: 2004-136(회제이 8360-00467) 연결범위.hwp
   atch_file_id: 0121b51edc3c1c5bdb642085ae04d46b
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:01:05.274741+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,22 @@ extract_status: pending_whale
 
 ## 첨부: 2004-136(회제이 8360-00467) 연결범위.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2004-136(회제이 8360-00467) |  |
+| --- | --- |
+| 연결범위 |  |
+
+Ⅰ. 질의요약
+
+◦ A 사와 B 사는 모두 비상장법인이며 외감법대상임. A 사와 B 사의 지배구조는 아래와 같음
+
+A 사와 B 사의 주주구성
+
+개인 C A 사 개인 E (C 자녀) 개인 D (C 배우자) B 사 48% 57% 43% 22% 30%
+
+◦ C 는 A 사와 B 사의 대표이사로 등기부등본에 등재되어 있으며 D 는 A 사의 감사와 B 사의 이사로 구성하고 있음.(전체 이사회 구성원은 A 사가 5명, B 사가 4명임)
+
+◦ 이와 관련하여 A 사가 B 사를 종속회사로 하여 연결재무제표를 작성해야 하는지 여부와 만약 작성해야 한다면 근거규정이 무엇인지?
+
+Ⅱ. 회신요약
+
+◦ A 사는 B 사를 연결대상 종속회사에서 제외하는 것이 타당합니다.

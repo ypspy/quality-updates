@@ -14,9 +14,9 @@ attachments:
 - name: 2003-084(회제일 8360-00451) 건물철거시 장부가액에 대한 회계처리.hwp
   atch_file_id: a69444e2499905a67e8732bcc4920c95
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:54:50.094936+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2003-084(회제일 8360-00451) 건물철거시 장부가액에 대한 회계처리.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2003-084(회제일 8360-00451) |  |
+| --- | --- |
+| 건물철거시 장부가액에 대한 회계처리 |  |
+
+Ⅰ. 질의요약
+
+◦ 사옥으로 약 10년간 사용하던 건물을 철거하고 그 대지에 새로운 건물을 신축하여 토지 및 건물을 제3자에게 분양하는 경우에 기존건물의 장부가격에 대한 회계처리는?
+
+Ⅱ. 회신요약
+
+◦ 건물을 신축하기 위하여 사용중인 기존 건물을 철거하는 경우 그 건물의 장부가액은 제거하여 처분손실로 반영

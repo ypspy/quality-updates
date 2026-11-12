@@ -14,9 +14,9 @@ attachments:
 - name: 2003-056(회제일8360-00301) 수익인식에 대한 질의.hwp
   atch_file_id: ab38835349a030087d15d4ac1dc06706
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:56:33.661645+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2003-056(회제일8360-00301) 수익인식에 대한 질의.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2003-056(회제일 8360-00301) |  |
+| --- | --- |
+| 수익인식기준에 대한 질의 |  |
+
+Ⅰ. 질의요약
+
+◦ 회사는 주문자의 요청에 따라 주문서를 접수한 후 6개월 이상의 생산기간이 소요되는 OEM 방식의 장비업체로 진행기준으로 수익을 인식해야하는지 인 도기준으로 인식해야하는지 여부를 질의임
+
+Ⅱ. 회신요약
+
+◦ 특수목적의 주문생산하는 기계장비는 진행기준으로 수익을 인식하는 것이 타당함

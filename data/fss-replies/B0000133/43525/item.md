@@ -14,9 +14,9 @@ attachments:
 - name: 2004-009(회제일 8360-00044) 페어웨이 잔디에 대한 감가상각여부 질의.hwp
   atch_file_id: 426224c467882a7c1edbd31358ce95bb
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:11:42.538790+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2004-009(회제일 8360-00044) 페어웨이 잔디에 대한 감가상각여부 질의.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2004-009(회제일 8360-00044) |  |
+| --- | --- |
+| 페어웨이 잔디에 대한 감가상각여부 질의 |  |
+
+Ⅰ. 질의요약
+
+◦ 골프장을 운영하기 위해 필수적인 페어웨이 잔디의 조성원가에 대하여 감가 상각을 하여야 하는지?
+
+Ⅱ. 회신요약
+
+◦ 페어웨이 잔디가 일정한 유지관리를 통하여 용역잠재력이 감소하지 않고 계속적으로 유지된다면 별도의 감가상각을 하지 않고 취득원가로 계상하는 것이 타당함.

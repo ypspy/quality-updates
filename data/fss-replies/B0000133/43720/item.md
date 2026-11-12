@@ -14,9 +14,9 @@ attachments:
 - name: 2002-137(회제일 8360-00122) 대북경협사업관련 투자유가증권의 평가.hwp
   atch_file_id: 7caecedb99c31b26c02ea117ce8beab2
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:32:39.673214+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2002-137(회제일 8360-00122) 대북경협사업관련 투자유가증권의 평가.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2002-137(회제일 8360-00122) |  |
+| --- | --- |
+| 대북경협사업관련 투자유가증권의 평가 |  |
+
+Ⅰ. 질의요약
+
+◦ 남북경협사업과 관련한 투자액의 회계처리에 관한 질의임
+
+Ⅱ. 회신요약
+
+◦ 남북경협사업과 관련하여 투자하였으나 북한의 피투자회사의 재무제표를 입수할 수 없는 경우에도 피투자회사에 중대한 영향력을 행사할 수 있다면 지분법 으로 평가하여야 함

@@ -14,9 +14,9 @@ attachments:
 - name: 2005-084 신상품의 포인트선지급관련 회계처리.hwp
   atch_file_id: a057a9e4d23d028613d70556b39c6793
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:17:27.436748+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2005-084 신상품의 포인트선지급관련 회계처리.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2005-084 |  |
+| --- | --- |
+| 신상품의 포인트선지급관련 회계처리 |  |
+
+Ⅰ. 질의요약
+
+◦ 카드와 정기예금을 연계하여 카드사용실적에 따라 적립될 Point( 현금처럼 사용 가능)를 정기예금 가입시에 선지급(현금으로 지급)한 후 정기예금만기일에 실제 적립된 Point 와 선지급한 Point 를 비교하여 정산하는 경우 정기예금가입자에게 선지급한 Point 에 대한 회계처리는?
+
+Ⅱ. 회신요약
+
+◦ 최초 예금 신규시 부여한 Point 를 선급비용으로 처리한 후, 실제 Point 발생시 비용으로 처리하는 것이 타당함

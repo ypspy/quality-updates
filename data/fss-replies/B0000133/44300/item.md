@@ -14,9 +14,9 @@ attachments:
 - name: (일반기준) 저축은행이 사모투자신탁펀드로부터 취득한 수익증권 회계처리_.hwp
   atch_file_id: 3c004dd9061ba0c2cae0e8bc82bc6e4d
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:08:15.792416+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,11 @@ extract_status: pending_whale
 
 ## 첨부: (일반기준) 저축은행이 사모투자신탁펀드로부터 취득한 수익증권 회계처리_.hwp
 
-pending_whale
-Whale 변환 대기
+| 저축은행이 사모투자신탁펀드로부터 취득한 수익증권 회계처리에 대한 질의회신 |
+| --- |
+
+| 질의 · 회신 요약 |
+| --- |
+
+| <현황> □ A 저축은행은 다음의 사모투자신탁펀드에 대한 수익 증권을 매입 ◦ 동 신탁펀드에 대한 법적, 실질적 운용권한은 집합투자업자 (자산운용사) 가 보유하고, 펀드 운용에 따른 손익은 수익증권 투자자에게 귀속됨 <질의 요약> □ 상기 수익증권 투자자가 취득한 수익증권 의 적절한 계정 분류에 대한 질의 <회신 요약> □ A 저축은행은 취득한 수익증권을 유가증권으로 회계처리하는 것이 타당함 |
+| --- |

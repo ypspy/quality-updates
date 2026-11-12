@@ -14,9 +14,9 @@ attachments:
 - name: 2001-001(회계제8360-00006) 건설기간중의 종합토지세 회계처리.hwp
   atch_file_id: d70b8842a976851871912ac472d4d9b0
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:30:01.749524+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2001-001(회계제8360-00006) 건설기간중의 종합토지세 회계처리.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2001-1 (회계제8360-00006) |  |
+| --- | --- |
+| 건설기간중의 종합토지세 회계처리 |  |
+
+Ⅰ. 질의요약
+
+토지취득후 유통단지를 건설하여 분양하기위한 공사를 수행하는 중 발생한 종 합토지세에 대한 타당한 회계처리방법은?
+
+Ⅱ. 회신요약
+
+건물완공전까지 납부한 종합토지세는 건설원가에 포함하는 것이 타당함

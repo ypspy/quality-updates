@@ -14,9 +14,9 @@ attachments:
 - name: 2007-047 증권회사 현금흐름표 작성.hwp
   atch_file_id: e19c7cc04d540ae505930c33e17cdc8d
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:32:42.311558+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2007-047 증권회사 현금흐름표 작성.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2007-047 |  |
+| --- | --- |
+| 증권회사 현금흐름표 작성 |  |
+
+Ⅰ. 질의요약
+
+◦ CMA( 종합자산관리계좌)를 환매조건부채권매도로 운영할 경우 동 활동을 영업 활동으로 인한 현금흐름으로 표시할 수 있는지?
+
+Ⅱ. 회신요약
+
+◦ 귀 질의의 경우 환매조건부채권매도거래가 고객예수금에 대한 수익률 제고를 통 해 고객예수금 및 위탁매매수수료를 증가시키는데 활용되는 등 영업활동에 직접 관련된 경우라면 영업현금흐름으로 표시하는 것이 바람직함

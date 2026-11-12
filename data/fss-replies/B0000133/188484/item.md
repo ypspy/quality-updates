@@ -27,3 +27,4 @@ extract_status: pending_whale
 
 pending_whale
 Whale 변환 대기
+오류: lxml.etree.XMLSyntaxError: invalid character in attribute value, line 2, column 233548

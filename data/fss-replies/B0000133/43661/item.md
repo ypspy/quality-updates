@@ -14,9 +14,9 @@ attachments:
 - name: 2003-078(회제일 8360-00417) 회수위임받은 채권의 미수금 회계처리.hwp
   atch_file_id: 0dd0cbb2592d4907d6dcac9947c775bb
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:55:16.961681+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2003-078(회제일 8360-00417) 회수위임받은 채권의 미수금 회계처리.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2003-078(회제일 8360-00417) |  |
+| --- | --- |
+| 회수위임받은 채권의 미수금 회계처리 |  |
+
+Ⅰ. 질의요약
+
+◦ 회수 위임을 받은 채권 중 당회사가 임의로 채무자에 대해 채무의 일부를 면 제해줌으로써 위탁자에게 미회수채권에 대한 부분을 대신 변제해야 하는 경우 동 변제금액에 대한 회계처리는?
+
+Ⅱ. 회신요약
+
+◦ 회수 위임 받은 채권 중 미회수된 부분은 손실로 손익계산서에 반영함

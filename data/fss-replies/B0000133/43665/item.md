@@ -14,9 +14,9 @@ attachments:
 - name: 2003-082(회제일8360-00442) 환지정산금에 대한 회계처리.hwp
   atch_file_id: a893eeb825db0c6375d6a4c0a7d7cec5
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:54:57.640091+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2003-082(회제일8360-00442) 환지정산금에 대한 회계처리.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2003-082(회제일 8360-00442) |  |
+| --- | --- |
+| 환지청산금에 대한 회계처리 |  |
+
+Ⅰ. 질의요약
+
+◦ 도시개발법에 근거하여 설립된 조합이 환지방식에 의하여 도시개발사업을 시행하는 경우에 종전 토지소유자에게 환지청산금을 지급하거나 징수하는 경우의 회계처리에 대한 질의
+
+Ⅱ. 회신요약
+
+◦ 조합이 환지청산금을 지급하는 것은 당해연도의 비용으로 처리하여야 하며, 조 합이 환지청산금을 징수하는 것은 당해연도의 수익으로 처리함

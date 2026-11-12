@@ -14,9 +14,9 @@ attachments:
 - name: 2002-079(회제일 8360-10121) 매출채권 인식에 대한 회계처리.hwp
   atch_file_id: 6cdb47ba1ebeb2b99e1b189b11ea5d50
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:37:24.007464+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2002-079(회제일 8360-10121) 매출채권 인식에 대한 회계처리.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2002-079(회제일 8360-10121) |  |
+| --- | --- |
+| 매출채권인식에 대한 회계처리 |  |
+
+Ⅰ. 질의요약
+
+◦ 제품판매와 관련하여 구매회사로부터 현금이 아닌 어음을 수령하는 경 우 선수금으로 계상할 수 있는지에 대한 것임
+
+Ⅱ. 회신요약
+
+◦ 일반적인 상거래시 매출인식시점이전에 발생한 선수액은 선수금으로 회 계처리하는 것이 타당함

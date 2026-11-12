@@ -14,9 +14,9 @@ attachments:
 - name: 2004-017(회제일8360-00078) 장비주문 생산방식 매출의 수익인식기준에 대한 질의.hwp
   atch_file_id: 4799119de9ae25090b3c6778a2714b22
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:10:39.866750+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2004-017(회제일8360-00078) 장비주문 생산방식 매출의 수익인식기준에 대한 질의.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2004-017(회제일 8360-00078) |  |
+| --- | --- |
+| 장비주문 생산방식 매출의 수익인식기준에 대한 질의 |  |
+
+Ⅰ. 질의요약
+
+◦ A 사는 LCD 테스트 장비를 주문생산 방식에 의하여 납품하는 회사로서 고객 으로부터의 주문 접수 후 고객이 요구하는 사양에 따라 제품 설계, 제품 생산, 제품 인도, 제품 설치 및 고객의 검사 절차를 걸쳐 제품을 판매하는 경우 수 익인식 방법은?
+
+Ⅱ. 회신요약
+
+◦ 진행기준에 따라 매출을 인식하는 것이 타당함.

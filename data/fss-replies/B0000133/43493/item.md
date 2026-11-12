@@ -14,9 +14,9 @@ attachments:
 - name: 2004-121(회제이 8360-00041) 지분율증가시 전기미실현손익의 실현방법에 대한 질의.hwp
   atch_file_id: d80170c45c69ace2b0c868ed47c01254
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:02:07.345065+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2004-121(회제이 8360-00041) 지분율증가시 전기미실현손익의 실현방법에 대한 질의.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2003-121(회제일 8360-00041) |  |
+| --- | --- |
+| 지분율증가시 전기미실현손익의 실현방법에 대한 질의 |  |
+
+Ⅰ. 질의요약
+
+◦ 피투자회사의 유상증자로 지분율 증가시 전기미실현손익의 실현방법은?
+
+Ⅱ. 회신요약
+
+◦ 피투자회사의 유상증자로 지분율 증가시 전기미실현손익은 발생시의 지분율을 사용하여 실현시킬 수 있음.

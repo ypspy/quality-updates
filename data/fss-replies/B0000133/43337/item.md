@@ -14,9 +14,9 @@ attachments:
 - name: 2007-006 판권대가로 선지급한 대금에 대한 회계처리.hwp
   atch_file_id: 5222b3d8b894346c2c5b791d0c385661
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:37:38.863745+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,18 @@ extract_status: pending_whale
 
 ## 첨부: 2007-006 판권대가로 선지급한 대금에 대한 회계처리.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2007-006 |  |
+| --- | --- |
+| 판권대가로 선지급한 대금에 대한 회계처리 |  |
+
+Ⅰ. 질의요약
+
+◦ 회사는 온라인게임을 퍼블리싱할 목적으로 제작업체가 개발예정인 게임의 완성 전에 일정액( initial fee) 을 지급하고 동 게임이 개발되어 상용화된 이후에 판권을 취득하여 매출액의 일정비율을 수취
+
+◦ 판권취득계약 체결시 일정액( initial fee) 을 지급(일시지급 또는 분할지급)하고 지급된 금액은 향후 게임의 완성여부와 관계없이 회수가 불가능하며 퍼블리싱 업체는 회사의 동의 없이 판권의 라이센스를 양도 불가
+
+◦ 회사가 판권취득을 위하여 게임개발 전에 지급한 일정액( initial fee) 의 회계처리는?
+
+Ⅱ. 회신요약
+
+◦ 판권 취득을 위한 일정액( initial fee) 의 지출시점에 선급금으로 계상하고, 추후 게임개발이 완료된 시점에 판권을 취득하면 기타의 무형자산으로 대체

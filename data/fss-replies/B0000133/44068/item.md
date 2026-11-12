@@ -14,9 +14,9 @@ attachments:
 - name: '[2009-034] 연결대상 종속회사 범위 판단.hwp'
   atch_file_id: 09930e3639d225a80b33de421407b9c9
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:18:02.484952+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,4 @@ extract_status: pending_whale
 
 ## 첨부: [2009-034] 연결대상 종속회사 범위 판단.hwp
 
-pending_whale
-Whale 변환 대기
+연결대상 종속회사 범위 판단 <질의요약> ◦ A 사(국내)와 E 사(외국)가 B 사(국내) 지분을 동일하게 50%씩 보유하고 B 사 임원 7명 중 5명이 A 사 임원이며 A 사와 B 사가 동일 기업집단에 속하는 경우, A 사는 B 사를 종속회사로 보아 연결재무제표를 작성해야 하는가 <회신요약> ◦ 귀 질의의 경우 A 사는 B 사를 종속회사로 보아 연결재무제표를 작성하는 것이 타당

@@ -14,9 +14,9 @@ attachments:
 - name: 2004-035(회제일8360-00188) 미착재고의 개별법 평가 가능 여부.hwp
   atch_file_id: 565e7083bc78056ebb747a2162a37750
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:08:52.175532+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2004-035(회제일8360-00188) 미착재고의 개별법 평가 가능 여부.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2004-035(회제일 8360-00188) |  |
+| --- | --- |
+| 미착재고의 개별법 평가 가능 여부 |  |
+
+Ⅰ. 질의요약
+
+◦ 재고자산의 원가 결정방법에 있어서 미착재고의 경우 일률적으로 개별법을 사용 하여야 하는지 아니면 선입선출법, 후입선출법 등 다른 방법의 사용도 가능한지?
+
+Ⅱ. 회신요약
+
+◦ 미착재고는 회사 내의 판매가능재고와 구분하여 회사의 기말재고를 구성하도 록 개별법으로 회계처리하는 것이 타당함.

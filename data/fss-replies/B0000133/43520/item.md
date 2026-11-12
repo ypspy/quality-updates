@@ -14,9 +14,9 @@ attachments:
 - name: 2004-004(회제일 8360-00016) IMT-2000 서비스를 위한 장비 및 주파수 이용권의 상각시기에 대한 질의.hwp
   atch_file_id: e446ae5b76b02ac43cbc17195766eac3
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:12:23.712832+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2004-004(회제일 8360-00016) IMT-2000 서비스를 위한 장비 및 주파수 이용권의 상각시기에 대한 질의.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2004-004(회제일 8360-00016) |  |
+| --- | --- |
+| IMT-2000 서비스를 위한 장비 및 주파수 이용권의 상각시기에 대한 질의 |  |
+
+Ⅰ. 질의요약
+
+◦ W-CDMA 서비스를 위한 네트워크는 구축 완료되었으나 실가입자 유치를 위한 W-CDMA 용 단말기가 시장에 충분히 공급되지 못한 경우, W-CDMA 사업자의 주파수이용권과 기지국장비의 상각 또는 감가상각 개시시점은?
+
+Ⅱ. 회신요약
+
+◦ 주파수이용권 및 기지국장비는 W-CDMA 상용서비스 개시발표와 관계없이 W-CDMA 상용서비스가 실질적으로 가능한 시점부터 상각하는 것이 타당함.

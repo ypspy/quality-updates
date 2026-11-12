@@ -14,9 +14,9 @@ attachments:
 - name: 2004-045(회제일8360-00271) 해외소재 외화자산 평가시 적용환율.hwp
   atch_file_id: aa792ed270d7177a90cd2a3421d3e90e
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:08:09.570459+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2004-045(회제일8360-00271) 해외소재 외화자산 평가시 적용환율.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2004-045(회제일 8360-00271) |  |
+| --- | --- |
+| 해외소재 외화자산 평가시 적용환율 |  |
+
+Ⅰ. 질의요약
+
+◦ 해외소재 무형자산의 감액손실 계상을 위한 회수가능가액 산정시 현행 환율을 기준으로 무형자산을 평가하여야 하는지 아니면 무형자산은 비화폐성자산에 해당하므로 취득시의 역사적 환율로 평가하여야 하는지?
+
+Ⅱ. 회신요약
+
+◦ 무형자산의 감액손실 계상 여부는 외화기준으로 회수가능가액을 평가한 후 동 회수가능가액을 역사적 환율로 환산하는 것이 타당함 .

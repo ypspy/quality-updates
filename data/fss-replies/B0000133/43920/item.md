@@ -14,9 +14,9 @@ attachments:
 - name: 2002-041(회제일 8360-00163) 자산유동화를 위한 리스채권 양도시 양도시기.hwp
   atch_file_id: 882edd7914e1360cb51e49c0b0ee424c
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:40:02.849136+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2002-041(회제일 8360-00163) 자산유동화를 위한 리스채권 양도시 양도시기.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2002-041(회제일 8360-00163) |  |
+| --- | --- |
+| 자산유동화를 위한 리스채권 양도시 양도시기 |  |
+
+Ⅰ. 질의요약
+
+◦ 자산유동화법률에 따라 자산을 양도하는 경우 자산보유자의 자산양도시기는?
+
+Ⅱ. 회신요약
+
+◦ 실질적으로 자산에 대한 권리 및 통제권이 이전되는 계약서상의 양도기준일에 양도된 것으로 봄

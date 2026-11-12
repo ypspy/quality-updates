@@ -14,9 +14,9 @@ attachments:
 - name: 2006-009 이월결손금의 이연법인세자산의 인식여부.hwp
   atch_file_id: d68eba481d96dd4ea19c3ee5bebe2179
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:37:03.268811+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2006-009 이월결손금의 이연법인세자산의 인식여부.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2006-009 |  |
+| --- | --- |
+| 이월결손금의 이연법인세자산의 인식여부 |  |
+
+Ⅰ. 질의요약
+
+◦ 차감할 일시적차이 뿐만 아니라 세무상 결손금도 가산할 일시적차이의 범위내에 서 인식할 수 있는지?
+
+Ⅱ. 회신요약
+
+◦ 회사의 차감할 일시적차이와 세무상 결손금으로 인한 법인세효과는 세무상 결손 금의 이월공제가능기간 및 차감할 일시적차이가 소멸되기 전까지 이를 활용할 수 있는 충분한 가산할 일시적차이 한도내에서 이연법인세자산으로 인식하는 것 이 타당함

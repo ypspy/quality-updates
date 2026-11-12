@@ -14,9 +14,9 @@ attachments:
 - name: 2008-062 신용연계채권(CLN) 회계처리에 관한 질의.hwp
   atch_file_id: ac439c5a91a204e0c498bcbec9ccd02d
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:43:32.941789+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,20 @@ extract_status: pending_whale
 
 ## 첨부: 2008-062 신용연계채권(CLN) 회계처리에 관한 질의.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2008-062 |  |
+| --- | --- |
+| 신용연계채권( CLN) 회계처리에 관한 질의 |  |
+
+Ⅰ. 질의요약
+
+◦ 회사는 보유한 신용연계채권( Credit Linked Note: CLN) 을 매도가능증권으로 분 류하고 있으며, 다음과 같은 구조로 거래가 이루어짐
+
+◦ 발행자는 스왑상대방과 다수의 준거자산에 대한 CDS 계약을 체결(신용매도)하고 해당 CDS 계약과 발행자신용을 기초로 신용연계채권( CLN) 을 발행(준거자산 미 보유)
+
+◦ 신용연계채권 투자자는 발행자금리와 CDS 프리미엄의 수익을 확보하는 대신 기 초자산에 신용사건( credit event) 발생시 발생자산에 대한 손실금액을 차감하고 거래 종료
+
+◦ 상기 신용연계채권을 보유한 투자자의 적절한 회계처리는?
+
+Ⅱ. 회신요약
+
+◦ 신용연계채권에 내재된 신용위험 부분을 발행자의 신용위험과 구분하지 않고 신 용연계채권 전체를 기준으로 회계처리하는 것이 타당함
