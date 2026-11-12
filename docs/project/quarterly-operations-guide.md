@@ -32,7 +32,7 @@
 - validate/build·markdownlint는 이 파이프라인과 품질관리감리 PR에서 같이 돌린다.
 - 품질관리감리 결과 보도가 분기 규제 문서에 들어갈 때는 서로 알린다.
 - 파이프라인은 볼트에 직접 쓰지 않는다.
-- 질의회신 seq는 질의회신 식별자이다. 수집 PR이 머지된 뒤 새 seq 목록과 요약을 넘긴다. `data/kasb-replies/{seq}/item.md`를 볼트 `raw/kasb-replies/{seq}.md`로 넣되, 있는 파일은 유지하고 첨부는 저장소에 둔다.
+- 질의회신 seq는 질의회신 식별자이다. 수집 PR이 머지된 뒤 새 seq 목록과 요약을 넘긴다. `data/kasb-replies/{seq}/item.md`를 볼트 `raw/kasb-replies/{seq}.md`로 넣되, 있는 파일은 유지하고 첨부는 저장소에 둔다. `--sibling-rev`는 그 파일을 덮지 않고 `{seq}.{rev}.md`와 `manifest-{rev}.jsonl`만 만든다.
 - 금감원 질의회신도 별도다. `data/fss-replies/{board}/{nttId}/item.md`와 `manifest.jsonl`만 git에 두고, 첨부 HWP/HWPX는 `data/fss-replies/.gitignore`로 뺀다. 수집은 `crawl_fss_replies.py`, 본문 추출은 네트워크 없는 `--extract-local`, 실패한 첨부만 나중에 Whale로 둔다. 볼트 복사는 `export_fss_replies_raw.py`이고, `--update-pending`일 때만 대상이 `pending_whale`이고 소스가 갱신된 파일을 덮어쓴다.
 - 제재는 회차이다. `downloads/sanctions/{회차}/`에 `record.md`와 의사록 PDF가 생기면 경로와 회차 목록을 넘긴다.
 - `export_kasb_replies_raw.py`와 `export_quarterly_raw.py`는 복사 도구이다.
@@ -272,7 +272,10 @@ python scripts/export_quarterly_raw.py <분기.md>
 python scripts/crawl_kasb_replies.py
 python scripts/crawl_kasb_replies.py --limit 20
 python scripts/crawl_kasb_replies.py --retry-failed
+python scripts/crawl_kasb_replies.py --extract-local
+python scripts/crawl_kasb_replies.py --extract-local --reextract-hwpx
 python scripts/export_kasb_replies_raw.py
+python scripts/export_kasb_replies_raw.py --sibling-rev
 
 # 금감원 질의회신. 분기 크롤러와 별도다. 원문은 사이트, 분기 문서, MCP 코퍼스에 넣지 않는다.
 # 첨부는 git에 넣지 않는다. data/fss-replies/.gitignore는 item.md와 manifest.jsonl만 허용한다.
@@ -280,6 +283,7 @@ python scripts/crawl_fss_replies.py
 python scripts/crawl_fss_replies.py --extract-local
 python scripts/export_fss_replies_raw.py
 python scripts/export_fss_replies_raw.py --update-pending
+python scripts/export_fss_replies_raw.py --sibling-rev
 
 # 텍스트 추출·정렬
 python scripts/extract_pdf.py
@@ -288,13 +292,13 @@ python scripts/extract_hwp.py --path "경로/파일.hwp"
 python scripts/reorder_chronological.py docs/quality-updates/2025/2025-01-01_to_2025-03-31.md
 ```
 
-`crawl_kasb_replies.py`는 `data/kasb-replies/{seq}/item.md`와 원본 첨부를 저장한다. 이 경로는 gitignore하지 않는다. `item.md`와 첨부가 이미 있으면 다시 받지 않는다. `--retry-failed`는 `failed`, `partial`, `empty`를 디스크의 원본으로 다시 추출하고, 없는 파일만 받는다.
+`crawl_kasb_replies.py`는 `data/kasb-replies/{seq}/item.md`와 원본 첨부를 저장한다. 이 경로는 gitignore하지 않는다. `item.md`와 첨부가 이미 있으면 다시 받지 않는다. `--retry-failed`는 `failed`, `partial`, `empty`를 디스크의 원본으로 다시 추출하고, 없는 파일만 받는다. `partial`은 파서 이전 `PrvText` 결과일 수 있다. `--extract-local`은 네트워크 없이 `partial` 또는 `failed`인 `.hwp`만 공유 파서(`hwp5html --html`)로 다시 읽는다. `--reextract-hwpx`를 같이 주면 상태가 `ok`인 `.hwpx`도 다시 읽는다. 파서가 실패하면 `PrvText`로 돌아가 `partial`이 되고, 그것도 없으면 `failed`다. 이미 성공한 첨부와 PDF·XLSX는 건드리지 않는다.
 
-`export_kasb_replies_raw.py`는 `item.md`만 복사한다. 기본 목적지는 `C:\dev\obsidian-vault\raw\kasb-replies`이고, `--dest`로 바꿀 수 있다. 같은 `{seq}.md`가 있으면 덮어쓰지 않는다. 첨부 파일은 복사하지 않는다.
+`export_kasb_replies_raw.py`는 `item.md`만 복사한다. 기본 목적지는 `C:\dev\obsidian-vault\raw\kasb-replies`이고, `--dest`로 바꿀 수 있다. 같은 `{seq}.md`가 있으면 덮어쓰지 않는다. 첨부 파일은 복사하지 않는다. `--sibling-rev`는 기존 `{seq}.md` 대신 `{seq}.{rev}.md`와 `manifest-{rev}.jsonl`을 쓴다. REV를 생략하면 git HEAD 8자를 쓰고, git이 실패하면 끝낸다.
 
 `crawl_fss_replies.py`는 금감원 질의회신 증분 수집이다. 이 단계에서 HWP/HWPX는 `pending_whale`이고 원본 바이트만 남긴다. `--extract-local`은 네트워크 없이 그 로컬 첨부만 읽는다. `.hwp`는 `hwp5html --html`로, `.hwpx`는 ZIP의 `Contents/section*.xml`로 뽑는다. `hwp5txt`는 쓰지 않는다. 이미 파싱한 첨부는 다시 쓰지 않고, 원본은 지우거나 옮기지 않는다. 실패·시간 초과·파일 없음은 `pending_whale`으로 두어 나중에 Whale로 넘긴다. 첨부가 모두 성공하면 항목은 `ok`다.
 
-`export_fss_replies_raw.py`는 `item.md`만 `{board}/{nttId}.md`로 복사한다. 기본 목적지는 `C:\dev\obsidian-vault\raw\fss-replies`이고, 대상이 있으면 건너뛴다. 첨부는 복사하지 않는다. `--update-pending`은 대상 `extract_status`가 `pending_whale`이고 소스 `extract_status`가 더 이상 `pending_whale`이 아닐 때만 덮어쓴다. 대상만 있는 파일은 지우지 않는다.
+`export_fss_replies_raw.py`는 `item.md`만 `{board}/{nttId}.md`로 복사한다. 기본 목적지는 `C:\dev\obsidian-vault\raw\fss-replies`이고, 대상이 있으면 건너뛴다. 첨부는 복사하지 않는다. `--update-pending`은 대상 `extract_status`가 `pending_whale`이고 소스 `extract_status`가 더 이상 `pending_whale`이 아닐 때만 덮어쓴다. 대상만 있는 파일은 지우지 않는다. `--sibling-rev`는 기존 `{nttId}.md` 대신 `{nttId}.{rev}.md`와 `manifest-{rev}.jsonl`을 쓰고, `--update-pending`과 함께 쓰면 오류다.
 
 npm: `npm run crawl`, `npm run prepare:deploy`, `npm test`, `npm run build:strict`, `npm run lint:md`
 
@@ -353,6 +357,7 @@ npm: `npm run crawl`, `npm run prepare:deploy`, `npm test`, `npm run build:stric
 | 날짜 | 내용 |
 |------|------|
 | 2026-11-12 | 금감원 질의회신 `--extract-local`과 export `--update-pending`을 2절·6절에 추가 |
+| 2026-11-12 | KASB 질의회신 오프라인 HWP 파서, `--extract-local`, FSS/KASB export `--sibling-rev` |
 | 2026-11-07 | README에만 있던 첨부·제재 의결·질의회신·추출 명령을 해당 Phase와 6절로 옮김 |
 | 2026-09-10 | Phase 5에 corpus export. 소비는 사이트+MCP. 렌즈 스킬 제거 |
 | 2026-06-25 | 초판 — 크롤러 통합·prepare_deploy 반영, Agent/HITL 역할 분담 |

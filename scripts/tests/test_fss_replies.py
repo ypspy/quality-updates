@@ -1628,3 +1628,86 @@ def test_extract_failure_message_is_stable_and_omits_temp_paths(tmp_path):
     assert "XMLSyntaxError: invalid character in attribute value, line 2, column 233548" in text
     assert _meta(text)["extract_status"] == "pending_whale"
     assert (folder / "bad.hwp").read_bytes() == b"BAD"
+
+
+def _init_git(repo: Path) -> str:
+    subprocess.run(["git", "init"], cwd=repo, check=True, capture_output=True)
+    subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=repo, check=True)
+    subprocess.run(["git", "config", "user.name", "test"], cwd=repo, check=True)
+    (repo / "README").write_text("x\n", encoding="utf-8")
+    subprocess.run(["git", "add", "README"], cwd=repo, check=True)
+    subprocess.run(["git", "commit", "-m", "init"], cwd=repo, check=True, capture_output=True)
+    completed = subprocess.run(
+        ["git", "rev-parse", "--short=8", "HEAD"],
+        cwd=repo,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return completed.stdout.strip()
+
+
+def test_fss_sibling_rev_keeps_raw_and_is_idempotent(tmp_path, capsys):
+    archive = tmp_path / "archive"
+    folder = archive / "B0000132" / "189689"
+    folder.mkdir(parents=True)
+    (folder / "item.md").write_text("원문\n", encoding="utf-8")
+    (folder / "note.hwp").write_bytes(b"bin")
+    (archive / "manifest.jsonl").write_text('{"board": "B0000132"}\n', encoding="utf-8")
+    dest = tmp_path / "raw"
+    raw_dir = dest / "B0000132"
+    raw_dir.mkdir(parents=True)
+    (raw_dir / "189689.md").write_text("기존 raw\n", encoding="utf-8")
+    (dest / "manifest.jsonl").write_text("기존 manifest\n", encoding="utf-8")
+    args = ["--archive", str(archive), "--dest", str(dest), "--sibling-rev", "abc1234"]
+    assert export_fss_replies_raw.main(args) == 0
+    assert capsys.readouterr().out.strip() == "copied=2 updated=0 skipped=0"
+    assert (raw_dir / "189689.md").read_text(encoding="utf-8") == "기존 raw\n"
+    assert (dest / "manifest.jsonl").read_text(encoding="utf-8") == "기존 manifest\n"
+    assert (raw_dir / "189689.abc1234.md").read_text(encoding="utf-8") == "원문\n"
+    assert (dest / "manifest-abc1234.jsonl").read_text(encoding="utf-8") == '{"board": "B0000132"}\n'
+    assert not (raw_dir / "note.hwp").exists()
+    assert export_fss_replies_raw.main(args) == 0
+    assert capsys.readouterr().out.strip() == "copied=0 updated=0 skipped=2"
+    (folder / "item.md").write_text("새 원문\n", encoding="utf-8")
+    assert export_fss_replies_raw.main(args) == 0
+    assert capsys.readouterr().out.strip() == "copied=0 updated=1 skipped=1"
+    assert (raw_dir / "189689.abc1234.md").read_text(encoding="utf-8") == "새 원문\n"
+    assert (raw_dir / "189689.md").read_text(encoding="utf-8") == "기존 raw\n"
+    assert (dest / "manifest.jsonl").read_text(encoding="utf-8") == "기존 manifest\n"
+
+
+def test_fss_sibling_rev_rejects_invalid_update_pending_and_git_failure(tmp_path, capsys):
+    with pytest.raises(SystemExit) as caught:
+        export_fss_replies_raw.parse_args(["--sibling-rev", "bad rev", "--update-pending"])
+    assert caught.value.code != 0
+    with pytest.raises(SystemExit) as caught:
+        export_fss_replies_raw.main(["--update-pending", "--sibling-rev", "abc1234"])
+    assert caught.value.code != 0
+    with pytest.raises(SystemExit) as caught:
+        export_fss_replies_raw.parse_args(["--sibling-rev", "a/b"])
+    assert caught.value.code != 0
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    sha = _init_git(repo)
+    archive = repo / "archive"
+    folder = archive / "B0000133" / "42"
+    folder.mkdir(parents=True)
+    (folder / "item.md").write_text("git 원문\n", encoding="utf-8")
+    (archive / "manifest.jsonl").write_text("{}\n", encoding="utf-8")
+    dest = tmp_path / "raw"
+    assert export_fss_replies_raw.main(
+        ["--archive", str(archive), "--dest", str(dest), "--sibling-rev"]
+    ) == 0
+    assert (dest / "B0000133" / f"42.{sha}.md").read_text(encoding="utf-8") == "git 원문\n"
+    assert (dest / f"manifest-{sha}.jsonl").is_file()
+    assert not (dest / "B0000133" / "42.md").exists()
+    capsys.readouterr()
+    missing = tmp_path / "no-git"
+    missing.mkdir()
+    outside = tmp_path / "outside"
+    assert export_fss_replies_raw.main(
+        ["--archive", str(missing), "--dest", str(outside), "--sibling-rev"]
+    ) == 1
+    assert capsys.readouterr().err.strip()
+    assert not outside.exists() or not list(outside.rglob("*"))
