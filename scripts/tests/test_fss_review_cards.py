@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -181,3 +182,34 @@ def test_year_comes_before_the_component_report_and_the_firms():
     assert "예지회계법인" in moved
     assert arrange_by_year(moved) == moved
     assert audit_review_html(moved) == []
+
+
+def test_card_rewrite_keeps_original_sentences():
+    text = PAGE.read_text(encoding="utf-8")
+    rewritten = arrange_by_year(place_labels(collapse_document(text)))
+
+    def bodies(html):
+        return sorted(
+            repair_severity_gap(body)
+            for body in re.findall(r'<div class="fss-original"[^>]*>(.*?)</div>', html)
+        )
+
+    assert bodies(rewritten) == bodies(text)
+
+
+def test_samil_time_finding_is_two_paragraphs():
+    text = PAGE.read_text(encoding="utf-8")
+    marker = "Time report에 입력"
+    at = text.find(marker)
+    assert at >= 0
+    original_start = text.rfind('<div class="fss-original"', 0, at)
+    original_end = text.find("</div>", at)
+    body = text[original_start:original_end]
+    assert body.count('<p class="fss-finding">') == 2
+    assert "입력·승인하였으나" in body
+    assert "입력· 승인" not in body
+    assert "통제절차가 미흡</p>" in body
+    assert "통제절차가 미흡하고" not in body
+    assert "통제절차가 미흡함" not in body
+    assert body.count('<span class="fss-sev') == 1
+    assert "공시되는 외부감사 투입시간을 집계하는 절차 운영이 일부 미흡</p>" in body

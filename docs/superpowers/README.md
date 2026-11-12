@@ -12,6 +12,7 @@ Agent 진입·프롬프트: [AGENTS.md](../../AGENTS.md)
 
 | 날짜 | 파일 | 요약 |
 |------|------|------|
+| 2026-11-12 | [fss-review-finding-prose-design.md](specs/2026-11-12-fss-review-finding-prose-design.md) | 품질관리감리 원문은 끊긴 문장만 잇고, 섞인 지적만 에이전트가 나눈다 |
 | 2026-11-11 | [fss-reply-archive-design.md](specs/2026-11-11-fss-reply-archive-design.md) | 금감원 K-IFRS·일반기업 질의회신 아카이브. 사이트 비게시, item.md만 옵시디안 raw |
 | 2026-11-11 | [fss-review-card-summary-design.md](specs/2026-11-11-fss-review-card-summary-design.md) | 품질관리감리 중분류 아래에는 요약 없이 회계법인만 나열 |
 | 2026-11-07 | [readme-front-door-design.md](specs/2026-11-07-readme-front-door-design.md) | README를 앞문으로 줄이고, 절차 문장은 작업지시서·CONTRIBUTING·문서 지도로 옮김 |
@@ -47,6 +48,7 @@ Agent 진입·프롬프트: [AGENTS.md](../../AGENTS.md)
 
 | 날짜 | 파일 | 요약 |
 |------|------|------|
+| 2026-11-12 | [fss-review-finding-prose.md](plans/2026-11-12-fss-review-finding-prose.md) | 품질관리감리 원문은 끊긴 문장만 잇고, 섞인 지적만 연도별로 고친다 |
 | 2026-11-07 | [readme-front-door.md](plans/2026-11-07-readme-front-door.md) | README를 앞문으로 줄이고 절차 문장을 정본으로 옮기는 구현 |
 | 2026-11-06 | [unpublished-sanction-items.md](plans/2026-11-06-unpublished-sanction-items.md) | 미연결 감리 의안을 미보도 절에 두고 검증으로 빠짐을 막음 |
 | 2026-11-05 | [quarterly-execution.md](plans/2026-11-05-quarterly-execution.md) | 크롤 때 제재 제목 분리, 의사록 PDF 수신, 요약 시 처리 기록 작성 |
