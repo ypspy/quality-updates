@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -181,3 +182,16 @@ def test_year_comes_before_the_component_report_and_the_firms():
     assert "예지회계법인" in moved
     assert arrange_by_year(moved) == moved
     assert audit_review_html(moved) == []
+
+
+def test_card_rewrite_keeps_original_sentences():
+    text = PAGE.read_text(encoding="utf-8")
+    rewritten = arrange_by_year(place_labels(collapse_document(text)))
+
+    def bodies(html):
+        return sorted(
+            repair_severity_gap(body)
+            for body in re.findall(r'<div class="fss-original"[^>]*>(.*?)</div>', html)
+        )
+
+    assert bodies(rewritten) == bodies(text)
