@@ -30,7 +30,7 @@ PRESS = """### 금융위원회
 
 LINK = "- (26-07-09) [사업보고서 등에 대한 조사·감리결과 조치 - 제13차 증권선물위원회(’26.7.8.)](https://fsc.go.kr/no010101/87293)"
 RELEASE_PDF = "downloads/260708(보도참고) 사업보고서 등에 대한 조사·감리결과 조치.pdf"
-MINUTES_PDF = "downloads/minutes-13.pdf"
+MINUTES_PDF = "downloads/sanctions/2026-증선위-13차/minutes.pdf"
 ZIP_URL = "https://fsc.go.kr/comm/getFile?fileNo=2"
 
 POSTS = [
@@ -120,7 +120,9 @@ def test_query_minutes_url_uses_meeting_filename():
         )
     ]
     updated, report = attach_minutes(PRESS, posts)
-    assert "downloads/minutes-2026-증선위-정기-13.pdf" in updated
+    assert "downloads/sanctions/2026-증선위-13차/minutes.pdf" in updated
+    assert "downloads/minutes.pdf" not in updated
+    assert "downloads/minutes-" not in updated
     assert "fileNo" not in updated
     assert "getFile" not in updated
     assert ZIP_URL not in updated
@@ -315,21 +317,28 @@ def test_run_minutes_downloads_only_minutes_pdfs(tmp_path):
         tmp_path,
     )
     assert code == 0
-    assert "minutes-2026-증선위-정기-15.pdf" in updated
-    assert "minutes-2026-증선위-임시-1.pdf" in updated
+    assert "downloads/sanctions/2026-증선위-15차/minutes.pdf" in updated
+    assert "downloads/sanctions/2026-증선위-임시-1차/minutes.pdf" in updated
+    assert "downloads/minutes.pdf" not in updated
+    assert "downloads/minutes-" not in updated
     assert "fileNo=2" not in updated
     assert "의결 251. 선진회계법인" not in updated
     assert "정기검사" not in updated
-    assert (tmp_path / "minutes-2026-증선위-정기-15.pdf").read_bytes() == b"pdf"
+    assert not list(tmp_path.glob("minutes*.pdf"))
     agenda = list((tmp_path / "sanctions").rglob("*의결 251*"))
     assert len(agenda) == 1
-    bundle = tmp_path / "sanctions" / "2026-증선위-정기-15차"
-    assert (bundle / "minutes-2026-증선위-정기-15.pdf").read_bytes() == b"pdf"
+    bundle = tmp_path / "sanctions" / "2026-증선위-15차"
+    assert (bundle / "minutes.pdf").read_bytes() == b"pdf"
     record = (bundle / "record.md").read_text(encoding="utf-8")
     assert "- 회의일: 2026-09-02" in record
-    assert "downloads/sanctions/2026-증선위-정기-15차/minutes-2026-증선위-정기-15.pdf" in record
+    assert "- 게시 URL: https://www.fsc.go.kr/no020102/88040" in record
+    assert "fileNo=2" in record
+    assert "사업보고서 등에 대한 조사·감리결과 조치 - 제15차 증권선물위원회" in record
+    assert "https://fsc.go.kr/no010101/87639" in record
+    assert "- 의사록: minutes.pdf" in record
+    assert "| 번호 | 구분 | 제목 | 마스킹 | 연결 |" in record
     temporary = tmp_path / "sanctions" / "2026-증선위-임시-1차"
-    assert (temporary / "minutes-2026-증선위-임시-1.pdf").read_bytes() == b"pdf"
+    assert (temporary / "minutes.pdf").read_bytes() == b"pdf"
     assert "- 회의일: 2026-10-09" in (temporary / "record.md").read_text(encoding="utf-8")
     assert not list(tmp_path.rglob("*.zip"))
     assert not any("88015" in url for url in requested)
@@ -375,8 +384,9 @@ def test_additional_minutes_post_merges_into_the_same_meeting(tmp_path):
         tmp_path,
     )
     assert code == 0
-    assert "minutes-2026-증선위-정기-15.pdf" in updated
-    assert "minutes-2026-증선위-정기-15-추가.pdf" in updated
+    assert "downloads/sanctions/2026-증선위-15차/minutes.pdf" in updated
+    assert "downloads/sanctions/2026-증선위-15차/minutes-추가.pdf" in updated
+    assert "downloads/minutes-" not in updated
     assert is_additional_minutes("2026년 제15차 증권선물위원회 의사록(추가)")
     assert not any(line.startswith("ambiguous 2026 증선위 정기 15") for line in report)
     assert any(line.startswith("attached 2026 증선위 정기 15") for line in report)
@@ -421,8 +431,8 @@ def test_main_writes_quarter_file_with_lf_newlines(tmp_path, monkeypatch):
 
     repo_downloads = Path(__file__).resolve().parent.parent.parent / "downloads"
     stand_in_names = (
-        "minutes-2026-증선위-정기-15.pdf",
-        "minutes-2026-증선위-임시-1.pdf",
+        Path("sanctions") / "2026-증선위-15차" / "minutes.pdf",
+        Path("sanctions") / "2026-증선위-임시-1차" / "minutes.pdf",
     )
 
     fake_script = tmp_path / "scripts" / "attach_sanction_minutes.py"
@@ -454,7 +464,10 @@ def test_main_writes_quarter_file_with_lf_newlines(tmp_path, monkeypatch):
     assert asm.main([str(quarter_path)]) == 0
 
     data = quarter_path.read_bytes()
-    assert b"<!-- source: pdf|downloads/minutes-2026-" in data
+    assert b"<!-- source: pdf|downloads/sanctions/2026-" in data
+    assert b"/minutes.pdf -->" in data
+    assert b"downloads/minutes-" not in data
+    assert b"downloads/minutes.pdf" not in data
     assert b"\r\n" not in data
 
     tmp_downloads = tmp_path / "downloads"
@@ -674,8 +687,8 @@ def test_unmatched_agendas_are_reported_and_discussion_notes_stay(tmp_path):
         PRESS_NAMED,
         (2026, "증선위", "정기", 15),
         [
-            (agendas[0], "선진회계법인", "downloads/sanctions/2026-증선위-정기-15차/agenda/251.pdf"),
-            (agendas[1], "unmatched", "downloads/sanctions/2026-증선위-정기-15차/decision/250.pdf"),
+            (agendas[0], "선진회계법인", "downloads/sanctions/2026-증선위-15차/agenda/251.pdf"),
+            (agendas[1], "unmatched", "downloads/sanctions/2026-증선위-15차/decision/250.pdf"),
         ],
     )
     assert "251.pdf" in text
@@ -726,14 +739,14 @@ def test_raw_bundle_does_not_overwrite_an_existing_snapshot(tmp_path):
         "회차 기록\n",
         [("agenda", "251.pdf", b"one")],
     )
-    assert first == [tmp_path / "2026-증선위-정기-15차"]
+    assert first == [tmp_path / "2026-증선위-15차"]
     second = place_sanction_bundle(
         tmp_path,
         key,
         "다른 기록\n",
         [("agenda", "251.pdf", b"two"), ("decision", "251-decision.pdf", b"new")],
     )
-    folder = tmp_path / "2026-증선위-정기-15차"
+    folder = tmp_path / "2026-증선위-15차"
     assert (folder / "record.md").read_text(encoding="utf-8") == "회차 기록\n"
     assert (folder / "agenda" / "251.pdf").read_bytes() == b"one"
     assert (folder / "decision" / "251-decision.pdf").read_bytes() == b"new"
@@ -756,14 +769,15 @@ def test_unpublished_section_stays_outside_the_press_item():
 
 - 제5차 증권선물위원회(2026.3.11.) 의결 66. 예시
 
-    <!-- source: pdf|downloads/sanctions/2026-증선위-정기-5차/decision/staff.pdf -->
+    <!-- source: pdf|downloads/sanctions/2026-증선위-5차/decision/staff.pdf -->
 
 #### 고시/공고/훈령
 """
     posts = [DecisionPost(2026, "증선위", "정기", 5, "https://fsc.go.kr/files/minutes-5.pdf", [])]
     updated, _report = attach_minutes(text, posts)
     assert "##### 미보도" in updated
-    assert updated.index("minutes-5.pdf") < updated.index("##### 미보도")
+    marker = "downloads/sanctions/2026-증선위-5차/minutes.pdf"
+    assert updated.index(marker) < updated.index("##### 미보도")
     assert updated.index("##### 미보도") < updated.index("staff.pdf")
     assert updated.index("staff.pdf") < updated.index("#### 고시/공고/훈령")
 
@@ -781,13 +795,415 @@ def test_unpublished_bullet_stays_outside_the_press_item():
 
 - 분기중 미보도 항목
 
-    <!-- source: pdf|downloads/sanctions/2026-증선위-정기-5차/decision/staff.pdf -->
+    <!-- source: pdf|downloads/sanctions/2026-증선위-5차/decision/staff.pdf -->
 
 #### 고시/공고/훈령
 """
     posts = [DecisionPost(2026, "증선위", "정기", 5, "https://fsc.go.kr/files/minutes-5.pdf", [])]
     updated, _report = attach_minutes(text, posts)
     assert "##### 미보도" not in updated
-    assert updated.index("minutes-5.pdf") < updated.index("- 분기중 미보도 항목")
+    marker = "downloads/sanctions/2026-증선위-5차/minutes.pdf"
+    assert updated.index(marker) < updated.index("- 분기중 미보도 항목")
     assert updated.index("- 분기중 미보도 항목") < updated.index("staff.pdf")
     assert updated.index("staff.pdf") < updated.index("#### 고시/공고/훈령")
+
+
+def test_regular_temporary_and_written_folders_stay_distinct():
+    from attach_sanction_minutes import sanction_folder
+
+    regular = sanction_folder((2026, "금융위", "정기", 1))
+    temporary = sanction_folder((2026, "금융위", "임시", 1))
+    written = sanction_folder((2026, "금융위", "서면", 1))
+    assert regular == "2026-금융위-1차"
+    assert temporary == "2026-금융위-임시-1차"
+    assert written == "2026-금융위-서면-1차"
+    assert len({regular, temporary, written}) == 3
+    assert sanction_folder((2026, "증선위", "정기", 16)) == "2026-증선위-16차"
+
+
+def test_existing_folder_marker_does_not_add_an_outside_minutes_path():
+    marked = _insert_marker(PRESS, f"<!-- source: pdf|{MINUTES_PDF} -->")
+    updated, report = attach_minutes(marked, [POSTS[0]])
+    assert updated == marked
+    assert "downloads/minutes.pdf" not in updated
+    assert "downloads/minutes-" not in updated
+    assert report == []
+
+
+def test_record_says_unpublished_when_the_press_link_is_missing():
+    from attach_sanction_minutes import _record_text
+
+    record = _record_text((2026, "증선위", "정기", 16), "", "", "없음", [], [], "미보도")
+    assert "- 보도: 미보도" in record
+    assert "- 의사록: 없음" in record
+    assert "# 2026-증선위-16차" in record
+
+
+LATE_QUARTER = """### 금융위원회
+
+#### 제재 의결
+
+- (26-09-02) [사업보고서 등에 대한 조사·감리결과 조치 - 제15차 증권선물위원회(’26.9.2.) 조치 의결](https://fsc.go.kr/no010101/87639)
+
+    요약은 그대로 둔다.
+
+    | 회사명 | 구분 |
+    | --- | --- |
+    | 선진회계법인 | 감사 |
+
+##### 미보도
+
+- 분기중 미보도 항목
+"""
+
+LATE_LIST = """
+<ul>
+  <li><div class="inner"><div class="subject"><a href="/no020102/88040">2026년 제15차 증권선물위원회 의사록, 안건 및 제재안건 의결서</a></div></div></li>
+</ul>
+"""
+
+LATE_LIST_EXTRA = """
+<ul>
+  <li><div class="inner"><div class="subject"><a href="/no020102/88040">2026년 제15차 증권선물위원회 의사록, 안건 및 제재안건 의결서</a></div></div></li>
+  <li><div class="inner"><div class="subject"><a href="/no020102/89001">2026년 제15차 증권선물위원회 의사록(추가)</a></div></div></li>
+  <li><div class="inner"><div class="subject"><a href="/no020102/89002">2026년 제4차 증권선물위원회 의사록</a></div></div></li>
+</ul>
+"""
+
+LATE_DETAIL = """
+<a href="/comm/getFile?srvcId=BBSTY1&upperNo=88040&fileTy=ATTACH&fileNo=1">2026년 제15차 증권선물위원회 의사록 (공개용)_F.pdf</a>
+<a href="/comm/getFile?srvcId=BBSTY1&upperNo=88040&fileTy=ATTACH&fileNo=2">안건.zip</a>
+"""
+
+LATE_EXTRA_DETAIL = """
+<a href="/comm/getFile?srvcId=BBSTY1&upperNo=89001&fileTy=ATTACH&fileNo=8">의사록(추가).pdf</a>
+"""
+
+LATE_OTHER_DETAIL = """
+<a href="/comm/getFile?srvcId=BBSTY1&upperNo=89002&fileTy=ATTACH&fileNo=3">제4차 의사록.pdf</a>
+"""
+
+
+def _search_end(url: str) -> date:
+    return date.fromisoformat(url.split("srchEndDt=")[1].split("&", 1)[0])
+
+
+def _late_fetch(url: str) -> str:
+    if "curPage=1" in url and "no020102" in url:
+        if _search_end(url) >= date(2026, 12, 20):
+            return LATE_LIST_EXTRA
+        return LATE_LIST
+    if "curPage=" in url:
+        return "<ul></ul>"
+    if url.endswith("/88040"):
+        return LATE_DETAIL
+    if url.endswith("/89001"):
+        return LATE_EXTRA_DETAIL
+    if url.endswith("/89002"):
+        return LATE_OTHER_DETAIL
+    raise AssertionError(url)
+
+
+def _late_download(url: str, dest: Path) -> None:
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    if "fileNo=2" in url:
+        dest.write_bytes(
+            _zip_bytes(
+                [
+                    "(공개용) 의결 251. 선진회계법인의 중요한 감사절차 위반혐의에 대한 감리결과 조치안.pdf",
+                    "(의결서) 의결 251. 선진회계법인의 중요한 감사절차 위반혐의에 대한 감리결과 조치안.pdf",
+                ]
+            )
+        )
+        return
+    if "fileNo=8" in url:
+        dest.write_bytes(b"extra-minutes")
+        return
+    if "fileNo=3" in url:
+        dest.write_bytes(b"other-meeting")
+        return
+    dest.write_bytes(b"primary-minutes")
+
+
+def test_late_additional_minutes_stay_out_until_the_window_grows(tmp_path):
+    code, updated, _report = run_minutes(
+        LATE_QUARTER,
+        "2026-07-01_to_2026-09-30.md",
+        _late_fetch,
+        _late_download,
+        tmp_path,
+    )
+    folder = tmp_path / "sanctions" / "2026-증선위-15차"
+    assert code == 0
+    assert not (folder / "minutes-추가.pdf").exists()
+    assert "minutes-추가.pdf" not in updated
+    assert not (tmp_path / "sanctions" / "2026-증선위-4차").exists()
+
+    code, updated, _report = run_minutes(
+        updated,
+        "2026-07-01_to_2026-09-30.md",
+        _late_fetch,
+        _late_download,
+        tmp_path,
+        until=date(2026, 12, 31),
+    )
+    assert code == 0
+    assert (folder / "minutes-추가.pdf").read_bytes() == b"extra-minutes"
+    assert updated.count("downloads/sanctions/2026-증선위-15차/minutes-추가.pdf") == 1
+    assert not (tmp_path / "sanctions" / "2026-증선위-4차").exists()
+
+
+def test_extra_days_collects_the_same_meeting_key(tmp_path):
+    code, updated, _report = run_minutes(
+        LATE_QUARTER,
+        "2026-07-01_to_2026-09-30.md",
+        _late_fetch,
+        _late_download,
+        tmp_path,
+        extra_days=20,
+    )
+    assert code == 0
+    assert "downloads/sanctions/2026-증선위-15차/minutes-추가.pdf" in updated
+    assert not (tmp_path / "sanctions" / "2026-증선위-4차").exists()
+
+
+def test_existing_bundle_keeps_bytes_when_a_late_supplement_arrives(tmp_path):
+    code, seeded, _report = run_minutes(
+        LATE_QUARTER,
+        "2026-07-01_to_2026-09-30.md",
+        _late_fetch,
+        _late_download,
+        tmp_path,
+    )
+    assert code == 0
+    folder = tmp_path / "sanctions" / "2026-증선위-15차"
+    minutes = (folder / "minutes.pdf").read_bytes()
+    agenda = {path.name: path.read_bytes() for path in (folder / "agenda").iterdir()}
+    decision = {path.name: path.read_bytes() for path in (folder / "decision").iterdir()}
+    record_before = (folder / "record.md").read_text(encoding="utf-8")
+    assert "- 의사록: minutes.pdf" in record_before
+    assert "| 번호 | 구분 | 제목 | 마스킹 | 연결 |" in record_before
+
+    code, updated, _report = run_minutes(
+        seeded,
+        "2026-07-01_to_2026-09-30.md",
+        _late_fetch,
+        _late_download,
+        tmp_path,
+        extra_days=30,
+        until=date(2026, 12, 15),
+    )
+    assert code == 0
+    assert (folder / "minutes.pdf").read_bytes() == minutes
+    assert {path.name: path.read_bytes() for path in (folder / "agenda").iterdir()} == agenda
+    assert {path.name: path.read_bytes() for path in (folder / "decision").iterdir()} == decision
+    assert (folder / "minutes-추가.pdf").read_bytes() == b"extra-minutes"
+    record_after = (folder / "record.md").read_text(encoding="utf-8")
+    before_lines = [line for line in record_before.splitlines() if not line.startswith("- 의사록:")]
+    after_lines = [line for line in record_after.splitlines() if not line.startswith("- 의사록:")]
+    assert before_lines == after_lines
+    assert "- 의사록: minutes.pdf, minutes-추가.pdf" in record_after
+    assert "요약은 그대로 둔다." in updated
+    assert "| 선진회계법인 | 감사 |" in updated
+    assert "- 분기중 미보도 항목" in updated
+    assert updated.count("downloads/sanctions/2026-증선위-15차/minutes.pdf") == 1
+    assert updated.count("downloads/sanctions/2026-증선위-15차/minutes-추가.pdf") == 1
+    assert "downloads/minutes.pdf" not in updated
+    assert not (tmp_path / "sanctions" / "2026-증선위-4차").exists()
+
+
+def test_repeat_run_keeps_markers_and_pdf_bytes(tmp_path):
+    def fetch_text(url: str) -> str:
+        if "curPage=1" in url and "no020102" in url:
+            return LIST_HTML
+        if "curPage=" in url:
+            return "<ul></ul>"
+        if url.endswith("/88040"):
+            return DETAIL_MINUTES
+        if url.endswith("/87906"):
+            return DETAIL_SPECIAL
+        return "<ul></ul>"
+
+    def download(url: str, dest: Path) -> None:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        if "fileNo=2" in url:
+            dest.write_bytes(_zip_bytes(["(공개용) 의결 251. 선진회계법인 감리결과 조치안.pdf"]))
+            return
+        dest.write_bytes(b"first-pdf")
+
+    code, updated, _report = run_minutes(
+        QUARTER,
+        "2026-07-01_to_2026-09-30.md",
+        fetch_text,
+        download,
+        tmp_path,
+    )
+    assert code == 0
+    regular = tmp_path / "sanctions" / "2026-증선위-15차" / "minutes.pdf"
+    special = tmp_path / "sanctions" / "2026-증선위-임시-1차" / "minutes.pdf"
+    assert regular.read_bytes() == b"first-pdf"
+    assert updated.count("downloads/sanctions/2026-증선위-15차/minutes.pdf") == 1
+    assert "downloads/minutes.pdf" not in updated
+
+    def download_again(url: str, dest: Path) -> None:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(b"second-pdf")
+
+    code, again, _report = run_minutes(
+        updated,
+        "2026-07-01_to_2026-09-30.md",
+        fetch_text,
+        download_again,
+        tmp_path,
+    )
+    assert code == 0
+    assert again.count("downloads/sanctions/2026-증선위-15차/minutes.pdf") == 1
+    assert again.count("downloads/sanctions/2026-증선위-임시-1차/minutes.pdf") == 1
+    assert "downloads/minutes.pdf" not in again
+    assert "downloads/minutes-" not in again
+    assert regular.read_bytes() == b"first-pdf"
+    assert special.read_bytes() == b"first-pdf"
+
+
+def test_failed_supplement_does_not_delete_existing_files(tmp_path):
+    folder = tmp_path / "sanctions" / "2026-증선위-15차"
+    (folder / "agenda").mkdir(parents=True)
+    (folder / "decision").mkdir()
+    (folder / "minutes.pdf").write_bytes(b"original-minutes")
+    (folder / "agenda" / "251.pdf").write_bytes(b"original-agenda")
+    (folder / "decision" / "251.pdf").write_bytes(b"original-decision")
+    (folder / "record.md").write_text(
+        "\n".join(
+            [
+                "# 2026-증선위-15차",
+                "",
+                "- 회의일: 2026-09-02",
+                "- 게시 URL: https://www.fsc.go.kr/no020102/88040",
+                "- ZIP URL: https://www.fsc.go.kr/comm/getFile?fileNo=2",
+                "- 보도: 기존 보도 (https://fsc.go.kr/no010101/87639)",
+                "- 의사록: 없음",
+                "",
+                "| 번호 | 구분 | 제목 | 마스킹 | 연결 |",
+                "| --- | --- | --- | --- | --- |",
+                "| 251 | agenda | 251.pdf | 아니오 | 선진회계법인 |",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+        newline="\n",
+    )
+    marked = LATE_QUARTER.replace(
+        "요약은 그대로 둔다.",
+        "요약은 그대로 둔다.\n\n    <!-- source: pdf|downloads/sanctions/2026-증선위-15차/minutes.pdf -->",
+    )
+
+    def download(url: str, dest: Path) -> None:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        if "fileNo=8" in url:
+            dest.write_bytes(b"partial-extra")
+            raise OSError("disk full")
+        dest.write_bytes(b"should-not-land")
+
+    code, updated, _report = run_minutes(
+        marked,
+        "2026-07-01_to_2026-09-30.md",
+        _late_fetch,
+        download,
+        tmp_path,
+        until=date(2026, 12, 31),
+    )
+    assert code == 1
+    assert updated == marked
+    assert (folder / "minutes.pdf").read_bytes() == b"original-minutes"
+    assert (folder / "agenda" / "251.pdf").read_bytes() == b"original-agenda"
+    assert (folder / "decision" / "251.pdf").read_bytes() == b"original-decision"
+    assert not (folder / "minutes-추가.pdf").exists()
+    assert "- 의사록: 없음" in (folder / "record.md").read_text(encoding="utf-8")
+    assert "- 보도: 기존 보도 (https://fsc.go.kr/no010101/87639)" in (folder / "record.md").read_text(encoding="utf-8")
+
+
+def test_until_before_the_default_end_exits_2(tmp_path):
+    def fetch_text(url: str) -> str:
+        raise AssertionError(url)
+
+    code, updated, report = run_minutes(
+        LATE_QUARTER,
+        "2026-07-01_to_2026-09-30.md",
+        fetch_text,
+        lambda url, dest: None,
+        tmp_path,
+        until=date(2026, 12, 1),
+    )
+    assert code == 2
+    assert updated == LATE_QUARTER
+    assert report == []
+
+
+def test_http_helpers_use_a_browser_agent_and_delay(tmp_path, monkeypatch):
+    import attach_sanction_minutes as asm
+
+    sleeps: list[float] = []
+    seen: list[str] = []
+    monkeypatch.setattr(asm.time, "sleep", lambda seconds: sleeps.append(seconds))
+    asm._requests_made = 0
+    asm._request_delay = 0.3
+
+    class Response:
+        text = "ok"
+        content = b"ok"
+
+        def raise_for_status(self) -> None:
+            return None
+
+    def fake_get(url, timeout=30, headers=None):
+        assert "fsc.go.kr" not in url
+        seen.append(headers["User-Agent"])
+        return Response()
+
+    import requests
+
+    monkeypatch.setattr(requests, "get", fake_get)
+    assert asm._http_text("https://example.test/list") == "ok"
+    asm._http_download("https://example.test/file", tmp_path / "minutes.pdf")
+    assert sleeps == [0.3]
+    assert seen[0].startswith("Mozilla/5.0")
+    assert "Chrome/" in seen[0]
+    assert seen[0] == seen[1]
+
+
+def test_main_delay_until_and_extra_days(tmp_path, monkeypatch):
+    import attach_sanction_minutes as asm
+
+    requested: list[str] = []
+
+    def fetch_text(url: str) -> str:
+        requested.append(url)
+        assert "fsc.go.kr" not in url or "srchBeginDt" in url
+        if "curPage=" in url:
+            return "<ul></ul>"
+        raise AssertionError(url)
+
+    fake_script = tmp_path / "scripts" / "attach_sanction_minutes.py"
+    fake_script.parent.mkdir(parents=True)
+    fake_script.write_text("# stub\n", encoding="utf-8")
+    monkeypatch.setattr(asm, "__file__", str(fake_script))
+    monkeypatch.setattr(asm, "_http_text", fetch_text)
+    monkeypatch.setattr(asm, "_http_download", lambda url, dest: (_ for _ in ()).throw(AssertionError(url)))
+
+    quarter = tmp_path / "2026-07-01_to_2026-09-30.md"
+    quarter.write_text("### 금융위원회\n", encoding="utf-8")
+    assert asm.main([str(quarter), "--until", "2026-10-01"]) == 2
+    assert requested == []
+
+    assert asm.main([str(quarter), "--delay", "0", "--until", "2026-12-20", "--extra-days", "10"]) == 0
+    assert asm._request_delay == 0
+    assert any(
+        "srchBeginDt=2026-07-01" in url and "srchEndDt=2026-12-20" in url for url in requested
+    )
+
+    requested.clear()
+    assert asm.main([str(quarter)]) == 0
+    assert asm._request_delay == 0.3
+    assert any(
+        "srchBeginDt=2026-07-01" in url and "srchEndDt=2026-12-09" in url for url in requested
+    )

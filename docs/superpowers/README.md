@@ -13,6 +13,7 @@ Agent 진입·프롬프트: [AGENTS.md](../../AGENTS.md)
 | 날짜 | 파일 | 요약 |
 |------|------|------|
 | 2026-11-12 | [fss-review-finding-prose-design.md](specs/2026-11-12-fss-review-finding-prose-design.md) | 품질관리감리 원문은 끊긴 문장만 잇고, 섞인 지적만 에이전트가 나눈다 |
+| 2026-11-11 | [fss-reply-archive-design.md](specs/2026-11-11-fss-reply-archive-design.md) | 금감원 K-IFRS·일반기업 질의회신 아카이브. 사이트 비게시, item.md만 옵시디안 raw |
 | 2026-11-11 | [fss-review-card-summary-design.md](specs/2026-11-11-fss-review-card-summary-design.md) | 품질관리감리 중분류 아래에는 요약 없이 회계법인만 나열 |
 | 2026-11-07 | [readme-front-door-design.md](specs/2026-11-07-readme-front-door-design.md) | README를 앞문으로 줄이고, 절차 문장은 작업지시서·CONTRIBUTING·문서 지도로 옮김 |
 | 2026-11-06 | [unpublished-sanction-items-design.md](specs/2026-11-06-unpublished-sanction-items-design.md) | 미연결 감리 의안을 제재 의결의 미보도 절에 두고, 요약 단계가 내용으로 연결 |
