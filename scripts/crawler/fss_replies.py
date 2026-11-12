@@ -1219,23 +1219,53 @@ def _pending_target_needs_source(source: Path, target: Path) -> bool:
     return source_meta.get("extract_status") != "pending_whale"
 
 
+_REV_RE = re.compile(r"[A-Za-z0-9._-]+")
+
+
+def _count_write(target: Path, payload: bytes) -> str:
+    if target.is_file() and target.read_bytes() == payload:
+        return "skipped"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    existed = target.is_file()
+    target.write_bytes(payload)
+    return "updated" if existed else "copied"
+
+
 def copy_archive_markdown(
     archive: Path,
     dest: Path,
     *,
     update_pending: bool = False,
+    sibling_rev: str | None = None,
 ) -> tuple[int, int, int]:
     """item.md만 dest로 복사한다. 첨부는 복사하지 않는다.
 
     기본은 대상이 있으면 건너뛴다. update_pending 일 때는 대상 extract_status 가
     pending_whale 이고 소스가 더 이상 pending_whale 이 아닐 때만 덮어쓴다.
     대상만 있는 파일은 지우지 않는다.
+
+    sibling_rev 가 있으면 ``{board}/{nttId}.{rev}.md`` 와 ``manifest-{rev}.jsonl`` 만
+    쓴다. 원래 ``{nttId}.md`` 와 기존 manifest 는 쓰지 않는다.
     """
+    if sibling_rev is not None and update_pending:
+        raise ValueError("sibling-rev cannot be combined with update-pending")
     copied = 0
     updated = 0
     skipped = 0
     if not archive.is_dir():
         return copied, updated, skipped
+    if sibling_rev is not None:
+        if not _REV_RE.fullmatch(sibling_rev):
+            raise ValueError("invalid sibling rev")
+        counts = {"copied": 0, "updated": 0, "skipped": 0}
+        dest.mkdir(parents=True, exist_ok=True)
+        for item in sorted(path for path in archive.glob("*/*/item.md") if path.is_file()):
+            target = dest / item.parent.parent.name / f"{item.parent.name}.{sibling_rev}.md"
+            counts[_count_write(target, item.read_bytes())] += 1
+        manifest = archive / "manifest.jsonl"
+        if manifest.is_file():
+            counts[_count_write(dest / f"manifest-{sibling_rev}.jsonl", manifest.read_bytes())] += 1
+        return counts["copied"], counts["updated"], counts["skipped"]
     dest.mkdir(parents=True, exist_ok=True)
     for item in sorted(archive.glob("*/*/item.md")):
         board = item.parent.parent.name

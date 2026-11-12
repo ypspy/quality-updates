@@ -2,7 +2,7 @@
 
 **날짜**: 2026-11-11  
 **상태**: 승인됨 (2026-11-12)  
-**개정**: 2026-11-12 오프라인 `--extract-local`과 export `--update-pending`. 수집 경로의 HWP/HWPX는 여전히 `pending_whale`.  
+**개정**: 2026-11-12 오프라인 `--extract-local`, export `--update-pending`, `--sibling-rev`. 수집 경로의 HWP/HWPX는 여전히 `pending_whale`.  
 **범위**: 금융감독원 질의회신 요약 게시판 두 곳을 항목 폴더로 입수해 이 저장소에 보관한다. 사이트에는 게시하지 않는다. 옵시디안은 `item.md`만 `raw/`로 복사한다.
 
 ---
@@ -268,9 +268,12 @@ PDF만 `pypdf`로 페이지 텍스트를 이어 붙인다. 페이지 사이는 �
 
 ```text
 python scripts/export_fss_replies_raw.py [--archive PATH] [--dest PATH] [--update-pending]
+python scripts/export_fss_replies_raw.py [--archive PATH] [--dest PATH] [--sibling-rev [REV]]
 ```
 
 `--archive` 기본값은 저장소의 `data/fss-replies`. `--dest` 기본값은 `C:\dev\obsidian-vault\raw\fss-replies`. `{board}/{nttId}/item.md`를 `{dest}/{board}/{nttId}.md`로 복사한다. 기본은 대상 파일이 있으면 생략한다. `--update-pending`일 때만, 대상 프론트매터 `extract_status`가 `pending_whale`이고 소스 `extract_status`가 더 이상 `pending_whale`이 아니면 덮어쓴다. 그 외(둘 다 `pending_whale`, 대상이 이미 다른 상태, 프론트매터를 읽지 못함)는 생략한다. 첨부 파일은 복사하지 않는다. 끝난 뒤 `copied` / `updated` / `skipped`를 출력한다. 기본 경로의 `updated`는 0이다. 아카이브에서 사라진 항목을 dest에서 지우지 않는다.
+
+`--sibling-rev`는 기존 `{nttId}.md`와 manifest를 쓰지 않는다. `{dest}/{board}/{nttId}.{rev}.md`와 `{dest}/manifest-{rev}.jsonl`만 만든다. REV를 생략하면 아카이브가 속한 저장소의 `git rev-parse --short=8 HEAD`를 쓴다. git이 실패하거나 REV에 영문·숫자·`.`·`_`·`-` 이외의 문자가 있으면 오류로 끝낸다. `--update-pending`과 함께 쓰면 argparse 오류다. 같은 rev 형제의 바이트가 같으면 건너뛰고, 다르면 그 형제만 덮어쓴다.
 
 테스트는 임시 디렉터리를 dest로 쓴다. 기본 경로에 쓰지 않는다.
 

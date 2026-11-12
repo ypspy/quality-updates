@@ -292,7 +292,7 @@ def test_extract_pdf_hwpx_and_xlsx():
     text, status = kasb_replies.extract_bytes("empty.pdf", _empty_pdf())
     assert status == "empty"
     text, status = kasb_replies.extract_bytes("a.hwpx", _hwpx("회신 문장"))
-    assert status == "ok"
+    assert status == "hwpx_parsed"
     assert "회신 문장" in text
     assert "헤더" not in text
     text, status = kasb_replies.extract_bytes("a.xlsx", _xlsx())
@@ -307,8 +307,11 @@ def test_extract_hwp_preview_and_garbage():
     text, status = kasb_replies.extract_bytes("a.hwp", _ole_with_prvtext("회신결론"))
     assert status == "partial"
     assert "회신결론" in text
+    assert "오류:" in text
+    assert "/tmp/" not in text
     text, status = kasb_replies.extract_bytes("a.hwp", b"not-ole")
     assert status == "failed"
+    assert "/tmp/" not in text
     text, status = kasb_replies.extract_bytes("a.zip", b"PK")
     assert status == "failed"
 
@@ -334,6 +337,12 @@ def test_extract_hwp_fails_on_invalid_utf16_prvtext():
         (["failed", "ok"], "failed"),
         (["empty", "empty"], "empty"),
         (["ok", "empty"], "partial"),
+        (["ok", "hwp_parsed"], "ok"),
+        (["hwpx_parsed"], "ok"),
+        (["hwp_parsed", "hwpx_parsed", "ok"], "ok"),
+        (["hwp_parsed", "empty"], "partial"),
+        (["hwp_parsed", "failed"], "failed"),
+        (["partial", "hwp_parsed"], "partial"),
     ],
 )
 def test_aggregate_status(statuses, expected):
@@ -760,3 +769,427 @@ def test_site_index_does_not_promise_reply_pages():
     text = index.read_text(encoding="utf-8")
     assert "질의회신 원문은 이 사이트에 게시하지 않는다" in text
     assert "질의회신 정리" not in text
+
+
+import subprocess
+
+
+_TABLE_HTML = """<html><body>
+<p>본문</p>
+<table><tr><th>구분</th><th>값</th></tr><tr><td>가</td><td>나</td></tr></table>
+</body></html>"""
+
+
+def _hwpx_table() -> bytes:
+    xml = """<?xml version="1.0" encoding="UTF-8"?>
+<hp:sec xmlns:hp="http://www.hancom.co.kr/hwpml/2011/paragraph">
+  <hp:p><hp:run><hp:t>앞문단</hp:t></hp:run></hp:p>
+  <hp:p><hp:run><hp:tbl>
+    <hp:tr>
+      <hp:tc><hp:p><hp:run><hp:t>구분</hp:t></hp:run></hp:p></hp:tc>
+      <hp:tc><hp:p><hp:run><hp:t>값</hp:t></hp:run></hp:p></hp:tc>
+    </hp:tr>
+    <hp:tr>
+      <hp:tc><hp:p><hp:run><hp:t>가</hp:t></hp:run></hp:p></hp:tc>
+      <hp:tc><hp:p><hp:run><hp:t>나</hp:t></hp:run></hp:p></hp:tc>
+    </hp:tr>
+  </hp:tbl></hp:run></hp:p>
+</hp:sec>"""
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        zf.writestr("Contents/section0.xml", xml)
+    return buf.getvalue()
+
+
+def _init_git(repo: Path) -> str:
+    subprocess.run(["git", "init"], cwd=repo, check=True, capture_output=True)
+    subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=repo, check=True)
+    subprocess.run(["git", "config", "user.name", "test"], cwd=repo, check=True)
+    (repo / "README").write_text("x\n", encoding="utf-8")
+    subprocess.run(["git", "add", "README"], cwd=repo, check=True)
+    subprocess.run(["git", "commit", "-m", "init"], cwd=repo, check=True, capture_output=True)
+    completed = subprocess.run(
+        ["git", "rev-parse", "--short=8", "HEAD"],
+        cwd=repo,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return completed.stdout.strip()
+
+
+def _saved_item(archive: Path, seq: str, sections: list[tuple[str, str, str]]) -> Path:
+    row = kasb_replies.ListRow(
+        seq=seq,
+        ctg_cd="016008",
+        number="1",
+        category="분류",
+        title="제목",
+        reply_date="2026-10-16",
+        published_date=None,
+        attachments=tuple(
+            kasb_replies.AttachmentRef(name, "-9", str(index + 1))
+            for index, (name, _text, _status) in enumerate(sections)
+        ),
+    )
+    detail = kasb_replies.DetailPage(
+        category="분류",
+        standards=(),
+        registered_date="2026-10-16",
+        notice="안내 문장",
+        attachments=row.attachments,
+    )
+    directory = archive / seq
+    directory.mkdir(parents=True, exist_ok=True)
+    text = kasb_replies.compose_item(row, detail, sections, "2026-11-04T00:00:00+00:00")
+    (directory / "item.md").write_text(text, encoding="utf-8")
+    meta = yaml.safe_load(text.split("---", 2)[1])
+    kasb_replies.append_manifest(
+        archive / "manifest.jsonl",
+        {
+            "seq": seq,
+            "ctg_cd": "016008",
+            "number": "1",
+            "category": "분류",
+            "title": "제목",
+            "reply_date": "2026-10-16",
+            "published_date": None,
+            "extract_status": meta["extract_status"],
+            "path": f"{seq}/item.md",
+            "error": None,
+        },
+    )
+    return directory
+
+
+def test_extract_hwp_mock_success_writes_table_and_deletes_temp(monkeypatch):
+    seen = {}
+
+    def fake(path, timeout=90):
+        seen["path"] = Path(path)
+        assert timeout == 90
+        assert Path(path).is_file()
+        return _TABLE_HTML
+
+    monkeypatch.setattr(kasb_replies.fss_hwp_text, "hwp_file_to_html", fake)
+    text, status = kasb_replies.extract_bytes("a.hwp", _ole_with_prvtext("잘린미리보기"))
+    assert status == "hwp_parsed"
+    assert "| 구분 |" in text
+    assert "| 가 | 나 |" in text
+    assert "잘린미리보기" not in text
+    assert not seen["path"].exists()
+
+
+def test_extract_hwp_mock_failure_falls_back_to_partial_without_temp_path(monkeypatch):
+    seen = {}
+
+    def fake(path, timeout=90):
+        seen["path"] = Path(path)
+        raise kasb_replies.fss_hwp_text.HwpConvertError(
+            "Traceback (most recent call last):\n"
+            f'  File "{path}", line 1, in transform\n'
+            f"OSError: boom {path}\n"
+        )
+
+    monkeypatch.setattr(kasb_replies.fss_hwp_text, "hwp_file_to_html", fake)
+    text, status = kasb_replies.extract_bytes("a.hwp", _ole_with_prvtext("회신결론"))
+    assert status == "partial"
+    assert text.startswith("회신결론")
+    assert "오류:" in text
+    assert "OSError: boom" in text
+    assert "/tmp/" not in text
+    assert "kasb-hwp-" not in text
+    assert str(seen["path"]) not in text
+    assert "Traceback" not in text
+    assert not seen["path"].exists()
+
+
+def test_extract_hwp_timeout_fallback_omits_command_path(monkeypatch):
+    def fake(path, timeout=90):
+        raise subprocess.TimeoutExpired(cmd=["hwp5html", str(path)], timeout=timeout)
+
+    monkeypatch.setattr(kasb_replies.fss_hwp_text, "hwp_file_to_html", fake)
+    text, status = kasb_replies.extract_bytes("a.hwp", _ole_with_prvtext("미리보기"))
+    assert status == "partial"
+    assert "미리보기" in text
+    assert "TimeoutExpired: timed out" in text
+    assert "/tmp/" not in text
+    assert "hwp5html" not in text
+
+
+def test_extract_hwp_zero_byte_and_non_ole_skip_parser(monkeypatch):
+    def boom(path, timeout=90):
+        raise AssertionError("parser should not run")
+
+    monkeypatch.setattr(kasb_replies.fss_hwp_text, "hwp_file_to_html", boom)
+    text, status = kasb_replies.extract_bytes("a.hwp", b"")
+    assert (text, status) == ("empty file", "failed")
+    text, status = kasb_replies.extract_bytes("a.hwp", b"not-ole")
+    assert status == "failed"
+    assert text == "not an OLE file"
+    assert "/tmp/" not in text
+
+
+def test_extract_hwpx_table_and_empty():
+    text, status = kasb_replies.extract_bytes("a.hwpx", _hwpx_table())
+    assert status == "hwpx_parsed"
+    assert "앞문단" in text
+    assert "| 구분 | 값 |" in text
+    assert "| 가 | 나 |" in text
+    text, status = kasb_replies.extract_bytes("empty.hwpx", _hwpx(""))
+    assert status == "failed"
+    text, status = kasb_replies.extract_bytes("bad.hwpx", b"not-a-zip")
+    assert status == "failed"
+    assert "/tmp/" not in text
+
+
+def test_real_hwp_fixture_parses_markdown_table():
+    pytest.importorskip("hwp5")
+    data = Path(__file__).resolve().parent.joinpath("fixtures", "kasb_table.hwp").read_bytes()
+    text, status = kasb_replies.extract_bytes("table.hwp", data)
+    assert status == "hwp_parsed"
+    assert "| 구분 |" in text
+    assert "| --- |" in text
+    assert "/tmp/" not in text
+
+
+def test_compose_item_mixed_pdf_and_hwp_is_ok():
+    row = kasb_replies.ListRow(
+        seq="40689",
+        ctg_cd="016008",
+        number="1",
+        category="분류",
+        title="제목",
+        reply_date="2026-10-16",
+        published_date=None,
+        attachments=(
+            kasb_replies.AttachmentRef("note.pdf", "-1", "1"),
+            kasb_replies.AttachmentRef("note.hwp", "-1", "2"),
+        ),
+    )
+    detail = kasb_replies.DetailPage(
+        category="분류",
+        standards=(),
+        registered_date="2026-10-16",
+        notice="안내",
+        attachments=row.attachments,
+    )
+    text = kasb_replies.compose_item(
+        row,
+        detail,
+        [("note.pdf", "PDF본문", "ok"), ("note.hwp", "| 구분 | 값 |\n| --- | --- |", "hwp_parsed")],
+        "2026-11-04T00:00:00+00:00",
+    )
+    meta = yaml.safe_load(text.split("---", 2)[1])
+    assert meta["extract_status"] == "ok"
+    assert [item["extract_status"] for item in meta["attachments"]] == ["ok", "hwp_parsed"]
+    assert "PDF본문" in text
+    assert "| 구분 | 값 |" in text
+
+
+def test_extract_local_upgrades_partial_hwp_and_is_idempotent(tmp_path, monkeypatch):
+    archive = tmp_path / "archive"
+    mixed = _saved_item(
+        archive,
+        "40689",
+        [("note.pdf", "PDF본문", "ok"), ("note.hwp", "잘린미리보기", "partial")],
+    )
+    (mixed / "note.pdf").write_bytes(b"PDF")
+    hwp_bytes = _ole_with_prvtext("잘린미리보기")
+    (mixed / "note.hwp").write_bytes(hwp_bytes)
+    done = _saved_item(archive, "40000", [("keep.hwp", "이미 파싱한 본문", "hwp_parsed")])
+    (done / "keep.hwp").write_bytes(b"KEEP")
+    untouched = _saved_item(archive, "30000", [("sheet.xlsx", "표", "ok")])
+    (untouched / "sheet.xlsx").write_bytes(b"XLSX")
+    before_done = (done / "item.md").read_bytes()
+    before_sheet = (untouched / "item.md").read_bytes()
+    manifest = archive / "manifest.jsonl"
+    historical = json.dumps({"seq": "40689", "extract_status": "failed", "path": "40689/item.md"}, ensure_ascii=False)
+    manifest.write_text(historical + "\n" + manifest.read_text(encoding="utf-8"), encoding="utf-8")
+    calls = []
+
+    def fake(path, timeout=90):
+        calls.append(Path(path))
+        assert Path(path).is_file()
+        assert Path(path).suffix == ".hwp"
+        return _TABLE_HTML
+
+    monkeypatch.setattr(kasb_replies.fss_hwp_text, "hwp_file_to_html", fake)
+
+    def network(*_args, **_kwargs):
+        raise AssertionError("network")
+
+    monkeypatch.setattr(kasb_replies, "make_session", network)
+    monkeypatch.setattr(kasb_replies, "http_fetch_list", network)
+    monkeypatch.setattr(kasb_replies, "http_fetch_detail", network)
+    monkeypatch.setattr(kasb_replies, "http_fetch_file", network)
+    monkeypatch.setattr(kasb_replies.requests, "Session", network)
+    code = crawl_kasb_replies.main(["--extract-local", "--archive", str(archive)])
+    assert code == 0
+    assert len(calls) == 1
+    assert not calls[0].exists()
+    text = (mixed / "item.md").read_text(encoding="utf-8")
+    meta = yaml.safe_load(text.split("---", 2)[1])
+    assert meta["extract_status"] == "ok"
+    assert meta["fetched_at"] == "2026-11-04T00:00:00+00:00"
+    assert [item["extract_status"] for item in meta["attachments"]] == ["ok", "hwp_parsed"]
+    assert "PDF본문" in text
+    assert "안내 문장" in text
+    assert "| 구분 | 값 |" in text
+    assert "잘린미리보기" not in text
+    assert (mixed / "note.hwp").read_bytes() == hwp_bytes
+    assert (mixed / "note.pdf").read_bytes() == b"PDF"
+    assert (done / "item.md").read_bytes() == before_done
+    assert (untouched / "item.md").read_bytes() == before_sheet
+    lines = manifest.read_text(encoding="utf-8").splitlines()
+    assert json.loads(lines[0])["extract_status"] == "failed"
+    assert json.loads(lines[1])["extract_status"] == "ok"
+    snapshot = {path.relative_to(archive).as_posix(): path.read_bytes() for path in archive.rglob("*") if path.is_file()}
+    again = crawl_kasb_replies.main(["--extract-local", "--archive", str(archive)])
+    assert again == 0
+    assert len(calls) == 1
+    after = {path.relative_to(archive).as_posix(): path.read_bytes() for path in archive.rglob("*") if path.is_file()}
+    assert after == snapshot
+
+
+def test_extract_local_partial_fallback_is_byte_identical(tmp_path, monkeypatch):
+    archive = tmp_path / "archive"
+    directory = _saved_item(archive, "8", [("note.hwp", "잘린미리보기", "partial")])
+    (directory / "note.hwp").write_bytes(_ole_with_prvtext("회신결론"))
+    calls = {"n": 0}
+
+    def fake(path, timeout=90):
+        calls["n"] += 1
+        raise kasb_replies.fss_hwp_text.HwpConvertError(f"boom /tmp/kasb-hwp-{calls['n']}.hwp")
+
+    monkeypatch.setattr(kasb_replies.fss_hwp_text, "hwp_file_to_html", fake)
+    kasb_replies.extract_local(archive, hwp_to_html=fake)
+    once = {path.relative_to(archive).as_posix(): path.read_bytes() for path in archive.rglob("*") if path.is_file()}
+    kasb_replies.extract_local(archive, hwp_to_html=fake)
+    twice = {path.relative_to(archive).as_posix(): path.read_bytes() for path in archive.rglob("*") if path.is_file()}
+    assert calls["n"] == 2
+    assert twice == once
+    text = (directory / "item.md").read_text(encoding="utf-8")
+    assert yaml.safe_load(text.split("---", 2)[1])["extract_status"] == "partial"
+    assert "회신결론" in text
+    assert "/tmp/" not in text
+    assert "kasb-hwp-" not in text
+
+
+def test_extract_local_reextracts_ok_hwpx_only_when_asked(tmp_path, monkeypatch):
+    archive = tmp_path / "archive"
+    directory = _saved_item(archive, "40689", [("note.hwpx", "글만 이어붙인 본문", "ok")])
+    payload = _hwpx_table()
+    (directory / "note.hwpx").write_bytes(payload)
+    before = (directory / "item.md").read_bytes()
+
+    def boom(path, timeout=90):
+        raise AssertionError("hwp parser should not run")
+
+    monkeypatch.setattr(kasb_replies.fss_hwp_text, "hwp_file_to_html", boom)
+    kasb_replies.extract_local(archive)
+    assert (directory / "item.md").read_bytes() == before
+    kasb_replies.extract_local(archive, reextract_hwpx=True)
+    text = (directory / "item.md").read_text(encoding="utf-8")
+    meta = yaml.safe_load(text.split("---", 2)[1])
+    assert meta["extract_status"] == "ok"
+    assert meta["attachments"][0]["extract_status"] == "hwpx_parsed"
+    assert "| 구분 | 값 |" in text
+    assert "글만 이어붙인 본문" not in text
+    assert (directory / "note.hwpx").read_bytes() == payload
+    snapshot = (directory / "item.md").read_bytes()
+    kasb_replies.extract_local(archive, reextract_hwpx=True)
+    assert (directory / "item.md").read_bytes() == snapshot
+
+
+def test_extract_local_leaves_failed_pdf_and_missing_hwp(tmp_path, monkeypatch):
+    archive = tmp_path / "archive"
+    pdf = _saved_item(archive, "1", [("note.pdf", "bad pdf", "failed")])
+    (pdf / "note.pdf").write_bytes(b"PDF")
+    missing = _saved_item(archive, "2", [("gone.hwp", "없음", "partial")])
+    before_pdf = (pdf / "item.md").read_bytes()
+
+    def refuse_parser(path, timeout=90):
+        raise AssertionError("parser")
+
+    monkeypatch.setattr(kasb_replies.fss_hwp_text, "hwp_file_to_html", refuse_parser)
+    kasb_replies.extract_local(archive)
+    assert (pdf / "item.md").read_bytes() == before_pdf
+    text = (missing / "item.md").read_text(encoding="utf-8")
+    meta = yaml.safe_load(text.split("---", 2)[1])
+    assert meta["attachments"][0]["extract_status"] == "failed"
+    assert "missing file" in text
+    once = (missing / "item.md").read_bytes()
+    kasb_replies.extract_local(archive)
+    assert (missing / "item.md").read_bytes() == once
+
+
+def test_retry_failed_help_mentions_pre_parser_partial(capsys):
+    with pytest.raises(SystemExit) as caught:
+        crawl_kasb_replies.parse_args(["--help"])
+    assert caught.value.code == 0
+    assert "파서 이전" in capsys.readouterr().out
+
+
+def test_kasb_sibling_rev_keeps_raw_and_is_idempotent(tmp_path, capsys):
+    archive = tmp_path / "archive"
+    item = archive / "40689"
+    item.mkdir(parents=True)
+    (item / "item.md").write_text("원문\n", encoding="utf-8")
+    (item / "note.hwp").write_bytes(b"bin")
+    (archive / "manifest.jsonl").write_text('{"seq": "40689"}\n', encoding="utf-8")
+    dest = tmp_path / "raw"
+    dest.mkdir()
+    (dest / "40689.md").write_text("기존 raw\n", encoding="utf-8")
+    (dest / "manifest.jsonl").write_text("기존 manifest\n", encoding="utf-8")
+    args = ["--archive", str(archive), "--dest", str(dest), "--sibling-rev", "abc1234"]
+    assert export_kasb_replies_raw.main(args) == 0
+    assert capsys.readouterr().out.strip() == "copied=2 updated=0 skipped=0"
+    assert (dest / "40689.md").read_text(encoding="utf-8") == "기존 raw\n"
+    assert (dest / "manifest.jsonl").read_text(encoding="utf-8") == "기존 manifest\n"
+    assert (dest / "40689.abc1234.md").read_text(encoding="utf-8") == "원문\n"
+    assert (dest / "manifest-abc1234.jsonl").read_text(encoding="utf-8") == '{"seq": "40689"}\n'
+    assert not (dest / "note.hwp").exists()
+    assert export_kasb_replies_raw.main(args) == 0
+    assert capsys.readouterr().out.strip() == "copied=0 updated=0 skipped=2"
+    (item / "item.md").write_text("새 원문\n", encoding="utf-8")
+    assert export_kasb_replies_raw.main(args) == 0
+    assert capsys.readouterr().out.strip() == "copied=0 updated=1 skipped=1"
+    assert (dest / "40689.abc1234.md").read_text(encoding="utf-8") == "새 원문\n"
+    assert (dest / "40689.md").read_text(encoding="utf-8") == "기존 raw\n"
+    assert (dest / "manifest.jsonl").read_text(encoding="utf-8") == "기존 manifest\n"
+
+
+def test_kasb_sibling_rev_rejects_invalid_and_uses_git_head(tmp_path, capsys):
+    with pytest.raises(SystemExit) as caught:
+        export_kasb_replies_raw.parse_args(["--sibling-rev", "bad rev"])
+    assert caught.value.code != 0
+    with pytest.raises(SystemExit) as caught:
+        export_kasb_replies_raw.parse_args(["--sibling-rev", "a/b"])
+    assert caught.value.code != 0
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    sha = _init_git(repo)
+    archive = repo / "data"
+    folder = archive / "40689"
+    folder.mkdir(parents=True)
+    (folder / "item.md").write_text("git 원문\n", encoding="utf-8")
+    (archive / "manifest.jsonl").write_text("{}\n", encoding="utf-8")
+    dest = tmp_path / "raw"
+    assert export_kasb_replies_raw.main(
+        ["--archive", str(archive), "--dest", str(dest), "--sibling-rev"]
+    ) == 0
+    assert (dest / f"40689.{sha}.md").read_text(encoding="utf-8") == "git 원문\n"
+    assert (dest / f"manifest-{sha}.jsonl").is_file()
+    assert not (dest / "40689.md").exists()
+    capsys.readouterr()
+    missing = tmp_path / "no-git"
+    missing.mkdir()
+    (missing / "1").mkdir()
+    (missing / "1" / "item.md").write_text("x\n", encoding="utf-8")
+    outside = tmp_path / "outside"
+    assert export_kasb_replies_raw.main(
+        ["--archive", str(missing), "--dest", str(outside), "--sibling-rev"]
+    ) == 1
+    assert capsys.readouterr().err.strip()
+    assert not outside.exists() or not list(outside.rglob("*"))

@@ -2,6 +2,7 @@
 
 **날짜**: 2026-11-04  
 **상태**: 승인됨 (2026-11-04)  
+**개정**: 2026-11-12 공유 오프라인 HWP 파서, `--extract-local`, export `--sibling-rev`.  
 **범위**: [질의회신 요약 전체](https://kasb.or.kr/front/board/allReplySummaryList.do)를 항목 폴더로 입수해 이 저장소에 보관한다. 사이트에는 게시하지 않는다. 옵시디안은 `item.md`만 `raw/`로 복사한다.
 
 ---
@@ -25,7 +26,7 @@
 - 분기 `crawl.py`, `docs/quality-updates/`, `quality-updates-writer`, `auto_curate.py`
 - MCP `export_corpus.py`와 `data/corpus/`
 - MkDocs nav, 질의회신 본문의 사이트 게시, CI의 라이브 크롤, Cron. `docs/index.md`의 한 줄 정정은 범위에 포함한다.
-- 한글 프로그램·LibreOffice 변환, HWP 본문 전체 파서
+- 한글 프로그램·LibreOffice 변환. `hwp5txt`는 쓰지 않는다.
 - 아카이브 2천 건을 구현 작업 중에 받아 커밋하는 일. 수집은 구현 후 운영자가 실행한다.
 
 ---
@@ -61,7 +62,7 @@ scripts/crawler/kasb_replies.py          # 목록·상세 파서, 추출, 저장
 scripts/crawl_kasb_replies.py            # 수집 CLI
 scripts/export_kasb_replies_raw.py       # item.md → 옵시디안 raw
 scripts/tests/test_kasb_replies.py       # fixture 단위 테스트
-requirements.txt                         # pypdf, openpyxl, olefile
+requirements.txt                         # pypdf, openpyxl, olefile, pyhwp, six
 docs/index.md                            # 사이트 게시 약속을 한 줄로 정정
 docs/superpowers/README.md               # 이 스펙 색인
 ```
@@ -98,6 +99,11 @@ export_kasb_replies_raw.py
   → data/kasb-replies/{seq}/item.md
   → {dest}/{seq}.md
   → 대상 파일이 있으면 생략
+  → --sibling-rev 이면 {dest}/{seq}.{rev}.md 와 manifest-{rev}.jsonl 만 쓴다
+
+crawl_kasb_replies.py --extract-local
+  → 네트워크 없이 partial/failed .hwp 를 공유 파서로 다시 읽는다
+  → --reextract-hwpx 이면 ok .hwpx 도 다시 읽는다
 ```
 
 목록을 매 실행 처음부터 읽는다. 새 글은 1페이지에 붙기 때문이다. 상세와 다운로드만 완료된 `seq`에서 생략한다.
@@ -144,7 +150,7 @@ POST `https://www.kasb.or.kr/commonFile/fileDownload.do`, 필드 `fileNo`, `file
 - 프론트매터의 첨부 파일이 모두 디스크에 있다.
 - `extract_status`가 `ok`다.
 
-`--retry-failed`는 `extract_status`가 `failed`, `partial`, `empty`인 항목을 다시 추출한다. 첨부 파일이 없으면 다시 받는다. `ok`인 항목은 이 플래그로도 다시 받지 않는다.
+`--retry-failed`는 `extract_status`가 `failed`, `partial`, `empty`인 항목을 다시 추출한다. 첨부 파일이 없으면 다시 받는다. `ok`인 항목은 이 플래그로도 다시 받지 않는다. `partial`은 공유 파서 이전의 `PrvText` 결과일 수 있다. 그 재추출은 크롤이 아니라 `--extract-local`이 한다.
 
 ---
 
@@ -182,7 +188,7 @@ extract_status: ok
 | `reply_date`, `published_date` | `YYYY-MM-DD` 또는 null. |
 | `attachments` | `name`, `file_no`, `file_seq`, 파일별 `extract_status`. |
 | `fetched_at` | 타임존이 있는 ISO 8601. |
-| `extract_status` | 항목 전체 상태. `ok`, `partial`, `failed`, `empty` 중 하나. |
+| `extract_status` | 항목 전체 상태. `ok`, `partial`, `failed`, `empty` 중 하나. 첨부 상태에는 `hwp_parsed`, `hwpx_parsed`도 있다. |
 
 본문:
 
@@ -208,24 +214,33 @@ extract_status: ok
 | 2 | 하나라도 `failed` | `failed` |
 | 3 | 하나라도 `partial` | `partial` |
 | 4 | 모두 `empty` | `empty` |
-| 5 | `ok`와 `empty`가 섞여 있다 | `partial` |
-| 6 | 모두 `ok` | `ok` |
+| 5 | 성공(`ok`, `hwp_parsed`, `hwpx_parsed`)과 `empty`가 섞여 있다 | `partial` |
+| 6 | 모두 성공(`ok`, `hwp_parsed`, `hwpx_parsed`) | `ok` |
 
 ---
 
 ## 추출
 
-의존성: `pypdf`, `openpyxl`, `olefile`. 한글 프로그램과 LibreOffice는 호출하지 않는다.
+의존성: `pypdf`, `openpyxl`, `olefile`, `pyhwp`, `six`. 한글 프로그램과 LibreOffice는 호출하지 않는다. HWP 본문은 `scripts/crawler/fss_hwp_text.py`의 `hwp5html --html`과 마크다운 변환을 같이 쓴다. `hwp5txt`는 쓰지 않는다.
 
 | 확장자 | 방법 | 첨부 상태 |
 |--------|------|-----------|
 | pdf | `pypdf`로 페이지 텍스트를 이어 붙인다. 페이지 사이는 빈 줄. | 공백을 제외하고 글이 있으면 `ok`, 없으면 `empty` |
-| hwpx | `Contents/section*.xml`만, 이름순. 로컬 이름이 `t`인 요소의 직접 텍스트만 문서 순으로 잇는다. | 글이 있으면 `ok`, 없으면 `empty` |
+| hwpx | `hwpx_to_text`. ZIP의 `Contents/section*.xml`에서 문단과 표의 행·셀을 읽는다. | 글이 있으면 `hwpx_parsed`, 없으면 `failed` |
 | xlsx | `openpyxl` `data_only=True`. 빈 시트는 생략. 시트마다 `### 시트명`과 마크다운 표. 셀 안의 줄바꿈은 공백으로 바꾸고, 세로줄 문자에는 백슬래시를 앞에 붙인다. | 글이 있으면 `ok`, 없으면 `empty` |
-| hwp | OLE 스트림 `PrvText`를 UTF-16LE로 읽고 끝의 NUL과 공백을 제거한다. | 글이 있으면 `partial`. 스트림이 없거나 디코드에 실패하면 `failed` |
+| hwp | 바이트를 임시 파일로 쓰고 `hwp_file_to_html`과 `html_to_markdown`을 호출한다. 표는 마크다운 표다. 임시 파일은 지운다. | 글이 있으면 `hwp_parsed` |
+| hwp 폴백 | 파서 실패·시간 초과·빈 글이면 OLE `PrvText`를 UTF-16LE로 읽는다. `PrvText`는 정본이 아니다. | 미리보기가 있으면 `partial`이고 짧은 오류를 남긴다. 없거나 0바이트·OLE가 아니면 `failed`와 짧은 오류 |
 | 그 외 | 파일만 저장 | `failed` |
 
-`partial`은 미리보기 길이에 잘릴 수 있다는 뜻이다. 원본 hwp가 대조 정본이다.
+오류 문장에는 임시 경로와 트레이스백을 넣지 않는다. 0바이트 파일과 OLE가 아닌 파일은 파서를 호출하지 않는다.
+
+## 로컬 재추출
+
+```text
+python scripts/crawl_kasb_replies.py --extract-local [--reextract-hwpx]
+```
+
+네트워크 없이 아카이브에 있는 첨부만 다시 읽는다. 대상은 첨부 상태가 `partial` 또는 `failed`인 `.hwp`다. `--reextract-hwpx`를 주면 상태가 `ok`인 `.hwpx`도 다시 읽는다. 이미 `hwp_parsed`·`hwpx_parsed`인 첨부와 PDF·XLSX는 그대로 둔다. `item.md` 본문, 첨부 상태, 항목 상태, `manifest.jsonl`의 마지막 해당 `seq` 줄을 갱신한다. 같은 명령을 다시 실행하면 바이트가 같다. `--retry-failed`의 크롤 의미는 바꾸지 않는다.
 
 ---
 
@@ -244,10 +259,12 @@ extract_status: ok
 ## 옵시디안으로 복사
 
 ```text
-python scripts/export_kasb_replies_raw.py [--dest PATH]
+python scripts/export_kasb_replies_raw.py [--dest PATH] [--sibling-rev [REV]]
 ```
 
 `--dest` 기본값은 `C:\dev\obsidian-vault\raw\kasb-replies`. `{seq}/item.md`를 `{dest}/{seq}.md`로 복사한다. 대상 파일이 있으면 생략한다. 첨부 파일과 `wiki/`는 복사하지 않는다. 끝난 뒤 복사 건수와 생략 건수를 출력한다. 아카이브에서 사라진 항목을 dest에서 지우지 않는다.
+
+`--sibling-rev`는 기존 `{seq}.md`와 `manifest.jsonl`을 쓰지 않는다. `{dest}/{seq}.{rev}.md`와 `{dest}/manifest-{rev}.jsonl`만 만든다. REV를 생략하면 아카이브가 속한 저장소의 `git rev-parse --short=8 HEAD`를 쓴다. git이 실패하면 종료 코드는 0이 아니고, rev를 추정하지 않는다. REV는 영문, 숫자, `.`, `_`, `-`만 허용한다. 같은 rev 형제의 바이트가 같으면 건너뛰고, 다르면 그 형제만 덮어쓴다. 출력은 `copied`, `updated`, `skipped`다.
 
 테스트는 임시 디렉터리를 dest로 쓴다. 기본 경로에 쓰지 않는다.
 
@@ -271,12 +288,15 @@ python scripts/export_kasb_replies_raw.py [--dest PATH]
 - 매 페이지에 반복되는 공지를 `seq`로 한 건으로 모은다.
 - `G_MovePage`에서 마지막 페이지 번호를 읽는다.
 - 상세에서 기준서·안내 문장을 읽고 메뉴 문구는 본문에서 뺀다.
-- pdf·hwpx·xlsx는 비어 있지 않으면 `ok`, 빈 파일은 `empty`.
-- `PrvText`가 있는 hwp는 `partial`, 스트림이 없으면 `failed`.
+- pdf·xlsx는 비어 있지 않으면 `ok`, 빈 파일은 `empty`. hwpx는 글이 있으면 `hwpx_parsed`, 없으면 `failed`.
+- 작은 hwp 픽스처는 `hwp_parsed`이고 표가 마크다운 표다. 파서 실패는 `PrvText` 폴백으로 `partial`이다. 0바이트는 `failed`다.
+- 오류 문장에 임시 경로가 없고, 임시 파일은 지운다. pyhwp가 없으면 실제 파서 호출 테스트는 건너뛴다.
+- PDF와 HWP가 모두 성공하면 항목은 `ok`다.
+- `--extract-local`은 `partial` hwp를 `hwp_parsed`로 바꾸고, 성공 항목은 그대로 두며, 다시 실행해도 바이트가 같다. 네트워크 함수는 호출하지 않는다.
 - 첨부 상태 집계가 위의 표와 같다.
 - `ok`이고 파일이 있으면 완료로 건너뛴다.
 - `--retry-failed` 대상은 `failed`, `partial`, `empty`뿐이다.
-- export는 dest에 같은 `{seq}.md`가 있으면 생략한다.
+- export는 dest에 같은 `{seq}.md`가 있으면 생략한다. `--sibling-rev`는 그 파일을 쓰지 않고 형제 파일만 만든다.
 
 검증 명령:
 
