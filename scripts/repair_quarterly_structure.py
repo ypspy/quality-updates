@@ -29,6 +29,32 @@ def _date_key(yy: str, mm: str, dd: str) -> tuple[int, int, int]:
     return (2000 + int(yy), int(mm), int(dd))
 
 
+_TITLE_BREAKS = "·ㆍ･‧・,，、"
+
+
+def _compact_title(title: str) -> str:
+    compact = title
+    for char in _TITLE_BREAKS:
+        compact = compact.replace(char, "")
+    return re.sub(r"\s+", "", compact)
+
+
+def _is_fsc_sanction_title(title: str) -> bool:
+    compact = _compact_title(title)
+    if "조사감리결과조치" in compact:
+        return True
+    if "불공정거래" in compact:
+        return False
+    return any(
+        phrase in compact
+        for phrase in (
+            "감사인에대한감리결과조치",
+            "심사조사결과조치",
+            "외부감사법위반등에대한감리결과조치",
+        )
+    )
+
+
 def classify_url(url: str, title: str = "") -> tuple[str, str]:
     if "fss.or.kr" in url:
         if "lrgRegItnPrvntc" in url or "lrgSlno" in url:
@@ -41,7 +67,7 @@ def classify_url(url: str, title: str = "") -> tuple[str, str]:
             return "금융위원회", "입법예고/규정변경예고"
         if "/po040200/" in url or "po040200/" in url:
             return "금융위원회", "고시/공고/훈령"
-        if "조사·감리결과 조치" in title:
+        if _is_fsc_sanction_title(title):
             return "금융위원회", "제재 의결"
         return "금융위원회", "보도자료"
     if "kicpa.or.kr" in url:

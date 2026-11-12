@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import io
 import re
+import time
 import zipfile
 from dataclasses import dataclass
 from datetime import date, timedelta
@@ -23,6 +24,13 @@ DECISION_KEY_RE = re.compile(
 POST_TITLE_WORDS = ("의사록", "안건", "의결서")
 BOARDS = ("https://www.fsc.go.kr/no020101", "https://www.fsc.go.kr/no020102")
 QUARTER_NAME_RE = re.compile(r"(\d{4}-\d{2}-\d{2})_to_(\d{4}-\d{2}-\d{2})\.md$")
+_BROWSER_UA = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/122.0.0.0 Safari/537.36"
+)
+_request_delay = 0.3
+_requests_made = 0
 MEETING_DATE_RE = re.compile(
     rf"\(\s*[{_YEAR_QUOTES}]?\s*(\d{{2}})\.(\d{{1,2}})\.(\d{{1,2}})\."
 )
@@ -118,13 +126,12 @@ def is_additional_minutes(title: str) -> bool:
 
 
 def _minutes_filename(pdf_url: str, key: tuple[int, str, str, int], title: str = "") -> str:
-    path = pdf_url.split("#", 1)[0].split("?", 1)[0]
-    segment = path.rstrip("/").rsplit("/", 1)[-1]
-    if segment.lower().endswith(".pdf"):
-        return segment
-    year, committee, kind, number = key
-    suffix = "-추가" if is_additional_minutes(title) else ""
-    return f"minutes-{year}-{committee}-{kind}-{number}{suffix}.pdf"
+    del pdf_url, key
+    return "minutes-추가.pdf" if is_additional_minutes(title) else "minutes.pdf"
+
+
+def _minutes_marker(key: tuple[int, str, str, int], filename: str) -> str:
+    return f"downloads/sanctions/{sanction_folder(key)}/{filename}"
 
 
 def _meeting_posts(key, posts: list[DecisionPost]) -> list[DecisionPost]:
@@ -199,12 +206,13 @@ def attach_minutes(text: str, posts: list[DecisionPost]) -> tuple[str, list[str]
                 names = []
                 for url in found:
                     name = _minutes_filename(url, key, _title_for_url(key, posts, url))
-                    if f"downloads/{name}" not in block:
-                        names.append(name)
+                    marker = _minutes_marker(key, name)
+                    if marker not in block:
+                        names.append(marker)
                 if names:
                     lines.insert(i + 1, "")
-                    for offset, name in enumerate(names):
-                        lines.insert(i + 2 + offset, f"    <!-- source: pdf|downloads/{name} -->")
+                    for offset, marker in enumerate(names):
+                        lines.insert(i + 2 + offset, f"    <!-- source: pdf|{marker} -->")
                     report.append(f"attached {key[0]} {key[1]} {key[2]} {key[3]}")
                     i = block_end + 1 + len(names)
                     continue
@@ -446,7 +454,9 @@ def link_agendas(
 
 def sanction_folder(key: tuple[int, str, str, int]) -> str:
     year, committee, kind, number = key
-    return f"{year}-{committee}-{kind}-{number}차"
+    if kind in {"임시", "서면"}:
+        return f"{year}-{committee}-{kind}-{number}차"
+    return f"{year}-{committee}-{number}차"
 
 
 def _safe_filename(name: str) -> str:
@@ -457,8 +467,24 @@ def _safe_filename(name: str) -> str:
 def _bundle_file(folder: Path, kind: str, filename: str) -> Path:
     safe = _safe_filename(filename)
     if kind == "minutes":
+        if safe not in {"minutes.pdf", "minutes-추가.pdf"}:
+            safe = "minutes-추가.pdf" if "추가" in safe else "minutes.pdf"
         return folder / safe
     return folder / kind / safe
+
+
+def _merge_minutes_line(text: str, minutes: list[str]) -> str:
+    matched = re.search(r"^(- 의사록:\s*)(.*)$", text, re.MULTILINE)
+    if matched is None or not minutes:
+        return text
+    names = [part.strip() for part in matched.group(2).split(",") if part.strip() and part.strip() != "없음"]
+    for name in minutes:
+        if name not in names:
+            names.append(name)
+    if not names:
+        return text
+    merged = matched.group(1) + ", ".join(names)
+    return text[: matched.start()] + merged + text[matched.end() :]
 
 
 def place_sanction_bundle(
@@ -466,18 +492,33 @@ def place_sanction_bundle(
     key: tuple[int, str, str, int],
     record: str,
     files: list[tuple[str, str, bytes]],
+    written: list[Path] | None = None,
+    restores: list[tuple[Path, bytes]] | None = None,
 ) -> list[Path]:
     folder = root / sanction_folder(key)
     folder.mkdir(parents=True, exist_ok=True)
     record_path = folder / "record.md"
+    minute_names = [filename for kind, filename, _payload in files if kind == "minutes"]
     if not record_path.exists():
         record_path.write_text(record, encoding="utf-8", newline="\n")
+        if written is not None:
+            written.append(record_path)
+    elif minute_names:
+        original = record_path.read_bytes()
+        updated = _merge_minutes_line(original.decode("utf-8"), minute_names)
+        revised = updated.encode("utf-8")
+        if revised != original:
+            if restores is not None:
+                restores.append((record_path, original))
+            record_path.write_bytes(revised)
     for kind, filename, payload in files:
         dest = _bundle_file(folder, kind, filename)
         dest.parent.mkdir(parents=True, exist_ok=True)
         if dest.exists():
             continue
         dest.write_bytes(payload)
+        if written is not None:
+            written.append(dest)
     return [folder]
 
 
@@ -550,6 +591,14 @@ def attach_agenda_markers(
     return "\n".join(lines) + ("\n" if text.endswith("\n") else ""), report
 
 
+def _press_label(block: str) -> str:
+    first = block.splitlines()[0] if block else ""
+    matched = LINK_RE.match(first.strip())
+    if matched is None:
+        return "미보도"
+    return f"{matched.group(4)} ({matched.group(5)})"
+
+
 def _record_text(
     key: tuple[int, str, str, int],
     page_url: str,
@@ -557,15 +606,15 @@ def _record_text(
     meeting_day: str,
     minutes: list[str],
     rows: list[tuple[AgendaFile, str, str]],
+    press: str = "미보도",
 ) -> str:
-    year, committee, kind, number = key
     lines = [
         f"# {sanction_folder(key)}",
         "",
-        f"- 회차: {year} {committee} {kind} {number}차",
         f"- 회의일: {meeting_day}",
         f"- 게시 URL: {page_url or '없음'}",
         f"- ZIP URL: {zip_url or '없음'}",
+        f"- 보도: {press or '미보도'}",
         f"- 의사록: {', '.join(minutes) if minutes else '없음'}",
         "",
         "| 번호 | 구분 | 제목 | 마스킹 | 연결 |",
@@ -609,7 +658,7 @@ def _resolution_keys(text: str) -> dict[tuple[int, str, str, int], str]:
     return found
 
 
-def _apply_agendas(text, posts, download, downloads: Path, written: list[Path]):
+def _apply_agendas(text, posts, download, downloads: Path, written: list[Path], restores: list | None = None):
     report: list[str] = []
     blocks = _resolution_keys(text)
     seen_zip: set[str] = set()
@@ -658,11 +707,12 @@ def _apply_agendas(text, posts, download, downloads: Path, written: list[Path]):
         minute_paths: list[str] = []
         for url in minute_urls:
             name = _minutes_filename(url, key, _title_for_url(key, posts, url))
-            dest = downloads / name
+            dest = downloads / "sanctions" / folder / name
             if not dest.is_file():
-                download(url, dest)
+                dest.parent.mkdir(parents=True, exist_ok=True)
                 written.append(dest)
-            minute_paths.append(f"downloads/sanctions/{folder}/{name}")
+                download(url, dest)
+            minute_paths.append(name)
             minute_files.append(("minutes", name, dest.read_bytes()))
         if not agendas and not whale and not minute_files and not minute_note:
             continue
@@ -693,14 +743,12 @@ def _apply_agendas(text, posts, download, downloads: Path, written: list[Path]):
                 meeting_date(block),
                 minutes,
                 rows,
+                _press_label(block),
             ),
             bundle_files,
+            written,
+            restores,
         )
-        meeting_folder = downloads / "sanctions" / folder
-        for kind, filename, _payload in bundle_files:
-            path = _bundle_file(meeting_folder, kind, filename)
-            if path.is_file() and path not in written:
-                written.append(path)
         text, item_report = attach_agenda_markers(text, key, rows)
         report.extend(item_report)
     return text, report
@@ -763,8 +811,9 @@ def pending_downloads(text: str, posts: list[DecisionPost]) -> list[tuple[str, s
                 if found:
                     for url in found:
                         name = _minutes_filename(url, key, _title_for_url(key, posts, url))
-                        if f"downloads/{name}" not in block:
-                            pending.append((url, name))
+                        marker = _minutes_marker(key, name)
+                        if marker not in block:
+                            pending.append((url, marker.removeprefix("downloads/")))
             i = block_end
             continue
         i += 1
@@ -780,35 +829,93 @@ def _quarter_window(quarter_name: str) -> tuple[date, date] | None:
     return start, end
 
 
-def run_minutes(text, quarter_name, fetch_text, download, downloads: Path):
+def _search_window(
+    quarter_name: str,
+    until: date | None = None,
+    extra_days: int | None = None,
+) -> tuple[date, date] | None:
     window = _quarter_window(quarter_name)
+    if window is None:
+        return None
+    start, default_end = window
+    if until is not None and until < default_end:
+        raise ValueError("until precedes the default end")
+    if extra_days is not None and extra_days < 0:
+        raise ValueError("extra-days must not shrink the window")
+    end = default_end
+    if extra_days:
+        end = default_end + timedelta(days=extra_days)
+    if until is not None and until > end:
+        end = until
+    return start, end
+
+
+def _rollback(downloads: Path, written: list[Path], restores: list[tuple[Path, bytes]]) -> None:
+    parents: list[Path] = []
+    for dest in written:
+        parents.append(dest.parent)
+        if dest.is_file():
+            dest.unlink()
+    for path, payload in restores:
+        path.write_bytes(payload)
+    for parent in parents:
+        current = parent
+        while downloads in current.parents:
+            try:
+                current.rmdir()
+            except OSError:
+                break
+            current = current.parent
+
+
+def run_minutes(
+    text,
+    quarter_name,
+    fetch_text,
+    download,
+    downloads: Path,
+    until: date | None = None,
+    extra_days: int | None = None,
+):
+    try:
+        window = _search_window(quarter_name, until, extra_days)
+    except ValueError:
+        return 2, text, []
     if window is None:
         return 2, text, []
     written: list[Path] = []
+    restores: list[tuple[Path, bytes]] = []
     try:
         posts = collect_posts(fetch_text, *window)
         pending = pending_downloads(text, posts)
-        for url, name in pending:
-            dest = downloads / name
+        for url, relative in pending:
+            dest = downloads / relative
             if dest.is_file():
                 continue
+            dest.parent.mkdir(parents=True, exist_ok=True)
             written.append(dest)
             download(url, dest)
         updated, report = attach_minutes(text, posts)
-        updated, agenda_report = _apply_agendas(updated, posts, download, downloads, written)
+        updated, agenda_report = _apply_agendas(updated, posts, download, downloads, written, restores)
         report.extend(agenda_report)
     except Exception:
-        for dest in written:
-            if dest.is_file():
-                dest.unlink()
+        _rollback(downloads, written, restores)
         return 1, text, []
     return 0, updated, report
+
+
+def _before_request() -> None:
+    global _requests_made
+    if _requests_made and _request_delay > 0:
+        time.sleep(_request_delay)
+    _requests_made += 1
 
 
 def _http_text(url: str) -> str:
     import requests
 
-    response = requests.get(url, timeout=30)
+    _before_request()
+    response = requests.get(url, timeout=30, headers={"User-Agent": _BROWSER_UA})
     response.raise_for_status()
     return response.text
 
@@ -816,26 +923,50 @@ def _http_text(url: str) -> str:
 def _http_download(url: str, dest: Path) -> None:
     import requests
 
-    response = requests.get(url, timeout=60)
+    _before_request()
+    response = requests.get(url, timeout=60, headers={"User-Agent": _BROWSER_UA})
     response.raise_for_status()
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_bytes(response.content)
 
 
 def main(argv: list[str] | None = None) -> int:
+    import argparse
     import sys
 
-    args = list(sys.argv[1:] if argv is None else argv)
-    if len(args) != 1:
+    parser = argparse.ArgumentParser(description="제재 의결 의사록과 의안을 회차 폴더에 붙입니다.")
+    parser.add_argument("quarter", type=Path)
+    parser.add_argument("--delay", type=float, default=0.3)
+    parser.add_argument("--until")
+    parser.add_argument("--extra-days", type=int, default=None)
+    try:
+        args = parser.parse_args(list(sys.argv[1:] if argv is None else argv))
+    except SystemExit as exc:
+        code = exc.code
+        return 2 if code is None else int(code)
+    if not args.quarter.is_file():
         return 2
-    path = Path(args[0])
-    if not path.is_file():
-        return 2
-    text = path.read_text(encoding="utf-8")
+    until = None
+    if args.until:
+        try:
+            until = date.fromisoformat(args.until)
+        except ValueError:
+            return 2
+    global _request_delay
+    _request_delay = args.delay
+    text = args.quarter.read_text(encoding="utf-8")
     downloads = Path(__file__).resolve().parent.parent / "downloads"
-    code, updated, report = run_minutes(text, path.name, _http_text, _http_download, downloads)
+    code, updated, report = run_minutes(
+        text,
+        args.quarter.name,
+        _http_text,
+        _http_download,
+        downloads,
+        until=until,
+        extra_days=args.extra_days,
+    )
     if code == 0 and updated != text:
-        path.write_text(updated, encoding="utf-8", newline="\n")
+        args.quarter.write_text(updated, encoding="utf-8", newline="\n")
     for line in report:
         print(line)
     return code
