@@ -1518,3 +1518,113 @@ def test_extract_local_cli_does_not_crawl(tmp_path, monkeypatch):
         ["--refresh-standards", "--from-extracted-body", "--archive", str(tmp_path)]
     )
     assert code == 0
+
+
+def test_hwp5html_import_loads_six():
+    completed = subprocess.run(
+        [sys.executable, "-c", "from hwp5.hwp5html import main"],
+        capture_output=True,
+        text=True,
+    )
+    combined = completed.stderr + completed.stdout
+    assert completed.returncode == 0
+    assert "No module named 'six'" not in combined
+    assert "No module named \"six\"" not in combined
+
+
+def test_refresh_standards_normalizes_sme_labels_without_body(tmp_path):
+    originals = {}
+    for ntt_id, label in (
+        ("43865", "중소기업회계처리 특례"),
+        ("43469", "중소기업 회계처리 특례"),
+        ("43236", "중소기업회계처리특례"),
+    ):
+        folder = _archive_item(
+            tmp_path,
+            board="B0000133",
+            ntt_id=ntt_id,
+            filename="note.hwp",
+            standards=[label],
+            title="특례 표기",
+            notice="상세 안내는 그대로",
+        )
+        originals[ntt_id] = (folder / "item.md").read_text(encoding="utf-8")
+    listed = _archive_item(
+        tmp_path,
+        board="B0000132",
+        ntt_id="133043",
+        filename="keep.hwp",
+        standards=["K-IFRS 제1109호", "기업회계기준서 제1115호"],
+        title="목록 기준서",
+        notice="일반기업회계기준 제6장",
+    )
+    listed_text = (listed / "item.md").read_text(encoding="utf-8")
+
+    result = fss_replies.refresh_standards(tmp_path)
+    assert result["updated"] == 2
+    assert result["unchanged"] == 2
+    for ntt_id in ("43865", "43469", "43236"):
+        text = (tmp_path / "B0000133" / ntt_id / "item.md").read_text(encoding="utf-8")
+        meta = _meta(text)
+        assert meta["standards"] == ["중소기업회계처리 특례"]
+        assert meta["extract_status"] == "pending_whale"
+        assert meta["fetched_at"] == "2026-11-12T09:00:00+09:00"
+        assert text.split("---", 2)[2] == originals[ntt_id].split("---", 2)[2]
+    assert (listed / "item.md").read_text(encoding="utf-8") == listed_text
+
+
+def test_numbered_kifrs_drops_bare_label_from_body():
+    found = fss_replies.infer_standards(
+        "B0000133",
+        "제목만 있는 질의",
+        [],
+        "(없음)",
+        "공표된 K-IFRS 중 현행 K-IFRS 제1101호 문단 B2",
+    )
+    assert found == ["K-IFRS 제1101호"]
+    korean = fss_replies.infer_standards(
+        "B0000133",
+        "제목",
+        [],
+        "한국채택국제회계기준을 참고",
+        "한국채택국제회계기준 제1116호",
+    )
+    assert "한국채택국제회계기준 제1116호" in korean
+    assert "한국채택국제회계기준" not in korean
+
+
+def test_extract_failure_message_is_stable_and_omits_temp_paths(tmp_path):
+    folder = _archive_item(
+        tmp_path,
+        board="B0000133",
+        ntt_id="188484",
+        filename="bad.hwp",
+        standards=["일반기업회계기준"],
+        title="변환에 실패하는 첨부",
+        notice="상세 안내",
+    )
+    (folder / "bad.hwp").write_bytes(b"BAD")
+    calls = {"n": 0}
+
+    def fail(path, timeout=90):
+        calls["n"] += 1
+        raise fss_replies.HwpConvertError(
+            "Traceback (most recent call last):\n"
+            f'  File "/tmp/tmp{calls["n"]}abc/hwp5.xml", line 2, in transform\n'
+            "    parser.feed(xml)\n"
+            "lxml.etree.XMLSyntaxError: invalid character in attribute value, line 2, column 233548\n"
+        )
+
+    first = fss_replies.extract_local(tmp_path, hwp_to_html=fail)
+    once = (folder / "item.md").read_bytes()
+    second = fss_replies.extract_local(tmp_path, hwp_to_html=fail)
+    assert first["failed"] == 1
+    assert second["failed"] == 1
+    assert calls["n"] == 2
+    assert (folder / "item.md").read_bytes() == once
+    text = once.decode("utf-8")
+    assert "/tmp/tmp" not in text
+    assert "Traceback" not in text
+    assert "XMLSyntaxError: invalid character in attribute value, line 2, column 233548" in text
+    assert _meta(text)["extract_status"] == "pending_whale"
+    assert (folder / "bad.hwp").read_bytes() == b"BAD"

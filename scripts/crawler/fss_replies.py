@@ -324,7 +324,15 @@ def infer_standards(
     specific = [item for item in found if item not in _BARE_FRAMEWORKS]
     if board == "B0000133" and not specific and "일반기업회계기준" not in found:
         found.append("일반기업회계기준")
-    return found
+    return _drop_bare_framework_when_numbered(found)
+
+
+def _drop_bare_framework_when_numbered(found: list[str]) -> list[str]:
+    """번호 있는 K-IFRS·한국채택국제회계기준이 있으면 맨몸 이름은 뺀다."""
+    has_numbered = any(re.match(r"^(?:K-IFRS|한국채택국제회계기준) 제\d+호$", item) for item in found)
+    if not has_numbered:
+        return found
+    return [item for item in found if item not in _BARE_FRAMEWORKS]
 
 
 def _present_standards(values) -> list[str]:
@@ -686,6 +694,16 @@ def _is_bare_fallback(standards: list[str]) -> bool:
     return bool(standards) and all(item in _BARE_LABELS for item in standards)
 
 
+def _normalize_standard_labels(standards: list[str]) -> list[str]:
+    """이미 있는 라벨의 표기만 맞추고 순서를 유지한 채 중복을 뺀다."""
+    chosen: list[str] = []
+    for item in standards:
+        value = _canonicalize_citation(str(item))
+        if value and value not in chosen:
+            chosen.append(value)
+    return chosen
+
+
 def _choose_body_standards(existing: list[str], inferred: list[str]) -> list[str]:
     """맨몸 폴백만 본문 추론으로 바꾼다. 구체 인용은 그대로 둔다."""
     specific = [item for item in inferred if item not in _BARE_LABELS]
@@ -714,6 +732,7 @@ def refresh_standards(archive: Path, *, from_body: bool = False) -> dict:
 
     첨부 파일, 본문, extract_status, fetched_at은 바꾸지 않는다.
     이미 채워진 구체 standards는 추론으로 덮어쓰지 않는다.
+    라벨 표기만 _canonicalize_citation으로 맞춘다.
     from_body 일 때만, 맨몸 폴백은 추출된 첨부 본문의 구체 인용으로 바꾼다.
     """
     if not archive.is_dir():
@@ -746,6 +765,7 @@ def refresh_standards(archive: Path, *, from_body: bool = False) -> dict:
             chosen = _choose_body_standards(existing, inferred)
         else:
             chosen = existing
+        chosen = _normalize_standard_labels(chosen)
         parsed.append((path, text, meta, chosen))
 
     manifest_path = archive / "manifest.jsonl"
@@ -1011,9 +1031,39 @@ def _replace_attachment_section(body: str, filename: str, payload: str) -> str:
     return body[:start] + block + body[end:]
 
 
-def _pending_error(exc: BaseException) -> str:
-    message = " ".join(str(exc).split()) or exc.__class__.__name__
-    return f"pending_whale\nWhale 변환 대기\n오류: {message}"
+_TEMP_PATH = re.compile(r"/tmp/(?:tmp|fss-hwp-)[A-Za-z0-9_.-]*")
+
+
+def _short_error_message(exc: BaseException | str) -> str:
+    """트레이스백과 임시 경로를 빼고, 실행마다 같은 한 줄만 남긴다."""
+    if isinstance(exc, str):
+        return " ".join(exc.split()) or "failed"
+    if isinstance(exc, subprocess.TimeoutExpired):
+        return "TimeoutExpired: timed out"
+    text = _TEMP_PATH.sub("", str(exc) or "")
+    lines = []
+    for raw in text.splitlines():
+        line = " ".join(raw.split())
+        if not line or line.startswith("Traceback") or line.startswith("File ") or line.startswith("^"):
+            continue
+        lines.append(line)
+    chosen = ""
+    for line in reversed(lines):
+        if re.search(r"(Error|Exception)\b", line):
+            chosen = line
+            break
+    if not chosen and lines:
+        chosen = lines[-1]
+    chosen = " ".join(_TEMP_PATH.sub("", chosen).split())
+    if not chosen:
+        return exc.__class__.__name__
+    if "Error" not in chosen and "Exception" not in chosen:
+        return f"{exc.__class__.__name__}: {chosen}"
+    return chosen
+
+
+def _pending_error(exc: BaseException | str) -> str:
+    return f"pending_whale\nWhale 변환 대기\n오류: {_short_error_message(exc)}"
 
 
 def _front_with_statuses(front: str, attachment_statuses: list[str], item_status: str) -> str:
