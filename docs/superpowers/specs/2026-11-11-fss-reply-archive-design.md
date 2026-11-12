@@ -2,6 +2,7 @@
 
 **날짜**: 2026-11-11  
 **상태**: 승인됨 (2026-11-12)  
+**개정**: 2026-11-12 오프라인 `--extract-local`과 export `--update-pending`. 수집 경로의 HWP/HWPX는 여전히 `pending_whale`.  
 **범위**: 금융감독원 질의회신 요약 게시판 두 곳을 항목 폴더로 입수해 이 저장소에 보관한다. 사이트에는 게시하지 않는다. 옵시디안은 `item.md`만 `raw/`로 복사한다.
 
 ---
@@ -23,14 +24,14 @@
 
 - 두 게시판을 `board`와 `nttId` 단위로 저장한다.
 - 다시 실행하면 이미 받은 항목은 건너뛴다.
-- PDF 본문은 `pypdf`로 추출한다. HWP와 HWPX는 원본만 남기고 Whale 변환 대기로 표시한다.
-- `item.md`만 옵시디안 `raw/`에 복사하고, 이미 있는 파일은 덮어쓰지 않는다.
+- PDF 본문은 `pypdf`로 추출한다. 수집 직후 HWP와 HWPX는 원본만 남기고 `pending_whale`이다. 본문은 이후 `--extract-local`이 오프라인으로 뽑고, 실패한 것만 Whale로 둔다.
+- `item.md`만 옵시디안 `raw/`에 복사한다. 기본은 이미 있는 파일을 덮어쓰지 않는다. `--update-pending`일 때만 대상이 `pending_whale`이고 소스가 갱신됐을 때 덮어쓴다.
 
 **범위 외**
 
 - B0000134 과거 국제회계기준 Q&A. 목록 밖에 링크가 있어도 요청하지 않는다.
 - 그 밖의 금감원 게시판, 한공회, KASB 게시판
-- 한글 프로그램, LibreOffice, Whale 호출. HWP 본문 파서
+- 수집 경로에서의 한글 프로그램, LibreOffice, Whale, `hwp5txt` 호출. 오프라인 추출은 `hwp5html`과 HWPX XML만 쓴다.
 - 분기 `crawl.py`, `scripts/crawler/KASB.py`, `scripts/crawler/unified.py`, `scripts/crawler/FSS.py`
 - `docs/quality-updates/`, `quality-updates-writer`, MCP `export_corpus.py`, `data/corpus/`
 - MkDocs nav, `docs/index.md`, 질의회신 본문의 사이트 게시
@@ -232,8 +233,12 @@ Whale 변환 대기
 | 1 | 첨부가 없다 | `empty` |
 | 2 | 하나라도 `failed` | `failed` |
 | 3 | PDF를 받아 글이 있다. 같은 항목에 HWP가 있어도 PDF만 썼으면 `ok` | `ok` |
-| 4 | PDF가 없고 HWP/HWPX만 저장했다 | `pending_whale` |
+| 4 | PDF가 없고 HWP/HWPX만 저장했다. 오프라인 추출 전 | `pending_whale` |
 | 5 | PDF를 받았으나 글이 없다 | `empty` |
+| 6 | 오프라인 추출로 모든 첨부가 `hwp_parsed` 또는 `hwpx_parsed`(또는 `ok`) | `ok` |
+| 7 | 일부 첨부만 파싱되고 나머지가 `pending_whale` | `pending_whale` |
+
+첨부 `extract_status`는 성공한 `.hwp`가 `hwp_parsed`, `.hwpx`가 `hwpx_parsed`다. 항목 상태는 그 값을 그대로 쓰지 않고 위 표의 `ok` / `pending_whale` / `failed` / `empty`를 쓴다. 항목이 `hwp_parsed`나 `hwpx_parsed`로 남아 있어도 파일이 있으면 다시 받지 않는다.
 
 ---
 
@@ -241,7 +246,9 @@ Whale 변환 대기
 
 PDF만 `pypdf`로 페이지 텍스트를 이어 붙인다. 페이지 사이는 빈 줄. 공백을 제외하고 글이 있으면 `ok`, 없으면 `empty`. 추출 예외는 그 첨부만 `failed`다.
 
-HWP와 HWPX는 바이트를 그대로 두고 `pending_whale`이다. 한글, LibreOffice, Whale, `olefile`은 호출하지 않는다.
+수집 경로에서 HWP와 HWPX는 바이트를 그대로 두고 `pending_whale`이다. 수집 중에는 한글, LibreOffice, Whale, `olefile`, `hwp5txt`를 호출하지 않는다.
+
+오프라인 단계는 `python scripts/crawl_fss_replies.py --extract-local`이다. 네트워크 없이 `pending_whale` 첨부의 로컬 파일만 읽는다. `.hwp`는 pyhwp `hwp5html --html`로 HTML을 만든 뒤 문단과 표를 마크다운으로 옮긴다. `.hwpx`는 ZIP의 `Contents/section*.xml`에서 `hp:t`와 표의 행·셀을 읽는다. 성공한 첨부는 `hwp_parsed` 또는 `hwpx_parsed`이고, 모두 성공하면 항목은 `ok`다. 실패·시간 초과·빈 글·파일 없음은 `pending_whale`을 유지하고, 변환 오류는 그 절에 남긴다. 원본 첨부는 지우거나 옮기지 않는다. 이미 파싱한 첨부 본문은 다시 쓰지 않는다. 맨몸 폴백인 `일반기업회계기준`(과 bare `K-IFRS`만 더 있는 경우)은 추출 본문의 구체 인용이 있으면 그 값으로 바꾼다. 목록·상세의 구체 기준서는 덮지 않는다.
 
 ---
 
@@ -260,10 +267,10 @@ HWP와 HWPX는 바이트를 그대로 두고 `pending_whale`이다. 한글, Libr
 ## 옵시디안으로 복사
 
 ```text
-python scripts/export_fss_replies_raw.py [--archive PATH] [--dest PATH]
+python scripts/export_fss_replies_raw.py [--archive PATH] [--dest PATH] [--update-pending]
 ```
 
-`--archive` 기본값은 저장소의 `data/fss-replies`. `--dest` 기본값은 `C:\dev\obsidian-vault\raw\fss-replies`. `{board}/{nttId}/item.md`를 `{dest}/{board}/{nttId}.md`로 복사한다. 대상 파일이 있으면 생략한다. 첨부 파일은 복사하지 않는다. 끝난 뒤 복사 건수와 건너뛴 건수를 출력한다. 아카이브에서 사라진 항목을 dest에서 지우지 않는다.
+`--archive` 기본값은 저장소의 `data/fss-replies`. `--dest` 기본값은 `C:\dev\obsidian-vault\raw\fss-replies`. `{board}/{nttId}/item.md`를 `{dest}/{board}/{nttId}.md`로 복사한다. 기본은 대상 파일이 있으면 생략한다. `--update-pending`일 때만, 대상 프론트매터 `extract_status`가 `pending_whale`이고 소스 `extract_status`가 더 이상 `pending_whale`이 아니면 덮어쓴다. 그 외(둘 다 `pending_whale`, 대상이 이미 다른 상태, 프론트매터를 읽지 못함)는 생략한다. 첨부 파일은 복사하지 않는다. 끝난 뒤 `copied` / `updated` / `skipped`를 출력한다. 기본 경로의 `updated`는 0이다. 아카이브에서 사라진 항목을 dest에서 지우지 않는다.
 
 테스트는 임시 디렉터리를 dest로 쓴다. 기본 경로에 쓰지 않는다.
 

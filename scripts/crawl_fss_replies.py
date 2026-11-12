@@ -20,13 +20,29 @@ def parse_args(argv=None):
         action="store_true",
         help="item.md와 manifest의 standards만 오프라인으로 다시 쓴다",
     )
+    parser.add_argument(
+        "--extract-local",
+        action="store_true",
+        help="로컬 HWP/HWPX 첨부만 오프라인으로 추출한다. 네트워크를 쓰지 않는다",
+    )
+    parser.add_argument(
+        "--from-extracted-body",
+        action="store_true",
+        help="맨몸 폴백 standards를 추출된 첨부 본문으로 다시 추론한다",
+    )
     return parser.parse_args(argv)
 
 
 def main(argv=None) -> int:
     args = parse_args(argv)
-    if args.refresh_standards:
-        result = fss_replies.refresh_standards(args.archive)
+    if args.extract_local or args.refresh_standards or args.from_extracted_body:
+        if args.extract_local:
+            result = fss_replies.extract_local(args.archive)
+            print(
+                "parsed={parsed} failed={failed} missing={missing} skipped={skipped}".format(**result)
+            )
+            return 0
+        result = fss_replies.refresh_standards(args.archive, from_body=args.from_extracted_body)
         print(
             f"updated={result['updated']} unchanged={result['unchanged']} items={result['items']}"
         )
