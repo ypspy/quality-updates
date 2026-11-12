@@ -12,9 +12,9 @@ attachments:
 - name: 201511A_재고자산_–_장기_공급계약의_선급금.hwp
   file_no: '6452'
   file_seq: '1'
-  extract_status: partial
+  extract_status: hwp_parsed
 fetched_at: '2026-11-04T01:33:43.781242+00:00'
-extract_status: partial
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -23,18 +23,21 @@ https://cdn.ifrs.org/-/media/feature/supporting-implementation/agenda-decisions/
 
 ## 첨부: 201511A_재고자산_–_장기_공급계약의_선급금.hwp
 
-<IFRS 해석위원회 논의 결과                                            2015년 11월>
-<재고자산 – 장기 공급계약의 선급금>
-<IAS 2 ‘재고자산’>
-
-1. 질의 내용
-
-국제회계기준해석위원회(이하 ‘해석위원회’라 한다)는 구매자가 공급자에게 상당한 선급금을 지급하기로 합의한 경우에 재고자산 장기 공급계약의 회계처리를 명확히 해 달라는 요청서를 받았다. 질의는 구매자가 이자수익을 인식하여 장기선급금에 이자를 부가하고 그 결과로 재고자산의 원가를 증액하며 최종적으로 매출원가를 증액해야 하는지이다.  
-
-2. 검토 내용과 결정
-
-해석위원회는 이 사안을 논의하면서, IAS 2 ‘재고자산’ 문단 18에서 재고자산을 후불조건으로 취득하였는데 계약이 금융요소를 포함하고 있다면 정상 신용조건의 매입가격과 실제 지급액의 차이는 금융이 이루어지는 기간에 이자비용으로 별도로 인식하도록 요구한다는 점에 주목하였다. 또 자산에 대한 지급이 이연되는 경우에 IAS 16 ‘유형자산’과 IAS 38 ‘무형자산’도 비슷한 요구사항을 포함한다는 점에도 주목하였다. 2014년 5월에 공표된 IFRS 15 ‘고객과의 계약에서 생기는 수익’에서는 선급하는 상황과 지급을 이연하는 상황 모두 거래의 금융요소는 별도로 인식해야 한다는 요구사항을 추가로 포함하였다. 해석위원회는 이 사안에 대하여 의견수집활동을 하였으나 수집된 결과는 매우 제한적이었다. 해석위원회는 이 사안이 안건 상정 기준을 충족하지 못하였다고 결론 내렸고, 따라서 안건에서 제외하기로 결정하였다.
-
-<관련 회계기준: 기업회계기준서 제1002호 ‘재고자산’ 문단 18  색인어: 재고자산, 장기 공급계약, 선급금, 금융요소>
-
-<Notice  Copyright © IFRS Foundation All rights reserved. Translated, reproduced and distributed by the Korea Accounting Standards Board with the permission of t>
+| IFRS 해석위원회 논의 결과 2015년 11월 |
+| --- |
+| 재고자산 – 장기 공급계약의 선급금 |
+| IAS 2 ‘ 재고자산 ’ |
+
+1. 질의 내용
+
+국제회계기준해석위원회(이하 ‘ 해석위원회 ’ 라 한다)는 구매자가 공급자에게 상당한 선 급금을 지급하기로 합의한 경우에 재고자산 장기 공급계약의 회계처리를 명확히 해 달 라는 요청서를 받았다. 질의는 구매자가 이자수익을 인식하여 장기선급금에 이자를 부 가하고 그 결과로 재고자산의 원가를 증액하며 최종적으로 매출원가를 증액해야 하는 지이다.
+
+2. 검토 내용과 결정
+
+해석위원회는 이 사안을 논의하면서, IAS 2 ‘ 재고자산 ’ 문단 18에서 재고자산을 후불조 건으로 취득하였는데 계약이 금융요소를 포함하고 있다면 정상 신용조건의 매입가격과 실제 지급액의 차이는 금융이 이루어지는 기간에 이자비용으로 별도로 인식하도록 요 구한다는 점에 주목하였다. 또 자산에 대한 지급이 이연되는 경우에 IAS 16 ‘ 유형자산 ’ 과 IAS 38 ‘ 무형자산 ’ 도 비슷한 요구사항을 포함한다는 점에도 주목하였다. 2014년 5월 에 공표된 IFRS 15 ‘ 고객과의 계약에서 생기는 수익 ’ 에서는 선급하는 상황과 지급을 이 연하는 상황 모두 거래의 금융요소는 별도로 인식해야 한다는 요구사항을 추가로 포함 하였다. 해석위원회는 이 사안에 대하여 의견수집활동을 하였으나 수집된 결과는 매우 제한적이었다. 해석위원회는 이 사안이 안건 상정 기준을 충족하지 못하였다고 결론 내렸고, 따라서 안건에서 제외하기로 결정하였다.
+
+| 관련 회계기준 : 기업회계기준서 제1002호 ‘ 재고자산 ’ 문단 18 색인어 : 재고자산, 장기 공급계약, 선급금, 금융요소 |
+| --- |
+
+| Notice Copyright © IFRS Foundation All rights reserved. Translated, reproduced and distributed by the Korea Accounting Standards Board with the permission of the IFRS Foundation. The Korean translation of this IASB Agenda Decision has not been approved by the IFRS Foundation and the IFRS Foundation accepts no liability in respect of the quality or content of this translation. 알림 Copyright © IFRS Foundation 모든 저작권은 보호됩니다. 한국회계기준원 회계기준위원회는 국제회계 기준위원회재단의 동의를 받아 이 저작물을 번역, 재출간, 배포합니다. 이 국제회계기준위원회의 논의 결과 한국어 번역은 국제회계기준위원회재단에서 승인하지 않았고, 국제 회계기준위원회재단은 이 번역의 품질이나 내용에 대하여 어떠한 책임도 지지 않습니다. |
+| --- |
