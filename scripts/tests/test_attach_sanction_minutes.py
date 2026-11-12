@@ -336,7 +336,7 @@ def test_run_minutes_downloads_only_minutes_pdfs(tmp_path):
     assert "사업보고서 등에 대한 조사·감리결과 조치 - 제15차 증권선물위원회" in record
     assert "https://fsc.go.kr/no010101/87639" in record
     assert "- 의사록: minutes.pdf" in record
-    assert "| 번호 | 구분 | 제목 | 마스킹 | 연결 |" in record
+    assert "| 번호 | 구분 | 제목 | 마스킹 | 연결 | 연결근거 |" in record
     temporary = tmp_path / "sanctions" / "2026-증선위-임시-1차"
     assert (temporary / "minutes.pdf").read_bytes() == b"pdf"
     assert "- 회의일: 2026-10-09" in (temporary / "record.md").read_text(encoding="utf-8")
@@ -351,10 +351,12 @@ DETAIL_EXTRA = """
 
 
 def test_additional_minutes_post_merges_into_the_same_meeting(tmp_path):
-    extra = LIST_HTML.replace(
-        "</ul>",
-        '<li><div class="inner"><div class="subject"><a href="/no020102/87747">2026년 제15차 증권선물위원회 의사록(추가)</a></div><div class="day">2026-09-18</div></div></li></ul>',
+    extra_item = (
+        '<li><div class="inner"><div class="subject">'
+        '<a href="/no020102/87747">2026년 제15차 증권선물위원회 의사록(추가)</a>'
+        '</div><div class="day">2026-09-18</div></div></li>\n  '
     )
+    extra = LIST_HTML.replace("<ul>\n  <li>", "<ul>\n  " + extra_item + "<li>", 1)
 
     def fetch_text(url: str) -> str:
         if "curPage=1" in url and "no020102" in url:
@@ -371,10 +373,13 @@ def test_additional_minutes_post_merges_into_the_same_meeting(tmp_path):
 
     def download(url: str, dest: Path) -> None:
         dest.parent.mkdir(parents=True, exist_ok=True)
-        if url.lower().endswith(".zip") or "fileNo=2" in url and ".pdf" not in url:
+        if url.lower().endswith(".zip") or ("fileNo=2" in url and ".pdf" not in url):
             dest.write_bytes(_zip_bytes(["(공개용) 의결 235. 교보증권 정기검사.pdf"]))
             return
-        dest.write_bytes(b"pdf")
+        if "upperNo=87747" in url:
+            dest.write_bytes(b"extra-minutes")
+            return
+        dest.write_bytes(b"primary-minutes")
 
     code, updated, report = run_minutes(
         QUARTER,
@@ -390,6 +395,16 @@ def test_additional_minutes_post_merges_into_the_same_meeting(tmp_path):
     assert is_additional_minutes("2026년 제15차 증권선물위원회 의사록(추가)")
     assert not any(line.startswith("ambiguous 2026 증선위 정기 15") for line in report)
     assert any(line.startswith("attached 2026 증선위 정기 15") for line in report)
+    folder = tmp_path / "sanctions" / "2026-증선위-15차"
+    assert (folder / "minutes.pdf").read_bytes() == b"primary-minutes"
+    assert (folder / "minutes-추가.pdf").read_bytes() == b"extra-minutes"
+    record = (folder / "record.md").read_text(encoding="utf-8")
+    assert "- 게시 URL: https://www.fsc.go.kr/no020102/88040" in record
+    assert "- 게시 URL: https://www.fsc.go.kr/no020102/87747\n" not in record
+    assert "- 추가 게시 URL: https://www.fsc.go.kr/no020102/87747" in record
+    zip_line = next(line for line in record.splitlines() if line.startswith("- ZIP URL:"))
+    assert "upperNo=88040" in zip_line
+    assert "87747" not in zip_line
 
 
 def test_download_failure_leaves_the_quarter_text_unchanged(tmp_path):
@@ -640,7 +655,7 @@ def test_masked_company_names_are_not_linked():
     assert [item.filename for item, row in linked] == [
         "(공개용) 의결 251. 선진회계법인의 중요한 감사절차 위반혐의에 대한 감리결과 조치안.pdf"
     ]
-    assert linked[0][1] == "선진회계법인"
+    assert linked[0][1] == "실명"
     assert len(unmatched) == 2
     assert all(item.number != 251 for item in unmatched)
 
@@ -672,7 +687,7 @@ def test_press_agenda_number_is_the_primary_key():
         AgendaFile("(공개용) 의결 249. 조사결과 조치안.pdf", "agenda", 249, False),
     ]
     linked, unmatched = link_agendas(press, (2026, "증선위", "정기", 15), agendas)
-    assert [row for _, row in linked] == ["의안 250"]
+    assert [row for _, row in linked] == ["의안번호"]
     assert [item.number for item in unmatched] == [249]
 
 
@@ -733,24 +748,71 @@ def test_raw_bundle_does_not_overwrite_an_existing_snapshot(tmp_path):
     from attach_sanction_minutes import place_sanction_bundle
 
     key = (2026, "증선위", "정기", 15)
+    folder = tmp_path / "2026-증선위-15차"
+    original = "\n".join(
+        [
+            "# 2026-증선위-15차",
+            "",
+            "- 회의일: 없음",
+            "- 게시 URL: https://www.fsc.go.kr/no020102/87747",
+            "- ZIP URL: 없음",
+            "- 보도: 미보도",
+            "- 의사록: minutes.pdf, minutes-추가.pdf",
+            "",
+            "| 번호 | 구분 | 제목 | 마스킹 | 연결 |",
+            "| --- | --- | --- | --- | --- |",
+            "",
+        ]
+    )
     first = place_sanction_bundle(
         tmp_path,
         key,
-        "회차 기록\n",
-        [("agenda", "251.pdf", b"one")],
+        original,
+        [
+            ("minutes", "minutes.pdf", b"minutes-one"),
+            ("minutes", "minutes-추가.pdf", b"extra-one"),
+            ("agenda", "251.pdf", b"one"),
+        ],
     )
-    assert first == [tmp_path / "2026-증선위-15차"]
+    assert first == [folder]
+    refreshed = "\n".join(
+        [
+            "# 2026-증선위-15차",
+            "",
+            "- 회의일: 2026-09-02",
+            "- 게시 URL: https://www.fsc.go.kr/no020102/88040",
+            "- ZIP URL: https://www.fsc.go.kr/comm/getFile?upperNo=88040",
+            "- 보도: 보도 (https://fsc.go.kr/no010101/87639)",
+            "- 의사록: minutes.pdf",
+            "",
+            "| 번호 | 구분 | 제목 | 마스킹 | 연결 | 연결근거 |",
+            "| --- | --- | --- | --- | --- | --- |",
+            "| 251 | agenda | 251.pdf | 아니오 | https://fsc.go.kr/no010101/87639 | 의안번호 |",
+            "",
+        ]
+    )
     second = place_sanction_bundle(
         tmp_path,
         key,
-        "다른 기록\n",
-        [("agenda", "251.pdf", b"two"), ("decision", "251-decision.pdf", b"new")],
+        refreshed,
+        [
+            ("minutes", "minutes.pdf", b"minutes-two"),
+            ("agenda", "251.pdf", b"two"),
+            ("decision", "251-decision.pdf", b"new"),
+        ],
     )
-    folder = tmp_path / "2026-증선위-15차"
-    assert (folder / "record.md").read_text(encoding="utf-8") == "회차 기록\n"
+    assert second == [folder]
+    assert (folder / "minutes.pdf").read_bytes() == b"minutes-one"
+    assert (folder / "minutes-추가.pdf").read_bytes() == b"extra-one"
     assert (folder / "agenda" / "251.pdf").read_bytes() == b"one"
     assert (folder / "decision" / "251-decision.pdf").read_bytes() == b"new"
-    assert second == [folder]
+    record = (folder / "record.md").read_text(encoding="utf-8")
+    assert record != original
+    assert "회차 기록" not in record
+    assert "- 회의일: 2026-09-02" in record
+    assert "- 게시 URL: https://www.fsc.go.kr/no020102/88040" in record
+    assert "- 의사록: minutes.pdf, minutes-추가.pdf" in record
+    assert "| 251 | agenda | 251.pdf | 아니오 | https://fsc.go.kr/no010101/87639 | 의안번호 |" in record
     assert not list(tmp_path.rglob("*.zip"))
 
 
@@ -836,6 +898,9 @@ def test_record_says_unpublished_when_the_press_link_is_missing():
     record = _record_text((2026, "증선위", "정기", 16), "", "", "없음", [], [], "미보도")
     assert "- 보도: 미보도" in record
     assert "- 의사록: 없음" in record
+    assert "- 추가 게시 URL:" not in record
+    assert "| 번호 | 구분 | 제목 | 마스킹 | 연결 | 연결근거 |" in record
+    assert "|  |  |  |  |  |  |" in record
     assert "# 2026-증선위-16차" in record
 
 
@@ -982,7 +1047,8 @@ def test_existing_bundle_keeps_bytes_when_a_late_supplement_arrives(tmp_path):
     decision = {path.name: path.read_bytes() for path in (folder / "decision").iterdir()}
     record_before = (folder / "record.md").read_text(encoding="utf-8")
     assert "- 의사록: minutes.pdf" in record_before
-    assert "| 번호 | 구분 | 제목 | 마스킹 | 연결 |" in record_before
+    assert "- 추가 게시 URL:" not in record_before
+    assert "| 번호 | 구분 | 제목 | 마스킹 | 연결 | 연결근거 |" in record_before
 
     code, updated, _report = run_minutes(
         seeded,
@@ -999,10 +1065,18 @@ def test_existing_bundle_keeps_bytes_when_a_late_supplement_arrives(tmp_path):
     assert {path.name: path.read_bytes() for path in (folder / "decision").iterdir()} == decision
     assert (folder / "minutes-추가.pdf").read_bytes() == b"extra-minutes"
     record_after = (folder / "record.md").read_text(encoding="utf-8")
-    before_lines = [line for line in record_before.splitlines() if not line.startswith("- 의사록:")]
-    after_lines = [line for line in record_after.splitlines() if not line.startswith("- 의사록:")]
-    assert before_lines == after_lines
+
+    def stable(text: str) -> list[str]:
+        return [
+            line
+            for line in text.splitlines()
+            if not line.startswith("- 의사록:") and not line.startswith("- 추가 게시 URL:")
+        ]
+
+    assert stable(record_before) == stable(record_after)
     assert "- 의사록: minutes.pdf, minutes-추가.pdf" in record_after
+    assert "- 추가 게시 URL: https://www.fsc.go.kr/no020102/89001" in record_after
+    assert "- 게시 URL: https://www.fsc.go.kr/no020102/88040" in record_after
     assert "요약은 그대로 둔다." in updated
     assert "| 선진회계법인 | 감사 |" in updated
     assert "- 분기중 미보도 항목" in updated
@@ -1207,3 +1281,416 @@ def test_main_delay_until_and_extra_days(tmp_path, monkeypatch):
     assert any(
         "srchBeginDt=2026-07-01" in url and "srchEndDt=2026-12-09" in url for url in requested
     )
+
+
+SAMJONG = "(공개용) 의결 212. 삼정회계법인의 사업보고서에 대한 조사결과 조치안_마스킹.pdf"
+FSC_MASKED = (
+    "금융위 의결서(제2026-337호)_OOOO㈜의 사업보고서 및 연결감사보고서 등에 대한 "
+    "조사·감리결과 조치안(공개용).pdf"
+)
+
+
+def test_samjong_masking_suffix_does_not_hide_the_real_name():
+    from attach_sanction_minutes import is_masked_label
+
+    assert is_masked_label(SAMJONG) is False
+    assert is_masked_label(SAMJONG.replace("(공개용) ", "(의결서) ")) is False
+    assert is_masked_label("OOOO㈜") is True
+    assert is_masked_label("㈜OO") is True
+    assert is_masked_label("(주)OO") is True
+    assert is_masked_label("OO(주)") is True
+
+
+def test_parenthesized_agenda_number_links_a_masked_decision():
+    from attach_sanction_minutes import AgendaFile, _agenda_record_rows, press_agenda_numbers
+
+    press = """- (26-08-12) [금융회사 제재](https://fsc.go.kr/no010101/85337)
+
+    2026년 제13차 금융위원회 제25조에서 (제337호)를 의결하였다.
+    의결 211
+
+    !!! note "위원 논의"
+
+        - (제338호)는 여기 있다.
+"""
+    assert press_agenda_numbers(press) == {337, 211}
+    assert 13 not in press_agenda_numbers(press)
+    assert 25 not in press_agenda_numbers(press)
+    assert 338 not in press_agenda_numbers(press)
+    rows = _agenda_record_rows(
+        press,
+        [
+            AgendaFile(FSC_MASKED, "decision", 337, True),
+            AgendaFile(SAMJONG, "agenda", 212, False),
+            AgendaFile("(의결서) 의결 249. 조사결과 조치안.pdf", "decision", 249, False),
+        ],
+    )
+    url = "https://fsc.go.kr/no010101/85337"
+    assert [(item.number, link, basis) for item, link, basis in rows] == [
+        (337, url, "의안번호"),
+        (212, "unmatched", ""),
+        (249, "unmatched", ""),
+    ]
+
+
+def test_agenda_number_basis_wins_when_one_company_also_matches():
+    from attach_sanction_minutes import AgendaFile, _agenda_record_rows
+
+    press = PRESS_NAMED.replace(
+        "| 선진회계법인 | 감사 | 중요한 감사절차 위반 | 과징금 |",
+        "| 선진회계법인 | 감사 | 중요한 감사절차 위반 의결 251 | 과징금 |",
+    )
+    filename = "(공개용) 의결 251. 선진회계법인의 중요한 감사절차 위반혐의에 대한 감리결과 조치안.pdf"
+    rows = _agenda_record_rows(press, [AgendaFile(filename, "agenda", 251, False)])
+    assert rows[0][1] == "https://fsc.go.kr/no010101/87639"
+    assert rows[0][2] == "의안번호"
+    name_only = _agenda_record_rows(PRESS_NAMED, [AgendaFile(filename, "agenda", 251, False)])
+    assert name_only[0][1] == "https://fsc.go.kr/no010101/87639"
+    assert name_only[0][2] == "실명"
+
+
+def test_primary_page_and_zip_win_when_the_additional_post_is_first():
+    from attach_sanction_minutes import meeting_source_urls
+
+    additional = DecisionPost(
+        2026,
+        "증선위",
+        "정기",
+        13,
+        "https://www.fsc.go.kr/comm/getFile?upperNo=87747&fileNo=1",
+        ["https://www.fsc.go.kr/comm/getFile?upperNo=87747&fileNo=9"],
+        "2026년 제13차 증권선물위원회 의사록(추가)",
+        "https://www.fsc.go.kr/no020102/87747",
+    )
+    primary = DecisionPost(
+        2026,
+        "증선위",
+        "정기",
+        13,
+        "https://www.fsc.go.kr/comm/getFile?upperNo=87654&fileNo=1",
+        ["https://www.fsc.go.kr/comm/getFile?upperNo=87654&fileNo=2"],
+        "2026년 제13차 증권선물위원회 의사록",
+        "https://www.fsc.go.kr/no020102/87654",
+    )
+    page, extras, zips = meeting_source_urls([additional, primary])
+    assert page == "https://www.fsc.go.kr/no020102/87654"
+    assert extras == ["https://www.fsc.go.kr/no020102/87747"]
+    assert zips[0] == "https://www.fsc.go.kr/comm/getFile?upperNo=87654&fileNo=2"
+    assert "87747" in zips[1]
+
+    quiet = DecisionPost(
+        2026,
+        "증선위",
+        "정기",
+        13,
+        additional.pdf_url,
+        [],
+        additional.title,
+        additional.page_url,
+    )
+    page, extras, zips = meeting_source_urls([quiet, primary])
+    assert page == "https://www.fsc.go.kr/no020102/87654"
+    assert extras == ["https://www.fsc.go.kr/no020102/87747"]
+    assert zips == ["https://www.fsc.go.kr/comm/getFile?upperNo=87654&fileNo=2"]
+    second = DecisionPost(
+        2026,
+        "증선위",
+        "정기",
+        13,
+        "https://www.fsc.go.kr/comm/getFile?upperNo=87748&fileNo=1",
+        [],
+        "2026년 제13차 증권선물위원회 의사록(추가_2)",
+        "https://www.fsc.go.kr/no020102/87748",
+    )
+    _page, extras, _zips = meeting_source_urls([second, quiet, primary])
+    assert extras == [
+        "https://www.fsc.go.kr/no020102/87748",
+        "https://www.fsc.go.kr/no020102/87747",
+    ]
+
+
+def test_meeting_date_ignores_a_publication_note_and_reads_the_minutes_front():
+    from attach_sanction_minutes import meeting_date, meeting_date_from_minutes_text
+
+    assert meeting_date("(2026.9.18. 공개)") == "없음"
+    assert meeting_date("사업보고서 등에 대한 조사·감리결과 조치") == "없음"
+    assert meeting_date("제14차 증권선물위원회('26.7.22.)") == "2026-07-22"
+    dotted = """제14차 증권선물위원회 의사록
+2026. 7. 22.
+(2026.9.18. 공개)
+안건 2026. 8. 1.
+"""
+    assert meeting_date_from_minutes_text(dotted) == "2026-07-22"
+    spoken = """제14차 증권선물위원회 의사록
+(2026.9.18. 공개)
+1. 일시: 2026년 7월 22일 (수)
+이후 2026년 8월 1일 제출
+"""
+    assert meeting_date_from_minutes_text(spoken) == "2026-07-22"
+    buried = """제14차 증권선물위원회 의사록
+회의를 개의한다.
+안건 2026. 8. 1.
+2026년 8월 1일 제출
+"""
+    assert meeting_date_from_minutes_text(buried) == "없음"
+
+
+def _minutes_pdf(pages: list[list[str]]) -> bytes:
+    import io
+
+    from pypdf import PdfWriter
+    from pypdf.generic import DecodedStreamObject, DictionaryObject, NameObject
+
+    writer = PdfWriter()
+    font = writer._add_object(
+        DictionaryObject(
+            {
+                NameObject("/Type"): NameObject("/Font"),
+                NameObject("/Subtype"): NameObject("/Type0"),
+                NameObject("/BaseFont"): NameObject("/Identity"),
+                NameObject("/Encoding"): NameObject("/Identity-H"),
+            }
+        )
+    )
+
+    def literal(text: str) -> bytes:
+        raw = b"\xfe\xff" + text.encode("utf-16-be")
+        return b"<" + raw.hex().encode("ascii") + b">"
+
+    for lines in pages:
+        writer.add_blank_page(width=612, height=792)
+        commands = [b"BT /F1 12 Tf"]
+        y = 740
+        for line in lines:
+            commands.append(f"1 0 0 1 72 {y} Tm ".encode("ascii") + literal(line) + b" Tj")
+            y -= 18
+        commands.append(b"ET")
+        stream = DecodedStreamObject()
+        stream.set_data(b"\n".join(commands))
+        page = writer.pages[-1]
+        page[NameObject("/Contents")] = writer._add_object(stream)
+        page[NameObject("/Resources")] = DictionaryObject(
+            {NameObject("/Font"): DictionaryObject({NameObject("/F1"): font})}
+        )
+    buffer = io.BytesIO()
+    writer.write(buffer)
+    return buffer.getvalue()
+
+
+def test_minutes_pdf_text_uses_the_first_page_only(tmp_path):
+    from attach_sanction_minutes import meeting_date_from_minutes_text, read_minutes_pdf_text
+
+    path = tmp_path / "minutes.pdf"
+    path.write_bytes(
+        _minutes_pdf(
+            [
+                [
+                    "제14차 증권선물위원회 의사록",
+                    "(2026.9.18. 공개)",
+                    "일시: 2026년 7월 22일 (수)",
+                ],
+                [
+                    "제14차 증권선물위원회 의사록",
+                    "2026. 8. 1.",
+                    "일시: 2026년 8월 1일 (토)",
+                ],
+            ]
+        )
+    )
+    text = read_minutes_pdf_text(path)
+    assert "2026. 8. 1." not in text
+    assert "8월 1일" not in text
+    assert meeting_date_from_minutes_text(text) == "2026-07-22"
+
+
+def test_dateless_press_takes_the_meeting_day_from_minutes_pdf(tmp_path):
+    from attach_sanction_minutes import DecisionPost, resolve_meeting_day
+
+    press = """### 금융위원회
+
+#### 제재 의결
+
+- (26-07-24) [사업보고서 등에 대한 조사·감리결과 조치](https://fsc.go.kr/no010101/87014)
+
+    2026년 제14차 증권선물위원회 조사·감리결과이다.
+    (2026.9.18. 공개)
+
+    !!! note "위원 논의"
+
+        - 미공개임
+"""
+    listing = """
+<ul>
+  <li><div class="inner"><div class="subject"><a href="/no020102/87014">2026년 제14차 증권선물위원회 의사록 (2026.9.18. 공개)</a></div></div></li>
+</ul>
+"""
+    detail = """
+<a href="/comm/getFile?srvcId=BBSTY1&upperNo=87014&fileTy=ATTACH&fileNo=1">제14차 의사록.pdf</a>
+"""
+    pdf = _minutes_pdf(
+        [
+            [
+                "제14차 증권선물위원회 의사록",
+                "2026. 7. 22.",
+                "(2026.9.18. 공개)",
+                "일시: 2026년 7월 22일 (수)",
+            ],
+            ["안건", "2026. 8. 1.", "일시: 2026년 8월 1일 (토)"],
+        ]
+    )
+
+    def fetch_text(url: str) -> str:
+        if "curPage=1" in url and "no020102" in url:
+            return listing
+        if "curPage=" in url:
+            return "<ul></ul>"
+        if url.endswith("/87014"):
+            return detail
+        raise AssertionError(url)
+
+    def download(url: str, dest: Path) -> None:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(pdf)
+
+    code, _updated, _report = run_minutes(
+        press,
+        "2026-07-01_to_2026-09-30.md",
+        fetch_text,
+        download,
+        tmp_path,
+    )
+    assert code == 0
+    record = (tmp_path / "sanctions" / "2026-증선위-14차" / "record.md").read_text(encoding="utf-8")
+    assert "- 회의일: 2026-07-22" in record
+    assert "2026-09-18" not in record
+    assert "2026-08-01" not in record
+
+    titled = [
+        DecisionPost(
+            2026,
+            "증선위",
+            "정기",
+            14,
+            "https://example.test/minutes.pdf",
+            [],
+            "2026년 제14차 증권선물위원회 의사록('26.7.22.)",
+            "https://www.fsc.go.kr/no020102/87014",
+        )
+    ]
+    other = tmp_path / "other.pdf"
+    other.write_bytes(
+        _minutes_pdf([["제14차 증권선물위원회 의사록", "2026. 8. 1."]])
+    )
+    block = press.split("#### 제재 의결", 1)[1]
+    assert resolve_meeting_day(block, titled, other) == "2026-07-22"
+
+
+def test_rewrite_rolls_back_to_the_original_record_bytes(tmp_path):
+    from attach_sanction_minutes import _rollback, place_sanction_bundle
+
+    key = (2026, "증선위", "정기", 15)
+    root = tmp_path / "sanctions"
+    folder = root / "2026-증선위-15차"
+    folder.mkdir(parents=True)
+    (folder / "agenda").mkdir()
+    original = "원본 기록\n- 의사록: minutes.pdf, minutes-추가.pdf\n".encode()
+    (folder / "record.md").write_bytes(original)
+    (folder / "minutes.pdf").write_bytes(b"keep-minutes")
+    (folder / "agenda" / "251.pdf").write_bytes(b"keep-agenda")
+    written: list[Path] = []
+    restores: list[tuple[Path, bytes]] = []
+    place_sanction_bundle(
+        root,
+        key,
+        "\n".join(
+            [
+                "# 2026-증선위-15차",
+                "- 회의일: 2026-09-02",
+                "- 게시 URL: https://www.fsc.go.kr/no020102/88040",
+                "- 의사록: minutes.pdf",
+                "",
+            ]
+        ),
+        [
+            ("minutes", "minutes.pdf", b"replace-me"),
+            ("decision", "252.pdf", b"new-decision"),
+        ],
+        written,
+        restores,
+    )
+    assert (folder / "record.md").read_text(encoding="utf-8").startswith("# 2026-증선위-15차")
+    assert "minutes-추가.pdf" in (folder / "record.md").read_text(encoding="utf-8")
+    assert (folder / "minutes.pdf").read_bytes() == b"keep-minutes"
+    assert (folder / "decision" / "252.pdf").read_bytes() == b"new-decision"
+    _rollback(tmp_path, written, restores)
+    assert (folder / "record.md").read_bytes() == original
+    assert (folder / "minutes.pdf").read_bytes() == b"keep-minutes"
+    assert (folder / "agenda" / "251.pdf").read_bytes() == b"keep-agenda"
+    assert not (folder / "decision" / "252.pdf").exists()
+
+
+FSC_QUARTER = """### 금융위원회
+
+#### 제재 의결
+
+- (26-08-12) [금융회사 제재](https://fsc.go.kr/no010101/85337)
+
+    2026년 제13차 금융위원회 제25조에서 (제337호)를 의결하였다.
+
+    !!! note "위원 논의"
+
+        - 미공개임
+"""
+
+FSC_LIST = """
+<ul>
+  <li><div class="inner"><div class="subject"><a href="/no020101/86001">2026년 제13차 금융위원회 의사록 및 의결서</a></div></div></li>
+</ul>
+"""
+
+FSC_DETAIL = """
+<a href="/comm/getFile?srvcId=BBSTY1&upperNo=86001&fileTy=ATTACH&fileNo=1">의사록.pdf</a>
+<a href="/comm/getFile?srvcId=BBSTY1&upperNo=86001&fileTy=ATTACH&fileNo=2">안건.zip</a>
+"""
+
+
+def test_masked_fsc_decision_links_to_the_press_url(tmp_path):
+    samjong_decision = SAMJONG.replace("(공개용) ", "(의결서) ")
+
+    def fetch_text(url: str) -> str:
+        if "curPage=1" in url and "no020101" in url:
+            return FSC_LIST
+        if "curPage=" in url:
+            return "<ul></ul>"
+        if url.endswith("/86001"):
+            return FSC_DETAIL
+        raise AssertionError(url)
+
+    def download(url: str, dest: Path) -> None:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        if "fileNo=2" in url:
+            dest.write_bytes(
+                _zip_bytes(
+                    [
+                        FSC_MASKED,
+                        samjong_decision,
+                        "(의결서) 의결 249. 조사결과 조치안.pdf",
+                    ]
+                )
+            )
+            return
+        dest.write_bytes(b"pdf")
+
+    code, _updated, _report = run_minutes(
+        FSC_QUARTER,
+        "2026-07-01_to_2026-09-30.md",
+        fetch_text,
+        download,
+        tmp_path,
+    )
+    assert code == 0
+    record = (tmp_path / "sanctions" / "2026-금융위-13차" / "record.md").read_text(encoding="utf-8")
+    assert "| 번호 | 구분 | 제목 | 마스킹 | 연결 | 연결근거 |" in record
+    assert f"| 337 | decision | {FSC_MASKED} | 예 | https://fsc.go.kr/no010101/85337 | 의안번호 |" in record
+    assert f"| 212 | decision | {samjong_decision} | 아니오 | unmatched |  |" in record
+    assert "| 249 | decision | (의결서) 의결 249. 조사결과 조치안.pdf | 아니오 | unmatched |  |" in record

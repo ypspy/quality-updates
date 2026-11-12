@@ -138,6 +138,27 @@ def _meeting_posts(key, posts: list[DecisionPost]) -> list[DecisionPost]:
     return [post for post in posts if (post.year, post.committee, post.kind, post.number) == key]
 
 
+def _unique_texts(values: list[str]) -> list[str]:
+    found: list[str] = []
+    for value in values:
+        if value and value not in found:
+            found.append(value)
+    return found
+
+
+def meeting_source_urls(posts: list[DecisionPost]) -> tuple[str, list[str], list[str]]:
+    """Primary page, additional pages, and ZIP URLs with the primary post's ZIP first."""
+    primaries = [post for post in posts if not is_additional_minutes(post.title)]
+    additions = [post for post in posts if is_additional_minutes(post.title)]
+    pages = _unique_texts([post.page_url for post in primaries])
+    extra_pages = _unique_texts([post.page_url for post in additions])
+    zips = _unique_texts([url for post in primaries for url in post.zip_urls])
+    for url in _unique_texts([url for post in additions for url in post.zip_urls]):
+        if url not in zips:
+            zips.append(url)
+    return ", ".join(pages), extra_pages, zips
+
+
 def minutes_urls_for_key(key, posts: list[DecisionPost]) -> list[str] | None:
     """PDF urls for one meeting. None means two primary minutes, so no marker."""
     group = [post for post in _meeting_posts(key, posts) if post.pdf_url]
@@ -334,6 +355,121 @@ def meeting_date(text: str) -> str:
     return f"{year:04d}-{month:02d}-{day:02d}"
 
 
+_PUBLICATION_RE = re.compile(
+    r"\(\s*\d{4}\s*\.\s*\d{1,2}\s*\.\s*\d{1,2}\s*\.\s*공개\s*\)"
+)
+_SPOKEN_DATE_RE = re.compile(
+    r"(?<!\d)(\d{4})\s*년\s*(\d{1,2})\s*월\s*(\d{1,2})\s*일"
+)
+_DOTTED_DATE_RE = re.compile(
+    r"(?<!\d)(\d{4})\s*\.\s*(\d{1,2})\s*\.\s*(\d{1,2})\s*\.?"
+)
+_TITLE_DOTTED_RE = re.compile(
+    r"(?<!\d)(\d{4})\s*\.\s*(\d{1,2})\s*\.\s*(\d{1,2})\s*\.?\s*$"
+)
+_STANDALONE_DOTTED_RE = re.compile(
+    r"(\d{4})\s*\.\s*(\d{1,2})\s*\.\s*(\d{1,2})\s*\.?(?:\s*\([^)]*\))?"
+)
+_SESSION_DATE_RE = re.compile(
+    r"일\s*시[^\n]{0,40}?(\d{4})\s*년\s*(\d{1,2})\s*월\s*(\d{1,2})\s*일"
+)
+_FRONT_LINES = 60
+
+
+def _iso_date(year: str, month: str, day: str) -> str | None:
+    try:
+        parsed = date(int(year), int(month), int(day))
+    except ValueError:
+        return None
+    return parsed.isoformat()
+
+
+def _clean_minutes_line(line: str) -> str:
+    return line.replace("\ufeff", "").strip()
+
+
+def _calendar_date(text: str) -> str:
+    """Full calendar date, ignoring a publication note such as (2026.9.18. 공개)."""
+    cleaned = _PUBLICATION_RE.sub(" ", text.replace("\ufeff", ""))
+    parenthetical = meeting_date(cleaned)
+    if parenthetical != "없음":
+        return parenthetical
+    spoken = _SPOKEN_DATE_RE.search(cleaned)
+    if spoken:
+        parsed = _iso_date(*spoken.groups())
+        if parsed:
+            return parsed
+    dotted = _DOTTED_DATE_RE.search(cleaned)
+    if dotted:
+        parsed = _iso_date(*dotted.groups())
+        if parsed:
+            return parsed
+    return "없음"
+
+
+def meeting_date_from_minutes_text(text: str) -> str:
+    """Date under the minutes title, or the 일시 line. Other dates are not the meeting day."""
+    lines = [_clean_minutes_line(line) for line in text.splitlines()[:_FRONT_LINES]]
+    for index, line in enumerate(lines):
+        if "의사록" not in line:
+            continue
+        stripped = _PUBLICATION_RE.sub(" ", line).strip()
+        trailed = _TITLE_DOTTED_RE.search(stripped)
+        if trailed:
+            parsed = _iso_date(*trailed.groups())
+            if parsed:
+                return parsed
+        for follow in lines[index + 1 : index + 8]:
+            if not follow or _PUBLICATION_RE.search(follow):
+                continue
+            matched = _STANDALONE_DOTTED_RE.fullmatch(follow)
+            if matched:
+                parsed = _iso_date(*matched.groups()[:3])
+                if parsed:
+                    return parsed
+            break
+        break
+    session = _SESSION_DATE_RE.search("\n".join(lines))
+    if session:
+        parsed = _iso_date(*session.groups())
+        if parsed:
+            return parsed
+    return "없음"
+
+
+def read_minutes_pdf_text(path: Path) -> str:
+    """First page only. Later pages carry agenda dates, not the meeting day."""
+    try:
+        from pypdf import PdfReader
+
+        reader = PdfReader(str(path))
+        if not reader.pages:
+            return ""
+        return reader.pages[0].extract_text() or ""
+    except Exception:
+        return ""
+
+
+def resolve_meeting_day(
+    block: str,
+    posts: list[DecisionPost],
+    minutes_pdf: Path | None = None,
+) -> str:
+    found = meeting_date(block)
+    if found != "없음":
+        return found
+    for additional in (False, True):
+        for post in posts:
+            if is_additional_minutes(post.title) != additional:
+                continue
+            found = _calendar_date(post.title)
+            if found != "없음":
+                return found
+    if minutes_pdf is not None and minutes_pdf.is_file():
+        return meeting_date_from_minutes_text(read_minutes_pdf_text(minutes_pdf))
+    return "없음"
+
+
 def is_masked_label(text: str) -> bool:
     if any(char in text for char in _MASK_CHARS):
         return True
@@ -382,6 +518,8 @@ def press_agenda_numbers(block: str) -> set[int]:
     found: set[int] = set()
     for matched in re.finditer(r"제\s*(\d{4})\s*-\s*(\d+)\s*호", text):
         found.add(int(matched.group(2)))
+    for matched in re.finditer(r"제\s*(\d+)\s*호", text):
+        found.add(int(matched.group(1)))
     for matched in re.finditer(r"의결\s*(\d+)", text):
         found.add(int(matched.group(1)))
     return found
@@ -444,12 +582,38 @@ def link_agendas(
         masked = agenda.masked or is_masked_label(agenda.filename)
         hits = [] if masked else _name_hits(names, agenda.filename)
         if agenda.number is not None and agenda.number in numbers:
-            linked.append((agenda, hits[0] if len(hits) == 1 else f"의안 {agenda.number}"))
+            linked.append((agenda, "의안번호"))
         elif len(hits) == 1:
-            linked.append((agenda, hits[0]))
+            linked.append((agenda, "실명"))
         else:
             unmatched.append(agenda)
     return linked, unmatched
+
+
+def _press_url(block: str) -> str:
+    for line in block.splitlines():
+        matched = LINK_RE.match(line.strip())
+        if matched:
+            return matched.group(5)
+    return ""
+
+
+def _agenda_record_rows(
+    block: str,
+    agendas: list[AgendaFile],
+) -> list[tuple[AgendaFile, str, str]]:
+    """(agenda, press URL or unmatched, 의안번호/실명 or blank)."""
+    linked, _unmatched = link_agendas(block, (0, "", "", 0), agendas)
+    url = _press_url(block)
+    basis_by_name = {item.filename: basis for item, basis in linked}
+    rows: list[tuple[AgendaFile, str, str]] = []
+    for agenda in agendas:
+        basis = basis_by_name.get(agenda.filename, "")
+        if basis and url:
+            rows.append((agenda, url, basis))
+        else:
+            rows.append((agenda, "unmatched", ""))
+    return rows
 
 
 def sanction_folder(key: tuple[int, str, str, int]) -> str:
@@ -471,6 +635,18 @@ def _bundle_file(folder: Path, kind: str, filename: str) -> Path:
             safe = "minutes-추가.pdf" if "추가" in safe else "minutes.pdf"
         return folder / safe
     return folder / kind / safe
+
+
+def _minutes_names(text: str) -> list[str]:
+    matched = re.search(r"^(- 의사록:\s*)(.*)$", text, re.MULTILINE)
+    if matched is None:
+        return []
+    names: list[str] = []
+    for part in matched.group(2).split(","):
+        name = part.strip()
+        if name.endswith(".pdf") and name not in names:
+            names.append(name)
+    return names
 
 
 def _merge_minutes_line(text: str, minutes: list[str]) -> str:
@@ -498,14 +674,17 @@ def place_sanction_bundle(
     folder = root / sanction_folder(key)
     folder.mkdir(parents=True, exist_ok=True)
     record_path = folder / "record.md"
-    minute_names = [filename for kind, filename, _payload in files if kind == "minutes"]
     if not record_path.exists():
         record_path.write_text(record, encoding="utf-8", newline="\n")
         if written is not None:
             written.append(record_path)
-    elif minute_names:
+    else:
         original = record_path.read_bytes()
-        updated = _merge_minutes_line(original.decode("utf-8"), minute_names)
+        try:
+            previous = original.decode("utf-8")
+        except UnicodeError:
+            previous = ""
+        updated = _merge_minutes_line(record, _minutes_names(previous))
         revised = updated.encode("utf-8")
         if revised != original:
             if restores is not None:
@@ -607,26 +786,34 @@ def _record_text(
     minutes: list[str],
     rows: list[tuple[AgendaFile, str, str]],
     press: str = "미보도",
+    extra_pages: list[str] | None = None,
 ) -> str:
     lines = [
         f"# {sanction_folder(key)}",
         "",
         f"- 회의일: {meeting_day}",
         f"- 게시 URL: {page_url or '없음'}",
-        f"- ZIP URL: {zip_url or '없음'}",
-        f"- 보도: {press or '미보도'}",
-        f"- 의사록: {', '.join(minutes) if minutes else '없음'}",
-        "",
-        "| 번호 | 구분 | 제목 | 마스킹 | 연결 |",
-        "| --- | --- | --- | --- | --- |",
     ]
-    for agenda, label, _path in rows:
+    if extra_pages:
+        lines.append(f"- 추가 게시 URL: {', '.join(extra_pages)}")
+    lines.extend(
+        [
+            f"- ZIP URL: {zip_url or '없음'}",
+            f"- 보도: {press or '미보도'}",
+            f"- 의사록: {', '.join(minutes) if minutes else '없음'}",
+            "",
+            "| 번호 | 구분 | 제목 | 마스킹 | 연결 | 연결근거 |",
+            "| --- | --- | --- | --- | --- | --- |",
+        ]
+    )
+    for agenda, link, basis in rows:
         masked = "예" if agenda.masked else "아니오"
+        number = agenda.number if agenda.number is not None else ""
         lines.append(
-            f"| {agenda.number if agenda.number is not None else ''} | {agenda.kind} | {agenda.filename} | {masked} | {label} |"
+            f"| {number} | {agenda.kind} | {agenda.filename} | {masked} | {link} | {basis} |"
         )
     if not rows:
-        lines.append("|  |  |  |  |  |")
+        lines.append("|  |  |  |  |  |  |")
     lines.append("")
     return "\n".join(lines)
 
@@ -664,13 +851,7 @@ def _apply_agendas(text, posts, download, downloads: Path, written: list[Path], 
     seen_zip: set[str] = set()
     for key, block in blocks.items():
         group = _meeting_posts(key, posts)
-        zip_urls: list[str] = []
-        page_url = ""
-        for post in group:
-            page_url = page_url or post.page_url
-            for url in post.zip_urls:
-                if url not in zip_urls:
-                    zip_urls.append(url)
+        page_url, extra_pages, zip_urls = meeting_source_urls(group)
         agendas: list[AgendaFile] = []
         payloads: list[tuple[str, str, bytes]] = []
         whale: list[str] = []
@@ -716,14 +897,16 @@ def _apply_agendas(text, posts, download, downloads: Path, written: list[Path], 
             minute_files.append(("minutes", name, dest.read_bytes()))
         if not agendas and not whale and not minute_files and not minute_note:
             continue
-        linked, unmatched = link_agendas(block, key, agendas)
-        labeled = [(item, row) for item, row in linked] + [(item, "unmatched") for item in unmatched]
-        by_name = {item.filename: label for item, label in labeled}
+        record_rows = _agenda_record_rows(block, agendas)
+        by_name = {item.filename: (link, basis) for item, link, basis in record_rows}
         rows: list[tuple[AgendaFile, str, str]] = []
+        marker_rows: list[tuple[AgendaFile, str, str]] = []
         bundle_files: list[tuple[str, str, bytes]] = []
         for agenda, (kind, filename, payload) in zip(agendas, payloads):
             relative = f"downloads/sanctions/{folder}/{kind}/{filename}"
-            rows.append((agenda, by_name.get(agenda.filename, "unmatched"), relative))
+            link, basis = by_name.get(agenda.filename, ("unmatched", ""))
+            rows.append((agenda, link, basis))
+            marker_rows.append((agenda, link, relative))
             bundle_files.append((kind, filename, payload))
         bundle_files.extend(minute_files)
         if minute_paths:
@@ -732,24 +915,28 @@ def _apply_agendas(text, posts, download, downloads: Path, written: list[Path], 
             minutes = [minute_note]
         else:
             minutes = []
-        page = next((post.page_url for post in group if post.page_url), page_url)
         place_sanction_bundle(
             downloads / "sanctions",
             key,
             _record_text(
                 key,
-                page,
-                zip_urls[0] if zip_urls else "",
-                meeting_date(block),
+                page_url,
+                ", ".join(zip_urls),
+                resolve_meeting_day(
+                    block,
+                    group,
+                    downloads / "sanctions" / folder / "minutes.pdf",
+                ),
                 minutes,
                 rows,
                 _press_label(block),
+                extra_pages,
             ),
             bundle_files,
             written,
             restores,
         )
-        text, item_report = attach_agenda_markers(text, key, rows)
+        text, item_report = attach_agenda_markers(text, key, marker_rows)
         report.extend(item_report)
     return text, report
 
