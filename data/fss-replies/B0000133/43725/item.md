@@ -5,7 +5,8 @@ ntt_id: '43725'
 number: '823'
 title: '[2002-143]지분법 회계처리시 종속회사채권에 설정한 대손충당금의 제거여부(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43725&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '43766'
 number: '574'
 title: '[2003-121]금융자산 양도관련 회계처리(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43766&menuNo=200443

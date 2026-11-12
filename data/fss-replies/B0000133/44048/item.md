@@ -5,7 +5,8 @@ ntt_id: '44048'
 number: '1023'
 title: '[2009-031] 유형자산 감가상각시 내용연수 적용에 대한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-09-28'
 published_date: '2009-09-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44048&menuNo=200443

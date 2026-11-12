@@ -5,7 +5,8 @@ ntt_id: '43981'
 number: '474'
 title: '[2003-011] 재평가된 자산의 감가상각방법 변경시 회계변경누적효과 관련 질의 (''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43981&menuNo=200443

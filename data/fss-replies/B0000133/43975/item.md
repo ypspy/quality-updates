@@ -5,7 +5,8 @@ ntt_id: '43975'
 number: '468'
 title: '[2003-005]비상장주식평가시 순자산가액의 회복가능성 여부관련 질의(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43975&menuNo=200443

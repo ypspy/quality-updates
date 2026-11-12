@@ -5,7 +5,8 @@ ntt_id: '44078'
 number: '1035'
 title: '[2009-043] 자체건설 분양아파트의 해약 및 재분양시 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-09-28'
 published_date: '2009-09-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44078&menuNo=200443

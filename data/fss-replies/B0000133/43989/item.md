@@ -5,7 +5,8 @@ ntt_id: '43989'
 number: '495'
 title: '[2003-034] 반기재무제표 양식 및 공인회계사의 의견표시에 대한 질의회신 (''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43989&menuNo=200443

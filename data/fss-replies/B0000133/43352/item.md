@@ -5,7 +5,8 @@ ntt_id: '43352'
 number: '23'
 title: '[2006-010] 1심 패심결과의 충당부채 인식요건 충족여부 (''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43352&menuNo=200443

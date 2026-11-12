@@ -5,7 +5,8 @@ ntt_id: '44208'
 number: '968'
 title: '[2001-152]부동산의 수익인식 시점에 대한 회계처리 검토(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44208&menuNo=200443

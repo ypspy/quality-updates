@@ -5,7 +5,8 @@ ntt_id: '43243'
 number: '112'
 title: '[2007-059]신설법인의 연결범위와 관련된 질의(''20.2.7 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43243&menuNo=200443

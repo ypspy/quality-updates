@@ -5,7 +5,8 @@ ntt_id: '43168'
 number: '37'
 title: '[2007-024] 기업발전적립금의 이익잉여금 분류'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43168&menuNo=200443

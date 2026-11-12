@@ -5,7 +5,8 @@ ntt_id: '44218'
 number: '1049'
 title: '[2009-057] 재고자산의 고정제조간접비 배부에 관한 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-12-31'
 published_date: '2009-12-31'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44218&menuNo=200443

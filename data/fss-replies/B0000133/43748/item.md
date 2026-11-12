@@ -5,7 +5,8 @@ ntt_id: '43748'
 number: '556'
 title: '[2003-103]위험회피회계 적용여부(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43748&menuNo=200443

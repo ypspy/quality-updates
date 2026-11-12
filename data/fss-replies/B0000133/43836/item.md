@@ -5,7 +5,8 @@ ntt_id: '43836'
 number: '644'
 title: '[2008-027]대출취급시 모집인에게 지급하는 수수료의 회계처리(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-28'
 published_date: '2009-01-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43836&menuNo=200443

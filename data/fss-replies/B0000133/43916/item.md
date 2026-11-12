@@ -5,7 +5,8 @@ ntt_id: '43916'
 number: '724'
 title: '[2002-037] 전기오류수정손익을 소급법으로 반영하기 위한 중대한 오류의 판단기준(''11.5.4)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43916&menuNo=200443

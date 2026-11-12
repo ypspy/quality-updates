@@ -5,7 +5,8 @@ ntt_id: '43783'
 number: '591'
 title: '[2003-144] 지분법 적용여부에 대한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43783&menuNo=200443

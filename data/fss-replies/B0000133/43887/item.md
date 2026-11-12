@@ -5,7 +5,8 @@ ntt_id: '43887'
 number: '695'
 title: '[2002-008]주식의 공정가액을 알기 어려운 경우의 채무재조정 회계처리(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43887&menuNo=200443

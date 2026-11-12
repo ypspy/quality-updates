@@ -5,7 +5,8 @@ ntt_id: '44297'
 number: '1139'
 title: 일반기업회계기준 개정 등에 따른 질의회신 수정 또는 폐기('18.12.24.)
 department: 회계관리국
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2018-12-28'
 published_date: '2018-12-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44297&menuNo=200443

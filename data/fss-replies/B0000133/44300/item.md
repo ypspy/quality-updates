@@ -5,7 +5,8 @@ ntt_id: '44300'
 number: '1142'
 title: '[2020-002] 저축은행이 사모투자신탁펀드로부터 취득한 수익증권 회계처리에 대한 질의회신'
 department: 회계관리국
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2020-11-11'
 published_date: '2020-11-11'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44300&menuNo=200443

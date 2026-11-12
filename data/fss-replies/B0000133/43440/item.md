@@ -5,7 +5,8 @@ ntt_id: '43440'
 number: '254'
 title: '[2005-057] 토지대금(양도소득세 상당액) 환수에 따른 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43440&menuNo=200443

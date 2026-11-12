@@ -5,7 +5,8 @@ ntt_id: '43438'
 number: '252'
 title: '[2005-055]계열분리된 회사가 특수관계자에 해당되는지 여부(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43438&menuNo=200443

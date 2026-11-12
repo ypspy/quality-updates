@@ -5,7 +5,8 @@ ntt_id: '44244'
 number: '1083'
 title: '[2010-017]공연장 건립비용에 대한 후원금에 관한 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2010-09-28'
 published_date: '2010-09-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44244&menuNo=200443

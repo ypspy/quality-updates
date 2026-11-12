@@ -5,7 +5,8 @@ ntt_id: '43308'
 number: '139'
 title: '[2006-085]지배·종속 혹은 종속회사간 지분인수 및 사업부양수도시 영업권인식(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43308&menuNo=200443

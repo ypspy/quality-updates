@@ -5,7 +5,8 @@ ntt_id: '44181'
 number: '941'
 title: '[2001-125]완전감자관련 주식매수청구권의 회계처리 검토(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44181&menuNo=200443

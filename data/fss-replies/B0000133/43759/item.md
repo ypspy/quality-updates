@@ -5,7 +5,8 @@ ntt_id: '43759'
 number: '567'
 title: '[2003-114] 선매출된 첨가소화채권의 중도매입에 따른 유가증권 평가'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43759&menuNo=200443

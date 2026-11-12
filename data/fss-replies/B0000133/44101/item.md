@@ -5,7 +5,8 @@ ntt_id: '44101'
 number: '863'
 title: '[2001-018]연구개발활동 관련 회계처리(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44101&menuNo=200443

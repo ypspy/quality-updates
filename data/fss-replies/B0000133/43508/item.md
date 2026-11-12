@@ -5,7 +5,8 @@ ntt_id: '43508'
 number: '456'
 title: '[2004-137] 자회사의 만기보유증권 매각이 연결재무제표의 작성에 미치는 영향'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-24'
 published_date: '2008-12-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43508&menuNo=200443

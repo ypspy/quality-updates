@@ -5,7 +5,8 @@ ntt_id: '43236'
 number: '105'
 title: '[2006-061]지분법관련 중소기업회계처리특례에 대한 질의회신(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 중소기업회계처리특례
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43236&menuNo=200443

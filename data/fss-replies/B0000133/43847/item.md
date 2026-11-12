@@ -5,7 +5,8 @@ ntt_id: '43847'
 number: '655'
 title: '[2008-038]연결재무제표의 연결범위 해당 여부 질의(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-29'
 published_date: '2009-01-29'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43847&menuNo=200443

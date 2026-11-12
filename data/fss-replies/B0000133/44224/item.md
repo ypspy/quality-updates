@@ -5,7 +5,8 @@ ntt_id: '44224'
 number: '1056'
 title: '[2009-064] 사후 정산조건이 있는 상장예정주식의 양수도 관련 회계처리에 관한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2010-01-19'
 published_date: '2010-01-19'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44224&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '44006'
 number: '839'
 title: '[2002-163]종속회사간 합병 회계처리에 대한 질의(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44006&menuNo=200443

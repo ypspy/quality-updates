@@ -5,7 +5,8 @@ ntt_id: '44104'
 number: '866'
 title: '[2001-021]유동화전문회사회계처리기준 관련 질의(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44104&menuNo=200443

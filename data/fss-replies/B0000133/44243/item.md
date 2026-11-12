@@ -5,7 +5,8 @@ ntt_id: '44243'
 number: '1082'
 title: '[2010-016]일괄취득한 유형자산의 취득원가에 관한 회계처리(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2010-09-28'
 published_date: '2010-09-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44243&menuNo=200443

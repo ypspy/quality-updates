@@ -5,7 +5,8 @@ ntt_id: '43696'
 number: '794'
 title: '[2002-112] 매출채권신탁 및 부동산관리처분신탁 수익권증서 매입시 회계처리(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43696&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '44107'
 number: '1018'
 title: 의무전환사채 관련 질의회신 요약 삭제
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-07-21'
 published_date: '2009-07-21'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44107&menuNo=200443

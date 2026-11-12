@@ -5,7 +5,8 @@ ntt_id: '43937'
 number: '745'
 title: '[2002-059] 화폐성 외화자산 및 부채의 외화환산시 적용환율의 변경'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43937&menuNo=200443

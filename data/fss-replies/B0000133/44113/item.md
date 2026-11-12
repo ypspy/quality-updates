@@ -5,7 +5,8 @@ ntt_id: '44113'
 number: '873'
 title: '[2001-032] 사용제한예금의 회계처리에 관한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44113&menuNo=200443

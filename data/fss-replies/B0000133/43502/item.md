@@ -5,7 +5,8 @@ ntt_id: '43502'
 number: '450'
 title: '[2004-131] 피투자회사 대여금에 대한 외화환산이익의 지분법 적용시 제거여부'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-24'
 published_date: '2008-12-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43502&menuNo=200443

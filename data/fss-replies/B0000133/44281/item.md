@@ -5,7 +5,8 @@ ntt_id: '44281'
 number: '1123'
 title: '[2013-004] MMT 금융상품의 계정과목 분류 관련 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2014-02-04'
 published_date: '2014-02-04'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44281&menuNo=200443

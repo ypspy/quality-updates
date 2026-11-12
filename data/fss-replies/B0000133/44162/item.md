@@ -5,7 +5,8 @@ ntt_id: '44162'
 number: '922'
 title: '[2001-098] 회사정리절차 진행중인 회사의 연결대상 종속회사 포함여부에 대한 질의 (''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44162&menuNo=200443

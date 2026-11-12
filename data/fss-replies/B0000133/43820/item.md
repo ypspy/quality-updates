@@ -5,7 +5,8 @@ ntt_id: '43820'
 number: '628'
 title: '[2008-011] 유상증자 미참여로 지배력을 상실한 경우 중단사업 해당여부 등(''20.2.7. 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-28'
 published_date: '2009-01-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43820&menuNo=200443

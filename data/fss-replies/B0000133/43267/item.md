@@ -5,7 +5,8 @@ ntt_id: '43267'
 number: '184'
 title: '[2007-093] 교환사채 발행에 대한 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43267&menuNo=200443

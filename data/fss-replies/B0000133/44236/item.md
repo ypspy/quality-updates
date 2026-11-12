@@ -5,7 +5,8 @@ ntt_id: '44236'
 number: '1075'
 title: '[2010-009]무선 재판매 매출의 수익 인식 회계처리에 대한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2010-07-28'
 published_date: '2010-07-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44236&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '43447'
 number: '261'
 title: '[2005-064] 매도가능증권평가이익에 대한 이연법인세부채 인식여부'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43447&menuNo=200443

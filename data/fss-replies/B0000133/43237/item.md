@@ -5,7 +5,8 @@ ntt_id: '43237'
 number: '106'
 title: '[2006-062] 지분법적용 중단시 적용할 장부가액에 대한 질의회신'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43237&menuNo=200443

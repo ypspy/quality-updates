@@ -5,7 +5,8 @@ ntt_id: '43272'
 number: '189'
 title: '[2006-082]합병 및 분할 관련 일련의 회계처리에 대한 질의(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43272&menuNo=200443

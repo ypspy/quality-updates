@@ -5,7 +5,8 @@ ntt_id: '43372'
 number: '272'
 title: '[2005-076]부동산투자신탁의 투자재산(부동산)의 감가상각대상여부 질의(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43372&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '44261'
 number: '1103'
 title: '[2011-003]건축물 수용시 처분손익 인식시기에 대한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2011-03-03'
 published_date: '2011-03-03'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44261&menuNo=200443

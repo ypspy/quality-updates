@@ -5,7 +5,8 @@ ntt_id: '44292'
 number: '1134'
 title: '[2016-002] 사모NPL펀드 투자금 회계처리에 관한 질의회신'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2017-05-08'
 published_date: '2017-05-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44292&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '44233'
 number: '1065'
 title: '[2009-073] 이종통화스왑의 공정가액위험회피회계 적용 관련 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2010-01-19'
 published_date: '2010-01-19'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44233&menuNo=200443

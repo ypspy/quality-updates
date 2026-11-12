@@ -5,7 +5,8 @@ ntt_id: '43200'
 number: '69'
 title: '[2006-039] 차입약정 위반한 BS일 이후 만기연장시 유동성 대체여부'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43200&menuNo=200443

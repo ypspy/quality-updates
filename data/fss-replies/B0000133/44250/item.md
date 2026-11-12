@@ -5,7 +5,8 @@ ntt_id: '44250'
 number: '1089'
 title: '[2010-023]피투자회사간 합병시 투자회사 회계처리(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2010-09-28'
 published_date: '2010-09-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44250&menuNo=200443

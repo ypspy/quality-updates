@@ -5,7 +5,8 @@ ntt_id: '43442'
 number: '256'
 title: '[2005-059] 기업회계기준서 제16호 법인세회계에 대한 질의 (''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 기업회계기준서 제16호
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43442&menuNo=200443

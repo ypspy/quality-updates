@@ -5,7 +5,8 @@ ntt_id: '43951'
 number: '759'
 title: '[2002-073]국고보조금에 대한 회계처리(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43951&menuNo=200443

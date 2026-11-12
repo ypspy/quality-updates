@@ -5,7 +5,8 @@ ntt_id: '44259'
 number: '1101'
 title: '[2011-001]온라인 동영상 강의에 대한 수익인식 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2011-03-02'
 published_date: '2011-03-02'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44259&menuNo=200443

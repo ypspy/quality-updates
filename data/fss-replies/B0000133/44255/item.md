@@ -5,7 +5,8 @@ ntt_id: '44255'
 number: '1097'
 title: '[2010-031]지분법 중단 관련 장기채권 범위'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2011-01-24'
 published_date: '2011-01-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44255&menuNo=200443

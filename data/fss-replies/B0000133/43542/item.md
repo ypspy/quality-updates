@@ -5,7 +5,8 @@ ntt_id: '43542'
 number: '349'
 title: '[2004-025] 도메인 등록기관의 수수료에 대한 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-24'
 published_date: '2008-12-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43542&menuNo=200443

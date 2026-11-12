@@ -5,7 +5,8 @@ ntt_id: '44099'
 number: '861'
 title: '[2001-016]법인세법상의 특별상각을 기업회계상 인정할 것인지의 여부(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44099&menuNo=200443

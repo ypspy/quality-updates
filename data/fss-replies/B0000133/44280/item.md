@@ -5,7 +5,8 @@ ntt_id: '44280'
 number: '1122'
 title: '[2013-003] 출자전환주식의 회계처리 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2014-02-04'
 published_date: '2014-02-04'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44280&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '44228'
 number: '1060'
 title: '[2009-068]풋백옵션 관련 회계처리 질의(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2010-01-19'
 published_date: '2010-01-19'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44228&menuNo=200443

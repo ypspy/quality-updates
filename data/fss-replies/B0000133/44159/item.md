@@ -5,7 +5,8 @@ ntt_id: '44159'
 number: '919'
 title: '[2001-094] 지분법적용시 매출채권의 대손충당금 처리 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44159&menuNo=200443

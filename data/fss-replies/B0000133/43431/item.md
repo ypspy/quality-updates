@@ -5,7 +5,8 @@ ntt_id: '43431'
 number: '245'
 title: '[2005-048]뮤추얼펀드 청산으로 인한 현물주식 인출시 수익인식(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43431&menuNo=200443

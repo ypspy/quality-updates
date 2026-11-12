@@ -5,7 +5,8 @@ ntt_id: '43879'
 number: '687'
 title: '[2008-070] 임대의무기간이 10년인 공공건설임대주택에 대한 회계처리(`25.2.25.폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 기업회계기준 등에 관한 해석 56-90
 reply_date: '2009-01-29'
 published_date: '2009-01-29'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43879&menuNo=200443

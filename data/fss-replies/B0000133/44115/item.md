@@ -5,7 +5,8 @@ ntt_id: '44115'
 number: '875'
 title: '[2001-034]자사주펀드에서 발생한 자기주식처분손실의 회계처리에 관한 질의(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44115&menuNo=200443

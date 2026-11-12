@@ -5,7 +5,8 @@ ntt_id: '43287'
 number: '118'
 title: '[2006-072] 지분법 적용 중지시 미반영손실의 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43287&menuNo=200443

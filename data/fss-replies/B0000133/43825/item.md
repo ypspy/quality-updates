@@ -5,7 +5,8 @@ ntt_id: '43825'
 number: '633'
 title: '[2008-016] CRM용 바코드 스캐너 취득가액에 대한 회계질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-28'
 published_date: '2009-01-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43825&menuNo=200443

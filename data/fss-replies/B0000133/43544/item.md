@@ -5,7 +5,8 @@ ntt_id: '43544'
 number: '351'
 title: '[2004-028] 외환차손익 인식시점과 매입채무 여부'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-24'
 published_date: '2008-12-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43544&menuNo=200443

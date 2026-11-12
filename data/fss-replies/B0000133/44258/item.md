@@ -5,7 +5,8 @@ ntt_id: '44258'
 number: '1100'
 title: '[2010-034]재평가된 유형자산의 물적분할시 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2011-03-02'
 published_date: '2011-03-02'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44258&menuNo=200443

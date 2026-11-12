@@ -5,7 +5,8 @@ ntt_id: '43170'
 number: '39'
 title: '[2007-025] 구조조정일환으로 지급한 명예퇴직금 (''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43170&menuNo=200443

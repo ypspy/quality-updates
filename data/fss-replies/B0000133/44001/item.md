@@ -5,7 +5,8 @@ ntt_id: '44001'
 number: '834'
 title: '[2002-157] 연결감사관련 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44001&menuNo=200443

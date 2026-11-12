@@ -5,7 +5,8 @@ ntt_id: '44149'
 number: '909'
 title: '[2001-078]완전자본잠식 회사에 대한 지분법 평가(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44149&menuNo=200443

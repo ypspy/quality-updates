@@ -5,7 +5,8 @@ ntt_id: '43871'
 number: '679'
 title: '[2008-062] 신용연계채권(CLN) 회계처리에 관한 질의 (''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-29'
 published_date: '2009-01-29'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43871&menuNo=200443

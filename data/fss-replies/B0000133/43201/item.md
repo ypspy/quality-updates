@@ -5,7 +5,8 @@ ntt_id: '43201'
 number: '70'
 title: '[2007-041] 유가증권 추가 매입시의 회계처리 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43201&menuNo=200443

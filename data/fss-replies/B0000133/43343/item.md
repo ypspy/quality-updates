@@ -5,7 +5,8 @@ ntt_id: '43343'
 number: '14'
 title: '[2007-009] 상품권 제작의 수익인식방법'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43343&menuNo=200443

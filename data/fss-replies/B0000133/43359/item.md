@@ -5,7 +5,8 @@ ntt_id: '43359'
 number: '312'
 title: '[2005-116]채권발행 및 통화스왑거래에 대한 간편법 적용여부(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43359&menuNo=200443

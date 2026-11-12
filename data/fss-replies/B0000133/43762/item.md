@@ -5,7 +5,9 @@ ntt_id: '43762'
 number: '570'
 title: '[2003-117] 기업회계기준서 제8호 유가증권의 적용관련 질의(''11.5.4)'
 department: 회계제도실
-standards: []
+standards:
+- 기업회계기준서 제8호
+- 일반기업회계기준 제6장
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43762&menuNo=200443

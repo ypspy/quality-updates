@@ -5,7 +5,8 @@ ntt_id: '43219'
 number: '88'
 title: '[2006-049]장외 외화유가증권 관련 회계처리 질의(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43219&menuNo=200443

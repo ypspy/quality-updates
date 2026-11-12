@@ -5,7 +5,8 @@ ntt_id: '44277'
 number: '1119'
 title: '[2012-003] 합병시 비상장주식 공정가치 평가에 대한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2013-02-13'
 published_date: '2013-02-13'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44277&menuNo=200443

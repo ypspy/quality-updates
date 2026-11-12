@@ -5,7 +5,8 @@ ntt_id: '44083'
 number: '1041'
 title: '[2009-049] ABCP 매입시 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-09-28'
 published_date: '2009-09-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44083&menuNo=200443

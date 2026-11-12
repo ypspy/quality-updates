@@ -5,7 +5,8 @@ ntt_id: '43846'
 number: '654'
 title: '[2008-037] 피투자회사의 투자회사 주식에 대한 매도가능증권평가손익에 대한 지분법 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-29'
 published_date: '2009-01-29'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43846&menuNo=200443

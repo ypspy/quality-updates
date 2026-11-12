@@ -5,7 +5,8 @@ ntt_id: '44090'
 number: '852'
 title: '[2001-005]기계제조업의 예약매출여부 및 진행율 적용방법(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44090&menuNo=200443

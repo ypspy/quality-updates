@@ -5,7 +5,8 @@ ntt_id: '44252'
 number: '1094'
 title: '[2010-028]완성차 구매후 해체하여 수출시 총액 순액 여부 관련 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2011-01-24'
 published_date: '2011-01-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44252&menuNo=200443

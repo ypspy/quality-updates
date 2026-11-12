@@ -5,7 +5,8 @@ ntt_id: '44061'
 number: '1010'
 title: '[2009-019] 연결대상 범위에 대한 질의(''20.2.7. 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-05-14'
 published_date: '2009-05-14'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44061&menuNo=200443

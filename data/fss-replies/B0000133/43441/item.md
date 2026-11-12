@@ -5,7 +5,8 @@ ntt_id: '43441'
 number: '255'
 title: '[2005-058]해외법인 원화표시 재무제표 작성시 환산방법(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43441&menuNo=200443

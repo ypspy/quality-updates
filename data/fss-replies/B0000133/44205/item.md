@@ -5,7 +5,8 @@ ntt_id: '44205'
 number: '965'
 title: '[2001-149] 러시아펀드와 손실연계펀드에 대한 회계처리 재검토'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44205&menuNo=200443

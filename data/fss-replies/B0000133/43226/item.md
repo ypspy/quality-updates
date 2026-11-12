@@ -5,7 +5,8 @@ ntt_id: '43226'
 number: '95'
 title: '[2007-054]투자회사와 피투자회사간 회계정책이 상이한 경우 지분법 회계처리(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43226&menuNo=200443

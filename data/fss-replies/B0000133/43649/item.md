@@ -5,7 +5,8 @@ ntt_id: '43649'
 number: '522'
 title: '[2003-065] 재과금사업자의 매출인식에 대한 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43649&menuNo=200443

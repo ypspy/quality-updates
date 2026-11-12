@@ -5,7 +5,8 @@ ntt_id: '43397'
 number: '297'
 title: '[2005-101] 해외소재 종속법인의 지분법 중단과 관련된 회계처리 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43397&menuNo=200443

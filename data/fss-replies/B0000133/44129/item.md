@@ -5,7 +5,8 @@ ntt_id: '44129'
 number: '889'
 title: '[2001-052] 양수인에게 상환청구권을 부여하는 매출채권 양도거래의 회계처리 (''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44129&menuNo=200443

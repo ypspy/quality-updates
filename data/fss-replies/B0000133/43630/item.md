@@ -5,7 +5,8 @@ ntt_id: '43630'
 number: '1091'
 title: '[2010-025]무형자산 취득원가의 조정에 대한 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2010-10-28'
 published_date: '2010-10-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43630&menuNo=200443

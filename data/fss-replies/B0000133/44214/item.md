@@ -5,7 +5,8 @@ ntt_id: '44214'
 number: '1045'
 title: '[2009-053]법원 화해결정에 따른 매출계약 포기 관련 회계처리(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-12-31'
 published_date: '2009-12-31'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44214&menuNo=200443

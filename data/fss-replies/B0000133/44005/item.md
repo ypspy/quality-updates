@@ -5,7 +5,8 @@ ntt_id: '44005'
 number: '838'
 title: '[2002-162]현물출자에 의한 영업양수도시 회계처리(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44005&menuNo=200443

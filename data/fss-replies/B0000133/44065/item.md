@@ -5,7 +5,8 @@ ntt_id: '44065'
 number: '1015'
 title: '[2009-024] 공정가치 평가모형 적용에 관한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-05-14'
 published_date: '2009-05-14'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44065&menuNo=200443

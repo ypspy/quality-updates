@@ -5,7 +5,8 @@ ntt_id: '44175'
 number: '935'
 title: '[2001-116] 재리스종료자산에 대한 공정가액 계상여부에 관한 검토'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44175&menuNo=200443

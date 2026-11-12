@@ -5,7 +5,8 @@ ntt_id: '43813'
 number: '621'
 title: '[2008-004] 장기수강료 매출수익 인식'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-28'
 published_date: '2009-01-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43813&menuNo=200443

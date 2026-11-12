@@ -5,7 +5,8 @@ ntt_id: '43378'
 number: '278'
 title: '[2005-082]NPL 수익인식 및 대손충당금 설정 관련 회계처리(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43378&menuNo=200443

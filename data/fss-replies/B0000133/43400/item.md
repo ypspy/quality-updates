@@ -5,7 +5,8 @@ ntt_id: '43400'
 number: '300'
 title: '[2005-104]합병을 전제로 한 주식취득시 지분법 및 연결적용여부(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43400&menuNo=200443

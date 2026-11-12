@@ -5,7 +5,8 @@ ntt_id: '43775'
 number: '583'
 title: '[2003-130]합병시 유가증권 분류변경 여부에 관한 질의(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43775&menuNo=200443

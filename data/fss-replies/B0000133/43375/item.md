@@ -5,7 +5,8 @@ ntt_id: '43375'
 number: '275'
 title: '[2005-079] 소멸시효완성된 휴면보험금 회계처리에 대한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43375&menuNo=200443

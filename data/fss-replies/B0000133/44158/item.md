@@ -5,7 +5,8 @@ ntt_id: '44158'
 number: '918'
 title: '[2001-092] 지분법 적용시 투자제거차액 산정에 대한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44158&menuNo=200443

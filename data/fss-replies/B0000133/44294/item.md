@@ -5,7 +5,8 @@ ntt_id: '44294'
 number: '1136'
 title: '[2017-002] 대주주의 부동산 무상증여 회계처리에 관한 질의회신'
 department: 회계관리국
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2018-06-08'
 published_date: '2018-06-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44294&menuNo=200443

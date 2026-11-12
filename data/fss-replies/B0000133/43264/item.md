@@ -5,7 +5,8 @@ ntt_id: '43264'
 number: '181'
 title: '[2006-108] 해외 현지법인 설립후 주택사업 시행, 시공, 분양의 주된 참여자로서의 회계처리 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43264&menuNo=200443

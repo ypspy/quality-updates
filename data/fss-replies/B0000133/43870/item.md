@@ -5,7 +5,8 @@ ntt_id: '43870'
 number: '678'
 title: '[2008-061] 공정가액위험회피회계 적용가능여부 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-29'
 published_date: '2009-01-29'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43870&menuNo=200443

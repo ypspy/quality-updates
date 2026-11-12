@@ -5,7 +5,8 @@ ntt_id: '44287'
 number: '1129'
 title: '[2015-003] 유형자산 처분관련 수익인식 가능 여부 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2016-01-05'
 published_date: '2016-01-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44287&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '43181'
 number: '50'
 title: '[2006-029] 인터넷미디어랩사의 수익인식'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43181&menuNo=200443

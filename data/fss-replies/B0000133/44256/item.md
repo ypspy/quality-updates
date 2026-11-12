@@ -5,7 +5,8 @@ ntt_id: '44256'
 number: '1098'
 title: '[2010-032]순환출자시 임원겸직에 따른 지분법 적용 여부'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2011-01-24'
 published_date: '2011-01-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44256&menuNo=200443

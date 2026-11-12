@@ -5,7 +5,8 @@ ntt_id: '43707'
 number: '805'
 title: '[2002-123]투자주식 분류기준에 관한 질의(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43707&menuNo=200443

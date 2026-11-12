@@ -5,7 +5,8 @@ ntt_id: '43778'
 number: '586'
 title: '[2003-133] 대출채권 유효수익 인식 및 대출부대수익,비용 이연에 관한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43778&menuNo=200443

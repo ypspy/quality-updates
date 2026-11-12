@@ -5,7 +5,8 @@ ntt_id: '43858'
 number: '666'
 title: '[2008-049]합병후 합병한 사업부문을 물적분할 할 경우 영업권의 회계처리(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-29'
 published_date: '2009-01-29'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43858&menuNo=200443

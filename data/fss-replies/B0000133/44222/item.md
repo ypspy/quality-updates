@@ -5,7 +5,8 @@ ntt_id: '44222'
 number: '1053'
 title: '[2009-061]금융지주회사 설립시 종속회사 주식 취득원가 결정(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-12-31'
 published_date: '2009-12-31'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44222&menuNo=200443

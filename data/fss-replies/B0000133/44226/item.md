@@ -5,7 +5,8 @@ ntt_id: '44226'
 number: '1058'
 title: '[2009-066] 대출이자 환급액의 회계처리 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2010-01-19'
 published_date: '2010-01-19'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44226&menuNo=200443

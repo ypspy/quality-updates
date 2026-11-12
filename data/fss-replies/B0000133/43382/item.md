@@ -5,7 +5,8 @@ ntt_id: '43382'
 number: '282'
 title: '[2005-086] 회계변경의 누적효과의 표시에 대한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43382&menuNo=200443

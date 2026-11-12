@@ -5,7 +5,8 @@ ntt_id: '43622'
 number: '429'
 title: '[2004-109] 신설 생명보험사의 유가증권 분류'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-24'
 published_date: '2008-12-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43622&menuNo=200443

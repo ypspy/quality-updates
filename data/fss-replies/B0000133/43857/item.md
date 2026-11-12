@@ -6,7 +6,8 @@ number: '665'
 title: '[2008-048]인적분할합병에 따라 매도가능증권 중 자기주식으로 전환되는 부분과 관련된 매도가능증권평가손익의 회계처리 방법 질의(''11.5.4
   폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-29'
 published_date: '2009-01-29'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43857&menuNo=200443

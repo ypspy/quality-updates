@@ -5,7 +5,8 @@ ntt_id: '44204'
 number: '964'
 title: '[2001-148] 모집수당 등의 선급비용(자산) 계상 관련 질의검토'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44204&menuNo=200443

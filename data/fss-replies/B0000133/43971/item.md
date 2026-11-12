@@ -5,7 +5,8 @@ ntt_id: '43971'
 number: '779'
 title: '[2002-097] 임대중인 상가의 분양시 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43971&menuNo=200443

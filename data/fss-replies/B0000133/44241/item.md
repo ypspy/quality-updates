@@ -5,7 +5,8 @@ ntt_id: '44241'
 number: '1080'
 title: '[2010-014]독점판매권 대가로 수령한 계약금의 수익인식시기'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2010-09-28'
 published_date: '2010-09-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44241&menuNo=200443

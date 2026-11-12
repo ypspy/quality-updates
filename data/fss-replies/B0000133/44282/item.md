@@ -5,7 +5,8 @@ ntt_id: '44282'
 number: '1124'
 title: '[2014-001] 외국모회사의 국내 종속회사간 합병시 연결장부금액에 관한 질의(''20.2.7. 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2014-11-24'
 published_date: '2014-11-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44282&menuNo=200443

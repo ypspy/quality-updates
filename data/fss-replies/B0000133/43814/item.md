@@ -5,7 +5,8 @@ ntt_id: '43814'
 number: '622'
 title: '[2008-005]태양광모듈(제품) 및 발전시스템 설치(용역) 매출 수익인식(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-28'
 published_date: '2009-01-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43814&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '43865'
 number: '673'
 title: '[2008-056] 파생상품의 중소기업회계처리 특례 적용여부에 대한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 중소기업회계처리 특례
 reply_date: '2009-01-29'
 published_date: '2009-01-29'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43865&menuNo=200443

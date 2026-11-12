@@ -5,7 +5,8 @@ ntt_id: '43425'
 number: '239'
 title: '[2005-042] 부동산을 기초로 한 자산유동화관련 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43425&menuNo=200443

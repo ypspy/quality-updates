@@ -5,7 +5,8 @@ ntt_id: '44240'
 number: '1079'
 title: '[2010-013]외국 모회사의 국내 종속회사간 합병시 회계처리에 관한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2010-07-28'
 published_date: '2010-07-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44240&menuNo=200443

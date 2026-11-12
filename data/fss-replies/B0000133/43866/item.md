@@ -5,7 +5,8 @@ ntt_id: '43866'
 number: '674'
 title: '[2008-057]외화지분법 적용주식의 위험회피회계 중단시 기타포괄손익의 당기손익 인식시점에 대한 질의(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-29'
 published_date: '2009-01-29'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43866&menuNo=200443

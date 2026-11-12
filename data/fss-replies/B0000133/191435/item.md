@@ -5,7 +5,8 @@ ntt_id: '191435'
 number: '1147'
 title: 「기업회계기준 등에 관한 해석 56-90」 유효기간 경과에 따른 관련 질의회신 수정 또는 폐기(`25.2.25)
 department: 회계감독국
-standards: []
+standards:
+- 기업회계기준 등에 관한 해석 56-90
 reply_date: '2025-02-25'
 published_date: '2025-02-25'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=191435&menuNo=200443

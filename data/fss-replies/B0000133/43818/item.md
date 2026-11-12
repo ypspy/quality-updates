@@ -5,7 +5,8 @@ ntt_id: '43818'
 number: '626'
 title: '[2008-009] 물적분할신설회사 주식매각결정 부재시 중단사업 해당여부'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-28'
 published_date: '2009-01-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43818&menuNo=200443

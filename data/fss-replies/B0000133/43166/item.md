@@ -5,7 +5,8 @@ ntt_id: '43166'
 number: '35'
 title: '[2007-023] 준정년특별퇴직제도의 퇴직금 회계처리(''18.12.24. 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준 제21장 (종업원급여)
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43166&menuNo=200443

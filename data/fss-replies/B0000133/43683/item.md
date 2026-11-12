@@ -5,7 +5,8 @@ ntt_id: '43683'
 number: '781'
 title: '[2002-099] 건설회사 기부체납자산의 공사원가 산입여부 및 제조경비 배부'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43683&menuNo=200443

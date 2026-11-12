@@ -5,7 +5,8 @@ ntt_id: '43319'
 number: '150'
 title: '[2006-092] 지배종속회사간 합병시 부의지분법자본변동에 대한 회계처리 (''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43319&menuNo=200443

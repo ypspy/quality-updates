@@ -5,7 +5,8 @@ ntt_id: '44053'
 number: '994'
 title: '[2009-003] 아이템매출 수익인식방법 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-05-14'
 published_date: '2009-05-14'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44053&menuNo=200443

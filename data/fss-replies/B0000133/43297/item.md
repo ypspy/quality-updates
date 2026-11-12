@@ -5,7 +5,8 @@ ntt_id: '43297'
 number: '128'
 title: '[2006-077]자산 70억원 미만 자회사에 대한 연결여부(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43297&menuNo=200443

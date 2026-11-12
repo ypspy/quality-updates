@@ -5,7 +5,8 @@ ntt_id: '44121'
 number: '881'
 title: '[2001-042] 투자유가증권처분손익의 영업수익비용 계상여부'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44121&menuNo=200443

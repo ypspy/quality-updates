@@ -5,7 +5,8 @@ ntt_id: '43224'
 number: '93'
 title: '[2006-052] 출자전환주식 매각에 대한 회계처리 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43224&menuNo=200443

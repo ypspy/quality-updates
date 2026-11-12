@@ -5,7 +5,8 @@ ntt_id: '43260'
 number: '177'
 title: '[2006-106] 특별수선충당금 적립에 관한 회계처리(`25.2.25.수정)'
 department: 회계제도실
-standards: []
+standards:
+- 기업회계기준 등에 관한 해석 56-90
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43260&menuNo=200443

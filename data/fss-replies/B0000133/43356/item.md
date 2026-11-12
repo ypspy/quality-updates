@@ -5,7 +5,8 @@ ntt_id: '43356'
 number: '27'
 title: '[2007-017] 프렌차이즈업체 매출의 총액 또는 순액인식'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43356&menuNo=200443

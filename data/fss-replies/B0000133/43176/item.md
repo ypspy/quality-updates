@@ -5,7 +5,8 @@ ntt_id: '43176'
 number: '45'
 title: '[2007-028] 우리사주조합에 대한 대여금 처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43176&menuNo=200443

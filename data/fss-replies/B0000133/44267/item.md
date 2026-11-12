@@ -5,7 +5,8 @@ ntt_id: '44267'
 number: '1109'
 title: '[2011-007]유형자산의 감가상각방법 변경에 대한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2012-01-03'
 published_date: '2012-01-03'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44267&menuNo=200443

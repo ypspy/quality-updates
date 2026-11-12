@@ -5,7 +5,8 @@ ntt_id: '44160'
 number: '920'
 title: '[2001-095] 회사정리절차진행중인 회사에 대한 지분법적용'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44160&menuNo=200443

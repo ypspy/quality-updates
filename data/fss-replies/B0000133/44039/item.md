@@ -5,7 +5,8 @@ ntt_id: '44039'
 number: '1004'
 title: '[2009-013] 종속회사 순자산변동분에 대한 지주회사의 회계처리 관련 질의 (''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-05-14'
 published_date: '2009-05-14'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44039&menuNo=200443

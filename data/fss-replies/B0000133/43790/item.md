@@ -5,7 +5,8 @@ ntt_id: '43790'
 number: '598'
 title: '[2003-154]중간지배회사의 연결재무제표 작성(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43790&menuNo=200443

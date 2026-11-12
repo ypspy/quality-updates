@@ -5,7 +5,8 @@ ntt_id: '43828'
 number: '636'
 title: '[2008-019] 감사보고서 재공시 관련 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-28'
 published_date: '2009-01-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43828&menuNo=200443

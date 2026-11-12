@@ -5,7 +5,8 @@ ntt_id: '43855'
 number: '663'
 title: '[2008-046]외국법인의 국내자회사간 합병시 종속회사간 합병 적용 여부(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-29'
 published_date: '2009-01-29'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43855&menuNo=200443

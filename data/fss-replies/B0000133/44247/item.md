@@ -5,7 +5,8 @@ ntt_id: '44247'
 number: '1086'
 title: '[2010-020]지분법피투자회사에 대한 현물출자 회계처리(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2010-09-28'
 published_date: '2010-09-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44247&menuNo=200443

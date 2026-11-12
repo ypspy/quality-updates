@@ -5,7 +5,8 @@ ntt_id: '44032'
 number: '991'
 title: '[2001년~2007년] 질의회신의 폐지'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-20'
 published_date: '2009-02-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44032&menuNo=200443

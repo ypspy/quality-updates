@@ -5,7 +5,8 @@ ntt_id: '43860'
 number: '668'
 title: '[2008-051] Zero Coupon Swap과 유사한 거래의 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-29'
 published_date: '2009-01-29'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43860&menuNo=200443

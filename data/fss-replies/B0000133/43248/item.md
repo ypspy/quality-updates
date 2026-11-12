@@ -5,7 +5,8 @@ ntt_id: '43248'
 number: '165'
 title: '[2006-100] 매입약정이 있는 자산담보부 기업어음의 양도여부'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43248&menuNo=200443

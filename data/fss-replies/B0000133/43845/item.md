@@ -5,7 +5,8 @@ ntt_id: '43845'
 number: '653'
 title: '[2008-036]자회사를 통해 취득한 손자회사 처분시 지분법 회계처리(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-29'
 published_date: '2009-01-29'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43845&menuNo=200443

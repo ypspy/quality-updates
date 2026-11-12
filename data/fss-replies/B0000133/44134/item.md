@@ -5,7 +5,8 @@ ntt_id: '44134'
 number: '894'
 title: '[2001-059] 저작권 양도에 따른 수익인식 시기'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44134&menuNo=200443

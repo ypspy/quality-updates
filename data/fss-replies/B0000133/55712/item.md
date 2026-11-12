@@ -5,7 +5,8 @@ ntt_id: '55712'
 number: '1144'
 title: '[2022-001] 집합투자기구를 통한 가설건축물 판매 및 판매후리스 관련 회계처리'
 department: 회계관리국
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2022-05-11'
 published_date: '2022-05-11'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=55712&menuNo=200443

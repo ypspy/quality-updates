@@ -5,7 +5,8 @@ ntt_id: '43764'
 number: '572'
 title: '[2003-119]기업회계기준서 제8호(유가증권)와 상충되는 규정의 적용여부 등에 관한질의(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 기업회계기준서 제8호(유가증권)
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43764&menuNo=200443

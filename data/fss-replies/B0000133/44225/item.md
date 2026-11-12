@@ -5,7 +5,8 @@ ntt_id: '44225'
 number: '1057'
 title: '[2009-065] 공공임대아파트 회계처리(`25.2.25.폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 기업회계기준 등에 관한 해석 56-90
 reply_date: '2010-01-19'
 published_date: '2010-01-19'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44225&menuNo=200443

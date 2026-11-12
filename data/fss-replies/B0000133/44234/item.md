@@ -5,7 +5,8 @@ ntt_id: '44234'
 number: '1066'
 title: '[2009년] 질의회신요약'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2010-01-19'
 published_date: '2010-01-19'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44234&menuNo=200443

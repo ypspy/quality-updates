@@ -5,7 +5,8 @@ ntt_id: '43823'
 number: '631'
 title: '[2008-014] 자본조정 해소방안 관련 질의회신'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-28'
 published_date: '2009-01-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43823&menuNo=200443

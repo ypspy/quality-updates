@@ -5,7 +5,8 @@ ntt_id: '43470'
 number: '223'
 title: '[2005-026] 대여금 및 무형자산 회계처리에 대한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43470&menuNo=200443

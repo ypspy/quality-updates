@@ -5,7 +5,8 @@ ntt_id: '43773'
 number: '581'
 title: '[2003-128] 투자일임계약자산의 특정과 비특정의 구분에 관한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43773&menuNo=200443

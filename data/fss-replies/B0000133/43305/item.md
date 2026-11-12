@@ -5,7 +5,8 @@ ntt_id: '43305'
 number: '135'
 title: '[2006-083]합병시 취득한 주식의 취득원가 결정 및 감액손실 환입 여부(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43305&menuNo=200443

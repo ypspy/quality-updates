@@ -5,7 +5,8 @@ ntt_id: '43291'
 number: '122'
 title: '[2006-074] 지분법중단 관련 장기성채권 범위질의 검토'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43291&menuNo=200443

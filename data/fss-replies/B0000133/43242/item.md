@@ -5,7 +5,8 @@ ntt_id: '43242'
 number: '111'
 title: '[2006-068] 지분법 적용시 종속회사 발행 전환사채의 전환에 따른 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43242&menuNo=200443

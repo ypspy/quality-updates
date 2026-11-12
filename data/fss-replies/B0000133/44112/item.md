@@ -5,7 +5,8 @@ ntt_id: '44112'
 number: '872'
 title: '[2001-030]투자유가증권의 평가에 관한 질의(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44112&menuNo=200443

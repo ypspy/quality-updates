@@ -5,7 +5,8 @@ ntt_id: '44082'
 number: '1039'
 title: '[2009-047] CR리츠를 이용한 미분양아파트 처리 관련 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-09-28'
 published_date: '2009-09-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44082&menuNo=200443

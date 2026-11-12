@@ -5,7 +5,8 @@ ntt_id: '43251'
 number: '168'
 title: '[2007-085]역합병의 회계처리 및 재무제표의 비교표시(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43251&menuNo=200443

@@ -5,7 +5,9 @@ ntt_id: '43418'
 number: '232'
 title: '[2005-035] 이전가격 조정액에 대한 질의(''18.12.24. 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- K-IFRS
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43418&menuNo=200443

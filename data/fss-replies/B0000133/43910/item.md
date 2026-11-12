@@ -5,7 +5,8 @@ ntt_id: '43910'
 number: '718'
 title: '[2002-031] 주식의 담보목적 신탁에 대한 회계처리 질의회신'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43910&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '43668'
 number: '541'
 title: '[2003-086]사업년도 변경시 중간재무제표 비교표시에 대한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43668&menuNo=200443

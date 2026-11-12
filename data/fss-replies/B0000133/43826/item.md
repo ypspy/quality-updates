@@ -5,7 +5,8 @@ ntt_id: '43826'
 number: '634'
 title: '[2008-017] 신용평가 매출수익 인식기준 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-28'
 published_date: '2009-01-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43826&menuNo=200443

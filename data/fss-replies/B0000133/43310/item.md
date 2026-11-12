@@ -5,7 +5,8 @@ ntt_id: '43310'
 number: '141'
 title: '[2007-071]불균등 유상증자 관련 지분법 회계처리(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43310&menuNo=200443

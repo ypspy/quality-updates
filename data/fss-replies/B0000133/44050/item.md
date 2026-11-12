@@ -5,7 +5,8 @@ ntt_id: '44050'
 number: '1025'
 title: '[2009-033]지분법피투자회사 보유 매도가능증권 관련 부의영업권 회계처리(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-09-28'
 published_date: '2009-09-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44050&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '44178'
 number: '938'
 title: '[2001-121] 미분양공장의 일시임대 및 공실의 감가상각에 대한 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44178&menuNo=200443

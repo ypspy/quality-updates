@@ -5,7 +5,8 @@ ntt_id: '43486'
 number: '434'
 title: '[2004-114]주식매각대금중 에스크로 계좌에서 관리되는 유보금에 대한 회계처리(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-24'
 published_date: '2008-12-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43486&menuNo=200443

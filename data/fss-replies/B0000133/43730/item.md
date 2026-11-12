@@ -5,7 +5,8 @@ ntt_id: '43730'
 number: '828'
 title: '[2002-150] 지분법 평가시 피투자회사의 전기오류수정손익에 대한 회계처리 (''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43730&menuNo=200443

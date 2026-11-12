@@ -5,7 +5,8 @@ ntt_id: '44266'
 number: '1108'
 title: '[2011-006]토지 취득 관련 위약금의 토지 취득원가 해당 여부'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2012-01-03'
 published_date: '2012-01-03'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44266&menuNo=200443

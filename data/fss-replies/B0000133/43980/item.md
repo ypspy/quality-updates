@@ -5,7 +5,8 @@ ntt_id: '43980'
 number: '473'
 title: '[2003-010] 통신업체에 제공하는 컨텐츠 관련 수익인식'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43980&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '44271'
 number: '1113'
 title: '[2011-011]대물변제에 따른 골프회원권 취득시 수익인식 시점 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2012-01-03'
 published_date: '2012-01-03'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44271&menuNo=200443

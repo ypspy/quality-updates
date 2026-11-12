@@ -5,7 +5,8 @@ ntt_id: '43624'
 number: '1068'
 title: '[2010-002]감가상각방법 변경의 정당한 변경여부에 대한 질의(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2010-03-15'
 published_date: '2010-03-15'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43624&menuNo=200443

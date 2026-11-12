@@ -5,7 +5,8 @@ ntt_id: '43670'
 number: '543'
 title: '[2003-088] 영화배급대행업의 수익인식기준 관련 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43670&menuNo=200443

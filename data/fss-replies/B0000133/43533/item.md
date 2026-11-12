@@ -5,7 +5,8 @@ ntt_id: '43533'
 number: '325'
 title: '[2004-001] 케이블TV 댁내인입선 설치비용에 대한 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-24'
 published_date: '2008-12-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43533&menuNo=200443

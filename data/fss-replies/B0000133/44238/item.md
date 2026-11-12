@@ -5,7 +5,8 @@ ntt_id: '44238'
 number: '1077'
 title: '[2010-011]종속회사 지분법 적용으로의 변경 회계처리에 대한 질의 (''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2010-07-28'
 published_date: '2010-07-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44238&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '43521'
 number: '329'
 title: '[2004-005]제조회사의 단기매매증권 보유가능여부에 대한 질의(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-24'
 published_date: '2008-12-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43521&menuNo=200443

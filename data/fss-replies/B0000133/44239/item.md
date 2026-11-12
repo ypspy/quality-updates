@@ -5,7 +5,8 @@ ntt_id: '44239'
 number: '1078'
 title: '[2010-012]장기대여금에 반영한 지분법 미반영 손실의 합병시 회계처리에 관한 질의 (''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2010-07-28'
 published_date: '2010-07-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44239&menuNo=200443

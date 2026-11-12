@@ -5,7 +5,8 @@ ntt_id: '43702'
 number: '800'
 title: '[2002-118] 상호저축은행의 대출채권 원리금 변제순서'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43702&menuNo=200443

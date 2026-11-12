@@ -5,7 +5,8 @@ ntt_id: '44124'
 number: '884'
 title: '[2001-045]은행업회계처리준칙상 타당한 계정분류(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44124&menuNo=200443

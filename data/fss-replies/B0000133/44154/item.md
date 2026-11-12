@@ -5,7 +5,8 @@ ntt_id: '44154'
 number: '914'
 title: '[2001-086]분할시 유가증권 회계처리 및 지주회사 매출등 표시관련(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44154&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '43623'
 number: '1067'
 title: '[2010-001] 매입한 상품 관련 판매활동지원수수료에 대한 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2010-03-15'
 published_date: '2010-03-15'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43623&menuNo=200443

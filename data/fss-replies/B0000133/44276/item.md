@@ -5,7 +5,8 @@ ntt_id: '44276'
 number: '1118'
 title: '[2012-002] 저축은행이 자산부채이전 방식으로 취득한 대출채권의 회계처리 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2013-02-13'
 published_date: '2013-02-13'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44276&menuNo=200443

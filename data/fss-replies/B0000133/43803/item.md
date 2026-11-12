@@ -5,7 +5,8 @@ ntt_id: '43803'
 number: '611'
 title: '[2003-168]합병회사보유 피합병회사 지분에 신주교부시 회계처리(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43803&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '43434'
 number: '248'
 title: '[2005-051] 피투자회사의 전기오류수정에 대한 지분법 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43434&menuNo=200443

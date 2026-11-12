@@ -5,7 +5,8 @@ ntt_id: '188484'
 number: '1145'
 title: '[2024-001] 단일 차주의 대출채권만 펀드에 양도한 경우 회계처리'
 department: 회계감독국
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2024-11-28'
 published_date: '2024-11-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=188484&menuNo=200443

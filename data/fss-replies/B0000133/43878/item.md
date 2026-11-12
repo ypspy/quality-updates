@@ -5,7 +5,8 @@ ntt_id: '43878'
 number: '686'
 title: '[2008-069] 위험회피대상과 위험회피수단의 기간 불일치시 위험회피회계 적용 가능여부 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-29'
 published_date: '2009-01-29'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43878&menuNo=200443

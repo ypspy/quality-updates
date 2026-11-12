@@ -5,7 +5,8 @@ ntt_id: '43917'
 number: '725'
 title: '[2002-038] 유동화전문회사가 매수한 사모사채의 계정분류'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43917&menuNo=200443

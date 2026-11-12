@@ -5,7 +5,8 @@ ntt_id: '43368'
 number: '321'
 title: '[2005-125] 분양원가의 산정방식에 관한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43368&menuNo=200443

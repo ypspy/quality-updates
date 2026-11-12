@@ -5,7 +5,8 @@ ntt_id: '44260'
 number: '1102'
 title: '[2011-002]동일인 지배하 회사간 합병시 매수주체 구분'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2011-03-02'
 published_date: '2011-03-02'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44260&menuNo=200443

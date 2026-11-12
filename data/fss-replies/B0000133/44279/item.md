@@ -5,7 +5,8 @@ ntt_id: '44279'
 number: '1121'
 title: '[2013-002] 양도자의 관여가 있는 부동산의 양도판단기준 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2014-02-04'
 published_date: '2014-02-04'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44279&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '43342'
 number: '13'
 title: '[2007-010 ]자동차부품제조회사 매출의 총액 또는 순액인식'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43342&menuNo=200443

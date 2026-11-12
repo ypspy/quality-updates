@@ -5,7 +5,8 @@ ntt_id: '43349'
 number: '20'
 title: '[2007-014] 온라인게임 개발업체의 이니셜피 수익인식'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43349&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '43830'
 number: '638'
 title: '[2008-021] 도메인 관련 사용권 제공에 따른 수입수수료의 수익인식'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-28'
 published_date: '2009-01-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43830&menuNo=200443

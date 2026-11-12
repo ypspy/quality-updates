@@ -5,7 +5,8 @@ ntt_id: '44201'
 number: '961'
 title: '[2001-145] 유가증권 처분관련 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44201&menuNo=200443

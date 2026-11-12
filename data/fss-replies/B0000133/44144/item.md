@@ -5,7 +5,8 @@ ntt_id: '44144'
 number: '904'
 title: '[2001-071]현물출자된 자가창설 영업권의 회계처리(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44144&menuNo=200443

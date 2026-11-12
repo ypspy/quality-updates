@@ -5,7 +5,8 @@ ntt_id: '43324'
 number: '155'
 title: '[2007-078]사업부 양수도 후 청산시 회계처리(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43324&menuNo=200443

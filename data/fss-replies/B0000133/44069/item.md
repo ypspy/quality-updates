@@ -5,7 +5,8 @@ ntt_id: '44069'
 number: '1027'
 title: '[2009-035] 집합투자증권 투자자예수금 신탁시 회계처리 방법'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-09-28'
 published_date: '2009-09-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44069&menuNo=200443

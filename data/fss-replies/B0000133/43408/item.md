@@ -5,7 +5,8 @@ ntt_id: '43408'
 number: '308'
 title: '[2005-112] 합병시 매수주체 구분에 대한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43408&menuNo=200443

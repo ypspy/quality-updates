@@ -5,7 +5,8 @@ ntt_id: '43294'
 number: '125'
 title: '[2007-065]연결대상 종속회사의 범위에 대한 질문(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43294&menuNo=200443

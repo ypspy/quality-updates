@@ -5,7 +5,8 @@ ntt_id: '43286'
 number: '117'
 title: '[2006-071]간접투자자산운용업법상 투융자회사의 연결 및 지분법의 적용여부(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43286&menuNo=200443

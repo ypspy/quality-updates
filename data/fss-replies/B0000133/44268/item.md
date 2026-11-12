@@ -5,7 +5,8 @@ ntt_id: '44268'
 number: '1110'
 title: '[2011-008]부동산신탁 수익권 양도 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2012-01-03'
 published_date: '2012-01-03'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44268&menuNo=200443

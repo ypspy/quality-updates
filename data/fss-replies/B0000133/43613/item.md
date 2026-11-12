@@ -5,7 +5,9 @@ ntt_id: '43613'
 number: '420'
 title: '[2004-100]기업회계기준서 제8호(유가증권) 문단14의 적용적합 여부(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 기업회계기준서 제8호(유가증권)
+- 일반기업회계기준 제6장
 reply_date: '2008-12-24'
 published_date: '2008-12-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43613&menuNo=200443

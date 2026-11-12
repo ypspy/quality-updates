@@ -5,7 +5,8 @@ ntt_id: '43262'
 number: '179'
 title: '[2006-107] 분양관련 매출액 및 매출원가의 표시 방법'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43262&menuNo=200443

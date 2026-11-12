@@ -5,7 +5,8 @@ ntt_id: '43520'
 number: '328'
 title: '[2004-004] IMT-2000 서비스를 위한 장비 및 주파수 이용권의 상각시기에 대한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-24'
 published_date: '2008-12-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43520&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '43190'
 number: '58'
 title: '[2007-035] 보험회사 특별계정 수익,비용의 손익계산서 기표여부에 대한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43190&menuNo=200443

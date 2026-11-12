@@ -5,7 +5,8 @@ ntt_id: '44230'
 number: '1062'
 title: '[2009-070]합병시 종속회사 해당 여부(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2010-01-19'
 published_date: '2010-01-19'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44230&menuNo=200443

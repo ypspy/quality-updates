@@ -5,7 +5,8 @@ ntt_id: '43824'
 number: '632'
 title: '[2008-015] 주식취득시 과점주주가 되어 납부하는 취득세 등의 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-28'
 published_date: '2009-01-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43824&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '44235'
 number: '1074'
 title: '[2010-008]대위변제충당부채 조정에 관한 회계처리 질의 (''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2010-07-28'
 published_date: '2010-07-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44235&menuNo=200443

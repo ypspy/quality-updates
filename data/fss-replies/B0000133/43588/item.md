@@ -5,7 +5,8 @@ ntt_id: '43588'
 number: '395'
 title: '[2004-074] 정상렌탈자산에 대한 폐기손실충당금 설정여부'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-24'
 published_date: '2008-12-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43588&menuNo=200443

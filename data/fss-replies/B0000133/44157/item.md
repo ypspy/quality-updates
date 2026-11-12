@@ -5,7 +5,8 @@ ntt_id: '44157'
 number: '917'
 title: '[2001-089] 지분법 회계처리 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44157&menuNo=200443

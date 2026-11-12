@@ -5,7 +5,8 @@ ntt_id: '43339'
 number: '9'
 title: '[2007-007] 소프트웨어 라이선스 관련 매출의 총액 또는 순액 수익인식'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43339&menuNo=200443

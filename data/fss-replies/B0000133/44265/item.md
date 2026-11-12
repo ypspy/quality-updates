@@ -5,7 +5,8 @@ ntt_id: '44265'
 number: '1107'
 title: '[2011-005]정산조건부 주식 매각 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2012-01-03'
 published_date: '2012-01-03'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44265&menuNo=200443

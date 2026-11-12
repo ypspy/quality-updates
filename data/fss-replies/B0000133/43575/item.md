@@ -5,7 +5,8 @@ ntt_id: '43575'
 number: '382'
 title: '[2004-061] 골프장 사업부지 외각의 소하천 정비공사 관련 비용의 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-24'
 published_date: '2008-12-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43575&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '43338'
 number: '12'
 title: '[2006-005] 원금보장형 구조화 채권 회계처리에 대한 질의회신'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43338&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '43591'
 number: '398'
 title: '[2004-077] 주상복합건물의 분양률 산정방법 변경'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-24'
 published_date: '2008-12-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43591&menuNo=200443

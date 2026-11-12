@@ -5,7 +5,8 @@ ntt_id: '43333'
 number: '4'
 title: '[2007-004] 소프트웨어 사용권 계약에 대한 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43333&menuNo=200443

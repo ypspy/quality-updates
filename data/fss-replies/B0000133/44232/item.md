@@ -5,7 +5,8 @@ ntt_id: '44232'
 number: '1064'
 title: '[2009-072]SOC사업법인의 연결 여부(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2010-01-19'
 published_date: '2010-01-19'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44232&menuNo=200443

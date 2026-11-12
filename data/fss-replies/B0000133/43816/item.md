@@ -5,7 +5,8 @@ ntt_id: '43816'
 number: '624'
 title: '[2008-007]자산의 일괄취득시 취득가액 회계처리(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-28'
 published_date: '2009-01-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43816&menuNo=200443

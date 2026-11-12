@@ -5,7 +5,8 @@ ntt_id: '43994'
 number: '500'
 title: '[2003-040] 자동차매매상사의 매출액 계상에 대한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43994&menuNo=200443

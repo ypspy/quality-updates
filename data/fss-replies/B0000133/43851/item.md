@@ -5,7 +5,8 @@ ntt_id: '43851'
 number: '659'
 title: '[2008-042]종속회사 보유 지배회사 주식에 대한 지분법 회계처리(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-29'
 published_date: '2009-01-29'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43851&menuNo=200443

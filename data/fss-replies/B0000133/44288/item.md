@@ -5,7 +5,8 @@ ntt_id: '44288'
 number: '1130'
 title: '[2015-004] 집합투자기구를 통한 부동산 매각관련 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2016-01-05'
 published_date: '2016-01-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44288&menuNo=200443

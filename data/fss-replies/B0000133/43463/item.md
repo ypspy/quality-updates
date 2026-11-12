@@ -5,7 +5,8 @@ ntt_id: '43463'
 number: '216'
 title: '[2005-019] 이익처분에 의한 성과배분 상여금에 대한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43463&menuNo=200443

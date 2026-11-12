@@ -5,7 +5,8 @@ ntt_id: '43213'
 number: '82'
 title: '[2007-047]증권회사 현금흐름표 작성(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43213&menuNo=200443

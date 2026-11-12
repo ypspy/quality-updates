@@ -5,7 +5,8 @@ ntt_id: '44284'
 number: '1126'
 title: '[2014-003] SPC를 통한 부동산 양도시 매각거래 인정 여부'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2014-11-24'
 published_date: '2014-11-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44284&menuNo=200443

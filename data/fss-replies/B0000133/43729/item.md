@@ -5,7 +5,8 @@ ntt_id: '43729'
 number: '827'
 title: '[2002-148] 지분법평가손익의 영업수익비용 계상에 관한 질의 회신'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43729&menuNo=200443

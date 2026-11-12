@@ -5,7 +5,8 @@ ntt_id: '44299'
 number: '1141'
 title: '[2020-001] 저축은행이 취득한 사모사채 계정분류에 대한 질의'
 department: 회계관리국
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2020-07-06'
 published_date: '2020-07-06'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44299&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '43834'
 number: '642'
 title: '[2008-025] 제품제조와 임가공서비스업을 병행하는 경우 손익계산서 표시 관련 회계질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-28'
 published_date: '2009-01-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43834&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '43395'
 number: '295'
 title: '[2005-099] 금융지주회사의 종속회사 투자주식에 대한 취득원가 결정'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43395&menuNo=200443

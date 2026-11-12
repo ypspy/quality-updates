@@ -5,7 +5,8 @@ ntt_id: '43966'
 number: '774'
 title: '[2002-089]리스자산 이전에 관한 회계처리 질의(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43966&menuNo=200443

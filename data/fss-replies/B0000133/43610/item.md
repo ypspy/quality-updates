@@ -5,7 +5,8 @@ ntt_id: '43610'
 number: '417'
 title: '[2004-097]상품채권의 시가평가시 적용할 기준수익률(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-24'
 published_date: '2008-12-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43610&menuNo=200443

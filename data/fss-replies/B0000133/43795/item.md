@@ -5,7 +5,8 @@ ntt_id: '43795'
 number: '603'
 title: '[2003-159]연결대상 자회사채권의 매입에 따른 내부거래 제거에 대한 회계처리(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43795&menuNo=200443

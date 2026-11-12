@@ -5,7 +5,8 @@ ntt_id: '43861'
 number: '669'
 title: '[2008-052] T+2일 결제되는 장외채권의 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-29'
 published_date: '2009-01-29'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43861&menuNo=200443

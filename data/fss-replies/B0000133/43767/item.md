@@ -5,7 +5,8 @@ ntt_id: '43767'
 number: '575'
 title: '[2003-122] 채권결제일 변경 회계처리 추가질의(''11.5.4)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43767&menuNo=200443

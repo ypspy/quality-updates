@@ -5,7 +5,8 @@ ntt_id: '43258'
 number: '175'
 title: '[2006-105] 민간건설 임대아파트에 대한 회계처리(`25.2.25. 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 기업회계기준 등에 관한 해석 56-90
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43258&menuNo=200443

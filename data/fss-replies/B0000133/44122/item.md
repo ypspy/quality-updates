@@ -5,7 +5,8 @@ ntt_id: '44122'
 number: '882'
 title: '[2001-043] 공사부담금 수령전 취득자산의 감가상각비 처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44122&menuNo=200443

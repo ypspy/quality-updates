@@ -5,7 +5,8 @@ ntt_id: '43934'
 number: '742'
 title: '[2002-056]해외신주인수권부사채의 Warrant 부분 매입소각시 회계처리(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43934&menuNo=200443

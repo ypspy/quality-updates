@@ -5,7 +5,8 @@ ntt_id: '44093'
 number: '855'
 title: '[2001-010]외부감사관련 질의(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44093&menuNo=200443

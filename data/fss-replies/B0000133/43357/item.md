@@ -5,7 +5,8 @@ ntt_id: '43357'
 number: '28'
 title: '[2007-018]유형자산 감액손실에 대한 회계처리(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43357&menuNo=200443

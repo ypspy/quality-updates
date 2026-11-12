@@ -5,7 +5,8 @@ ntt_id: '44156'
 number: '916'
 title: '[2001-088]영업권(이전손실금)에 대한 회계처리 질의(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44156&menuNo=200443

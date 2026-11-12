@@ -5,7 +5,8 @@ ntt_id: '44264'
 number: '1106'
 title: 일반기업회계기준에 따른 질의회신 폐기 ('11.5.4)
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2011-05-12'
 published_date: '2011-05-12'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44264&menuNo=200443

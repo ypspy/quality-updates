@@ -5,7 +5,8 @@ ntt_id: '43769'
 number: '577'
 title: '[2003-124] 채권거래의 자산 및 수익인식에 따른 회계처리방법'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43769&menuNo=200443

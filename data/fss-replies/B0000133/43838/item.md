@@ -5,7 +5,8 @@ ntt_id: '43838'
 number: '646'
 title: '[2008-029] 사모특별자산투자신탁에 대한 수익증권의 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-28'
 published_date: '2009-01-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43838&menuNo=200443

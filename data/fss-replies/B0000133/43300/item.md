@@ -5,7 +5,8 @@ ntt_id: '43300'
 number: '131'
 title: '[2007-068] 재무보고에 관한 실무의견서 2007-4의 임원범위 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43300&menuNo=200443

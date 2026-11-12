@@ -5,7 +5,8 @@ ntt_id: '44183'
 number: '943'
 title: '[2001-127] 채무면제이익 계상시점'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44183&menuNo=200443

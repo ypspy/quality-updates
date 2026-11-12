@@ -5,7 +5,8 @@ ntt_id: '43793'
 number: '601'
 title: '[2003-157]지분관계 없는 회사간의 내부미실현손익의 상계제거(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43793&menuNo=200443

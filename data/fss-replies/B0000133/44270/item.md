@@ -5,7 +5,8 @@ ntt_id: '44270'
 number: '1112'
 title: '[2011-010]결산월이 다른 지분법적용피투자회사 재무제표 관련'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2012-01-03'
 published_date: '2012-01-03'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44270&menuNo=200443

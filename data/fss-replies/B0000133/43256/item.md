@@ -5,7 +5,8 @@ ntt_id: '43256'
 number: '173'
 title: '[2006-104]채권채무상계 및 공사대금 지연이자에 대한 질의(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43256&menuNo=200443

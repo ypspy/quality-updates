@@ -5,7 +5,8 @@ ntt_id: '43874'
 number: '682'
 title: '[2008-065]자산담보부대출(ABL) 투자자의 회계처리(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-29'
 published_date: '2009-01-29'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43874&menuNo=200443

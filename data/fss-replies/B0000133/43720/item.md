@@ -5,7 +5,8 @@ ntt_id: '43720'
 number: '818'
 title: '[2002-137]대북경협사업관련 투자유가증권의 평가(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43720&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '43164'
 number: '33'
 title: '[2007-021] 전환상환우선주의 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43164&menuNo=200443

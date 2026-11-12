@@ -5,7 +5,8 @@ ntt_id: '43511'
 number: '459'
 title: '[2004-142] 합병시 채권채무 조정에 관한 회계처리-138과의 관련성 검색 (''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-24'
 published_date: '2008-12-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43511&menuNo=200443

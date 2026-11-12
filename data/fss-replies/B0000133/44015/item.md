@@ -5,7 +5,8 @@ ntt_id: '44015'
 number: '974'
 title: '[2001-159]투자유가증권 매매거래의 적정성에 대한 검토(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44015&menuNo=200443

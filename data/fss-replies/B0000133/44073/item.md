@@ -5,7 +5,8 @@ ntt_id: '44073'
 number: '1031'
 title: '[2009-039]비파생금융상품을 이용한 현금흐름위험회피회계 관련 질의(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-09-28'
 published_date: '2009-09-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44073&menuNo=200443

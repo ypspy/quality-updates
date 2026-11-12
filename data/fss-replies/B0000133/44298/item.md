@@ -5,7 +5,8 @@ ntt_id: '44298'
 number: '1140'
 title: 『주식회사 등의 외부감사에 관한 법률 시행령』 개정 등에 따른 질의회신 수정 또는 폐기('20.2.7.)
 department: 회계관리국
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2020-02-10'
 published_date: '2020-02-10'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44298&menuNo=200443

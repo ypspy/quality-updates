@@ -5,7 +5,8 @@ ntt_id: '44043'
 number: '1'
 title: '[2007-001] 전기 재무제표 재작성 여부에 관한 질의 (''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44043&menuNo=200443

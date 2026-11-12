@@ -5,7 +5,8 @@ ntt_id: '43410'
 number: '310'
 title: '[2005-114] 파생상품과 예금이 결합된 복합금융상품의 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43410&menuNo=200443

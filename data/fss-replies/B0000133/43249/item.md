@@ -5,7 +5,8 @@ ntt_id: '43249'
 number: '166'
 title: '[2007-084]지배회사의 종속회사 지분증권 취득시 종속회사의 회계처리(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43249&menuNo=200443

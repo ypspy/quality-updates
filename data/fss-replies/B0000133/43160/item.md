@@ -5,7 +5,8 @@ ntt_id: '43160'
 number: '29'
 title: '[2007-019] 골프장 코스비용의 자본화 여부'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43160&menuNo=200443

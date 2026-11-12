@@ -5,7 +5,8 @@ ntt_id: '44221'
 number: '1052'
 title: '[2009-060] ELW 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-12-31'
 published_date: '2009-12-31'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44221&menuNo=200443

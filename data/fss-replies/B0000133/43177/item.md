@@ -5,7 +5,8 @@ ntt_id: '43177'
 number: '46'
 title: '[2006-027] 채권추심용역 수익 및 비용인식시점'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43177&menuNo=200443

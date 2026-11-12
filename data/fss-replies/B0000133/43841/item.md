@@ -5,7 +5,8 @@ ntt_id: '43841'
 number: '649'
 title: '[2008-032]피투자회사의 합병시 회계처리(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-29'
 published_date: '2009-01-29'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43841&menuNo=200443

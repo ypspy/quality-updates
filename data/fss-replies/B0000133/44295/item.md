@@ -5,7 +5,8 @@ ntt_id: '44295'
 number: '1137'
 title: '[2018-001] 양수인의 매각제한이 있는 대출채권 양도 질의회신'
 department: 회계관리국
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2018-08-03'
 published_date: '2018-08-03'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44295&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '43949'
 number: '757'
 title: '[2002-071] 일정기간을 무상임대하는 조건으로 건물을 기부받는 경우의 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43949&menuNo=200443

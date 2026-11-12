@@ -5,7 +5,8 @@ ntt_id: '43420'
 number: '234'
 title: '[2005-037] 지분법평가손익의 영업손익계상 가능이익'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43420&menuNo=200443

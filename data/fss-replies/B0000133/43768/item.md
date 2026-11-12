@@ -5,7 +5,8 @@ ntt_id: '43768'
 number: '576'
 title: '[2003-123]매출채권의 양수도관련 회계처리 질의(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43768&menuNo=200443

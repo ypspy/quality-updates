@@ -5,7 +5,8 @@ ntt_id: '43794'
 number: '602'
 title: '[2003-158] 우선주 의결권 부활시 연결범위'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43794&menuNo=200443

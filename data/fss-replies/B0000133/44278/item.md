@@ -5,7 +5,8 @@ ntt_id: '44278'
 number: '1120'
 title: '[2013-001] 양도한 부실채권 제거가능 여부 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2013-11-11'
 published_date: '2013-11-11'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44278&menuNo=200443

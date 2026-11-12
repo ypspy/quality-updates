@@ -5,7 +5,8 @@ ntt_id: '43196'
 number: '65'
 title: '[2007-038] 기업구매카드 관련 회계처리 질의 (''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43196&menuNo=200443

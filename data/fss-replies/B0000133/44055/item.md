@@ -5,7 +5,8 @@ ntt_id: '44055'
 number: '996'
 title: '[2009-005] 산지관리법에 의한 복구비의 충당부채 인식관련 회계처리 관련 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-05-14'
 published_date: '2009-05-14'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44055&menuNo=200443

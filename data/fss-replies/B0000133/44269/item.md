@@ -5,7 +5,8 @@ ntt_id: '44269'
 number: '1111'
 title: '[2011-009]공제회 탈퇴시 지급할 이자에 대한 충당부채 계상'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2012-01-03'
 published_date: '2012-01-03'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44269&menuNo=200443

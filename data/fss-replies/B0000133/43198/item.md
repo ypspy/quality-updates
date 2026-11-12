@@ -5,7 +5,8 @@ ntt_id: '43198'
 number: '67'
 title: '[2006-038] 집행임원에 대한 장단기 특별상여금'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43198&menuNo=200443

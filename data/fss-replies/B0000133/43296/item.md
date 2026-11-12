@@ -5,7 +5,8 @@ ntt_id: '43296'
 number: '127'
 title: '[2007-066] 간접투자자산운용업법상 사모투자전문회사가 보유한 투자주식 평가 및 연결대상 여부 질의 (''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43296&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '43443'
 number: '257'
 title: '[2005-060] 재고자산 저가법 적용에 관한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43443&menuNo=200443

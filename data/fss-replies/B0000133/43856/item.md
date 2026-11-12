@@ -5,7 +5,8 @@ ntt_id: '43856'
 number: '664'
 title: '[2008-047] 역합병시 피합병회사에서 승계되는 신주인수권대가의 회계처리 방법 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-29'
 published_date: '2009-01-29'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43856&menuNo=200443

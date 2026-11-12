@@ -5,7 +5,8 @@ ntt_id: '43671'
 number: '544'
 title: '[2003-089]과세예고통지를 받은 경우 등에 대한 회계처리(''18.12.24. 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준 제22장 (법인세회계)
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43671&menuNo=200443

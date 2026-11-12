@@ -5,7 +5,8 @@ ntt_id: '43669'
 number: '542'
 title: '[2003-087]수익인식시점에 대한 질의회신(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43669&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '44200'
 number: '960'
 title: '[2001-144] 외화자산 부채의 평가관련 질의 (’11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44200&menuNo=200443

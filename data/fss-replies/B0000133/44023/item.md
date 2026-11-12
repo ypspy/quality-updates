@@ -5,7 +5,8 @@ ntt_id: '44023'
 number: '982'
 title: '[2001-156] 교환사채에 내재된 교환권의 회계처리 질의 검토'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-19'
 published_date: '2009-02-19'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44023&menuNo=200443

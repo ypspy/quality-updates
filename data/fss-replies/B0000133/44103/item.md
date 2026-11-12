@@ -5,7 +5,8 @@ ntt_id: '44103'
 number: '865'
 title: '[2001-020]중소기업의 회계처리에 대한 특례에 관한 질의(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44103&menuNo=200443

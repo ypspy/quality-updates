@@ -5,7 +5,8 @@ ntt_id: '43341'
 number: '11'
 title: '[2006-004] 매도가능증권평가이익에 대한 이연법인세 인식'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43341&menuNo=200443

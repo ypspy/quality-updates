@@ -5,7 +5,8 @@ ntt_id: '44070'
 number: '1028'
 title: '[2009-036]증권사 현금흐름표 작성(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-09-28'
 published_date: '2009-09-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44070&menuNo=200443

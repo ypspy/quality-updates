@@ -5,7 +5,8 @@ ntt_id: '43374'
 number: '274'
 title: '[2005-078]프로젝트파이낸싱수수료의 계정분류에 대한 질의(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43374&menuNo=200443

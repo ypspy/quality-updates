@@ -6,7 +6,8 @@ number: '846'
 title: '[2002-172] (해석적용사례 2002-10) 비화폐성자산 중 지분법적용대상주식에 배분된 부의영업권의 회계처리 (''11.5.4
   폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44013&menuNo=200443

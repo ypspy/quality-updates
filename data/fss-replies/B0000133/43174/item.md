@@ -5,7 +5,8 @@ ntt_id: '43174'
 number: '43'
 title: '[2007-027]현물출자자산의 감액에 관한 질의회신(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43174&menuNo=200443

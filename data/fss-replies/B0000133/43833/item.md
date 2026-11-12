@@ -5,7 +5,8 @@ ntt_id: '43833'
 number: '641'
 title: '[2008-024]엔터테인먼트사의 수익인식시점에 대한 질의(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-28'
 published_date: '2009-01-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43833&menuNo=200443

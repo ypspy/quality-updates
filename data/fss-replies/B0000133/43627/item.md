@@ -5,7 +5,8 @@ ntt_id: '43627'
 number: '1071'
 title: '[2010-005]유상증자로 지분율 하락시 지분법 회계처리(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2010-03-15'
 published_date: '2010-03-15'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43627&menuNo=200443

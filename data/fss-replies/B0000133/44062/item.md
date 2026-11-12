@@ -5,7 +5,8 @@ ntt_id: '44062'
 number: '1012'
 title: '[2009-021] 인적분할시 중단사업 해당여부 및 분할자산 재매입시 회계처리 관련 질의 (''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-05-14'
 published_date: '2009-05-14'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44062&menuNo=200443

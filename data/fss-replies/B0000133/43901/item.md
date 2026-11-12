@@ -5,7 +5,8 @@ ntt_id: '43901'
 number: '709'
 title: '[2002-022] 무상수증한 자기주식의 추후 회계처리에 대한 질의회신'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43901&menuNo=200443

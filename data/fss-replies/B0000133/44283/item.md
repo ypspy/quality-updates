@@ -5,7 +5,8 @@ ntt_id: '44283'
 number: '1125'
 title: '[2014-002] 대출채권 양도거래 관련 회계처리 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2014-11-24'
 published_date: '2014-11-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44283&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '43850'
 number: '658'
 title: '[2008-041]종속회사에 대한 하향판매로 인해 발생한 내부거래미실현이익을 실현시키는 방법에 대한 질의(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-29'
 published_date: '2009-01-29'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43850&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '43827'
 number: '635'
 title: '[2008-018]기간약정 단말기 보조금 회계처리에 대한 질의(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-28'
 published_date: '2009-01-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43827&menuNo=200443

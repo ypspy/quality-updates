@@ -5,7 +5,8 @@ ntt_id: '43837'
 number: '645'
 title: '[2008-028]만기보유증권 중도상환 회계처리(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-28'
 published_date: '2009-01-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43837&menuNo=200443

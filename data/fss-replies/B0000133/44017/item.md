@@ -5,7 +5,8 @@ ntt_id: '44017'
 number: '976'
 title: '[2001-161]예정원가의 실무적 의미에 대한 질의(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44017&menuNo=200443

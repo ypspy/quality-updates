@@ -5,7 +5,8 @@ ntt_id: '43363'
 number: '316'
 title: '[2005-120]매도가능증권의 공정가액위험회피회계 중단시 회계처리(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43363&menuNo=200443

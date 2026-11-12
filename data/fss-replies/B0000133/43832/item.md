@@ -5,7 +5,8 @@ ntt_id: '43832'
 number: '640'
 title: '[2008-023] 물적분할시 발생한 물적분할양도차익 및 동 미실현손익의 제거손익인 지분법손익의 손익계산서 표시방법에 대한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-28'
 published_date: '2009-01-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43832&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '43351'
 number: '22'
 title: '[2007-016] 모바일게임회사 수익인식'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43351&menuNo=200443

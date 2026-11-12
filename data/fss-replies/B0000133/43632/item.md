@@ -5,7 +5,8 @@ ntt_id: '43632'
 number: '1093'
 title: '[2010-027]펀드를 통한 미분양아파트 매각 관련 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2010-10-28'
 published_date: '2010-10-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43632&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '43479'
 number: '208'
 title: '[2005-009]채권채무재조정 관련 회계처리에 대한 질의(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43479&menuNo=200443

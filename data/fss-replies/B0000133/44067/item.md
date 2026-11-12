@@ -5,7 +5,8 @@ ntt_id: '44067'
 number: '1017'
 title: '[2009-026]리스계약 해당 여부 및 연결범위에 대한 질의(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-05-14'
 published_date: '2009-05-14'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44067&menuNo=200443

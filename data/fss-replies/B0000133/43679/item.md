@@ -5,7 +5,8 @@ ntt_id: '43679'
 number: '552'
 title: '[2003-099]모델하우스 설치비용의 회계처리(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43679&menuNo=200443

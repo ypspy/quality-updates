@@ -5,7 +5,8 @@ ntt_id: '43990'
 number: '496'
 title: '[2003-035] 백화점 특정매입거래에 대한 수익인식 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43990&menuNo=200443

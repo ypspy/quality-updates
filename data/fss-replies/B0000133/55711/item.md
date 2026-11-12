@@ -5,7 +5,8 @@ ntt_id: '55711'
 number: '1143'
 title: '[2021-001] 금융비용 자본화 관련 회계처리'
 department: 회계관리국
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2022-05-11'
 published_date: '2022-05-11'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=55711&menuNo=200443

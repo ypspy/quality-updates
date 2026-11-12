@@ -5,7 +5,8 @@ ntt_id: '43976'
 number: '469'
 title: '[2003-006]부가세법 개정에 따른 환급세액 회계처리(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43976&menuNo=200443

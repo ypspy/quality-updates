@@ -5,7 +5,8 @@ ntt_id: '43831'
 number: '639'
 title: '[2008-022] 외환차익 인정의 회계상 기준여부 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-28'
 published_date: '2009-01-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43831&menuNo=200443

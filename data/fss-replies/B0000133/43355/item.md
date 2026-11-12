@@ -5,7 +5,8 @@ ntt_id: '43355'
 number: '26'
 title: '[2006-012]금융비용 자본화에 대한 질의회신(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43355&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '43942'
 number: '750'
 title: '[2002-064] 재무제표에 기재할 자본금의 기준일에 대한 질의회신'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43942&menuNo=200443

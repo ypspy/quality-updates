@@ -5,7 +5,8 @@ ntt_id: '43864'
 number: '672'
 title: '[2008-055]신용파생상품을 기초자산에 포함하고 있는 유동화채권의 회계처리(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-29'
 published_date: '2009-01-29'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43864&menuNo=200443

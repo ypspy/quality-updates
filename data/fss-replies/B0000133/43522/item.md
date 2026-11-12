@@ -5,7 +5,8 @@ ntt_id: '43522'
 number: '330'
 title: '[2004-006]의무전환조건부 전환사채의 전환청구시 회계처리(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-24'
 published_date: '2008-12-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43522&menuNo=200443

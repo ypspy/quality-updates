@@ -5,7 +5,8 @@ ntt_id: '43582'
 number: '389'
 title: '[2004-068] 양방향 옵션 형태의 유가증권 담보부 차입거래와 관련한 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-24'
 published_date: '2008-12-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43582&menuNo=200443

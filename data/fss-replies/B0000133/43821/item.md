@@ -5,7 +5,8 @@ ntt_id: '43821'
 number: '629'
 title: '[2008-012]투자주식의 지분법 적용 및 감액손실 인식여부(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-28'
 published_date: '2009-01-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43821&menuNo=200443

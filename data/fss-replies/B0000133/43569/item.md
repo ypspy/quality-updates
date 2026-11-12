@@ -5,7 +5,8 @@ ntt_id: '43569'
 number: '376'
 title: '[2004-055]연대납세채무액의 특별손실 가능여부(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-24'
 published_date: '2008-12-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43569&menuNo=200443

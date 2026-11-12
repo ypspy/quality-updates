@@ -5,7 +5,8 @@ ntt_id: '44080'
 number: '1038'
 title: '[2009-046]관계사의 연결대상 종속회사 여부(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-09-28'
 published_date: '2009-09-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44080&menuNo=200443

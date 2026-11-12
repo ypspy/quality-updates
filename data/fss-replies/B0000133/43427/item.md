@@ -5,7 +5,8 @@ ntt_id: '43427'
 number: '242'
 title: '[2005-045]유가증권의 실질적인 취득시점 및 부의영업권 환입시점(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43427&menuNo=200443

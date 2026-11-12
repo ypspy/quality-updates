@@ -5,7 +5,9 @@ ntt_id: '44253'
 number: '1095'
 title: '[2010-029]K-IFRS 도입에 따른 영향 사전공시 관련 질의회신(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- K-IFRS
+- 일반기업회계기준
 reply_date: '2011-01-24'
 published_date: '2011-01-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44253&menuNo=200443

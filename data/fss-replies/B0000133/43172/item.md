@@ -5,7 +5,8 @@ ntt_id: '43172'
 number: '41'
 title: '[2007-026]차입금의존도 산정방법 질의회신(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43172&menuNo=200443

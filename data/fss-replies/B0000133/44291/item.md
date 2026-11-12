@@ -5,7 +5,8 @@ ntt_id: '44291'
 number: '1133'
 title: '[2016-001] 합병차손의 결손금 회계처리에 관한 질의회신'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2016-07-15'
 published_date: '2016-07-15'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44291&menuNo=200443

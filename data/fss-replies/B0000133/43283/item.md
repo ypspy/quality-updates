@@ -5,7 +5,8 @@ ntt_id: '43283'
 number: '114'
 title: '[2007-060] 연결재무제표 작성시 지배종속 회사간 회계정책 일치에 대한 질의 (''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43283&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '43292'
 number: '123'
 title: '[2007-064] 종속회사에 무형자산을 현물출자한 경우 지분법 및 연결 회계처리에 대한 질의회신 (''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43292&menuNo=200443

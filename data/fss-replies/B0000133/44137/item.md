@@ -5,7 +5,8 @@ ntt_id: '44137'
 number: '897'
 title: '[2001-064] 생산위탁 비중이 높은 물품의 계정분류'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44137&menuNo=200443

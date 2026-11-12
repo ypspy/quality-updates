@@ -5,7 +5,8 @@ ntt_id: '43484'
 number: '432'
 title: '[2004-112] 만기보유증권의 중도매각 예외적용의 채권대차거래 적용가능 여부(''11.5.4)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-24'
 published_date: '2008-12-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43484&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '44040'
 number: '1005'
 title: '[2009-014]보험금청구소송 1심판결에 따른 회계처리 질의(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-05-14'
 published_date: '2009-05-14'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44040&menuNo=200443

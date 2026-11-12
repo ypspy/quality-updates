@@ -5,7 +5,8 @@ ntt_id: '44045'
 number: '1020'
 title: '[2009-028]공사대금 중 일부를 아파트로 회수한 경우 회계처리(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-09-28'
 published_date: '2009-09-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44045&menuNo=200443

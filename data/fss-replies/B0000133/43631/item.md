@@ -5,7 +5,8 @@ ntt_id: '43631'
 number: '1092'
 title: '[2010-026]주식 매각 관련 지분법자본변동 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2010-10-28'
 published_date: '2010-10-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43631&menuNo=200443

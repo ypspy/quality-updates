@@ -5,7 +5,8 @@ ntt_id: '43908'
 number: '716'
 title: '[2002-029] 무상감자시 보유중인 자기주식의 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43908&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '44199'
 number: '959'
 title: '[2001-143]미수금에 대한 대손충당금 설정방법에 대한 질의(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-09'
 published_date: '2009-02-09'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44199&menuNo=200443

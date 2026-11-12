@@ -5,7 +5,8 @@ ntt_id: '44064'
 number: '1014'
 title: '[2009-023]주가연계증권(ELS)의 회계처리 질의(''11.5.4 수정)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-05-14'
 published_date: '2009-05-14'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44064&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '44216'
 number: '1047'
 title: '[2009-055] 매출채권 매각관련 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-12-31'
 published_date: '2009-12-31'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=44216&menuNo=200443

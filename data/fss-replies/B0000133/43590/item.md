@@ -5,7 +5,8 @@ ntt_id: '43590'
 number: '397'
 title: '[2004-076] 분양공사의 진행률계산시 분양수수료 및 건물분 취득세·등록세의 포함여부'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-24'
 published_date: '2008-12-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43590&menuNo=200443

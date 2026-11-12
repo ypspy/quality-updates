@@ -5,7 +5,8 @@ ntt_id: '43208'
 number: '77'
 title: '[2007-045]금고업무 출연금 질의회신(''11.5.4 폐기)'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43208&menuNo=200443

@@ -5,7 +5,8 @@ ntt_id: '43817'
 number: '625'
 title: '[2008-008] 중단사업손익의 귀속시기'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-28'
 published_date: '2009-01-28'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43817&menuNo=200443

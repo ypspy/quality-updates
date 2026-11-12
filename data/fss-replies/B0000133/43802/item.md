@@ -5,7 +5,8 @@ ntt_id: '43802'
 number: '610'
 title: '[2003-167] 역합병시 비교재무제표 및 사업연도 기표에 대한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43802&menuNo=200443

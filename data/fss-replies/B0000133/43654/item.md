@@ -5,7 +5,8 @@ ntt_id: '43654'
 number: '527'
 title: '[2003-070] 전환사채 발생이자 계산오류에 대한 질의'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43654&menuNo=200443

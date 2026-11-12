@@ -5,7 +5,8 @@ ntt_id: '43921'
 number: '729'
 title: '[2002-042] 유가증권 신탁계약 및 회사채 발행과 관련한 회계처리'
 department: 회계제도실
-standards: []
+standards:
+- 일반기업회계기준
 reply_date: '2009-02-05'
 published_date: '2009-02-05'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43921&menuNo=200443
