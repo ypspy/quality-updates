@@ -6,7 +6,7 @@ number: '329'
 title: '[2004-005]제조회사의 단기매매증권 보유가능여부에 대한 질의(''11.5.4 폐기)'
 department: 회계제도실
 standards:
-- 일반기업회계기준
+- 기업회계기준서 제8호
 reply_date: '2008-12-24'
 published_date: '2008-12-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43521&menuNo=200443
@@ -14,9 +14,9 @@ attachments:
 - name: 2004-005(회제일 8360-00022) 제조회사의 단기매매증권 보유가능 여부에 대한 질의.hwp
   atch_file_id: 2d4b385eed5e835b551adae5bac992e9
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:12:15.586555+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2004-005(회제일 8360-00022) 제조회사의 단기매매증권 보유가능 여부에 대한 질의.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2004-005(회제일 8360-00022) |  |
+| --- | --- |
+| 제조회사의 단기매매증권 보유가증 여부에 대한 질의 |  |
+
+Ⅰ. 질의요약
+
+◦ 제조업을 영위하는 회사가 기준서 8호를 적용하게 되면서 2003년 초에 보유 중인 유가증권을 단기매매증권으로 분류할 수 있는지?
+
+Ⅱ. 회신요약
+
+◦ 기업회계기준서 제8호에 따라 당초 취득목적과 보유의도(불분명한 경우에는 재분류 기준일 현재)등이 주로 단기간 내의 매매차익을 위한 것으로서 매수와 매도가 적 극적이고 빈번하게 이루어진다면 단기매매증권으로 분류하는 것이 타당함.

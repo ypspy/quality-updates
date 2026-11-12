@@ -14,9 +14,9 @@ attachments:
 - name: 2001-051(회계8360-00232)희석화주당순이익의 계산방법에 대한 질의.hwp
   atch_file_id: 0218a7893d070b3626828c160c9c52da
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:27:23.638352+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2001-051(회계8360-00232)희석화주당순이익의 계산방법에 대한 질의.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2001-051(회제일 8360-00232) |  |
+| --- | --- |
+| 희석화주당순이익의 계산방법에 대한 질의 |  |
+
+Ⅰ. 질의요약
+
+o 발행된 전환사채의 전환조건이 회계연도말 현재 미충족된 경우, 희석화주당순 이익 및 희석화주당경상이익 계산시 전환사채로 전환가능한 보통주식수를 희 석증권의 주식수에 포함할 것인지에 대한 질의임
+
+Ⅱ. 회신요약
+
+o 희석화주당순이익은 전환조건에 상관없이 사채발행일을 기준으로 계산함

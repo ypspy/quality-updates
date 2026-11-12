@@ -14,9 +14,9 @@ attachments:
 - name: 2006-005 원금보장형 구조화 채권 회계처리에 대한 질의회신.hwp
   atch_file_id: 237454369a1c3a1b713582b5e6a295ae
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:37:26.207807+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,20 @@ extract_status: pending_whale
 
 ## 첨부: 2006-005 원금보장형 구조화 채권 회계처리에 대한 질의회신.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2006-005 |  |
+| --- | --- |
+| 원금보장형 구조화 채권 회계처리에 대한 질의회신 |  |
+
+Ⅰ. 질의요약
+
+◦ 회사가 만기 12년의 SPC 외화채권을 액면가액으로 매수하였으며, 동 채권은 원 금 은 보장되나, 이자는 SPC 의 운용수익 결과에 따라 수취하게 됨. 따라서 운용수 익이 0인 경우 이자는 없음
+
+◦ SPC 의 투자구조는 채권의 원금 보장을 위해 미국국채( zero coupon) 를 매입하고, 나머지는 CLO(Collateralized Loan Obligation) 후순위 증권에 투자함
+
+◦ 향후 SPC 는 후순위 증권에서 현금이 회수될 때마다 채권의 원금을 상환하고, 이 에 따라 원금 보장 채권이 감소하므로 감소분만큼의 미국국채를 매도하여 회사에 지급함
+
+◦ SPC 가 원금보장채권의 감소분만큼 미국국채를 매도하여 당행에 지급하는 경우, 상기 금액 수취시 채권 투자자의 회계처리 방법은?
+
+Ⅱ. 회신요약
+
+◦ 원금이 보장되므로 전액 이자수익으로 회계처리

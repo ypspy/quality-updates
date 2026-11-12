@@ -14,9 +14,9 @@ attachments:
 - name: 2005-086 회계변경의 누적효과의 표시에 대한 질의.hwp
   atch_file_id: 6b9c0c7351d31a3a12ee2ba53cde6b18
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:17:19.483303+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2005-086 회계변경의 누적효과의 표시에 대한 질의.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2005-086 |  |
+| --- | --- |
+| 회계변경의 누적효과의 표시에 대한 질의 |  |
+
+Ⅰ. 질의요약
+
+◦ 회계변경을 하여 회계변경에 따른 누적효과를 이익잉여금에 반영하고 비교표 시되는 전기재무제표를 재작성하는 경우, 회계변경에 따른 누적효과를 당기 이익잉여금처분계산서상에 ‘ 회계변경의 누적효과 ’ 로 표시하여야 하는지?
+
+Ⅱ. 회신요약
+
+◦ 회계변경의 누적효과는 이익잉여금에 반영하고 전기재무제표를 재작성하였기 때문에 당기 이익잉여금처분계산서상의 ‘ 회계변경의 누적효과 ’ 에 별도로 나타 나지 않는 것이 타당함 .

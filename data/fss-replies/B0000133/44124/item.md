@@ -14,9 +14,9 @@ attachments:
 - name: 2001-045(회계 제 8360-7) 은행업회계처리준칙상 타당한 계정분류.hwp
   atch_file_id: 4d261261e544b2b07a5e70cec2826c4c
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:27:39.609365+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,20 @@ extract_status: pending_whale
 
 ## 첨부: 2001-045(회계 제 8360-7) 은행업회계처리준칙상 타당한 계정분류.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2001-045(회계제 8360-7) |  |
+| --- | --- |
+| 은행업회계처리준칙상 타당한 계정분류 |  |
+
+Ⅰ. 질의요약
+
+- 수입 L/C 개설은행 : 시중은행
+
+- 인수 및 결제은행 : 갑은행 서울지점
+
+o 갑은행 은 L/C 개설은행의 요청에 따라 인수와 동시에 해외의 Nego 은행에 대금을 지급하게 되는 거래로서 L/C 개설은행에 Financing 을 제공하게 됨
+
+- 이와 같은 거래시 갑은행 서울지점에서 처리할 적정한 계정과목은?
+
+Ⅱ. 회신요약
+
+◦ 신용장 발행은행 이외의 외국환은행(갑은행)이 어음을 인수 및 대외결제하는 것이 므로 인수은행(갑은행)은 난내계정인 “ 내국수입유산스 ” 계정으로 회계처리 하는 것이 타당함.

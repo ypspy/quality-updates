@@ -14,9 +14,9 @@ attachments:
 - name: 2006-050 수익증권 만기상환시 회계처리 질의.hwp
   atch_file_id: 94ea0e37820cc36a4b664cc58b5e6c10
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:31:59.771349+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2006-050 수익증권 만기상환시 회계처리 질의.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2006-050 |  |
+| --- | --- |
+| 수익증권 만기상환시 회계처리 질의 |  |
+
+Ⅰ. 질의요약
+
+◦ 부동산 펀드에 투자하여 교부받은 수익증권은 크게 투자계약기간 동안 분배금 을 받는 형태와 만기에 일시상환되는 형태로 구분되는 데 수익증권 만기 상환 시 에 발생하는 손익이 영업손익 또는 영업외손익인가?
+
+Ⅱ. 회신요약
+
+◦ 부동산펀드에 투자하여 교부받은 수익증권의 만기상환시 발생하는 손익의 경 우 동 수익증권 투자가 주요 경영활동과 관련되어 있고 지속성 정도가 높다면 손 익 계산서의 정보유용성 제고 측면에서 영업손익으로 계상하는 것이 타당함

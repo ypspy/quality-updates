@@ -14,9 +14,9 @@ attachments:
 - name: 2001-034(회계8360-00426)자사주펀드에서 발생한 자기주식처분손실의 회계처리에 관한 질의.hwp
   atch_file_id: 416d2c8ebd8c9772b11dd652dd919e84
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:28:12.951399+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,18 @@ extract_status: pending_whale
 
 ## 첨부: 2001-034(회계8360-00426)자사주펀드에서 발생한 자기주식처분손실의 회계처리에 관한 질의.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2001-034(회제일 8360-00426) |  |
+| --- | --- |
+| 자사주펀드에서 발생한 자기주식처분손실의 회계처리에 관한 질의 |  |
+
+Ⅰ. 질의요약
+
+o 자사주펀드의 회계처리상 발생한 자기주식처분손실에 대한 회계처리는?
+
+(갑설) 일반 자기주식처분손실과 같이 기말에 잉여금처분으로 처리
+
+(을설) 자사주펀드를 해지하는 해의 기말에 잉여금처분으로 처리
+
+Ⅱ. 회신요약
+
+o 갑설이 타당함

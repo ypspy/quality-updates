@@ -6,7 +6,7 @@ number: '337'
 title: '[2004-013]이연법인세차에 대한 질의(''11.5.4 폐기)'
 department: 회계제도실
 standards:
-- 일반기업회계기준
+- 기업회계기준서 제16호
 reply_date: '2008-12-24'
 published_date: '2008-12-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43529&menuNo=200443
@@ -14,9 +14,9 @@ attachments:
 - name: 2004-013(회제일8360-00064)이연법인세차에 대한 질의.hwp
   atch_file_id: 0b0e5a706a65be334a924899da7c9e66
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:11:04.443044+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,16 @@ extract_status: pending_whale
 
 ## 첨부: 2004-013(회제일8360-00064)이연법인세차에 대한 질의.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2004-013(회제일 8360-00064) |  |
+| --- | --- |
+| 이연법인세차에 대한 질의 |  |
+
+Ⅰ. 질의요약
+
+◦ ( 해석 45-52) * 의 (5-4)의 4)의 ‘ 최근 3년간의 연평균경상이익 ’ 산정시 당기분을 제외하여야 하는지?
+
+* 해석 45-52는 기업회계기준서 제16호 “ 법인세회계 ” 로 대체
+
+Ⅱ. 회신요약
+
+◦ ‘ 최근 3년간의 연평균경상이익 ’ 은 당해연도를 포함한 최근 3년간 연평균경상이 익으로 산정하는 것이 타당함.

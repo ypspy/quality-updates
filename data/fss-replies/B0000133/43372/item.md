@@ -14,9 +14,9 @@ attachments:
 - name: 2005-076 부동산투자신탁의 투자재산(부동산)의 감가상각대상 여부 질의.hwp
   atch_file_id: 55949dedbde7e610eb3604419d56ddc5
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:18:25.112381+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2005-076 부동산투자신탁의 투자재산(부동산)의 감가상각대상 여부 질의.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2005-076 |  |
+| --- | --- |
+| 부동산투자신탁의 투자재산(부동산) 의 감가상각대상여부 질의 |  |
+
+Ⅰ. 질의요약
+
+◦ 간접투자자산운용법(이하 ‘ 간운법 ’) 에 의해 설정된 부동산투자신탁의 투자재산인 부동산이 감가상각대상인가?
+
+Ⅱ. 회신요약
+
+◦ 부동산투자신탁에서 투자한 부동산에 대하여 감가상각을 하지 않는 것이 타당함.

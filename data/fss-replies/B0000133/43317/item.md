@@ -14,9 +14,9 @@ attachments:
 - name: 2006-091 지배종속회사간 합병시 회계처리.hwp
   atch_file_id: 49bc70c03dc3e92c84988ed9edc32a44
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:27:54.695756+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,22 @@ extract_status: pending_whale
 
 ## 첨부: 2006-091 지배종속회사간 합병시 회계처리.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2006-091 |  |
+| --- | --- |
+| 지배종속회사간 합병시 회계처리 |  |
+
+Ⅰ. 질의요약
+
+A 사(합병회사) : 협회등록법인
+
+B 사(피합병회사) : 비상장법인으로 자산총액은 70억원을 초과하고 있음
+
+C 사(피합병회사) : 비상장법인으로 자산총액 70억원 미만인 소규모회사임
+
+⇒ 합병기준일 현재 A 사는 B 사 및 C 사의 (보통)주식을 100% 소유하고 있음
+
+합병시 회계처리는?
+
+Ⅱ. 회신요약
+
+C 사는 종속회사에 해당하지 아니하므로 B 사에 대하여는 연결재무제표 상 장부가 액으로 승계하는 회계처리를 행하고, C 사에 대하여는 매수법을 적용하여 회계처 리함

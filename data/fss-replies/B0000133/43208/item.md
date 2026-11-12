@@ -14,9 +14,9 @@ attachments:
 - name: 2007-045 금고업무 출연금 질의회신.hwp
   atch_file_id: 82908a8c77028abc1b3092bdcc3c2b26
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:33:08.076511+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2007-045 금고업무 출연금 질의회신.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2007-045 |  |
+| --- | --- |
+| 금고업무 출연금 질의회신 |  |
+
+Ⅰ. 질의요약
+
+◦ 은행이 시 ․ 도금고업무 취급과 관련하여 출연금 지급약정이 있는 경우 이를 출연금을 지급하는 시점에 무형자산으로 계상하고 잔여약정기간동안 상각하여야 하는지, 아니면 금고지정약정 계약이 체결되어 출연금 지급의무가 발생하는 시점에 무형자산을 계상하고 약정기간동안 상각하여야 하는지?
+
+Ⅱ. 회신요약
+
+◦ 귀 질의 의 경우 금고지정약정 계약이 체결되어 출연금 지급의무가 발생하는 시점에 무형자산으로 계상하고 약정기간동안 상각하는 것이 타당함

@@ -14,9 +14,9 @@ attachments:
 - name: 2007-054 투자회사와 피투자회사간 회계정책이 상이한 경우 지분법 회계처리.hwp
   atch_file_id: dc6845b360c802e7a2775e16ede57ee3
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:31:33.494288+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2007-054 투자회사와 피투자회사간 회계정책이 상이한 경우 지분법 회계처리.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2007-054 |  |
+| --- | --- |
+| 투자회사와 피투자회사간 회계정책이 상이한 경우 지분법 회계처리 |  |
+
+Ⅰ. 질의요약
+
+개별 지분법 적용시 투자회사의 유형자산과 동일한 제품을 생산하고 있는 해외 피투자회사의 유형자산에 대한 감가상각방법을 투자회사의 감가상각방법으로 일치하도록 수정하여야 하는지?
+
+Ⅱ. 회신요약
+
+감가상각방법을 일치시키는 것이 타당합니다.

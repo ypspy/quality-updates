@@ -14,9 +14,9 @@ attachments:
 - name: 2004-120(회제이 8360-00560) 대차대조표일 후 발생한 상각채권 매각의 회계처리.hwp
   atch_file_id: 497c895862a4e143207ea33b890e66cc
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:02:11.333273+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2004-120(회제이 8360-00560) 대차대조표일 후 발생한 상각채권 매각의 회계처리.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2004-120(회제이 8360-00560) |  |
+| --- | --- |
+| 대차대조표일 후 발생한 상각채권 매각의 회계처리 |  |
+
+Ⅰ. 질의요약
+
+◦ 은행이 기상각된 채권을 제3자에게 매각하는 거래가 대차대조표일 후 발생한 사 건에 해당할 경우 이익인식시점, 대차대조표일의 타당한 회계처리는?
+
+Ⅱ. 회신요약
+
+◦ 동 대차대조표일 사건의 효과를 대차대조표일 현재 재무제표에 반영하지 않는 것이 타당함

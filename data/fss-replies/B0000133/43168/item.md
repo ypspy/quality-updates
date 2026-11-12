@@ -6,7 +6,7 @@ number: '37'
 title: '[2007-024] 기업발전적립금의 이익잉여금 분류'
 department: 회계제도실
 standards:
-- 일반기업회계기준
+- 기업회계기준서 제21호(재무제표의 작성과 표시 Ⅰ)
 reply_date: '2008-12-08'
 published_date: '2008-12-08'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43168&menuNo=200443
@@ -14,9 +14,9 @@ attachments:
 - name: 2007-024 기업발전적립금의 이익잉여금 분류.hwp
   atch_file_id: a42b29a89969295558d3322006c8aca3
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:35:50.674111+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2007-024 기업발전적립금의 이익잉여금 분류.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2007-024 |  |
+| --- | --- |
+| 기업발전적립금의 이익잉여금 분류에 대한 질의 |  |
+
+Ⅰ. 질의요약
+
+◦ 기업회계기준서 제21호(재무제표의 작성과 표시 Ⅰ) 에 의하면 이익잉여금을 법 정적립금, 임의적립금 및 미처분이익잉여금으로 구분하여 표시토록 하고 있는 데 회사는 ’01 년 이전에 구 법인세법 제56조에 의해 적립한 기업발전적립금을 법정적립금으로 분류해야 하는지를 질의
+
+Ⅱ. 회신요약
+
+◦ 과거 기업회계기준에 의해 기타법정적립금으로 분류한 준비금은 기업회계기 준서 제21호(재무제표의 작성과 표시 Ⅰ) 에 의한 계정분류시 법정적립금으로 표시하는 것이 타당함

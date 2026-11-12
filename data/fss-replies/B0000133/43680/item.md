@@ -14,9 +14,9 @@ attachments:
 - name: 2003-100 (회제이 8360-00329) 공사원가관련 회계처리 질의.hwp
   atch_file_id: 299908da807b74d326e3a8edadbeb4dd
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:53:48.695776+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2003-100 (회제이 8360-00329) 공사원가관련 회계처리 질의.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2003-100 (회제이 8360-00329) |  |
+| --- | --- |
+| 공사원가관련 회계처리 질의 |  |
+
+Ⅰ. 질의요약
+
+A 사는 지금까지 철 구조물을 자체 제작하여 60%는 매출, 40%는 건설공사에 투입하고 있었으나, 최근 들어 철 구조물을 제작하는 공장을 매각하고 다른 업체로 부터 조달한다면 철 구조물 매입시 제조원가로 하는지, 아니면 공사원가로 하는지?
+
+Ⅱ. 회신요약
+
+철 구조물의 매입시에 재고자산으로 계상한 후, 철 구조물을 매출할 경우에는 매출원가가 되며, 건설공사에 투입할 경우에는 공사원가가 되는 것이 타당함

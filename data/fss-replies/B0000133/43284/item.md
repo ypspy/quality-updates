@@ -14,9 +14,9 @@ attachments:
 - name: 2006-070 연결재무제표 작성에 대한 질의.hwp
   atch_file_id: 35861bc0c59928153500edd41bea2baa
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:29:59.979343+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,24 @@ extract_status: pending_whale
 
 ## 첨부: 2006-070 연결재무제표 작성에 대한 질의.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2006-070 |  |
+| --- | --- |
+| 연결재무제표 작성에 대한 질의 |  |
+
+Ⅰ. 질의요약
+
+◦ 각 법인의 상황은 다음과 같음
+
+법인 A : 직전년도 자산총액이 70억원 이상인 법인
+
+법인 B : 직전년도 자산총액이 70 억원 미만인 소규모 법인 ( 종속회사이나 소규 모로 연결대상이 아님 )
+
+법인 C : 직전년도 자산총액이 70 억원 이상이며 자본잠식 상태의 법인임 .
+
+A 사 B 사 (70억 미만) C 사 (해외법인) 49% 67% 33%
+
+◦ 법인 A 가 2005년말 현재의 연결재무제표 작성시 법인 C 를 연결재무제표 작성대 상 종속회사로 보아야 하는지?
+
+Ⅱ. 회신요약
+
+A 사는 C 사를 연결대상 종속회사에서 제외하는 것이 타당합니다.

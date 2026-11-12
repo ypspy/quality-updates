@@ -14,9 +14,9 @@ attachments:
 - name: 2003-074(회제일8360-00390) 교환사채 회계처리에 대한 질의.hwp
   atch_file_id: 40d1802ab9ad237ed6ecb8ca2ea6cb7c
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:55:27.920974+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2003-074(회제일8360-00390) 교환사채 회계처리에 대한 질의.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2003-074(회제일8360-00390) |  |
+| --- | --- |
+| 교환사채 회계처리에 대한 질의 |  |
+
+Ⅰ. 질의요약
+
+◦ 자기주식으로 교환되는 교환사채의 교환권 행사시 단순히 사채와 자본으로의 교환으로 보아 회계처리 해야 하는지 아니면 자기주식의 처분과 교환사채의 상환의 이원거래로 보아야 하는지?
+
+Ⅱ. 회신요약
+
+◦ 교환사채의 교환권 행사시 자기주식의 처분가액을 교환사채의 장부가액과 교환 권대가의 합계금액으로 산정하고 사채상환손익을 인식하지 않는 것이 타당함

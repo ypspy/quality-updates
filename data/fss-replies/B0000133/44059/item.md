@@ -14,9 +14,9 @@ attachments:
 - name: 2009-020 상장사와 비상장사간 합병시 매수주체 구분 관련 질의_4537.hwp
   atch_file_id: ddadb3599342e953d87b17c028180b44
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:18:57.598228+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,4 @@ extract_status: pending_whale
 
 ## 첨부: 2009-020 상장사와 비상장사간 합병시 매수주체 구분 관련 질의_4537.hwp
 
-pending_whale
-Whale 변환 대기
+[2009-020] 상장사와 비상장사간 합병시 매수주체 구분 <질의요약> ◦ A 사(코스닥등록법인)가 B 사(비상장법인)를 흡수합병하는 경우 매수주체 구분 - 지분율: 합병후 A 주주 86%, B 주주 14%, B 의 최대주주가 합병후 최대주주 - 이사회 구성: 합병후 최종적으로 A 사 2인, B 사 5인(대표이사 포함) - 기타: 합병완료( ‘08.12.30) 전 A 사 사업 물적분할( ‘08.11.30) 【 질의 】 B 가 매수주체가 되어 역합병으로 회계처리할 수 있는지 <회신요약> ◦ B 사를 매수회사로 하여 매수법을 적용하는 것이 타당함

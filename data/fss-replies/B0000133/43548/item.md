@@ -6,7 +6,7 @@ number: '355'
 title: '[2004-032] 유가증권 감액대상 여부에 대한 질의 (''11.5.4 폐기)'
 department: 회계제도실
 standards:
-- 일반기업회계기준
+- 기업회계기준서 제8호
 reply_date: '2008-12-24'
 published_date: '2008-12-24'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43548&menuNo=200443
@@ -14,9 +14,9 @@ attachments:
 - name: 2004-032(회제일 8360-00171) 유가증권 감액대상 여부에 대한 질의.hwp
   atch_file_id: 972912e032ad8e149392a1a1d90c19e9
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:09:08.246143+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2004-032(회제일 8360-00171) 유가증권 감액대상 여부에 대한 질의.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2004-032(회제일 8360-00171) |  |
+| --- | --- |
+| 유가증권의 감액대상 여부에 대한 질의 |  |
+
+Ⅰ. 질의요약
+
+◦ 2003년 12월 23일 취득한 투자주식의 발행회사 재무제표가 완전자본잠식인 경우 유가증권기준서 제8호에 따른 감액대상인지?
+
+Ⅱ. 회신요약
+
+◦ 기업회계기준서 제8호에 따라 장부가액과 회수가능가액의 차액을 감액손실로 인식하여야 함.

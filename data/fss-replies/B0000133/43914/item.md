@@ -14,9 +14,9 @@ attachments:
 - name: 2002-035(회제일8360-00109) 신주인수권의 매입소각관련 회계처리.hwp
   atch_file_id: b03e355b173e39ee6596ac0ea3d65ce0
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:40:36.768497+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2002-035(회제일8360-00109) 신주인수권의 매입소각관련 회계처리.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2002-035(회제일8360-00109) |  |
+| --- | --- |
+| 신주인수권의 매입소각관련 회계처리 |  |
+
+Ⅰ. 질의요약
+
+◦ 97 년(신주인수권가치 별도인식)에 발행된 신주인수권부사채는 모두 중도상환된 후 신주인수권 행사기간이 종료되지 않은 신주인수권을 발행회사가 매입하여 소각하고자 하는 경우의 회계처리에 대한 것임
+
+Ⅱ. 회신요약
+
+◦ 자본조정으로 계상한 후, 소각시에 기타자본잉여금으로 처리하는 것이 타당함

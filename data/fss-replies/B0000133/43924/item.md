@@ -14,9 +14,9 @@ attachments:
 - name: 2002-045(회제일 8360-00179) 소송관련 배상금에 대한 우발채무 계상관련 회계처리.hwp
   atch_file_id: 69ed5756a0de99da3b1828cd42da9b62
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:39:48.497152+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2002-045(회제일 8360-00179) 소송관련 배상금에 대한 우발채무 계상관련 회계처리.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2002-045(회제일 8360-00179) |  |
+| --- | --- |
+| 소송관련 배상금에 대한 우발채무 계상관련 회계처리 |  |
+
+Ⅰ. 질의요약
+
+◦ 외국법원(괌)으로부터 부과(될) 손해배상금 중 우리나라 민법상에는 없는 징 벌적 손해배상( Punitive Damages) 의 회계처리는?
+
+Ⅱ. 회신요약
+
+◦ 우발손실의 실현가능성(징벌적 손해배상금의 국내집행가능성) 및 측정가능성은 관련 법령, 과거판례, 소송대리인의 견해 및 상 관습상 등의 이유로 회사가 실질적인 의무를 지는 지의 여부 등을 종합적으로 고려하여 회사 및 감사인 이 판단하여야 할 사항임

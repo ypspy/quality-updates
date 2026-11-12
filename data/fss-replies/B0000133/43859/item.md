@@ -14,9 +14,9 @@ attachments:
 - name: 2008-050 Callable Asset Swap 회계처리.hwp
   atch_file_id: b8a6a33dd25a859d8bab00ba8e982998
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:44:18.542758+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,16 @@ extract_status: pending_whale
 
 ## 첨부: 2008-050 Callable Asset Swap 회계처리.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2008-050 |  |
+| --- | --- |
+| Callable Asset Swap 회계처리 |  |
+
+Ⅰ. 질의요약
+
+◦ 은행은 A 사가 보유한 해외전환사채를 매입하고 동 CB 와 관련하여 A 사와 CB 매입금액을 명목금액으로 하는 스왑계약 체결하였으며 동 스왑계약에는 A 사가 CB 를 매입할 수 있는 권리가 포함되어 있음
+
+◦ 은행의 CB 매입 및 스왑거래에 대한 적정한 회계처리는 ?
+
+Ⅱ. 회신요약
+
+◦ 전환사채는 전환권가치를 포함하여 일반사채와 동일하게 회계처리하며 callable asset swap 은 순수 이자율스왑과 A 사에 대한 call 옵션 매도를 공정 가치로 계상하는 것이 타당함

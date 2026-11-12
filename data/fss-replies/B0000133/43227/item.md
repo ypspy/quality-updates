@@ -14,9 +14,9 @@ attachments:
 - name: 2007-055 지분법적용투자주식의 현물출자시 회계처리.hwp
   atch_file_id: d4e8948bd756c568101e5aada5ec4a75
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:31:29.779518+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,16 @@ extract_status: pending_whale
 
 ## 첨부: 2007-055 지분법적용투자주식의 현물출자시 회계처리.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2007-055 |  |
+| --- | --- |
+| 지분법적용투자주식의 현물출자시 회계처리 |  |
+
+Ⅰ. 질의요약
+
+100% 소유하고 있던 현지법인의 주식을 100% 소유 지주회사(설립시자본금 1만 불인 Paper Company, ) * 에 현물출자하는 경우 회계처리는?
+
+* 설립시 자본금 70억원 미만인 신설회사로 종속회사에 해당하지 아니함
+
+Ⅱ. 회신요약
+
+회사가 현물출자한 지분법적용투자주식의 장부가액을 지주회사발행주식의 취득원 가로 하여 처분손익을 인식하지 아니하고, 이때 발생된 투자차액등은 기업회계기 준서 제15호 문단13.에 따라 회계처리하는 것이 타당합니다.

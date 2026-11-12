@@ -14,9 +14,9 @@ attachments:
 - name: '[2010-013]외국모회사의 국내 종속회사간 합병시 회계처리에 관한 질의.hwp'
   atch_file_id: 4b14c812cb4485075148914760d933ca
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:14:35.020699+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,4 @@ extract_status: pending_whale
 
 ## 첨부: [2010-013]외국모회사의 국내 종속회사간 합병시 회계처리에 관한 질의.hwp
 
-pending_whale
-Whale 변환 대기
+[2010-013] 외국모회사의 국내 종속회사간 합병시 회계처리에 관한 질의 <질의요약> ◦ A 사는 국내법인으로 외국법인 B 사의 100% 자회사 - ‘10.2 월 B 사는 외국법인 D 사의 자회사인 C 사 지분 100%를 취득하였고, ’10.4 월 A 사는 C 사를 흡수합병할 예정 ◦ 지배회사는 IFRS 를 적용하는 외국기업으로서 우리나라 기준에 따른 연결재무제표가 존 재하지 않는 상황에서 A 사와 C 사의 합병시 회계 처리 <회신요약> ◦ A 사는 지배회사인 B 사가 국내 기업회계기준에 따라 연결재무제표를 작성하였을 경우의 C 사 장부가액으로 합병 회계처리 하는 것이 타당

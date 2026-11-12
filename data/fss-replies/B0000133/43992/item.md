@@ -6,7 +6,7 @@ number: '498'
 title: '[2003-038]보너스에 대한 기간배분방법에 대한 질의(''11.5.4 폐기)'
 department: 회계제도실
 standards:
-- 일반기업회계기준
+- 기업회계기준서 제17호(충당부채와 우발부채 ․ 우발 자산)
 reply_date: '2009-01-20'
 published_date: '2009-01-20'
 page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43992&menuNo=200443
@@ -14,9 +14,9 @@ attachments:
 - name: 2003-038(회제일8360-00199) 보너스에 대한 기간배분방법에 대한 질의.hwp
   atch_file_id: e7daeccaa3abd639544c85252006eb86
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:57:45.542735+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,16 @@ extract_status: pending_whale
 
 ## 첨부: 2003-038(회제일8360-00199) 보너스에 대한 기간배분방법에 대한 질의.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2003-038(회제일 8360-00199) |  |
+| --- | --- |
+| 보너스에 대한 기간배분방법에 대한 질의 |  |
+
+Ⅰ. 질의요약
+
+◦ 월차결산을 하는 회사의 설날 및 추석보너스 기간배분과 관련하여 매월 인 식되는 비용의 상대계정과목(선급비용 또는 미지급비용)에 대한 질의임
+
+Ⅱ. 회신요약
+
+◦ 기업회계기준 제26조에 따라 설날 및 추석보너스지급시점이후 장래에 지출 될 설날 및 추석보너스 금액을 추산하여 부채성충당금으로 계상하는 것이 타당함.
+
+* 기업회계기준 제26조는 기업회계기준서 제17호(충당부채와 우발부채 ․ 우발 자산)로 대체

@@ -14,9 +14,9 @@ attachments:
 - name: 2002-005(회계제 8360-00059) 외화차입금에 대한 현재가치할인차금의 외화환산 여부.hwp
   atch_file_id: 739802e5abc533371d6e4a3cd383ed70
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:42:40.141752+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2002-005(회계제 8360-00059) 외화차입금에 대한 현재가치할인차금의 외화환산 여부.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2002-005(회계제 8360-00059) |  |
+| --- | --- |
+| 외화차입금에 대한 현재가치할인차금의 외화환산 여부 |  |
+
+Ⅰ. 질의요약
+
+◦ 외화차입금에 대한 현재가치할인차금(이하 “ 현할차 ”) 이 외화환산 대상에 해당하 는지 여부임
+
+Ⅱ. 회신요약
+
+◦ 회폐성외화부채의 현재가치 평가에 따라 발생하는 현재가치할인차금도 외화 환산대상임

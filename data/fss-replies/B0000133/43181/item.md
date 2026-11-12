@@ -14,9 +14,9 @@ attachments:
 - name: 2006-029 인터넷미디어랩사의 수익인식.hwp
   atch_file_id: 4e3ec04b32de3c650e18ab0b00b38c09
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:34:57.303849+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,16 @@ extract_status: pending_whale
 
 ## 첨부: 2006-029 인터넷미디어랩사의 수익인식.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2006-029 |  |
+| --- | --- |
+| 인터넷미디어랩사의 수익인식에 대한 회계처리 |  |
+
+Ⅰ. 질의요약
+
+◦ 회사는 온라인매체사와 광고집행대가에 대해 일정율의 몫을 받기로 판매대행계 약을 하고 광고주에게 광고매체계획 및 집행 ․ 조사 ․ 결과분석 등의 용역을 제공하고 광고주로부터 광고금액을 수령하고 수령한 금액에서 광고를 집행한 온라인매체 사에 계약된 율에 따라 매체비를 지급하는 인터넷미디어랩 업무를 수행
+
+◦ 인터넷미디어랩 사업을 수행하는 당사의 경우 수익인식 기준으로 총액인식이 타 당한 것인지?
+
+Ⅱ. 회신요약
+
+◦ 순액으로 회계처리하는 것이 타당함

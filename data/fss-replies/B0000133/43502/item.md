@@ -14,9 +14,9 @@ attachments:
 - name: 2004-131(회제일 8360-00447) 피투자회사 대여금에 대한 외화환산이익의 지분법 적용시 제거여부.hwp
   atch_file_id: bbb36a325870cc05637dc2aaa2ccd8b2
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:01:27.213027+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2004-131(회제일 8360-00447) 피투자회사 대여금에 대한 외화환산이익의 지분법 적용시 제거여부.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2004-131(회제일 8360-00447) |  |
+| --- | --- |
+| 피투자회사 대여금에 대한 외화환산이익의 지분법 적용시 제거여부 |  |
+
+Ⅰ. 질의요약
+
+◦ 지분법적용 피투자회사에 대여한 외화대여금에서 발생한 외화환산손익이 지분법 회계처리시 내부거래미실현손익제거 대상인지?
+
+Ⅱ. 회신요약
+
+◦ 지분법회계처리시 제거될 내부거래미실현손익이 아닙니다.

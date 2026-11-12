@@ -14,9 +14,9 @@ attachments:
 - name: 2006-100 매입약정이 있는 자산담보부 기업어음의 양도여부.hwp
   atch_file_id: da2ab056a4c5c4972c1cbd123061d26c
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T14:26:49.491459+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,20 @@ extract_status: pending_whale
 
 ## 첨부: 2006-100 매입약정이 있는 자산담보부 기업어음의 양도여부.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2006-100 |  |
+| --- | --- |
+| 매입약정이 있는 자산담보부 기업어음의 양도여부 |  |
+
+Ⅰ. 질의요약
+
+◦ A 은행은 CDO 를 B 회사에게 양도한 뒤 B 회사는 C 은행에 동 CDO 를 신탁하고 우선수익권을 교부 받음
+
+◦ B 회사는 D(SPC) 사에 동 우선수익권을 다시 양도하며 D 는 동 우선수익권을 원본으로 ABCP 를 발행함
+
+◦ A 은행은 D(SPC) 가 발행하는 ABCP 가 시장에서 매각되지 않거나 기초자산의 부실화로 발행된 ABCP 의 원리금을 상환하지 못해 추가로 발행하는 ABCP 를 매입하기로 약정함
+
+◦ A 은행이 CDO 를 매각할 때의 적절한 회계처리는?
+
+Ⅱ. 회신요약
+
+◦ B 회사는 매입과 동시에 신탁을 해야 하므로 양수한 자산을 자유롭게 처분하거 나 담보로 제공할 수 없고 CDO 에서 부도가 발생할 경우 추가 로 발행되는 ABCP 는 시장에서 매각되지 않을 가능성이 높으므로 실질적으로 CDO 의 부실 에 대한 위험을 A 은행이 부담하고 있음. 따라서 담보차입거래로 회계처리 하 는 것이 타당함

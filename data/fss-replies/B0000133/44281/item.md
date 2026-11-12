@@ -14,9 +14,9 @@ attachments:
 - name: '[2013-004] MMT 금융상품의 계정과목 분류 관련 회계처리_.hwp'
   atch_file_id: a7b1dc69b838da96071d57e21ec6ce21
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:10:03.450655+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,7 @@ extract_status: pending_whale
 
 ## 첨부: [2013-004] MMT 금융상품의 계정과목 분류 관련 회계처리_.hwp
 
-pending_whale
-Whale 변환 대기
+[2013-004] MMT 금융상품의 계정과목 분류 관련 회계처리 <질의요약> □ 회사는 증권사가 운용하는 Money Market Trust( 이하 ” MMT* “) 에 가입하였는 바, MMT 의 계정과목 분류에 대해 질의 * 단기자금운용 금융상품으로 수익율에 큰 변동이 생길 수도 있는 MMF 의 단점을 보완하여 출시됨, 수익증권이 아닌 특정금전신탁의 형태이지만 수익률 및 입출금이 자유롭고 당일 환매가능 등 기존 MMF 의 특성을 그대로 따름 (갑설) MMT 계약의 구성자산을 직접 보유하고 있는 것으로 회계처리 (을설) MMT 계약을 현금 및 현금성자산으로 회계처리 <회신요약> □ 회사가 가입한 Money Market Trust( 이하 MMT) 계약은 유가증권이 아니라 위탁자가 단독 · 직접투자를 할 수 있는 금융상품으로, 회사가 직접 신탁금을 운용하는 것과 거래의 실질이 동일하므로 MMT 구성자산을 회사가 직접 보유하고 있는 것으로 회계처리하는 것이 타당 □ 다만, 현금및현금성자산의 정의를 충족하는 MMT 의 구성자산은 재무제표에 현금및현금성 자 산으로 표시할 수 있음
+
+| 질의 ․ 회신요약 |
+| --- |

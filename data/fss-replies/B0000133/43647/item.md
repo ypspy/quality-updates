@@ -14,9 +14,9 @@ attachments:
 - name: 2003-063(회제일 8360-00324) 방송제작업체의 수익인식 회계처리.hwp
   atch_file_id: 8b1c048ce730db7248404ee6569e5255
   file_sn: '1'
-  extract_status: pending_whale
+  extract_status: hwp_parsed
 fetched_at: '2026-11-12T13:56:10.101677+09:00'
-extract_status: pending_whale
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -25,5 +25,14 @@ extract_status: pending_whale
 
 ## 첨부: 2003-063(회제일 8360-00324) 방송제작업체의 수익인식 회계처리.hwp
 
-pending_whale
-Whale 변환 대기
+| 금감원 2003-063(회제일 8360-00324) |  |
+| --- | --- |
+| 방송제작업체의 수익인식 회계처리 |  |
+
+Ⅰ. 질의요약
+
+◦ 방송제작업체가 의뢰인과의 계약에 따라 협찬금(제작비 및 송출료)을 지급받 고, 방송사에 송출료를 지급할 경우 총액법으로 매출 및 비용을 인식할 수 있는지?
+
+Ⅱ. 회신요약
+
+◦ 방송제작업체는 방송 송출 관련 책임을 부담하고 있지 않으므로, 협찬금 중 에서 제작과 관련된 부분만을 수익으로 인식하는 것이 타당함
