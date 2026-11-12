@@ -1,0 +1,7 @@
+# Attachments are kept locally but not committed (over 100MB).
+*
+!*/
+!.gitignore
+!manifest.jsonl
+!*/*/
+!*/*/item.md
