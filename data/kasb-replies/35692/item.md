@@ -13,9 +13,9 @@ attachments:
 - name: 201401A_우발적인_'비유동성(non-viability)'_사건_발생_시_변동_수량의_주식으로_강제_전환되는_금융상품의_분류.hwp
   file_no: '6428'
   file_seq: '1'
-  extract_status: partial
+  extract_status: hwp_parsed
 fetched_at: '2026-11-04T01:34:40.157098+00:00'
-extract_status: partial
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -24,22 +24,27 @@ https://cdn.ifrs.org/-/media/feature/supporting-implementation/agenda-decisions/
 
 ## 첨부: 201401A_우발적인_'비유동성(non-viability)'_사건_발생_시_변동_수량의_주식으로_강제_전환되는_금융상품의_분류.hwp
 
-<IFRS 해석위원회 논의 결과                                            2014년 1월>
-<우발적인 '비유동성(non-viability)' 사건 발생 시  변동 수량의 주식으로 강제 전환되는 금융상품의 분류>
-<IAS 32 ‘금융상품: 표시’>
-
-1. 질의 내용
-
-국제회계기준해석위원회(이하 ‘해석위원회’라 한다)는 IAS 32 ‘금융상품: 표시’에 따라 발행자가 강제 전환되는 특정한 금융상품을 어떻게 분류할지를 논의하였다. 이 금융상품은 정해진 만기일은 없었지만, 발행자가 Tier 1 자본비율을 위반하는 경우(‘우발적인 비유동성 사건'으로 기술함)에 변동 수량의 발행자의 자기지분상품으로 강제 전환되는 것이었다. 이 금융상품은 액면가로 발행되고 전환시점에 인도될 지분상품의 가치는 고정 액면금액과 동일하다. 이 금융상품에 대한 이자는 발행자의 재량에 따라 지급된다.
-
-2. 검토 내용과 결정
-
-구체적으로, 해석위원회는 다음과 같은 쟁점을 논의하였다.
-a. 이 금융상품이 전체적으로 금융부채의 정의를 충족하는지, 아니면 부채요소와 자본요소로 구성된 복합금융상품으로 분류해야 하는지(그리고 후자의 경우, 그러한 구성요소가 무엇을 반영하는가)
-b. 앞의 a에서 식별된 금융부채(또는 부채요소)를 어떻게 측정하는가
-
-해석위원회는 이 사안을 안건에 추가하지 않기로 결정하였다. 해석위원회는 제출 내용에서 제기하는 사안의 범위가 너무 넓어 해석위원회에서 효율적인 방식으로 다루기가 어렵다고 보았다.
-
-<관련 회계기준: 기업회계기준서 제1032호 ‘금융상품: 표시’  색인어: 변동 수량, 자기지분상품, 전환, 금융부채, 부채요소, 자본요소, 측정>
-
-<Notice  Copyright © IFRS Foundation All rights reserved. Translated, reproduced and distributed by the Korea Accounting Standards Board with the permission of the IFRS Found>
+| IFRS 해석위원회 논의 결과 2014년 1월 |
+| --- |
+| 우발적인 '비유동성( non-viability)' 사건 발생 시 변동 수량의 주식으로 강제 전환되는 금융상품의 분류 |
+| IAS 32 ‘ 금융상품: 표시 ’ |
+
+1. 질의 내용
+
+국제회계기준해석위원회(이하 ‘ 해석위원회 ’ 라 한다)는 IAS 32 ‘ 금융상품: 표시 ’ 에 따라 발행자가 강제 전환되는 특정한 금융상품을 어떻게 분류할지를 논의하였다. 이 금융상 품은 정해진 만기일은 없었지만, 발행자가 Tier 1 자본비율을 위반하는 경우( ‘ 우발적인 비유동성 사건'으로 기술함)에 변동 수량의 발행자의 자기지분상품으로 강제 전환되는 것이었다. 이 금융상품은 액면가로 발행되고 전환시점에 인도될 지분상품의 가치는 고 정 액면금액과 동일하다. 이 금융상품에 대한 이자는 발행자의 재량에 따라 지급된다.
+
+2. 검토 내용과 결정
+
+구체적으로, 해석위원회는 다음과 같은 쟁점을 논의하였다.
+
+a. 이 금융상품이 전체적으로 금융부채의 정의를 충족하는지, 아니면 부채요소와 자본 요소로 구성된 복합금융상품으로 분류해야 하는지(그리고 후자의 경우, 그러한 구성 요소가 무엇을 반영하는가)
+
+b. 앞의 a 에서 식별된 금융부채(또는 부채요소)를 어떻게 측정하는가
+
+해석위원회는 이 사안을 안건에 추가하지 않기로 결정하였다. 해석위원회는 제출 내용 에서 제기하는 사안의 범위가 너무 넓어 해석위원회에서 효율적인 방식으로 다루기가 어렵다고 보았다.
+
+| 관련 회계기준 : 기업회계기준서 제1032호 ‘ 금융상품: 표시 ’ 색인어 : 변동 수량, 자기지분상품, 전환, 금융부채, 부채요소, 자본요소, 측정 |
+| --- |
+
+| Notice Copyright © IFRS Foundation All rights reserved. Translated, reproduced and distributed by the Korea Accounting Standards Board with the permission of the IFRS Foundation. The Korean translation of this IASB Agenda Decision has not been approved by the IFRS Foundation and the IFRS Foundation accepts no liability in respect of the quality or content of this translation. 알림 Copyright © IFRS Foundation 모든 저작권은 보호됩니다. 한국회계기준원 회계기준위원회는 국제회계 기준위원회재단의 동의를 받아 이 저작물을 번역, 재출간, 배포합니다. 이 국제회계기준위원회의 논의 결과 한국어 번역은 국제회계기준위원회재단에서 승인하지 않았고, 국제 회계기준위원회재단은 이 번역의 품질이나 내용에 대하여 어떠한 책임도 지지 않습니다. |
+| --- |

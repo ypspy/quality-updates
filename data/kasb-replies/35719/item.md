@@ -13,9 +13,9 @@ attachments:
 - name: 201501D_수익률이_음수(-)인_금융상품에서_생기는_수익과_비용_–_포괄손익계산서의_표시.hwp
   file_no: '6447'
   file_seq: '1'
-  extract_status: partial
+  extract_status: hwp_parsed
 fetched_at: '2026-11-04T01:34:05.395663+00:00'
-extract_status: partial
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -24,20 +24,23 @@ https://cdn.ifrs.org/-/media/feature/supporting-implementation/agenda-decisions/
 
 ## 첨부: 201501D_수익률이_음수(-)인_금융상품에서_생기는_수익과_비용_–_포괄손익계산서의_표시.hwp
 
-<IFRS 해석위원회 논의 결과                                             2015년 1월>
-<수익률이 음수(-)인 금융상품에서 생기는 수익과 비용 – 포괄손익계산서의 표시>
-<IAS 39 ‘금융상품 인식과 측정’, IAS 1 ‘재무제표 표시’>
-
-1. 질의 내용
-
-국제회계기준해석위원회(이하 ‘해석위원회’라 한다)는 유효이자율이 음수(-)인 경제 현상이 포괄손익계산서의 수익과 비용의 표시에 미치는 영향에 대해 논의하였다.
-
-2. 검토 내용과 결정
-
-해석위원회는 유효이자율이 음수(-)인 금융자산에서 생기는 이자가 IAS 18 ‘수익’의 이자수익의 정의[IAS 18은 폐지되었다. 재무보고를 위한 개념체계 문단 4.2에서는 수익(income)의 정의를 포함한다]를 충족하지 못한다고 보았다. 이는 경제적 효익의 총유입이 아닌 총유출을 반영하기 때문이다. 따라서 음수(-)인 유효이자율 때문에 금융자산에서 생기는 비용은 이자수익이 아니라 적절한 비용으로 분류하여 표시해야 한다. 해석위원회는 IAS 1 '재무제표 표시' 문단 85와 112(c)에 따라 그러한 금액이 기업의 재무성과나 이 항목을 이해하는 데 목적 적합한 경우에는 그러한 금액에 대한 추가 정보를 표시해야 한다는 점에 주목하였다.
-
-해석위원회는 기존 IFRS 요구사항을 고려하면 해석서를 제공할 필요가 없다고 보았고, 따라서 이 사안을 안건에 추가하지 않기로 결정하였다.
-
-<관련 회계기준: 기업회계기준서 제1039호 ‘금융상품: 인식과 측정’ '재무제표 표시' 문단 85, 112⑶, 재무보고를 위한 개념체계 문단 4.2  색인어: 유효이자율, 이자, 이자수익, 비용>
-
-<Notice  Copyright © IFRS Foundation All rights reserved. Translated, reproduced and distributed by the Korea Accounting Standards Board with the permission of the IFRS Foundation. >
+| IFRS 해석위원회 논의 결과 2015년 1월 |
+| --- |
+| 수익률이 음수(-)인 금융상품에서 생기는 수익과 비용 – 포괄손익계산서의 표시 |
+| IAS 39 ‘ 금융상품 인식과 측정 ’, IAS 1 ‘ 재무제표 표시 ’ |
+
+1. 질의 내용
+
+국제회계기준해석위원회(이하 ‘ 해석위원회 ’ 라 한다)는 유효이자율이 음수(-)인 경제 현 상이 포괄손익계산서의 수익과 비용의 표시에 미치는 영향에 대해 논의하였다.
+
+2. 검토 내용과 결정
+
+해석위원회는 유효이자율이 음수(-)인 금융자산에서 생기는 이자가 IAS 18 ‘ 수익 ’ 의 이 자수익의 정의 [IAS 18 은 폐지되었다. 재무보고를 위한 개념체계 문단 4.2에서는 수익 (income) 의 정의를 포함한다 ] 를 충족하지 못한다고 보았다. 이는 경제적 효익의 총유입 이 아닌 총유출을 반영하기 때문이다. 따라서 음수(-)인 유효이자율 때문에 금융자산에 서 생기는 비용은 이자수익이 아니라 적절한 비용으로 분류하여 표시해야 한다. 해석 위원회는 IAS 1 ' 재무제표 표시' 문단 85와 112( c) 에 따라 그러한 금액이 기업의 재무 성과나 이 항목을 이해하는 데 목적 적합한 경우에는 그러한 금액에 대한 추가 정보를 표시해야 한다는 점에 주목하였다.
+
+해석위원회는 기존 IFRS 요구사항을 고려하면 해석서를 제공할 필요가 없다고 보았고, 따라서 이 사안을 안건에 추가하지 않기로 결정하였다.
+
+| 관련 회계기준 : 기업회계기준서 제1039호 ‘ 금융상품: 인식과 측정 ’ ' 재무제표 표시' 문단 85, 112 ⑶, 재무보고를 위한 개념체계 문단 4.2 색인어 : 유효이자율, 이자, 이자수익, 비용 |
+| --- |
+
+| Notice Copyright © IFRS Foundation All rights reserved. Translated, reproduced and distributed by the Korea Accounting Standards Board with the permission of the IFRS Foundation. The Korean translation of this IASB Agenda Decision has not been approved by the IFRS Foundation and the IFRS Foundation accepts no liability in respect of the quality or content of this translation. 알림 Copyright © IFRS Foundation 모든 저작권은 보호됩니다. 한국회계기준원 회계기준위원회는 국제회계 기준위원회재단의 동의를 받아 이 저작물을 번역, 재출간, 배포합니다. 이 국제회계기준위원회의 논의 결과 한국어 번역은 국제회계기준위원회재단에서 승인하지 않았고, 국제 회계기준위원회재단은 이 번역의 품질이나 내용에 대하여 어떠한 책임도 지지 않습니다. |
+| --- |

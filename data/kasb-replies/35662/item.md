@@ -12,9 +12,9 @@ attachments:
 - name: 201103B_할인율에_자기신용위험의_포함.hwp
   file_no: '6531'
   file_seq: '1'
-  extract_status: partial
+  extract_status: hwp_parsed
 fetched_at: '2026-11-04T01:35:44.404302+00:00'
-extract_status: partial
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -23,20 +23,23 @@ https://cdn.ifrs.org/-/media/feature/supporting-implementation/agenda-decisions/
 
 ## 첨부: 201103B_할인율에_자기신용위험의_포함.hwp
 
-<IFRS 해석위원회 논의 결과                                             2011년 3월>
-<할인율에 자기신용위험의 포함>
-<IAS 37 ‘충당부채, 우발부채, 우발자산’>
-
-1. 질의 내용
-
-국제회계기준해석위원회(이하 ‘해석위원회’라 한다)는 '부채의 특유한 위험'이라는 문구와 이것이 부채 측정에 사용되는 할인율 조정에서 기업의 자기신용위험(성과위험)을 제외해야 한다는 뜻인지에 대해 해석해 달라는 요청서를 받았다. 요청서에서는 미래현금흐름 추정치가 기업의 자기신용위험에 대해 조정되지 않았다고 가정하였다.
-
-2. 검토 내용과 결정
-
-해석위원회는 IAS 37 문단 47에서 '부채의 특유한 위험'을 부채 측정에 고려해야 하는 것으로 기술한다고 보았다. 해석위원회는 IAS 37에서 자기신용위험 포함 여부를 분명하게 기술하지는 않는다는 점에 주목하였다. 해석위원회는 오늘날 지배적인 실무는 자기신용위험(이를 실무에서는 일반적으로 부채의 특유한 위험이라기보다는 기업의 위험으로 봄)을 제외하는 것이라고 이해하였다.
-
-또 해석위원회는 이 지침에 대한 요청이 새로운 부채 기준서로 IAS 37을 대체하는 국제회계기준위원회 과제의 일부로 가장 잘 다루어질 것이고, 국제회계기준위원회는 이미 이 새로운 기준서에 추가 지침을 포함해 달라는 요청을 고려하고 있다는 점에 주목하였다. 이러한 이유로, 해석위원회는 이 사안을 안건에 추가하지 않기로 결정하였다.
-
-<관련 회계기준: 기업회계기준서 제1037호 ‘충당부채, 우발부채, 우발자산’ 문단 47  색인어: 할인율, 자기신용위험, 부채의 특유한 위험>
-
-<Notice  Copyright © IFRS Foundation All rights reserved. Translated, reproduced and distributed by the Korea Accounting Standards Board with the permission of the IFRS Foundation.  The Korean translation>
+| IFRS 해석위원회 논의 결과 2011년 3월 |
+| --- |
+| 할인율에 자기신용위험의 포함 |
+| IAS 37 ‘ 충당부채, 우발부채, 우발자산 ’ |
+
+1. 질의 내용
+
+국제회계기준해석위원회(이하 ‘ 해석위원회 ’ 라 한다)는 '부채의 특유한 위험'이라는 문구 와 이것이 부채 측정에 사용되는 할인율 조정에서 기업의 자기신용위험(성과위험)을 제외해야 한다는 뜻인지에 대해 해석해 달라는 요청서를 받았다. 요청서에서는 미래현 금흐름 추정치가 기업의 자기신용위험에 대해 조정되지 않았다고 가정하였다.
+
+2. 검토 내용과 결정
+
+해석위원회는 IAS 37 문단 47에서 '부채의 특유한 위험'을 부채 측정에 고려해야 하는 것으로 기술한다고 보았다. 해석위원회는 IAS 37 에서 자기신용위험 포함 여부를 분명 하게 기술하지는 않는다는 점에 주목하였다. 해석위원회는 오늘날 지배적인 실무는 자 기신용위험(이를 실무에서는 일반적으로 부채의 특유한 위험이라기보다는 기업의 위험 으로 봄)을 제외하는 것이라고 이해하였다.
+
+또 해석위원회는 이 지침에 대한 요청이 새로운 부채 기준서로 IAS 37 을 대체하는 국 제회계기준위원회 과제의 일부로 가장 잘 다루어질 것이고, 국제회계기준위원회는 이 미 이 새로운 기준서에 추가 지침을 포함해 달라는 요청을 고려하고 있다는 점에 주목 하였다. 이러한 이유로, 해석위원회는 이 사안을 안건에 추가하지 않기로 결정하였다.
+
+| 관련 회계기준 : 기업회계기준서 제1037호 ‘ 충당부채, 우발부채, 우발자산 ’ 문단 47 색인어 : 할인율, 자기신용위험, 부채의 특유한 위험 |
+| --- |
+
+| Notice Copyright © IFRS Foundation All rights reserved. Translated, reproduced and distributed by the Korea Accounting Standards Board with the permission of the IFRS Foundation. The Korean translation of this IASB Agenda Decision has not been approved by the IFRS Foundation and the IFRS Foundation accepts no liability in respect of the quality or content of this translation. 알림 Copyright © IFRS Foundation 모든 저작권은 보호됩니다. 한국회계기준원 회계기준위원회는 국제회계 기준위원회재단의 동의를 받아 이 저작물을 번역, 재출간, 배포합니다. 이 국제회계기준위원회의 논의 결과 한국어 번역은 국제회계기준위원회재단에서 승인하지 않았고, 국제 회계기준위원회재단은 이 번역의 품질이나 내용에 대하여 어떠한 책임도 지지 않습니다. |
+| --- |

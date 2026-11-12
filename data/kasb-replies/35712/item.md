@@ -12,9 +12,9 @@ attachments:
 - name: 201407D_요약현금흐름표.hwp
   file_no: '6547'
   file_seq: '1'
-  extract_status: partial
+  extract_status: hwp_parsed
 fetched_at: '2026-11-04T01:34:17.538357+00:00'
-extract_status: partial
+extract_status: ok
 ---
 
 ## 상세 안내
@@ -23,22 +23,25 @@ https://cdn.ifrs.org/-/media/feature/supporting-implementation/agenda-decisions/
 
 ## 첨부: 201407D_요약현금흐름표.hwp
 
-<IFRS 해석위원회 논의 결과                                             2014년 7월>
-<요약현금흐름표>
-<IAS 34 ‘중간재무보고’>
-
-1. 질의 내용
-
-국제회계기준해석위원회(이하 ‘해석위원회’라 한다)는 중간재무제표에서 요약현금흐름표의 표시와 내용에 관한 IAS 34의 요구사항을 적용하는 것에 대해 명확히 해 달라는 요청서를 받았다. 
-
-제출자는 요약현금흐름표의 표시와 내용에 대해 다양한 견해가 존재한다고 보았다. 하나의 견해는 기업이 성격별 현금흐름을 보여주는 상세한 구조로 요약현금흐름표를 표시해야 한다는 것이다. 또 다른 견해는 기업이 영업활동, 투자활동, 재무활동 현금흐름 각각의 총액만을 보여주는 세 줄로 요약현금흐름표를 표시할 수도 있다는 것이다.  
-
-2. 검토 내용과 결정
-
-해석위원회는 이와 관련하여, IAS 34 문단 10, 15, 25의 요구사항을 모두 충족하려면 요약현금흐름표에는 현금흐름을 창출할 수 있는 기업의 능력과 그러한 현금흐름을 활용할 기업의 필요성을 이해하는 데 목적 적합한 모든 정보가 포함되어야 한다는 점에 주목하였다. 또 해석위원회는 세 줄로 표시하는 것만으로는 IAS 34의 요구사항을 충족할 것이라 예상하지 않았다는 점에도 주목하였다. 
-
-이러한 분석에 근거하여, 해석위원회는 해석서를 제정하거나 기준서를 개정하는 것이 필요하지 않다고 판단하였다. 따라서 해석위원회는 이 사안을 안건에 추가하지 않기로 결정하였다.
-
-<관련 회계기준: 기업회계기준서 제1034호 ‘중간재무보고’ 문단 10, 15, 25   색인어: 중간재무제표, 요약현금흐름표, 현금흐름, 성격별 현금흐름, 표시>
-
-<Notice  Copyright © IFRS Foundation All rights reserved. Translated, reproduced and distributed by the Korea Accounting Standards Board with the permission of the IFRS Foundatio>
+| IFRS 해석위원회 논의 결과 2014년 7월 |
+| --- |
+| 요약현금흐름표 |
+| IAS 34 ‘ 중간재무보고 ’ |
+
+1. 질의 내용
+
+국제회계기준해석위원회(이하 ‘ 해석위원회 ’ 라 한다)는 중간재무제표에서 요약현금흐름 표의 표시와 내용에 관한 IAS 34 의 요구사항을 적용하는 것에 대해 명확히 해 달라는 요청서를 받았다.
+
+제출자는 요약현금흐름표의 표시와 내용에 대해 다양한 견해가 존재한다고 보았다. 하 나의 견해는 기업이 성격별 현금흐름을 보여주는 상세한 구조로 요약현금흐름표를 표 시해야 한다는 것이다. 또 다른 견해는 기업이 영업활동, 투자활동, 재무활동 현금흐름 각각의 총액만을 보여주는 세 줄로 요약현금흐름표를 표시할 수도 있다는 것이다.
+
+2. 검토 내용과 결정
+
+해석위원회는 이와 관련하여, IAS 34 문단 10, 15, 25의 요구사항을 모두 충족하려면 요약현금흐름표에는 현금흐름을 창출할 수 있는 기업의 능력과 그러한 현금흐름을 활 용할 기업의 필요성을 이해하는 데 목적 적합한 모든 정보가 포함되어야 한다는 점에 주목하였다. 또 해석위원회는 세 줄로 표시하는 것만으로는 IAS 34 의 요구사항을 충족 할 것이라 예상하지 않았다는 점에도 주목하였다.
+
+이러한 분석에 근거하여, 해석위원회는 해석서를 제정하거나 기준서를 개정하는 것이 필요하지 않다고 판단하였다. 따라서 해석위원회는 이 사안을 안건에 추가하지 않기로 결정하였다.
+
+| 관련 회계기준 : 기업회계기준서 제1034호 ‘ 중간재무보고 ’ 문단 10, 15, 25 색인어 : 중간재무제표, 요약현금흐름표, 현금흐름, 성격별 현금흐름, 표시 |
+| --- |
+
+| Notice Copyright © IFRS Foundation All rights reserved. Translated, reproduced and distributed by the Korea Accounting Standards Board with the permission of the IFRS Foundation. The Korean translation of this IASB Agenda Decision has not been approved by the IFRS Foundation and the IFRS Foundation accepts no liability in respect of the quality or content of this translation. 알림 Copyright © IFRS Foundation 모든 저작권은 보호됩니다. 한국회계기준원 회계기준위원회는 국제회계 기준위원회재단의 동의를 받아 이 저작물을 번역, 재출간, 배포합니다. 이 국제회계기준위원회의 논의 결과 한국어 번역은 국제회계기준위원회재단에서 승인하지 않았고, 국제 회계기준위원회재단은 이 번역의 품질이나 내용에 대하여 어떠한 책임도 지지 않습니다. |
+| --- |

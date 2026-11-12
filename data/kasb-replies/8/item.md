@@ -23,4 +23,4 @@ I. 질의 내용 갑법인은 상환청구권을 부여하지 않는 조건으�
 
 ## 첨부: 채용안내문.hwp
 
-failed: not an OLE2 structured storage file
+failed: empty file
