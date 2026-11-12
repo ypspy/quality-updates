@@ -109,11 +109,19 @@ nav:
 
   - 품질관리감리: fss-review/index.md
 
-# Editor creates `.md.bak` backups in-place; exclude from MkDocs build/serve.
+# Editor backups and internal docs stay out of the site.
+# The hook also drops them before serve, which would otherwise preview them and log every link.
 exclude_docs: |
   **/*.bak
   project/**
   superpowers/**
+
+# The old review URL stays reachable and is absent from the nav on purpose.
+not_in_nav: |
+  fss-review/fr2022.md
+
+hooks:
+  - scripts/mkdocs_drop_excluded.py
 
 markdown_extensions:
   - toc:
