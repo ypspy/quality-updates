@@ -579,3 +579,370 @@ def test_real_list_stops_after_empty_page(tmp_path):
         _meta((tmp_path / "B0000132" / ntt / "item.md").read_text(encoding="utf-8"))["extract_status"]
         for ntt in [path.name for path in (tmp_path / "B0000132").iterdir()]
     ))
+
+
+def test_parse_detail_page_reads_related_standards():
+    kifr = fss_replies.parse_detail_page(VIEW_132)
+    assert kifr.standards == ("K-IFRS 제1117호",)
+    gaap = fss_replies.parse_detail_page(VIEW_133)
+    assert gaap.standards == ()
+    multi = """
+    <div class="krds-bd-view">
+      <dl><div><dt>관련기준서</dt><dd>K-IFRS 제1109호<br>K-IFRS 제1115호</dd></div></dl>
+    </div>
+    """
+    assert fss_replies.parse_detail_page(multi).standards == ("K-IFRS 제1109호", "K-IFRS 제1115호")
+
+
+def test_infer_standards_from_title_attachment_and_notice():
+    posting = "기업의 회계처리기준 적용 및 결정에 참고할 수 있는 일반기업회계기준 질의회신요약을 게시하오니, 첨부파일을 참고하시기 바랍니다."
+    maintenance = "일반기업회계기준 도입에 따른 기존 질의회신 정비작업의 일환으로 '11.5.4일자로 폐기(사유 :존치유익미미)"
+    assert fss_replies.infer_standards(
+        "B0000133",
+        "[2024-002] 일정 기간 양수인의 대출채권 매각이 특정 방법만 가능한 경우 회계처리",
+        ["(일반기업회계기준) 일정 기간 양수인의 대출채권 매각이 특정 방법만 가능한 경우 회계처리.hwpx"],
+        posting,
+    ) == ["일반기업회계기준"]
+    assert fss_replies.infer_standards(
+        "B0000133",
+        "저축은행이 취득한 사모사채",
+        ["(일반기준)저축은행이 취득한 사모사채.hwp"],
+        "(없음)",
+    ) == ["일반기업회계기준"]
+    assert fss_replies.infer_standards(
+        "B0000133",
+        "「기업회계기준 등에 관한 해석 56-90」 유효기간 경과에 따른 관련 질의회신 수정 또는 폐기(`25.2.25)",
+        ["기업회계기준 등에 관한 해석 56-90 유효기간 경과에 따른 관련 질의회신 수정 또는 폐기(`25.2.25.).hwpx"],
+        "「기업회계기준 등에 관한 해석 56-90」유효기간(`23.12.31.) 경과에 따라 더이상 유효하지 않은 질의회신을 수정 또는 폐기",
+    ) == ["기업회계기준 등에 관한 해석 56-90"]
+    assert fss_replies.infer_standards(
+        "B0000133",
+        "공백 「 기업회계기준 등에 관한 해석 56 - 90 」",
+        [],
+        "",
+    ) == ["기업회계기준 등에 관한 해석 56-90"]
+    chapter_notice = (
+        "일반기업회계기준 연차개선 (2018) 으로 특별 퇴직금을 포함한 모든 종업원 급여가 "
+        "일반 기업회계기준 제21장 (종업원급여) 의 적용 범위에 포함됨에 따라, '18.12.24.일자로 폐기"
+    )
+    assert fss_replies.infer_standards(
+        "B0000133",
+        "[2007-023] 준정년특별퇴직제도의 퇴직금 회계처리('18.12.24. 폐기)",
+        ["2007-023 준정년특별퇴직제도의 퇴직금 회계처리.hwp"],
+        chapter_notice,
+    ) == ["일반기업회계기준 제21장 (종업원급여)"]
+    assert fss_replies.infer_standards(
+        "B0000133",
+        "붙여 쓴 장",
+        [],
+        "일반기업 회계기준 제22장 (법인세회계) 의 적용범위",
+    ) == ["일반기업회계기준 제22장 (법인세회계)"]
+    assert fss_replies.infer_standards(
+        "B0000133",
+        "[2004-100]기업회계기준서 제8호(유가증권) 문단14의 적용적합 여부('11.5.4 수정)",
+        [
+            "2004-100(회제이 8360-00090) 기업회계기준서 제8호(유가증권) 문단 14의 적용적합 여부.hwp",
+            "(수정) 2004-100 일반기업회계기준 제6장 문단25 및 26의 적용 적합 여부.hwp_.hwp",
+        ],
+        "일반기업회계기준 도입에 따른 기존 질의회신 정비작업의 일환으로 ’11.5.4일자로 수정(사유 : 관련조문변경)",
+    ) == ["기업회계기준서 제8호(유가증권)", "일반기업회계기준 제6장"]
+    assert fss_replies.infer_standards(
+        "B0000133",
+        "[2003-117] 기업회계기준서 제8호 유가증권의 적용관련 질의('11.5.4)",
+        ["(수정) 2003-117 일반기업회계기준 제6장 금융자산금융부채의 적용관련 질의.hwp_.hwp"],
+        maintenance,
+    ) == ["기업회계기준서 제8호", "일반기업회계기준 제6장"]
+    assert fss_replies.infer_standards(
+        "B0000133",
+        "[2006-064]기업회계기준서 제15호 적용에 따른 전기누적손실 반영에 대한 질의('11.5.4 폐기)",
+        ["2006-064 기업회계기준서 제15호 적용에 따른 전기누적손실 반영에 대한 질의.hwp"],
+        maintenance,
+    ) == ["기업회계기준서 제15호"]
+    assert fss_replies.infer_standards(
+        "B0000133",
+        "[2005-059] 기업회계기준서 제16호 법인세회계에 대한 질의 ('11.5.4 수정)",
+        [],
+        maintenance,
+    ) == ["기업회계기준서 제16호"]
+    kifrs = fss_replies.infer_standards(
+        "B0000133",
+        "[2010-029]K-IFRS 도입에 따른 영향 사전공시 관련 질의회신('11.5.4 폐기)",
+        ["[2010-029] K-IFRS 도입에 따른 영향 사전공시 관련 질의회신.hwp"],
+        maintenance,
+    )
+    assert kifrs == ["K-IFRS", "일반기업회계기준"]
+    assert not any("제" in item and "호" in item for item in kifrs)
+    assert fss_replies.infer_standards(
+        "B0000133",
+        "[2008-056] 파생상품의 중소기업회계처리 특례 적용여부에 대한 질의",
+        ["2008-056 파생상품의 중소기업회계처리 특례 적용여부에 대한 질의.hwp"],
+        "(없음)",
+    ) == ["중소기업회계처리 특례"]
+    assert fss_replies.infer_standards(
+        "B0000133",
+        "[2006-061]지분법관련 중소기업회계처리특례에 대한 질의회신('11.5.4 폐기)",
+        [],
+        maintenance,
+    ) == ["중소기업회계처리특례"]
+    assert fss_replies.infer_standards("B0000133", "대출채권 양도", [], "(없음)") == ["일반기업회계기준"]
+    assert fss_replies.infer_standards("B0000133", "제목", [], maintenance) == ["일반기업회계기준"]
+    assert fss_replies.infer_standards("B0000132", "일반 공지", [], maintenance) == []
+    assert fss_replies.infer_standards(
+        "B0000133",
+        "수익인식 실무지침 제2호(예시) 문단4",
+        [],
+        posting,
+    ) == ["실무지침 제2호(예시)"]
+
+
+def _compose(row_standards, detail_standards, title, notice, filenames=()):
+    row = fss_replies.ListRow(
+        board="B0000133",
+        menu_no="200443",
+        ntt_id="1",
+        number="1",
+        title=title,
+        department="회계감독국",
+        standards=tuple(row_standards),
+        published_date="2024-01-02",
+        attachments=(),
+    )
+    detail = fss_replies.DetailPage(
+        subject=title,
+        department="회계감독국",
+        registered_date="2024-01-02",
+        notice=notice,
+        attachments=(),
+        standards=tuple(detail_standards),
+    )
+    sections = []
+    for name in filenames:
+        ref = fss_replies.AttachmentRef(name, "ID", "1", "200443")
+        sections.append((ref, name, "", "pending_whale"))
+    text = fss_replies.compose_item(row, detail, sections, "2026-11-12T09:00:00+09:00")
+    return _meta(text)["standards"]
+
+
+def test_compose_prefers_list_then_detail_then_inference():
+    notice = "일반기업회계기준 제21장 (종업원급여) 적용"
+    assert _compose(
+        ["K-IFRS 제1102호"],
+        ["K-IFRS 제9999호"],
+        "기업회계기준서 제15호 문단3",
+        notice,
+    ) == ["K-IFRS 제1102호"]
+    assert _compose(
+        [],
+        ["K-IFRS 제1117호"],
+        "기업회계기준서 제15호 문단3",
+        notice,
+    ) == ["K-IFRS 제1117호"]
+    assert _compose(
+        [],
+        [],
+        "기업회계기준서 제15호 문단3",
+        "일반기업회계기준 도입에 따른 기존 질의회신 정비작업의 일환으로 폐기",
+    ) == ["기업회계기준서 제15호"]
+
+
+def test_crawl_keeps_list_standards_and_uses_detail_when_list_is_empty(tmp_path):
+    kept = _item_row(
+        "11",
+        "B0000132",
+        "200442",
+        "기업회계기준서 제15호 문단3",
+        "",
+        standards="K-IFRS 제1102호",
+    )
+    detail_kept = """
+    <div class="krds-bd-view">
+      <h3 class="subject">기업회계기준서 제15호 문단3</h3>
+      <dl><div><dt>관련기준서</dt><dd>K-IFRS 제9999호</dd></div></dl>
+      <div class="dbdata"><p>일반기업회계기준 제21장 (종업원급여)</p></div>
+    </div>
+    """
+    result, _calls = _crawl(
+        tmp_path / "kept",
+        {("B0000132", 1): _list_table(kept)},
+        {("B0000132", "11"): detail_kept},
+        {},
+    )
+    assert result["saved"] == 1
+    assert _meta((tmp_path / "kept" / "B0000132" / "11" / "item.md").read_text(encoding="utf-8"))["standards"] == [
+        "K-IFRS 제1102호"
+    ]
+
+    empty = _item_row(
+        "77",
+        "B0000133",
+        "200443",
+        "기업회계기준서 제15호 문단3",
+        "",
+        standards="",
+    )
+    detail_empty = """
+    <div class="krds-bd-view">
+      <h3 class="subject">기업회계기준서 제15호 문단3</h3>
+      <dl><div><dt>관련기준서</dt><dd>K-IFRS 제1117호</dd></div>
+      <div><dt>등록일</dt><dd>2025-01-09</dd></div></dl>
+      <div class="dbdata"><p>일반기업회계기준 제6장 문단1</p></div>
+    </div>
+    """
+    result, _calls = _crawl(
+        tmp_path / "detail",
+        {("B0000133", 1): _list_table(empty)},
+        {("B0000133", "77"): detail_empty},
+        {},
+        boards=["B0000133"],
+    )
+    assert result["saved"] == 1
+    meta = _meta((tmp_path / "detail" / "B0000133" / "77" / "item.md").read_text(encoding="utf-8"))
+    assert meta["standards"] == ["K-IFRS 제1117호"]
+
+
+def _item_markdown(meta: dict, notice: str, attachment_sections: str) -> str:
+    dumped = yaml.safe_dump(meta, allow_unicode=True, sort_keys=False).strip()
+    return f"---\n{dumped}\n---\n\n## 상세 안내\n\n{notice}\n{attachment_sections}"
+
+
+def test_refresh_standards_rewrites_front_matter_and_manifest(tmp_path):
+    gaap = tmp_path / "B0000133" / "43613"
+    kifr = tmp_path / "B0000132" / "189689"
+    gaap.mkdir(parents=True)
+    kifr.mkdir(parents=True)
+    (gaap / "note.hwp").write_bytes(b"RAW-HWP")
+    (kifr / "keep.hwp").write_bytes(b"KEEP")
+    gaap_meta = {
+        "board": "B0000133",
+        "menu_no": "200443",
+        "ntt_id": "43613",
+        "number": "420",
+        "title": "[2004-100]기업회계기준서 제8호(유가증권) 문단14의 적용적합 여부",
+        "department": "회계제도실",
+        "standards": [],
+        "reply_date": "2008-12-24",
+        "published_date": "2008-12-24",
+        "page_url": "https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=43613&menuNo=200443",
+        "attachments": [
+            {
+                "name": "(수정) 2004-100 일반기업회계기준 제6장 문단25 및 26의 적용 적합 여부.hwp",
+                "atch_file_id": "ABC",
+                "file_sn": "2",
+                "extract_status": "pending_whale",
+            }
+        ],
+        "fetched_at": "2026-11-12T14:03:34.486978+09:00",
+        "extract_status": "pending_whale",
+    }
+    gaap_notice = "일반기업회계기준 도입에 따른 기존 질의회신 정비작업의 일환으로 수정"
+    gaap_tail = "\n## 첨부: (수정) 2004-100 일반기업회계기준 제6장 문단25 및 26의 적용 적합 여부.hwp\n\npending_whale\nWhale 변환 대기\n"
+    gaap_text = _item_markdown(gaap_meta, gaap_notice, gaap_tail)
+    (gaap / "item.md").write_text(gaap_text, encoding="utf-8")
+    kifr_meta = {
+        "board": "B0000132",
+        "menu_no": "200442",
+        "ntt_id": "189689",
+        "number": "49",
+        "title": "기업회계기준서 제15호를 제목에 적어도 목록 값을 유지",
+        "department": "회계감독국",
+        "standards": ["K-IFRS 제1117호"],
+        "reply_date": "2024-12-27",
+        "published_date": "2025-01-09",
+        "page_url": "https://www.fss.or.kr/fss/bbs/B0000132/view.do?nttId=189689&menuNo=200442",
+        "attachments": [
+            {"name": "keep.hwp", "atch_file_id": "K", "file_sn": "1", "extract_status": "pending_whale"}
+        ],
+        "fetched_at": "2026-11-12T12:57:50.899766+09:00",
+        "extract_status": "pending_whale",
+    }
+    kifr_text = _item_markdown(kifr_meta, "(없음)", "\n## 첨부: keep.hwp\n\npending_whale\nWhale 변환 대기\n")
+    (kifr / "item.md").write_text(kifr_text, encoding="utf-8")
+    first = {
+        "board": "B0000132",
+        "ntt_id": "189689",
+        "menu_no": "200442",
+        "number": "49",
+        "title": kifr_meta["title"],
+        "reply_date": "2024-12-27",
+        "published_date": "2025-01-09",
+        "extract_status": "pending_whale",
+        "path": "B0000132/189689/item.md",
+        "error": None,
+    }
+    second = {
+        "board": "B0000133",
+        "ntt_id": "43613",
+        "menu_no": "200443",
+        "number": "420",
+        "title": gaap_meta["title"],
+        "reply_date": "2008-12-24",
+        "published_date": "2008-12-24",
+        "extract_status": "pending_whale",
+        "path": "B0000133/43613/item.md",
+        "error": None,
+    }
+    duplicate = json.dumps(first, ensure_ascii=False)
+    (tmp_path / "manifest.jsonl").write_text(
+        duplicate + "\n" + json.dumps(second, ensure_ascii=False) + "\n" + duplicate + "\n",
+        encoding="utf-8",
+    )
+
+    result = fss_replies.refresh_standards(tmp_path)
+    assert result["updated"] == 1
+    assert result["unchanged"] == 1
+    assert result["items"] == 2
+    rewritten = (gaap / "item.md").read_text(encoding="utf-8")
+    assert rewritten.split("---", 2)[2] == gaap_text.split("---", 2)[2]
+    meta = _meta(rewritten)
+    assert meta["standards"] == ["기업회계기준서 제8호(유가증권)", "일반기업회계기준 제6장"]
+    assert meta["fetched_at"] == gaap_meta["fetched_at"]
+    assert meta["extract_status"] == "pending_whale"
+    assert meta["attachments"] == gaap_meta["attachments"]
+    assert "문단" not in " ".join(meta["standards"])
+    assert (gaap / "note.hwp").read_bytes() == b"RAW-HWP"
+    assert (kifr / "item.md").read_text(encoding="utf-8") == kifr_text
+    assert (kifr / "keep.hwp").read_bytes() == b"KEEP"
+    lines = (tmp_path / "manifest.jsonl").read_text(encoding="utf-8").splitlines()
+    assert len(lines) == 2
+    records = [json.loads(line) for line in lines]
+    assert [(row["board"], row["ntt_id"]) for row in records] == [("B0000132", "189689"), ("B0000133", "43613")]
+    assert records[0]["standards"] == ["K-IFRS 제1117호"]
+    assert records[0]["error"] is None
+    assert records[0]["path"] == "B0000132/189689/item.md"
+    assert records[1]["standards"] == meta["standards"]
+    assert records[1]["title"] == gaap_meta["title"]
+    again = fss_replies.refresh_standards(tmp_path)
+    assert again["updated"] == 0
+    assert again["unchanged"] == 2
+    assert (tmp_path / "manifest.jsonl").read_text(encoding="utf-8").splitlines() == lines
+    assert (gaap / "item.md").read_text(encoding="utf-8") == rewritten
+
+
+def test_refresh_standards_cli_does_not_crawl(tmp_path, monkeypatch):
+    def boom(*args, **kwargs):
+        raise AssertionError("crawl")
+
+    monkeypatch.setattr(fss_replies, "crawl_archive", boom)
+    folder = tmp_path / "B0000133" / "1"
+    folder.mkdir(parents=True)
+    meta = {
+        "board": "B0000133",
+        "menu_no": "200443",
+        "ntt_id": "1",
+        "number": "1",
+        "title": "첨부 없는 일반 질의",
+        "department": "회계감독국",
+        "standards": [],
+        "reply_date": "2024-01-02",
+        "published_date": "2024-01-02",
+        "page_url": "https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=1&menuNo=200443",
+        "attachments": [],
+        "fetched_at": "2026-11-12T09:00:00+09:00",
+        "extract_status": "empty",
+    }
+    (folder / "item.md").write_text(_item_markdown(meta, "(없음)", ""), encoding="utf-8")
+    args = crawl_fss_replies.parse_args([])
+    assert args.refresh_standards is False
+    code = crawl_fss_replies.main(["--refresh-standards", "--archive", str(tmp_path)])
+    assert code == 0
+    assert _meta((folder / "item.md").read_text(encoding="utf-8"))["standards"] == ["일반기업회계기준"]
