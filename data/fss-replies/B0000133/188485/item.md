@@ -1,0 +1,29 @@
+---
+board: B0000133
+menu_no: '200443'
+ntt_id: '188485'
+number: '1146'
+title: '[2024-002] 일정 기간 양수인의 대출채권 매각이 특정 방법만 가능한 경우 회계처리'
+department: 회계감독국
+standards:
+- 일반기업회계기준
+reply_date: '2024-11-28'
+published_date: '2024-11-28'
+page_url: https://www.fss.or.kr/fss/bbs/B0000133/view.do?nttId=188485&menuNo=200443
+attachments:
+- name: (일반기업회계기준) 일정 기간 양수인의 대출채권 매각이 특정 방법만 가능한 경우 회계처리.hwpx
+  atch_file_id: 4b399755b4d542fda5d09c34149a53b2
+  file_sn: '1'
+  extract_status: pending_whale
+fetched_at: '2026-11-12T12:58:43.778199+09:00'
+extract_status: pending_whale
+---
+
+## 상세 안내
+
+기업의 회계처리기준 적용 및 결정에 참고할 수 있는 일반기업회계기준 질의회신요약을 게시하오니, 첨부파일을 참고하시기 바랍니다.
+
+## 첨부: (일반기업회계기준) 일정 기간 양수인의 대출채권 매각이 특정 방법만 가능한 경우 회계처리.hwpx
+
+pending_whale
+Whale 변환 대기

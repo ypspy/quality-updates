@@ -15,11 +15,22 @@ def parse_args(argv=None):
     parser.add_argument("--delay", type=float, default=0.3)
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--retry-failed", action="store_true")
+    parser.add_argument(
+        "--refresh-standards",
+        action="store_true",
+        help="item.md와 manifest의 standards만 오프라인으로 다시 쓴다",
+    )
     return parser.parse_args(argv)
 
 
 def main(argv=None) -> int:
     args = parse_args(argv)
+    if args.refresh_standards:
+        result = fss_replies.refresh_standards(args.archive)
+        print(
+            f"updated={result['updated']} unchanged={result['unchanged']} items={result['items']}"
+        )
+        return 0
     session = fss_replies.make_session()
     result = fss_replies.crawl_archive(
         args.archive,
