@@ -215,21 +215,37 @@ def validate_no_phase2(lines: list[str], path: Path) -> list[ValidationError]:
     return errors
 
 
-_MINUTES_FOLDER = re.compile(
-    r"downloads/minutes-(?P<year>\d{4})-(?P<committee>증선위|금융위)-(?P<kind>정기|임시|서면)-(?P<number>\d+)\.pdf"
+_LEGACY_MINUTES = re.compile(
+    r"downloads/minutes-(?P<year>\d{4})-(?P<committee>증선위|금융위)-(?P<kind>정기|임시|서면)-(?P<number>\d+)(?:-추가)?\.pdf"
 )
-_BUNDLE_FOLDER = re.compile(
+_LEGACY_BUNDLE = re.compile(
     r"downloads/sanctions/(?P<year>\d{4})-(?P<committee>증선위|금융위)-(?P<kind>정기|임시|서면)-(?P<number>\d+)차/"
 )
+_KALE_BUNDLE = re.compile(
+    r"downloads/sanctions/(?P<year>\d{4})-(?P<committee>증선위|금융위)-(?:(?P<kind>임시|서면)-)?(?P<number>\d+)차/"
+)
+
+
+def _named_folder(match: re.Match[str], *, legacy: bool) -> str:
+    year = match.group("year")
+    committee = match.group("committee")
+    number = match.group("number")
+    kind = match.groupdict().get("kind")
+    if kind in {"임시", "서면"}:
+        return f"{year}-{committee}-{kind}-{number}차"
+    if legacy and kind == "정기":
+        return f"{year}-{committee}-정기-{number}차"
+    return f"{year}-{committee}-{number}차"
 
 
 def meeting_folders(text: str) -> set[str]:
     found: set[str] = set()
-    for pattern in (_MINUTES_FOLDER, _BUNDLE_FOLDER):
-        for match in pattern.finditer(text):
-            found.add(
-                f"{match.group('year')}-{match.group('committee')}-{match.group('kind')}-{match.group('number')}차"
-            )
+    for match in _LEGACY_MINUTES.finditer(text):
+        found.add(_named_folder(match, legacy=True))
+    for match in _LEGACY_BUNDLE.finditer(text):
+        found.add(_named_folder(match, legacy=True))
+    for match in _KALE_BUNDLE.finditer(text):
+        found.add(_named_folder(match, legacy=False))
     return found
 
 

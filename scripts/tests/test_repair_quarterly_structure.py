@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from repair_quarterly_structure import classify_url, rebuild_main_body, repair_file
+from repair_quarterly_structure import classify_block, classify_url, rebuild_main_body, repair_file
 
 
 def test_classify_fsc_subsections():
@@ -36,6 +36,29 @@ def test_sanction_title_goes_to_resolution_section():
 def test_unfair_trade_title_stays_in_press():
     url = "https://fsc.go.kr/no010101/9"
     assert classify_url(url, "불공정거래 조치")[1] == "보도자료"
+    assert classify_url(url, "불공정거래 심사·조사결과 조치")[1] == "보도자료"
+
+
+def test_fsc_audit_action_titles_are_sanctions():
+    url = "https://fsc.go.kr/no010101/50"
+    titles = [
+        "감사인에 대한 감리결과 조치",
+        "심사‧조사결과 조치",
+        "심사·조사결과 조치",
+        "심사, 조사결과 조치",
+        "심사ㆍ조사결과 조치",
+        "외부감사법 위반 등에 대한 감리결과 조치",
+    ]
+    for title in titles:
+        assert classify_url(url, title) == ("금융위원회", "제재 의결")
+        block = f"- (26-03-01) [{title}]({url})\n\n    본문"
+        assert classify_block(url, block) == ("금융위원회", "제재 의결")
+
+
+def test_fss_link_is_not_moved_to_sanctions():
+    url = "https://www.fss.or.kr/fss/bbs/B0000188/view.do?nttId=9"
+    assert classify_url(url, "감사인에 대한 감리결과 조치") == ("금융감독원", "보도자료")
+    assert classify_block(url, f"- (26-03-01) [심사·조사결과 조치]({url})")[1] != "제재 의결"
 
 
 def test_rebuild_keeps_discussion_note_under_resolution():
@@ -69,7 +92,7 @@ title: t
 
 - 제5차 증권선물위원회(2026.3.11.) 의결 66. 예시
 
-    <!-- source: pdf|downloads/sanctions/2026-증선위-정기-5차/decision/staff.pdf -->
+    <!-- source: pdf|downloads/sanctions/2026-증선위-5차/decision/staff.pdf -->
 
 #### 고시/공고/훈령
 
