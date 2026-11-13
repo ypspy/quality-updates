@@ -1,20 +1,41 @@
 # -*- coding: utf-8 -*-
+import hashlib
 import json
 import re
 import sys
+import unicodedata
 from pathlib import Path
+
+from bs4 import BeautifulSoup
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from fss_review_cards import (  # noqa: E402
     BOILERPLATE,
     PAGE,
+    YEAR_2025_MARK,
     arrange_by_year,
     audit_review_html,
     collapse_document,
+    load_year_2025,
+    materialize_review_markdown,
     place_labels,
+    render_year_2025_html,
     repair_severity_gap,
 )
+from mkdocs_fss_review_year import on_page_markdown  # noqa: E402
+
+TEXT_SHA = "1bcd9dfc6a4f96534765a756e936c5d066a999a069a2bc92317c70ab29d0431f"
+SEV_SHA = "c2133bc29c69c0404da2b8e8a93a77c639f9f10698fda75c910977c8abeebf99"
+YEAR_SHA = {
+    "2025": "05eeae40046d772179a57ad3579ae822f52ba5494a1df36ab541571c887f92c6",
+    "2024": "dd252ed36a6f3debb59d9c5c831dfab643bb3dc51a4918b5f4649b0087f87763",
+    "2023": "a04efa16f933d3aac44bb98434af3bc21160d028790e140c50d77a3f38416baf",
+    "2022": "5cf332453ec91121dbbc37aec0c15f540842b5cf845cfde7df98708c839601dc",
+    "2021": "9b278810dd0ff9a0e19300d5d8c1f67cb5ef34db2a07b8bcc437eed11ea2b821",
+    "2020": "24375fe9c10e2a0fa0513dea5831fc4141471cca9be2e0c1ea9414c01465ce92",
+    "2019": "fb13f1d4d54aaf8126f97bf802feb37ef40b2fee7852694ca22c3215e607d098",
+}
 
 BODY = (
     '<p class="fss-finding"><span class="fss-sev fss-sev-part">일부미흡</span>품질성과급 비중이 낮습니다.</p>'
@@ -184,8 +205,12 @@ def test_year_comes_before_the_component_report_and_the_firms():
     assert audit_review_html(moved) == []
 
 
+def _review_page() -> str:
+    return materialize_review_markdown(PAGE.read_text(encoding="utf-8"))
+
+
 def test_card_rewrite_keeps_original_sentences():
-    text = PAGE.read_text(encoding="utf-8")
+    text = _review_page()
     rewritten = arrange_by_year(place_labels(collapse_document(text)))
 
     def bodies(html):
@@ -198,7 +223,7 @@ def test_card_rewrite_keeps_original_sentences():
 
 
 def test_samil_time_finding_is_two_paragraphs():
-    text = PAGE.read_text(encoding="utf-8")
+    text = _review_page()
     marker = "Time report에 입력"
     at = text.find(marker)
     assert at >= 0
@@ -213,3 +238,131 @@ def test_samil_time_finding_is_two_paragraphs():
     assert "통제절차가 미흡함" not in body
     assert body.count('<span class="fss-sev') == 1
     assert "공시되는 외부감사 투입시간을 집계하는 절차 운영이 일부 미흡</p>" in body
+
+
+def _nfc(value: str) -> str:
+    return unicodedata.normalize("NFC", value or "")
+
+
+def finding_records(year_div):
+    records = []
+    last_sev = None
+    for paragraph in year_div.select("p.fss-finding"):
+        original = paragraph.find_parent("div", class_="fss-original")
+        firm = original.get("data-names") if original else None
+        span = paragraph.select_one("span.fss-sev")
+        full = paragraph.get_text()
+        if span:
+            severity = span.get_text(strip=True)
+            last_sev = severity
+            body = full.lstrip()
+            if body.startswith(severity):
+                body = body[len(severity):].lstrip()
+            else:
+                body = body.strip()
+        else:
+            severity = last_sev
+            body = full.strip()
+        records.append({
+            "firm": firm,
+            "severity": severity,
+            "badge": bool(span),
+            "text": _nfc(body.strip()),
+        })
+    return records
+
+
+def _sha_lines(lines) -> tuple[str, int]:
+    blob = "\n".join(lines).encode("utf-8")
+    return hashlib.sha256(blob).hexdigest(), len(blob)
+
+
+def _bundle_counts(data: dict) -> tuple[dict, dict]:
+    firms: dict[str, list[str]] = {}
+    findings: dict[str, int] = {}
+    for bundle in data["bundles"]:
+        names: list[str] = []
+        count = 0
+        for section in bundle["sections"]:
+            for group in section["groups"]:
+                for block in group["blocks"]:
+                    if block["kind"] != "firms":
+                        continue
+                    for firm in block["firms"]:
+                        names.append(firm["name"])
+                        count += len(firm["findings"])
+        firms[bundle["name"]] = names
+        findings[bundle["name"]] = count
+    return firms, findings
+
+
+def test_year_2025_inventory_is_locked():
+    data = load_year_2025()
+    rendered = render_year_2025_html(data)
+    json_records = [
+        {"severity": finding["severity"], "text": _nfc(finding["text"])}
+        for bundle in data["bundles"]
+        for section in bundle["sections"]
+        for group in section["groups"]
+        for block in group["blocks"]
+        if block["kind"] == "firms"
+        for firm in block["firms"]
+        for finding in firm["findings"]
+    ]
+    html_records = finding_records(BeautifulSoup(rendered, "html.parser").select_one("div.fss-year"))
+    assert _sha_lines(record["text"] for record in json_records) == (TEXT_SHA, 129054)
+    assert _sha_lines(record["text"] for record in html_records) == (TEXT_SHA, 129054)
+    assert _sha_lines(f'{record["severity"]}\t{record["text"]}' for record in json_records) == (SEV_SHA, 133729)
+    assert _sha_lines(f'{record["severity"]}\t{record["text"]}' for record in html_records) == (SEV_SHA, 133729)
+
+    firms, findings = _bundle_counts(data)
+    assert {name: len(dict.fromkeys(values)) for name, values in firms.items()} == {
+        "등록": 7,
+        "일반회계법인": 52,
+        "감사반": 19,
+    }
+    assert len({name for values in firms.values() for name in values}) == 78
+    assert findings == {"등록": 86, "일반회계법인": 227, "감사반": 57}
+    assert sum(findings.values()) == len(json_records) == len(html_records) == 370
+    severities = {}
+    for record in json_records:
+        severities[record["severity"]] = severities.get(record["severity"], 0) + 1
+    assert severities == {"일부미흡": 269, "미운영": 73, "일부미운영": 28}
+    assert all(record["severity"] != "미설계" for record in html_records)
+
+    source = PAGE.read_text(encoding="utf-8")
+    assert source.count('data-year="2025"') == 1
+    assert source.count(YEAR_2025_MARK) == 1
+    assert 'data-year="2026"' not in source
+    page = _review_page()
+    assert page.count('data-year="2025"') == 1
+    assert YEAR_2025_MARK not in page
+    assert 'data-year="2026"' not in page
+    assert rendered in page
+
+    soup = BeautifulSoup(page, "html.parser")
+    years = soup.select("div.fss-year")
+    assert [div.get("data-year") for div in years] == ["2025", "2024", "2023", "2022", "2021", "2020", "2019"]
+    for div in years:
+        year = div.get("data-year")
+        assert hashlib.sha256(str(div).encode("utf-8")).hexdigest() == YEAR_SHA[year]
+        assert div.has_attr("hidden") is (year != "2025")
+
+
+class _File:
+    def __init__(self, src: str) -> None:
+        self.src_uri = src
+
+
+class _Page:
+    def __init__(self, src: str) -> None:
+        self.file = _File(src)
+
+
+def test_build_hook_inserts_the_2025_year_once():
+    source = PAGE.read_text(encoding="utf-8")
+    built = on_page_markdown(source, _Page("fss-review/index.md"), None, None)
+    assert built == _review_page()
+    assert built.count('data-year="2025"') == 1
+    untouched = on_page_markdown("본문", _Page("index.md"), None, None)
+    assert untouched == "본문"

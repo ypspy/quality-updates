@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 from typing import NamedTuple
 
-from fss_review_cards import audit_review_html
+from fss_review_cards import audit_review_html, materialize_review_markdown
 from source_marker_layout import find_unsafe_source_layout
 
 
@@ -295,7 +295,7 @@ def validate_file(filepath: Path, strict: bool) -> list[ValidationError]:
     except Exception as e:
         return [ValidationError(0, "READ", str(e), "error")]
     if filepath.parent.name == "fss-review" and filepath.name == "index.md":
-        return validate_fss_review_cards(text)
+        return validate_fss_review_cards(materialize_review_markdown(text))
     lines = text.split("\n")
     all_errors: list[ValidationError] = []
     for fn in [

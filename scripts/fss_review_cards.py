@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import html
+import json
 import re
 import sys
 from dataclasses import dataclass
@@ -19,6 +20,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PAGE = ROOT / "docs" / "fss-review" / "index.md"
+YEAR_2025_PATH = ROOT / "data" / "fss-review" / "year-2025.json"
+YEAR_2025_MARK = '<!-- fss-review-year data-year="2025" -->'
 
 BOILERPLATE = "같은 규칙으로 묶은 지적입니다."
 
@@ -727,6 +730,291 @@ def _fill_dae_report(year: str, kind: str, dae: str) -> str:
     return dae[: title.end()] + f'<p class="fss-report">{html.escape(report)}</p>' + dae[title.end() :]
 
 
+_SEV_CLASS = {
+    "일부미흡": "fss-sev fss-sev-part",
+    "미운영": "fss-sev fss-sev-off",
+    "일부미운영": "fss-sev fss-sev-off",
+    "미설계": "fss-sev fss-sev-miss",
+}
+
+
+class _Cursor:
+    def __init__(self, text: str) -> None:
+        self.text = text
+        self.i = 0
+
+    def start(self, prefix: str) -> bool:
+        return self.text.startswith(prefix, self.i)
+
+    def take(self, prefix: str) -> None:
+        if not self.start(prefix):
+            raise ValueError(f"예상한 표식이 없습니다: {prefix}")
+        self.i += len(prefix)
+
+    def until(self, end: str) -> str:
+        at = self.text.find(end, self.i)
+        if at < 0:
+            raise ValueError(f"표식 끝을 찾지 못했습니다: {end}")
+        chunk = self.text[self.i:at]
+        self.i = at + len(end)
+        return chunk
+
+
+def _parse_finding(cursor: _Cursor) -> dict:
+    cursor.take('<p class="fss-finding">')
+    if cursor.start('<span class="'):
+        cursor.take('<span class="')
+        css = cursor.until('">')
+        severity = cursor.until("</span>")
+        body = cursor.until("</p>")
+        if _SEV_CLASS.get(severity) != css or not body.startswith(" "):
+            raise ValueError("심각도 뱃지 형식이 아닙니다.")
+        text = body[1:]
+        if text != text.strip():
+            raise ValueError("지적 본문 공백이 예상과 다릅니다.")
+        return {"severity": severity, "badge": True, "text": text}
+    text = cursor.until("</p>")
+    if text != text.strip() or "<" in text:
+        raise ValueError("지적 본문에 태그가 있습니다.")
+    return {"severity": None, "badge": False, "text": text}
+
+
+def _parse_firm(cursor: _Cursor) -> dict:
+    cursor.take('<button type="button" class="fss-badge" data-names="')
+    name = cursor.until('">')
+    shown = cursor.until("</button>")
+    cursor.take('<div class="fss-original" hidden data-names="')
+    original = cursor.until('">')
+    if shown != name or original != name:
+        raise ValueError(f"법인 이름 표기가 다릅니다: {name}")
+    findings = []
+    while cursor.start('<p class="fss-finding">'):
+        findings.append(_parse_finding(cursor))
+    cursor.take("</div>")
+    if not findings:
+        raise ValueError(f"지적이 없는 법인입니다: {name}")
+    return {"name": name, "findings": findings}
+
+
+def _parse_block(cursor: _Cursor) -> dict:
+    if cursor.start('<div class="fss-gun">'):
+        cursor.take('<div class="fss-gun"><p class="fss-gun-name">')
+        gun = cursor.until("</p>")
+        cursor.take('<p class="fss-none">')
+        empty = cursor.until("</p></div>")
+        if empty != "분류된 지적 없음":
+            raise ValueError("빈 군 문장이 다릅니다.")
+        return {"kind": "empty", "gun": gun}
+    cursor.take('<article class="fss-group" data-names="')
+    names = cursor.until('">')
+    block: dict = {"kind": "firms"}
+    if cursor.start('<p class="fss-gun-name">'):
+        cursor.take('<p class="fss-gun-name">')
+        block["gun"] = cursor.until("</p>")
+    cursor.take('<div class="fss-badges">')
+    firms = []
+    while cursor.start("<button "):
+        firms.append(_parse_firm(cursor))
+    cursor.take("</div></article>")
+    if names != "|".join(firm["name"] for firm in firms):
+        raise ValueError("법인 묶음 이름이 다릅니다.")
+    block["firms"] = firms
+    return block
+
+
+def _parse_group(cursor: _Cursor) -> dict:
+    cursor.take('<section class="fss-jung"><h3>')
+    heading = cursor.until("</h3>")
+    cursor.take('<p class="fss-group-name">')
+    name = cursor.until("</p>")
+    blocks = []
+    while cursor.start('<div class="fss-gun">') or cursor.start("<article "):
+        blocks.append(_parse_block(cursor))
+    cursor.take("</section>")
+    if not blocks:
+        raise ValueError(f"중분류에 카드가 없습니다: {heading}")
+    return {"heading": heading, "name": name, "blocks": blocks}
+
+
+def _parse_section(cursor: _Cursor) -> dict:
+    cursor.take('<section class="fss-dae"><h2>')
+    title = cursor.until("</h2>")
+    section: dict = {"title": title}
+    if cursor.start('<p class="fss-report">'):
+        cursor.take('<p class="fss-report">')
+        section["report"] = cursor.until("</p>")
+    groups = []
+    while cursor.start('<section class="fss-jung">'):
+        groups.append(_parse_group(cursor))
+    cursor.take("</section>")
+    section["groups"] = groups
+    return section
+
+
+def _parse_bundle(cursor: _Cursor) -> dict:
+    cursor.take('<div class="fss-bundle"><p class="fss-bundle-name">')
+    name = cursor.until("</p>")
+    bundle: dict = {"name": name}
+    if cursor.start('<p class="fss-report">'):
+        cursor.take('<p class="fss-report">')
+        bundle["report"] = cursor.until("</p>")
+    sections = []
+    while cursor.start('<section class="fss-dae">'):
+        sections.append(_parse_section(cursor))
+    cursor.take("</div>")
+    bundle["sections"] = sections
+    return bundle
+
+
+def _inherit_severity(data: dict) -> None:
+    last = None
+    for _firm, finding in iter_year_findings(data):
+        if finding["badge"]:
+            last = finding["severity"]
+            continue
+        if not last:
+            raise ValueError("심각도 뱃지 없이 시작하는 지적이 있습니다.")
+        finding["severity"] = last
+
+
+def parse_year_2025_html(year_html: str) -> dict:
+    """감리연도 2025 블록을 데이터로 읽는다. 문장과 뱃지 위치는 그대로 둔다."""
+    cursor = _Cursor(year_html)
+    cursor.take('<div class="fss-year" data-year="2025"><h2>')
+    title = cursor.until("</h2>")
+    bundles = []
+    while cursor.start('<div class="fss-bundle">'):
+        bundles.append(_parse_bundle(cursor))
+    cursor.take("</div>")
+    if cursor.i != len(year_html):
+        raise ValueError("2025 블록 뒤에 남은 HTML이 있습니다.")
+    data = {"year": "2025", "title": title, "bundles": bundles}
+    _inherit_severity(data)
+    return data
+
+
+def iter_year_findings(data: dict):
+    """문서 순서의 (법인 이름, 지적) 쌍."""
+    for bundle in data["bundles"]:
+        for section in bundle["sections"]:
+            for group in section["groups"]:
+                for block in group["blocks"]:
+                    if block.get("kind") != "firms":
+                        continue
+                    for firm in block["firms"]:
+                        for finding in firm["findings"]:
+                            yield firm["name"], finding
+
+
+def _render_finding(finding: dict) -> str:
+    text = _esc_text(finding["text"])
+    if not finding["badge"]:
+        return f'<p class="fss-finding">{text}</p>'
+    severity = finding["severity"]
+    css = _SEV_CLASS[severity]
+    return (
+        f'<p class="fss-finding"><span class="{css}">'
+        f"{_esc_text(severity)}</span> {text}</p>"
+    )
+
+
+def _render_block(block: dict) -> str:
+    if block["kind"] == "empty":
+        gun = _esc_text(block["gun"])
+        return (
+            f'<div class="fss-gun"><p class="fss-gun-name">{gun}</p>'
+            f'<p class="fss-none">분류된 지적 없음</p></div>'
+        )
+    gun = ""
+    if "gun" in block:
+        gun = f'<p class="fss-gun-name">{_esc_text(block["gun"])}</p>'
+    names = "|".join(firm["name"] for firm in block["firms"])
+    badges = []
+    for firm in block["firms"]:
+        name = _esc_attr(firm["name"])
+        body = "".join(_render_finding(finding) for finding in firm["findings"])
+        badges.append(
+            f'<button type="button" class="fss-badge" data-names="{name}">'
+            f'{_esc_text(firm["name"])}</button>'
+            f'<div class="fss-original" hidden data-names="{name}">{body}</div>'
+        )
+    return (
+        f'<article class="fss-group" data-names="{_esc_attr(names)}">{gun}'
+        f'<div class="fss-badges">{"".join(badges)}</div></article>'
+    )
+
+
+def render_year_2025_html(data: dict) -> str:
+    """데이터 파일을 발행 페이지의 2025 연도 블록으로 다시 만든다."""
+    parts = [
+        f'<div class="fss-year" data-year="{_esc_attr(data["year"])}">'
+        f'<h2>{_esc_text(data["title"])}</h2>'
+    ]
+    for bundle in data["bundles"]:
+        parts.append(
+            f'<div class="fss-bundle"><p class="fss-bundle-name">{_esc_text(bundle["name"])}</p>'
+        )
+        if "report" in bundle:
+            parts.append(f'<p class="fss-report">{_esc_text(bundle["report"])}</p>')
+        for section in bundle["sections"]:
+            parts.append(f'<section class="fss-dae"><h2>{_esc_text(section["title"])}</h2>')
+            if "report" in section:
+                parts.append(f'<p class="fss-report">{_esc_text(section["report"])}</p>')
+            for group in section["groups"]:
+                parts.append(
+                    f'<section class="fss-jung"><h3>{_esc_text(group["heading"])}</h3>'
+                    f'<p class="fss-group-name">{_esc_text(group["name"])}</p>'
+                )
+                for block in group["blocks"]:
+                    parts.append(_render_block(block))
+                parts.append("</section>")
+            parts.append("</section>")
+        parts.append("</div>")
+    parts.append("</div>")
+    return "".join(parts)
+
+
+def load_year_2025() -> dict:
+    return json.loads(YEAR_2025_PATH.read_text(encoding="utf-8"))
+
+
+def _write_year_2025(data: dict) -> None:
+    YEAR_2025_PATH.parent.mkdir(parents=True, exist_ok=True)
+    payload = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
+    YEAR_2025_PATH.write_text(payload, encoding="utf-8")
+
+
+def materialize_review_markdown(text: str) -> str:
+    """2025 훅을 데이터에서 렌더한 연도 블록으로 바꾼다. 훅이 없으면 그대로 둔다."""
+    if YEAR_2025_MARK not in text:
+        return text
+    if text.count(YEAR_2025_MARK) != 1:
+        raise ValueError("감리연도 2025 훅이 하나가 아닙니다.")
+    return text.replace(YEAR_2025_MARK, render_year_2025_html(load_year_2025()), 1)
+
+
+def _year_2025_span(text: str) -> tuple[int, int]:
+    found: list[tuple[int, int]] = []
+    for start, end in _year_regions(text):
+        head = text[start : text.find(">", start) + 1]
+        if 'data-year="2025"' in head:
+            found.append((start, end))
+    if len(found) != 1:
+        raise ValueError("감리연도 2025 블록이 하나가 아닙니다.")
+    return found[0]
+
+
+def park_year_2025(text: str) -> str:
+    """2025 연도 블록을 데이터 파일에 두고, 페이지에는 훅만 남긴다."""
+    start, end = _year_2025_span(text)
+    block = text[start:end]
+    data = parse_year_2025_html(block)
+    if render_year_2025_html(data) != block:
+        raise ValueError("감리연도 2025 블록을 같은 HTML로 보존할 수 없습니다.")
+    _write_year_2025(data)
+    return text[:start] + YEAR_2025_MARK + text[end:]
+
+
 def _newline_of(raw: bytes) -> str:
     return "\r\n" if b"\r\n" in raw else "\n"
 
@@ -740,13 +1028,14 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
     raw = PAGE.read_bytes()
-    text = raw.decode("utf-8")
+    text = materialize_review_markdown(raw.decode("utf-8"))
     before = len(_ARTICLE.findall(text))
     rewritten = arrange_by_year(place_labels(collapse_document(text))) if args.write else text
     errors = audit_review_html(rewritten)
     if args.write:
+        stored = park_year_2025(rewritten)
         newline = _newline_of(raw)
-        PAGE.write_bytes(rewritten.replace("\r\n", "\n").replace("\n", newline).encode("utf-8"))
+        PAGE.write_bytes(stored.replace("\r\n", "\n").replace("\n", newline).encode("utf-8"))
         after = len(_ARTICLE.findall(rewritten))
         print(f"cards {before} -> {after}")
     for message in errors:
