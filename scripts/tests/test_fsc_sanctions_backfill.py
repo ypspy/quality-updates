@@ -3,7 +3,7 @@
 
 import json
 import sys
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 import pytest
@@ -28,6 +28,19 @@ def test_decision_key_covers_backfill_titles():
         "금융위",
         "임시",
         1,
+    )
+    # 제목의 2022년도를 쓴다. 임시가 연도와 제N차 사이에 있어도 게시일 2023-02-27의 연도를 쓰지 않는다.
+    assert decision_key("2022년도 임시 제4차 금융위원회 의사록", date(2023, 2, 27)) == (
+        2022,
+        "금융위",
+        "임시",
+        4,
+    )
+    assert decision_key("2022년도 임시 제4차 금융위원회 안건", date(2023, 2, 27)) == (
+        2022,
+        "금융위",
+        "임시",
+        4,
     )
     assert decision_key("2026년도 제1차 금융위원회 서면회의 의사록 및 안건") == (
         2026,
@@ -91,6 +104,10 @@ def test_decision_key_covers_backfill_titles():
     )
     assert decision_key("2025년도 비공개기간 경과 금융위원회 안건") is None
     assert decision_key("2025년 말 기준 비공개사유 종료 및 비공개기간 경과 안건") is None
+    # 띄어쓴 비공개 경과 문구도 회의가 아니다. 게시일은 각각 2022-12-29, 2021-12-30, 2019-12-31.
+    assert decision_key("2022년말 기준 비공개 사유 종료 및 비공개 기간 경과 안건", date(2022, 12, 29)) is None
+    assert decision_key("비공개 사유 종료 및 비공개 기간 경과 안건", date(2021, 12, 30)) is None
+    assert decision_key("2019년 증권선물위원회 비공개 기간 경과 안건", date(2019, 12, 31)) is None
     assert decision_key("증권선물위원회의 '증권범죄조사사무처리규정' 제정") is None
 
 
@@ -621,7 +638,9 @@ def test_backfill_records_403_and_pending_hwp(tmp_path):
     assert row["http_status"] == 403
     assert row["attempts"] == 2
     assert row["board"] == "증선위"
-    assert "T" in row["ts"] and ("+" in row["ts"] or row["ts"].endswith("Z"))
+    parsed_ts = datetime.fromisoformat(row["ts"])
+    assert parsed_ts.tzinfo is not None and parsed_ts.utcoffset() is not None
+    assert "T" in row["ts"]
     pending_path = downloads / "sanctions" / "_pending-conversion.jsonl"
     pending = [json.loads(line) for line in pending_path.read_text(encoding="utf-8").splitlines()]
     assert pending[0]["reason"] == "not-pdf"

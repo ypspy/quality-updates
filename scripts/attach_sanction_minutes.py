@@ -30,6 +30,8 @@ _DECISION_GLUED = re.compile(
     rf"제\s*(?P<number>\d+)\s*"
     rf"(?P<committee>{_COMMITTEE_RE})"
 )
+_TITLE_YEAR = re.compile(r"(\d{4})\s*년\s*도?")
+_CLOSED_TITLE = re.compile(r"비공개\s*기간|비공개\s*사유")
 _FOUR_YEAR = re.compile(r"(?<!\d)((?:19|20)\d{2})")
 _TWO_YEAR = re.compile(r"(?<!\d)(\d{2})년")
 POST_TITLE_WORDS = ("의사록", "안건", "의결서")
@@ -142,17 +144,18 @@ def decision_key(
 ) -> tuple[int, str, str, int] | None:
     """회의 키 (연도, 금융위|증선위, 정기|임시|서면, 회차).
 
-    제목의 YYYY년·YYYY년도를 우선하고, 없으면 목록 게시일 연도를 쓴다.
+    제목의 YYYY년·YYYY년도를 제N차와의 위치와 관계없이 우선하고, 없으면 목록 게시일 연도를 쓴다.
     서면이 있으면 서면, 그다음 임시(임시회의·임시증권선물위원회 포함)면 임시, 아니면 정기다.
-    비공개기간 경과·비공개사유 종료 안건은 회의가 아니므로 None이다.
+    비공개 기간·비공개 사유 안건은 띄어쓰기와 관계없이 회의가 아니므로 None이다.
     """
-    if "비공개기간" in title or "비공개사유" in title:
+    if _CLOSED_TITLE.search(title):
         return None
     matched = _DECISION_WITH_CHA.search(title) or _DECISION_GLUED.search(title)
     if matched is None:
         return None
-    if matched.group("year"):
-        year = int(matched.group("year"))
+    titled_year = _TITLE_YEAR.search(title)
+    if titled_year:
+        year = int(titled_year.group(1))
     else:
         posted_date = _coerce_date(posted)
         if posted_date is None:
