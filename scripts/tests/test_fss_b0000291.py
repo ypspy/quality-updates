@@ -1324,3 +1324,185 @@ def test_duplicate_attachment_names_and_pending_only_after_success(tmp_path):
     assert _jsonl(failed / "_pending-conversion.jsonl") == []
     assert (failed / "8" / "one.hwpx").read_bytes() == b"ONE"
     assert 8 not in json.loads((failed / "_state.json").read_text(encoding="utf-8"))["done"]
+
+
+def _forbid(ntt_id):
+    raise fss_b0000291.FetchError(
+        "HTTP 403",
+        http_status=403,
+        attempts=2,
+        url=VIEW_URL.format(ntt_id=ntt_id),
+    )
+
+
+def test_done_seed_ledger_survives_later_failure(tmp_path):
+    dest = tmp_path / "dest"
+    row = _row(42, attach="예시.hwpx")
+    html = _page("예시회계법인", "예시.hwpx")
+    fss_b0000291.crawl_seed(
+        [row],
+        dest,
+        fetch_html=lambda ntt_id: html,
+        fetch_file=lambda url: b"original",
+        delay=0,
+    )
+    snapshot = _tree(dest)
+    assert json.loads((dest / "_state.json").read_text(encoding="utf-8"))["done"] == [42]
+    assert _jsonl(dest / "manifest.jsonl")[0]["nttId"] == 42
+    assert _jsonl(dest / "_pending-conversion.jsonl")[0]["nttId"] == 42
+    fss_b0000291.crawl_seed(
+        [row],
+        dest,
+        fetch_html=_forbid,
+        fetch_file=lambda url: b"should-not",
+        delay=0,
+    )
+    assert _tree(dest) == snapshot
+    calls = []
+    fss_b0000291.crawl_seed(
+        [row],
+        dest,
+        fetch_html=lambda ntt_id: calls.append(ntt_id) or html,
+        fetch_file=lambda url: b"original",
+        resume=True,
+        delay=0,
+    )
+    assert calls == []
+
+
+def test_sweep_failure_does_not_clear_seed_done(tmp_path):
+    dest = tmp_path / "dest"
+    row = _row(42, attach="예시.hwpx")
+    html = _page("예시회계법인", "예시.hwpx")
+    fss_b0000291.crawl_seed(
+        [row],
+        dest,
+        fetch_html=lambda ntt_id: html,
+        fetch_file=lambda url: b"original",
+        delay=0,
+    )
+    manifest = (dest / "manifest.jsonl").read_bytes()
+    body = (dest / "42" / "예시.hwpx").read_bytes()
+    calls = []
+
+    def fetch_html(ntt_id):
+        calls.append(ntt_id)
+        raise fss_b0000291.FetchError(
+            "HTTP 403",
+            http_status=403,
+            attempts=2,
+            url=VIEW_URL.format(ntt_id=ntt_id),
+        )
+
+    fss_b0000291.crawl_sweep(
+        dest,
+        seed=[row],
+        fetch_html=fetch_html,
+        fetch_file=lambda url: b"should-not",
+        range_spec="42-42",
+        coarse_from=43,
+        coarse_to=42,
+        coarse_stride=1,
+        delay=0,
+    )
+    assert calls == [42]
+    state = json.loads((dest / "_state.json").read_text(encoding="utf-8"))
+    assert state["done"] == [42]
+    assert (dest / "manifest.jsonl").read_bytes() == manifest
+    assert (dest / "42" / "예시.hwpx").read_bytes() == body
+    calls.clear()
+    fss_b0000291.crawl_sweep(
+        dest,
+        seed=[row],
+        fetch_html=lambda ntt_id: calls.append(ntt_id) or html,
+        fetch_file=lambda url: b"should-not",
+        range_spec="42-42",
+        coarse_from=43,
+        coarse_to=42,
+        coarse_stride=1,
+        resume=True,
+        delay=0,
+    )
+    assert calls == []
+
+
+def test_same_url_overwrites_changed_bytes_without_extra_suffix(tmp_path):
+    dest = tmp_path / "dest"
+    row = _row(9, attach="a.hwpx")
+    html = _page("예시회계법인", "a.hwpx")
+    fss_b0000291.crawl_seed(
+        [row],
+        dest,
+        fetch_html=lambda ntt_id: html,
+        fetch_file=lambda url: b"OLD",
+        delay=0,
+    )
+    path = dest / "9" / "a.hwpx"
+    stamp = path.stat().st_mtime_ns
+    fss_b0000291.crawl_seed(
+        [row],
+        dest,
+        fetch_html=lambda ntt_id: html,
+        fetch_file=lambda url: b"OLD",
+        delay=0,
+    )
+    assert path.read_bytes() == b"OLD"
+    assert path.stat().st_mtime_ns == stamp
+    assert not (dest / "9" / "a__2.hwpx").exists()
+    fss_b0000291.crawl_seed(
+        [row],
+        dest,
+        fetch_html=lambda ntt_id: html,
+        fetch_file=lambda url: b"NEW",
+        delay=0,
+    )
+    assert path.read_bytes() == b"NEW"
+    assert not (dest / "9" / "a__2.hwpx").exists()
+
+    pair = """
+    <dl class="bd-info">
+      <div><dt>감사인</dt><dd>둘회계법인</dd></div>
+      <div><dt>감시대상기간</dt><dd>2021-04-01~2022-03-31</dd></div>
+      <div><dt>개선권고일</dt><dd>2023-03-15</dd></div>
+      <div><dt>공시종료일</dt><dd>2026-03-15</dd></div>
+    </dl>
+    <a class="btn-attach-download" href="/fss/cmmn/file/fileDown.do?fileSn=1">report.hwpx</a>
+    <a class="btn-attach-download" href="/fss/cmmn/file/fileDown.do?fileSn=2">report.hwpx</a>
+    """
+    other = tmp_path / "pair"
+    bodies = {"fileSn=1": b"FIRST", "fileSn=2": b"SECOND"}
+
+    def fetch_file(url):
+        for key, body in bodies.items():
+            if key in url:
+                return body
+        raise AssertionError(url)
+
+    fss_b0000291.crawl_seed(
+        [_row(7, attach="report.hwpx")],
+        other,
+        fetch_html=lambda ntt_id: pair,
+        fetch_file=fetch_file,
+        delay=0,
+    )
+    fss_b0000291.crawl_seed(
+        [_row(7, attach="report.hwpx")],
+        other,
+        fetch_html=lambda ntt_id: pair,
+        fetch_file=fetch_file,
+        delay=0,
+    )
+    assert (other / "7" / "report.hwpx").read_bytes() == b"FIRST"
+    assert (other / "7" / "report__2.hwpx").read_bytes() == b"SECOND"
+    assert not (other / "7" / "report__3.hwpx").exists()
+    bodies["fileSn=2"] = b"SECOND-NEW"
+    fss_b0000291.crawl_seed(
+        [_row(7, attach="report.hwpx")],
+        other,
+        fetch_html=lambda ntt_id: pair,
+        fetch_file=fetch_file,
+        delay=0,
+    )
+    assert (other / "7" / "report.hwpx").read_bytes() == b"FIRST"
+    assert (other / "7" / "report__2.hwpx").read_bytes() == b"SECOND-NEW"
+    assert not (other / "7" / "report__3.hwpx").exists()

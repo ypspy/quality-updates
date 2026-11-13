@@ -10,7 +10,7 @@
 python scripts/crawl_fss_b0000291.py --seed scripts/tests/fixtures/b0000291/2022-seed.csv
 ```
 
-기본 출력 디렉터리는 `downloads/fss-review/B0000291`이다. 이 경로는 gitignore라 커밋하지 않는다. 첨부 원문은 `<nttId>/<파일명>`에만 저장한다. 글 단위 필드는 같은 디렉터리의 `manifest.jsonl`에 UTF-8 한 줄로 남긴다. 첨부까지 받아 manifest에 넣은 nttId만 `_state.json`의 `done`에, 감사인이 빈 시드 글은 `empty`에 글마다 바로 적는다. `--resume`은 `done`과 `empty`를 건너뛴다. 탐색의 `probed`만 있는 번호는 시드 수집이 첨부를 받는다. 실패한 요청은 `_failed.jsonl`에 같은 nttId의 마지막 결과만 남긴다. 이미 있고 해시가 같은 첨부는 덮어쓰지 않는다. 한 글에서 저장 이름이 겹치면 `report__2.hwpx`처럼 나누고, 그 글의 첨부가 모두 성공한 뒤에만 `_pending-conversion.jsonl`에 적는다.
+기본 출력 디렉터리는 `downloads/fss-review/B0000291`이다. 이 경로는 gitignore라 커밋하지 않는다. 첨부 원문은 `<nttId>/<파일명>`에만 저장한다. 글 단위 필드는 같은 디렉터리의 `manifest.jsonl`에 UTF-8 한 줄로 남긴다. 첨부까지 받아 manifest에 넣은 nttId만 `_state.json`의 `done`에, 감사인이 빈 시드 글은 `empty`에 글마다 바로 적는다. `--resume`은 `done`과 `empty`를 건너뛴다. 탐색의 `probed`만 있는 번호는 시드 수집이 첨부를 받는다. 실패한 요청은 `_failed.jsonl`에 같은 nttId의 마지막 결과만 남긴다. 이미 `done`인 글이 나중에 실패해도 `done`·manifest·pending·원문은 지우지 않는다. 이미 있고 해시가 같은 첨부는 덮어쓰지 않고, 같은 저장 경로의 내용이 달라지면 그 파일을 덮어쓴다. `__2`는 한 글 안에서 다른 URL이 같은 이름을 쓸 때만 붙인다. 그 글의 첨부가 모두 성공한 뒤에만 `_pending-conversion.jsonl`에 적는다.
 
 받은 `.hwp`와 `.hwpx`는 변환하지 않는다. 경로만 `_pending-conversion.jsonl`에 적는다. HWP 변환은 이 수집기의 다음 단계다.
 

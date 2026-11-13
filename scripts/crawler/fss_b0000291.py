@@ -269,11 +269,10 @@ def crawl_seed(
 
     def note_failure(ntt_id: int, exc: FetchError, filename: str | None) -> None:
         summary["failed"] += 1
-        if dry_run:
+        if dry_run or ntt_id in done:
             return
         failed[_failure_key({"nttId": ntt_id})] = _failure_record(ntt_id, exc, filename=filename)
         manifest.pop(ntt_id, None)
-        done.discard(ntt_id)
         _forget_pending(pending, ntt_id)
         flush()
 
@@ -391,10 +390,9 @@ def crawl_sweep(
 
     def note_failure(ntt_id: int, exc: FetchError, filename: str | None) -> None:
         summary["failed"] += 1
-        if dry_run:
+        if dry_run or ntt_id in done:
             return
         probed.discard(ntt_id)
-        done.discard(ntt_id)
         manifest.pop(ntt_id, None)
         records.pop(("post", ntt_id), None)
         records[("failure", ntt_id)] = _sweep_failure(ntt_id, exc, filename=filename)
@@ -512,7 +510,6 @@ def _download_attachments(post: Post, dest: Path, fetch_file, pause, pending: di
     for attachment in post.attachments:
         leaf = _safe_leaf(attachment.name)
         if leaf is None:
-            _forget_pending(pending, post.ntt_id)
             return attachment, FetchError(
                 "unsafe attachment name",
                 http_status=None,
@@ -523,11 +520,9 @@ def _download_attachments(post: Post, dest: Path, fetch_file, pause, pending: di
         try:
             content = fetch_file(attachment.url)
         except FetchError as exc:
-            _forget_pending(pending, post.ntt_id)
             return attachment, exc
         stored = _place_attachment(dest, post.ntt_id, leaf, content, reserved)
         if stored is None:
-            _forget_pending(pending, post.ntt_id)
             return attachment, FetchError(
                 "unsafe attachment name",
                 http_status=None,
@@ -573,20 +568,20 @@ def _place_attachment(
     candidate = leaf
     index = 1
     for _ in range(100):
-        if candidate not in reserved:
-            path = (base / candidate).resolve()
-            if path.parent != base:
-                return None
-            if path.exists() and hashlib.sha256(path.read_bytes()).digest() == digest:
-                reserved.add(candidate)
-                return candidate
-            if not path.exists():
-                path.parent.mkdir(parents=True, exist_ok=True)
-                path.write_bytes(content)
-                reserved.add(candidate)
-                return candidate
-        index += 1
-        candidate = _suffixed_leaf(leaf, index)
+        if candidate in reserved:
+            index += 1
+            candidate = _suffixed_leaf(leaf, index)
+            continue
+        path = (base / candidate).resolve()
+        if path.parent != base:
+            return None
+        if not path.exists():
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(content)
+        elif hashlib.sha256(path.read_bytes()).digest() != digest:
+            path.write_bytes(content)
+        reserved.add(candidate)
+        return candidate
     return None
 
 
