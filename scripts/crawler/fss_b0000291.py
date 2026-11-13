@@ -141,7 +141,15 @@ def resolve_kind(firm: str, seed_kind: str | None) -> str:
 
 def parse_view(html: str, ntt_id: int, kind: str | None = None) -> Post | None:
     soup = BeautifulSoup(html, "html.parser")
-    fields = _info_fields(soup)
+    board = soup.select_one("dl.bd-info")
+    if board is None:
+        raise FetchError(
+            "missing bd-info",
+            http_status=None,
+            attempts=1,
+            url=view_url(ntt_id),
+        )
+    fields = _info_fields(board)
     firm = fields.get("감사인", "").strip()
     if not firm:
         return None
@@ -218,7 +226,11 @@ def fetch_bytes(
 
 
 def http_fetch_text(session, ntt_id: int) -> str:
-    return fetch_bytes(session, view_url(ntt_id)).decode("utf-8")
+    url = view_url(ntt_id)
+    try:
+        return fetch_bytes(session, url).decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise FetchError(str(exc), http_status=None, attempts=1, url=url) from exc
 
 
 def http_fetch_file(session, url: str) -> bytes:
@@ -237,11 +249,11 @@ def crawl_seed(
     sleeper=time.sleep,
 ) -> dict:
     dest = Path(dest)
-    done, probed = _load_state(dest / "_state.json")
+    done, probed, empty = _load_state(dest / "_state.json")
     failed = _load_keyed(dest / "_failed.jsonl", _failure_key)
     manifest = {row["nttId"]: row for row in _read_jsonl(dest / "manifest.jsonl")}
     pending = {
-        (row["nttId"], row["name"]): row for row in _read_jsonl(dest / "_pending-conversion.jsonl")
+        (row["nttId"], row["path"]): row for row in _read_jsonl(dest / "_pending-conversion.jsonl")
     }
     summary = {"posts": 0, "attachments": 0, "empty": 0, "failed": 0}
     requested = False
@@ -253,25 +265,38 @@ def crawl_seed(
         requested = True
 
     def flush() -> None:
-        _write_seed_ledger(dest, manifest, done, pending, failed, probed)
+        _write_seed_ledger(dest, manifest, done, pending, failed, probed, empty)
+
+    def note_failure(ntt_id: int, exc: FetchError, filename: str | None) -> None:
+        summary["failed"] += 1
+        if dry_run:
+            return
+        failed[_failure_key({"nttId": ntt_id})] = _failure_record(ntt_id, exc, filename=filename)
+        manifest.pop(ntt_id, None)
+        done.discard(ntt_id)
+        _forget_pending(pending, ntt_id)
+        flush()
 
     for row in seed:
-        if resume and row.ntt_id in done:
+        if resume and (row.ntt_id in done or row.ntt_id in empty):
             continue
         pause()
         try:
             html = fetch_html(row.ntt_id)
         except FetchError as exc:
-            summary["failed"] += 1
-            if not dry_run:
-                failed[_failure_key({"nttId": row.ntt_id})] = _failure_record(
-                    row.ntt_id, exc, filename=None
-                )
-                flush()
+            note_failure(row.ntt_id, exc, None)
             continue
-        post = parse_view(html, row.ntt_id, kind=row.kind or None)
+        try:
+            post = parse_view(html, row.ntt_id, kind=row.kind or None)
+        except FetchError as exc:
+            note_failure(row.ntt_id, exc, None)
+            continue
         if post is None:
             summary["empty"] += 1
+            if not dry_run:
+                empty.add(row.ntt_id)
+                failed.pop(_failure_key({"nttId": row.ntt_id}), None)
+                flush()
             continue
         summary["posts"] += 1
         summary["attachments"] += len(post.attachments)
@@ -280,17 +305,30 @@ def crawl_seed(
         error = _download_attachments(post, dest, fetch_file, pause, pending)
         if error is not None:
             attachment, exc = error
-            summary["failed"] += 1
-            failed[_failure_key({"nttId": post.ntt_id})] = _failure_record(
-                post.ntt_id, exc, filename=attachment.name
-            )
-            flush()
+            note_failure(post.ntt_id, exc, attachment.name)
             continue
         manifest[post.ntt_id] = post.to_manifest()
         done.add(post.ntt_id)
+        empty.discard(post.ntt_id)
         failed.pop(_failure_key({"nttId": post.ntt_id}), None)
         flush()
     return summary
+
+
+def _post_from_record(record: dict) -> Post:
+    attachments = tuple(
+        Attachment(name=item["name"], url=item["url"], ext=item["ext"])
+        for item in record.get("attachments") or ()
+    )
+    return Post(
+        ntt_id=int(record["nttId"]),
+        firm=record["firm"],
+        period=record["period"],
+        action_date=record["action_date"],
+        disclose_end=record["disclose_end"],
+        kind=record["kind"],
+        attachments=attachments,
+    )
 
 
 def crawl_sweep(
@@ -311,13 +349,13 @@ def crawl_sweep(
 ) -> dict:
     dest = Path(dest)
     seed_ids = {row.ntt_id: row for row in seed}
-    done, probed = _load_state(dest / "_state.json")
+    done, probed, empty = _load_state(dest / "_state.json")
     records = {
         (row["type"], row["nttId"]): row for row in _read_jsonl(dest / "_sweep.jsonl")
     }
     manifest = {row["nttId"]: row for row in _read_jsonl(dest / "manifest.jsonl")}
     pending = {
-        (row["nttId"], row["name"]): row for row in _read_jsonl(dest / "_pending-conversion.jsonl")
+        (row["nttId"], row["path"]): row for row in _read_jsonl(dest / "_pending-conversion.jsonl")
     }
     summary = {"new": 0, "empty": 0, "failed": 0}
     requested = False
@@ -334,7 +372,7 @@ def crawl_sweep(
             dest / "_sweep.jsonl",
             sorted(records.values(), key=lambda row: (row["nttId"], row["type"])),
         )
-        _write_text_if_changed(dest / "_state.json", _state_text(done, probed))
+        _write_text_if_changed(dest / "_state.json", _state_text(done, probed, empty))
         if sweep_download:
             _write_jsonl(
                 dest / "manifest.jsonl",
@@ -342,7 +380,7 @@ def crawl_sweep(
             )
             _write_jsonl(
                 dest / "_pending-conversion.jsonl",
-                sorted(pending.values(), key=lambda row: (row["nttId"], row["name"])),
+                sorted(pending.values(), key=lambda row: (row["nttId"], row["path"])),
             )
 
     def finish(ntt_id: int) -> None:
@@ -351,20 +389,51 @@ def crawl_sweep(
         probed.add(ntt_id)
         flush()
 
+    def note_failure(ntt_id: int, exc: FetchError, filename: str | None) -> None:
+        summary["failed"] += 1
+        if dry_run:
+            return
+        probed.discard(ntt_id)
+        done.discard(ntt_id)
+        manifest.pop(ntt_id, None)
+        records.pop(("post", ntt_id), None)
+        records[("failure", ntt_id)] = _sweep_failure(ntt_id, exc, filename=filename)
+        _forget_pending(pending, ntt_id)
+        flush()
+
+    def download_post(post: Post) -> None:
+        error = _download_attachments(post, dest, fetch_file, pause, pending)
+        if error is not None:
+            attachment, exc = error
+            note_failure(post.ntt_id, exc, attachment.name)
+            return
+        manifest[post.ntt_id] = post.to_manifest()
+        done.add(post.ntt_id)
+        records.pop(("failure", post.ntt_id), None)
+        records[("post", post.ntt_id)] = {"type": "post", **post.to_manifest()}
+        finish(post.ntt_id)
+
     for ntt_id in sweep_ids(range_spec, coarse_from, coarse_to, coarse_stride):
-        if resume and (ntt_id in probed or ntt_id in done):
+        if resume and ntt_id in done:
+            continue
+        saved = records.get(("post", ntt_id))
+        if resume and ntt_id in probed and not (sweep_download and not dry_run and saved is not None):
+            continue
+        if resume and ntt_id in probed and sweep_download and not dry_run and saved is not None:
+            download_post(_post_from_record(saved))
             continue
         pause()
         try:
             html = fetch_html(ntt_id)
         except FetchError as exc:
-            summary["failed"] += 1
-            records.pop(("post", ntt_id), None)
-            records[("failure", ntt_id)] = _sweep_failure(ntt_id, exc, filename=None)
-            finish(ntt_id)
+            note_failure(ntt_id, exc, None)
             continue
         seed_row = seed_ids.get(ntt_id)
-        post = parse_view(html, ntt_id, kind=seed_row.kind if seed_row else None)
+        try:
+            post = parse_view(html, ntt_id, kind=seed_row.kind if seed_row else None)
+        except FetchError as exc:
+            note_failure(ntt_id, exc, None)
+            continue
         if post is None:
             summary["empty"] += 1
             records.pop(("post", ntt_id), None)
@@ -382,25 +451,11 @@ def crawl_sweep(
         if dry_run or not sweep_download:
             finish(ntt_id)
             continue
-        error = _download_attachments(post, dest, fetch_file, pause, pending)
-        if error is not None:
-            attachment, exc = error
-            summary["failed"] += 1
-            records[("failure", ntt_id)] = _sweep_failure(
-                ntt_id, exc, filename=attachment.name
-            )
-            finish(ntt_id)
-            continue
-        manifest[post.ntt_id] = post.to_manifest()
-        done.add(post.ntt_id)
-        finish(ntt_id)
+        download_post(post)
     return summary
 
 
-def _info_fields(soup: BeautifulSoup) -> dict[str, str]:
-    board = soup.select_one("dl.bd-info")
-    if board is None:
-        return {}
+def _info_fields(board) -> dict[str, str]:
     fields: dict[str, str] = {}
     for dt in board.find_all("dt"):
         label = dt.get_text(strip=True)
@@ -433,7 +488,18 @@ def _parse_range(spec: str) -> tuple[int, int]:
     return start, end
 
 
+def _certificate_failure(exc: BaseException) -> bool:
+    if type(exc).__name__ == "SSLCertVerificationError":
+        return True
+    text = str(exc).upper()
+    return "CERTIFICATE_VERIFY_FAILED" in text or "SSLCERTVERIFICATIONERROR" in text
+
+
 def _retryable_transport(exc: BaseException) -> bool:
+    if _certificate_failure(exc):
+        return False
+    if isinstance(exc, requests.exceptions.ChunkedEncodingError):
+        return True
     if isinstance(exc, (requests.ConnectionError, requests.Timeout)):
         return True
     text = str(exc).upper()
@@ -441,9 +507,12 @@ def _retryable_transport(exc: BaseException) -> bool:
 
 
 def _download_attachments(post: Post, dest: Path, fetch_file, pause, pending: dict):
+    staged = []
+    reserved: set[str] = set()
     for attachment in post.attachments:
         leaf = _safe_leaf(attachment.name)
         if leaf is None:
+            _forget_pending(pending, post.ntt_id)
             return attachment, FetchError(
                 "unsafe attachment name",
                 http_status=None,
@@ -454,8 +523,11 @@ def _download_attachments(post: Post, dest: Path, fetch_file, pause, pending: di
         try:
             content = fetch_file(attachment.url)
         except FetchError as exc:
+            _forget_pending(pending, post.ntt_id)
             return attachment, exc
-        if not _store_attachment(dest, post.ntt_id, leaf, content):
+        stored = _place_attachment(dest, post.ntt_id, leaf, content, reserved)
+        if stored is None:
+            _forget_pending(pending, post.ntt_id)
             return attachment, FetchError(
                 "unsafe attachment name",
                 http_status=None,
@@ -463,12 +535,17 @@ def _download_attachments(post: Post, dest: Path, fetch_file, pause, pending: di
                 url=attachment.url,
             )
         if attachment.ext in _CONVERT_EXT:
-            pending[(post.ntt_id, attachment.name)] = {
-                "nttId": post.ntt_id,
-                "name": attachment.name,
-                "ext": attachment.ext,
-                "path": f"{post.ntt_id}/{leaf}",
-            }
+            staged.append(
+                {
+                    "nttId": post.ntt_id,
+                    "name": attachment.name,
+                    "ext": attachment.ext,
+                    "path": f"{post.ntt_id}/{stored}",
+                }
+            )
+    _forget_pending(pending, post.ntt_id)
+    for item in staged:
+        pending[(item["nttId"], item["path"])] = item
     return None
 
 
@@ -479,19 +556,50 @@ def _safe_leaf(name: str) -> str | None:
     return leaf
 
 
+def _suffixed_leaf(leaf: str, index: int) -> str:
+    path = Path(leaf)
+    return f"{path.stem}__{index}{path.suffix}"
+
+
+def _place_attachment(
+    dest: Path,
+    ntt_id: int,
+    leaf: str,
+    content: bytes,
+    reserved: set[str],
+) -> str | None:
+    base = (dest / str(ntt_id)).resolve()
+    digest = hashlib.sha256(content).digest()
+    candidate = leaf
+    index = 1
+    for _ in range(100):
+        if candidate not in reserved:
+            path = (base / candidate).resolve()
+            if path.parent != base:
+                return None
+            if path.exists() and hashlib.sha256(path.read_bytes()).digest() == digest:
+                reserved.add(candidate)
+                return candidate
+            if not path.exists():
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(content)
+                reserved.add(candidate)
+                return candidate
+        index += 1
+        candidate = _suffixed_leaf(leaf, index)
+    return None
+
+
+def _forget_pending(pending: dict, ntt_id: int) -> None:
+    for key in [key for key in pending if key[0] == ntt_id]:
+        pending.pop(key, None)
+
+
 def _store_attachment(dest: Path, ntt_id: int, name: str, content: bytes) -> bool:
     leaf = _safe_leaf(name)
     if leaf is None:
         return False
-    base = (dest / str(ntt_id)).resolve()
-    path = base / leaf
-    if path.resolve().parent != base:
-        return False
-    path.parent.mkdir(parents=True, exist_ok=True)
-    if path.exists() and hashlib.sha256(path.read_bytes()).digest() == hashlib.sha256(content).digest():
-        return True
-    path.write_bytes(content)
-    return True
+    return _place_attachment(dest, ntt_id, leaf, content, set()) is not None
 
 
 def _failure_record(ntt_id: int, exc: FetchError, *, filename: str | None) -> dict:
@@ -517,17 +625,22 @@ def _failure_key(record: dict) -> str:
     return f"url:{record.get('url')}"
 
 
-def _load_state(path: Path) -> tuple[set[int], set[int]]:
+def _load_state(path: Path) -> tuple[set[int], set[int], set[int]]:
     if not path.exists():
-        return set(), set()
+        return set(), set(), set()
     data = json.loads(path.read_text(encoding="utf-8"))
     done = {int(item) for item in data.get("done", [])}
     probed = {int(item) for item in data.get("probed", [])}
-    return done, probed
+    empty = {int(item) for item in data.get("empty", [])}
+    return done, probed, empty
 
 
-def _state_text(done: set[int], probed: set[int]) -> str:
-    payload = {"done": sorted(done), "probed": sorted(probed)}
+def _state_text(done: set[int], probed: set[int], empty: set[int]) -> str:
+    payload = {
+        "done": sorted(done),
+        "empty": sorted(empty),
+        "probed": sorted(probed),
+    }
     return json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
 
 
@@ -574,16 +687,17 @@ def _write_seed_ledger(
     pending: dict,
     failed: dict,
     probed: set[int],
+    empty: set[int],
 ) -> None:
     dest.mkdir(parents=True, exist_ok=True)
     _write_jsonl(
         dest / "manifest.jsonl",
         sorted(manifest.values(), key=lambda row: row["nttId"]),
     )
-    _write_text_if_changed(dest / "_state.json", _state_text(done, probed))
+    _write_text_if_changed(dest / "_state.json", _state_text(done, probed, empty))
     _write_jsonl(
         dest / "_pending-conversion.jsonl",
-        sorted(pending.values(), key=lambda row: (row["nttId"], row["name"])),
+        sorted(pending.values(), key=lambda row: (row["nttId"], row["path"])),
     )
     _write_jsonl(
         dest / "_failed.jsonl",

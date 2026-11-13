@@ -65,7 +65,7 @@ class FakeResp:
         self.status_code = status
         self.content = content
         self.encoding = "utf-8"
-        self.text = content.decode("utf-8")
+        self.text = content.decode("utf-8", errors="replace")
 
 
 class FakeSession:
@@ -756,7 +756,8 @@ def test_sweep_resume_skips_probed_pages_without_downloading(tmp_path):
         delay=0,
     )
     state = json.loads((dest / "_state.json").read_text(encoding="utf-8"))
-    assert state["probed"] == [127970, 127971, 127972, 128100]
+    assert state["probed"] == [127970, 127971, 127972]
+    assert 128100 not in state["probed"]
     assert state["done"] == []
     kinds = {(row["type"], row["nttId"]) for row in _jsonl(dest / "_sweep.jsonl")}
     assert kinds == {("post", 127972), ("failure", 128100)}
@@ -774,7 +775,7 @@ def test_sweep_resume_skips_probed_pages_without_downloading(tmp_path):
         resume=True,
         delay=0,
     )
-    assert calls == []
+    assert calls == [128100]
     assert downloads == []
 
 
@@ -959,3 +960,367 @@ def test_sweep_dry_run_does_not_write_or_download(tmp_path):
     assert summary == {"new": 2, "empty": 0, "failed": 0}
     assert downloads == []
     assert not dest.exists()
+
+
+def test_resume_sweep_download_saves_reported_posts_and_retries_failures(tmp_path):
+    dest = tmp_path / "dest"
+    seed = [_row(1)]
+    calls = []
+    downloads = []
+
+    def fetch_html(ntt_id):
+        calls.append(ntt_id)
+        if ntt_id == 1:
+            return _html(127970)
+        if ntt_id == 2:
+            return _html(127980)
+        if ntt_id == 3:
+            return _page("새회계법인", "새회계법인.hwpx")
+        raise fss_b0000291.FetchError(
+            "HTTP 403",
+            http_status=403,
+            attempts=2,
+            url=VIEW_URL.format(ntt_id=ntt_id),
+        )
+
+    fss_b0000291.crawl_sweep(
+        dest,
+        seed=seed,
+        fetch_html=fetch_html,
+        fetch_file=lambda url: downloads.append(url) or b"nope",
+        range_spec="1-3",
+        coarse_from=4,
+        coarse_to=4,
+        coarse_stride=1,
+        delay=0,
+    )
+    state = json.loads((dest / "_state.json").read_text(encoding="utf-8"))
+    assert state["probed"] == [1, 2, 3]
+    assert 4 not in state["probed"]
+    assert state["done"] == []
+    assert {(row["type"], row["nttId"]) for row in _jsonl(dest / "_sweep.jsonl")} == {
+        ("post", 3),
+        ("failure", 4),
+    }
+    assert downloads == []
+    calls.clear()
+
+    def retry_html(ntt_id):
+        calls.append(ntt_id)
+        if ntt_id == 4:
+            return _page("복구회계법인", "복구.hwpx")
+        raise AssertionError(ntt_id)
+
+    def fetch_file(url):
+        downloads.append(url)
+        return b"saved-bytes"
+
+    fss_b0000291.crawl_sweep(
+        dest,
+        seed=seed,
+        fetch_html=retry_html,
+        fetch_file=fetch_file,
+        range_spec="1-3",
+        coarse_from=4,
+        coarse_to=4,
+        coarse_stride=1,
+        resume=True,
+        sweep_download=True,
+        delay=0,
+    )
+    assert calls == [4]
+    assert (dest / "3" / "새회계법인.hwpx").read_bytes() == b"saved-bytes"
+    assert (dest / "4" / "복구.hwpx").read_bytes() == b"saved-bytes"
+    saved = json.loads((dest / "_state.json").read_text(encoding="utf-8"))
+    assert saved["done"] == [3, 4]
+    assert {row["nttId"] for row in _jsonl(dest / "manifest.jsonl")} == {3, 4}
+    assert [row for row in _jsonl(dest / "_sweep.jsonl") if row["type"] == "failure"] == []
+    calls.clear()
+    downloads.clear()
+    fss_b0000291.crawl_sweep(
+        dest,
+        seed=seed,
+        fetch_html=lambda ntt_id: calls.append(ntt_id),
+        fetch_file=lambda url: downloads.append(url) or b"again",
+        range_spec="1-3",
+        coarse_from=4,
+        coarse_to=4,
+        coarse_stride=1,
+        resume=True,
+        sweep_download=True,
+        delay=0,
+    )
+    assert calls == []
+    assert downloads == []
+
+
+def test_failed_probe_is_retried_and_cleared(tmp_path):
+    dest = tmp_path / "dest"
+    calls = []
+
+    def fail_once(ntt_id):
+        calls.append(ntt_id)
+        raise fss_b0000291.FetchError(
+            "HTTP 403",
+            http_status=403,
+            attempts=2,
+            url=VIEW_URL.format(ntt_id=ntt_id),
+        )
+
+    fss_b0000291.crawl_sweep(
+        dest,
+        seed=[],
+        fetch_html=fail_once,
+        fetch_file=lambda url: b"",
+        range_spec="8-8",
+        coarse_from=9,
+        coarse_to=8,
+        coarse_stride=1,
+        delay=0,
+    )
+    state = json.loads((dest / "_state.json").read_text(encoding="utf-8"))
+    assert state["probed"] == []
+    assert _jsonl(dest / "_sweep.jsonl")[0]["type"] == "failure"
+    calls.clear()
+
+    def recover(ntt_id):
+        calls.append(ntt_id)
+        return _html(127980)
+
+    fss_b0000291.crawl_sweep(
+        dest,
+        seed=[],
+        fetch_html=recover,
+        fetch_file=lambda url: b"",
+        range_spec="8-8",
+        coarse_from=9,
+        coarse_to=8,
+        coarse_stride=1,
+        resume=True,
+        delay=0,
+    )
+    assert calls == [8]
+    rows = _jsonl(dest / "_sweep.jsonl")
+    assert rows == []
+    assert json.loads((dest / "_state.json").read_text(encoding="utf-8"))["probed"] == [8]
+
+
+def test_decode_chunk_and_certificate_errors(tmp_path):
+    session = FakeSession([FakeResp(200, b"\xff")])
+    with pytest.raises(fss_b0000291.FetchError):
+        fss_b0000291.http_fetch_text(session, 1)
+
+    dest = tmp_path / "dest"
+    calls = []
+
+    def fetch_html(ntt_id):
+        calls.append(ntt_id)
+        if ntt_id == 1:
+            return fss_b0000291.http_fetch_text(FakeSession([FakeResp(200, b"\xff")]), ntt_id)
+        return _page("다음회계법인", "다음.hwpx")
+
+    summary = fss_b0000291.crawl_sweep(
+        dest,
+        seed=[],
+        fetch_html=fetch_html,
+        fetch_file=lambda url: b"x",
+        range_spec="1-2",
+        coarse_from=3,
+        coarse_to=2,
+        coarse_stride=1,
+        delay=0,
+    )
+    assert calls == [1, 2]
+    assert summary["failed"] == 1
+    assert summary["new"] == 1
+    assert 1 not in json.loads((dest / "_state.json").read_text(encoding="utf-8"))["probed"]
+
+    sleeps = []
+    session = FakeSession(
+        [requests.exceptions.ChunkedEncodingError("broken chunk"), FakeResp(200, b"ok")]
+    )
+    body = fss_b0000291.fetch_bytes(
+        session,
+        "https://www.fss.or.kr/x",
+        sleeper=sleeps.append,
+        backoff_base=1,
+        backoff_cap=30,
+        max_attempts=5,
+    )
+    assert body == b"ok"
+    assert sleeps == [1]
+    assert session.calls == 2
+
+    sleeps.clear()
+    session = FakeSession(
+        [requests.exceptions.SSLError("CERTIFICATE_VERIFY_FAILED"), FakeResp(200, b"later")]
+    )
+    with pytest.raises(fss_b0000291.FetchError) as raised:
+        fss_b0000291.fetch_bytes(
+            session,
+            "https://www.fss.or.kr/x",
+            sleeper=sleeps.append,
+            backoff_base=1,
+            backoff_cap=30,
+            max_attempts=5,
+        )
+    assert raised.value.attempts == 1
+    assert sleeps == []
+    assert session.calls == 1
+
+    sleeps.clear()
+    session = FakeSession(
+        [requests.exceptions.SSLError("UNEXPECTED_EOF_WHILE_READING"), FakeResp(200, b"page")]
+    )
+    assert (
+        fss_b0000291.fetch_bytes(
+            session,
+            "https://www.fss.or.kr/x",
+            sleeper=sleeps.append,
+            backoff_base=1,
+            backoff_cap=30,
+            max_attempts=5,
+        )
+        == b"page"
+    )
+    assert sleeps == [1]
+
+
+def test_missing_bd_info_is_failure_not_empty_page(tmp_path):
+    blocked = "<html><body><p>점검 중</p></body></html>"
+    with pytest.raises(fss_b0000291.FetchError):
+        fss_b0000291.parse_view(blocked, 50)
+    assert fss_b0000291.parse_view(_html(127980), 127980) is None
+
+    dest = tmp_path / "dest"
+    calls = []
+
+    def fetch_html(ntt_id):
+        calls.append(ntt_id)
+        if ntt_id == 50:
+            return blocked
+        return _page("다른회계법인", "다른.hwpx")
+
+    summary = fss_b0000291.crawl_sweep(
+        dest,
+        seed=[],
+        fetch_html=fetch_html,
+        fetch_file=lambda url: b"x",
+        range_spec="50-51",
+        coarse_from=52,
+        coarse_to=51,
+        coarse_stride=1,
+        delay=0,
+    )
+    assert summary["failed"] == 1
+    assert summary["empty"] == 0
+    assert summary["new"] == 1
+    state = json.loads((dest / "_state.json").read_text(encoding="utf-8"))
+    assert 50 not in state["probed"]
+    assert state["probed"] == [51]
+    calls.clear()
+
+    def retry(ntt_id):
+        calls.append(ntt_id)
+        return _html(127980)
+
+    fss_b0000291.crawl_sweep(
+        dest,
+        seed=[],
+        fetch_html=retry,
+        fetch_file=lambda url: b"x",
+        range_spec="50-51",
+        coarse_from=52,
+        coarse_to=51,
+        coarse_stride=1,
+        resume=True,
+        delay=0,
+    )
+    assert calls == [50]
+
+
+def test_seed_empty_page_is_recorded_and_not_redone(tmp_path):
+    dest = tmp_path / "dest"
+    calls = []
+    summary = fss_b0000291.crawl_seed(
+        [_row(127980)],
+        dest,
+        fetch_html=lambda ntt_id: calls.append(ntt_id) or _html(127980),
+        fetch_file=lambda url: b"nope",
+        delay=0,
+    )
+    assert summary["empty"] == 1
+    state = json.loads((dest / "_state.json").read_text(encoding="utf-8"))
+    assert state["empty"] == [127980]
+    assert state["done"] == []
+    assert _jsonl(dest / "manifest.jsonl") == []
+    calls.clear()
+    fss_b0000291.crawl_seed(
+        [_row(127980)],
+        dest,
+        fetch_html=lambda ntt_id: calls.append(ntt_id) or _html(127980),
+        fetch_file=lambda url: b"nope",
+        resume=True,
+        delay=0,
+    )
+    assert calls == []
+
+
+def test_duplicate_attachment_names_and_pending_only_after_success(tmp_path):
+    dest = tmp_path / "dest"
+    html = """
+    <dl class="bd-info">
+      <div><dt>감사인</dt><dd>둘회계법인</dd></div>
+      <div><dt>감시대상기간</dt><dd>2021-04-01~2022-03-31</dd></div>
+      <div><dt>개선권고일</dt><dd>2023-03-15</dd></div>
+      <div><dt>공시종료일</dt><dd>2026-03-15</dd></div>
+    </dl>
+    <a class="btn-attach-download" href="/fss/cmmn/file/fileDown.do?fileSn=1">report.hwpx</a>
+    <a class="btn-attach-download" href="/fss/cmmn/file/fileDown.do?fileSn=2">report.hwpx</a>
+    """
+
+    def fetch_file(url):
+        if "fileSn=1" in url:
+            return b"FIRST"
+        if "fileSn=2" in url:
+            return b"SECOND"
+        raise AssertionError(url)
+
+    fss_b0000291.crawl_seed(
+        [_row(7, attach="report.hwpx")],
+        dest,
+        fetch_html=lambda ntt_id: html,
+        fetch_file=fetch_file,
+        delay=0,
+    )
+    assert (dest / "7" / "report.hwpx").read_bytes() == b"FIRST"
+    assert (dest / "7" / "report__2.hwpx").read_bytes() == b"SECOND"
+
+    failed = tmp_path / "failed"
+    partial = """
+    <dl class="bd-info">
+      <div><dt>감사인</dt><dd>둘회계법인</dd></div>
+      <div><dt>감시대상기간</dt><dd>2021-04-01~2022-03-31</dd></div>
+      <div><dt>개선권고일</dt><dd>2023-03-15</dd></div>
+      <div><dt>공시종료일</dt><dd>2026-03-15</dd></div>
+    </dl>
+    <a class="btn-attach-download" href="/fss/cmmn/file/fileDown.do?fileSn=1">one.hwpx</a>
+    <a class="btn-attach-download" href="/fss/cmmn/file/fileDown.do?fileSn=2">two.hwpx</a>
+    """
+
+    def fetch_partial(url):
+        if "fileSn=1" in url:
+            return b"ONE"
+        raise fss_b0000291.FetchError("HTTP 503", http_status=503, attempts=5, url=url)
+
+    fss_b0000291.crawl_seed(
+        [_row(8)],
+        failed,
+        fetch_html=lambda ntt_id: partial,
+        fetch_file=fetch_partial,
+        delay=0,
+    )
+    assert _jsonl(failed / "manifest.jsonl") == []
+    assert _jsonl(failed / "_pending-conversion.jsonl") == []
+    assert (failed / "8" / "one.hwpx").read_bytes() == b"ONE"
+    assert 8 not in json.loads((failed / "_state.json").read_text(encoding="utf-8"))["done"]
