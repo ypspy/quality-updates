@@ -205,9 +205,10 @@ def test_default_sweep_ids_cover_gap_and_coarse_stride():
     assert 128041 in ids and 128596 in ids
     assert 127970 in ids and 128616 in ids
     assert 129000 in ids and 136200 in ids
-    assert 136220 not in ids and 136400 not in ids
+    assert 136220 in ids and ids.count(136220) == 1
+    assert 136400 not in ids
     assert 128801 not in ids
-    assert len(ids) == 1001 + 37
+    assert len(ids) == 1001 + 38
 
 
 def test_fetch_retries_5xx_and_unexpected_eof_but_403_is_short():
@@ -276,6 +277,36 @@ def test_fetch_retries_5xx_and_unexpected_eof_but_403_is_short():
     assert raised.value.http_status == 404
     assert raised.value.attempts == 1
     assert session.calls == 1
+
+    sleeps.clear()
+    session = FakeSession(
+        [requests.exceptions.ConnectionError("connection reset"), FakeResp(200, b"again")]
+    )
+    body = fss_b0000291.fetch_bytes(
+        session,
+        "https://www.fss.or.kr/x",
+        sleeper=sleeps.append,
+        backoff_base=1,
+        backoff_cap=30,
+        max_attempts=5,
+    )
+    assert body == b"again"
+    assert sleeps == [1]
+    assert session.calls == 2
+
+    sleeps.clear()
+    session = FakeSession([requests.exceptions.SSLError("handshake failure")] * 3)
+    with pytest.raises(fss_b0000291.FetchError) as raised:
+        fss_b0000291.fetch_bytes(
+            session,
+            "https://www.fss.or.kr/x",
+            sleeper=sleeps.append,
+            backoff_base=1,
+            backoff_cap=30,
+            max_attempts=3,
+        )
+    assert raised.value.attempts == 3
+    assert session.calls == 3
 
 
 def test_http_fetch_text_reads_view_url():
@@ -657,3 +688,274 @@ def test_cli_defaults_and_dry_run_does_not_download(tmp_path, monkeypatch, capsy
     assert "empty=1" in captured
     assert "failed=0" in captured
     assert _tree(tmp_path / "out") == {}
+
+
+def _page(firm: str, filename: str | None = None) -> str:
+    attach = ""
+    if filename is not None:
+        attach = (
+            '<a class="btn-attach-download" '
+            f'href="/fss/cmmn/file/fileDown.do?fileSn=1">{filename}</a>'
+        )
+    return (
+        "<dl class=\"bd-info\">"
+        f"<div><dt>감사인</dt><dd>{firm}</dd></div>"
+        "<div><dt>감시대상기간</dt><dd>2021-04-01~2022-03-31</dd></div>"
+        "<div><dt>개선권고일</dt><dd>2023-03-15</dd></div>"
+        "<div><dt>공시종료일</dt><dd>2026-03-15</dd></div>"
+        "</dl>"
+        + attach
+    )
+
+
+def _row(ntt_id: int, firm: str = "예시회계법인", attach: str = "예시.hwpx"):
+    return fss_b0000291.SeedRow(
+        ntt_id=ntt_id,
+        action_date="2023-03-15",
+        period="2021-04-01~2022-03-31",
+        firm=firm,
+        kind="업체별",
+        attach=attach,
+        disclose_end="2026-03-15",
+        url=VIEW_URL.format(ntt_id=ntt_id),
+    )
+
+
+def test_sweep_resume_skips_probed_pages_without_downloading(tmp_path):
+    dest = tmp_path / "dest"
+    seed = _seed_subset(127970)
+    calls = []
+    downloads = []
+
+    def fetch_html(ntt_id):
+        calls.append(ntt_id)
+        if ntt_id == 127970:
+            return _html(127970)
+        if ntt_id == 127971:
+            return _html(127980)
+        if ntt_id == 127972:
+            return _html(128004)
+        if ntt_id == 128100:
+            raise fss_b0000291.FetchError(
+                "HTTP 403",
+                http_status=403,
+                attempts=2,
+                url=VIEW_URL.format(ntt_id=ntt_id),
+            )
+        raise AssertionError(ntt_id)
+
+    fss_b0000291.crawl_sweep(
+        dest,
+        seed=seed,
+        fetch_html=fetch_html,
+        fetch_file=lambda url: downloads.append(url) or b"x",
+        range_spec="127970-127972",
+        coarse_from=128100,
+        coarse_to=128100,
+        coarse_stride=1,
+        delay=0,
+    )
+    state = json.loads((dest / "_state.json").read_text(encoding="utf-8"))
+    assert state["probed"] == [127970, 127971, 127972, 128100]
+    assert state["done"] == []
+    kinds = {(row["type"], row["nttId"]) for row in _jsonl(dest / "_sweep.jsonl")}
+    assert kinds == {("post", 127972), ("failure", 128100)}
+    assert downloads == []
+    calls.clear()
+    fss_b0000291.crawl_sweep(
+        dest,
+        seed=seed,
+        fetch_html=fetch_html,
+        fetch_file=lambda url: downloads.append(url) or b"x",
+        range_spec="127970-127972",
+        coarse_from=128100,
+        coarse_to=128100,
+        coarse_stride=1,
+        resume=True,
+        delay=0,
+    )
+    assert calls == []
+    assert downloads == []
+
+
+def test_sweep_interrupt_persists_finished_probes(tmp_path):
+    dest = tmp_path / "dest"
+    calls = []
+
+    def fetch_html(ntt_id):
+        calls.append(ntt_id)
+        if len(calls) == 3:
+            raise RuntimeError("interrupt")
+        if ntt_id == 11:
+            return _html(127980)
+        return _page("새회계법인", "새회계법인 개선권고사항.hwpx")
+
+    with pytest.raises(RuntimeError, match="interrupt"):
+        fss_b0000291.crawl_sweep(
+            dest,
+            seed=[],
+            fetch_html=fetch_html,
+            fetch_file=lambda url: b"nope",
+            range_spec="10-12",
+            coarse_from=13,
+            coarse_to=12,
+            coarse_stride=1,
+            delay=0,
+        )
+    state = json.loads((dest / "_state.json").read_text(encoding="utf-8"))
+    assert state["probed"] == [10, 11]
+    assert state["done"] == []
+    assert [row["nttId"] for row in _jsonl(dest / "_sweep.jsonl")] == [10]
+    calls.clear()
+
+    def resume_html(ntt_id):
+        calls.append(ntt_id)
+        return _page("나머지회계법인", "나머지.hwpx")
+
+    downloads = []
+    fss_b0000291.crawl_sweep(
+        dest,
+        seed=[],
+        fetch_html=resume_html,
+        fetch_file=lambda url: downloads.append(url) or b"x",
+        range_spec="10-12",
+        coarse_from=13,
+        coarse_to=12,
+        coarse_stride=1,
+        resume=True,
+        delay=0,
+    )
+    assert calls == [12]
+    assert downloads == []
+    assert state_probed(dest) == [10, 11, 12]
+
+
+def state_probed(dest: Path) -> list[int]:
+    return json.loads((dest / "_state.json").read_text(encoding="utf-8"))["probed"]
+
+
+def test_sweep_probe_does_not_finish_seed_collection(tmp_path):
+    dest = tmp_path / "dest"
+    fss_b0000291.crawl_sweep(
+        dest,
+        seed=[_row(127970)],
+        fetch_html=lambda ntt_id: _html(127970),
+        fetch_file=lambda url: (_ for _ in ()).throw(AssertionError("download")),
+        range_spec="127970-127970",
+        coarse_from=127971,
+        coarse_to=127970,
+        coarse_stride=1,
+        delay=0,
+    )
+    state = json.loads((dest / "_state.json").read_text(encoding="utf-8"))
+    assert state["probed"] == [127970]
+    assert state["done"] == []
+    pages = []
+    files = []
+    fss_b0000291.crawl_seed(
+        [_row(127970)],
+        dest,
+        fetch_html=lambda ntt_id: pages.append(ntt_id) or _html(ntt_id),
+        fetch_file=lambda url: files.append(url) or b"annual",
+        resume=True,
+        delay=0,
+    )
+    assert pages == [127970]
+    assert files
+    done = json.loads((dest / "_state.json").read_text(encoding="utf-8"))
+    assert done["done"] == [127970]
+    assert done["probed"] == [127970]
+
+
+def test_seed_ledger_is_flushed_before_the_next_post(tmp_path):
+    dest = tmp_path / "dest"
+    rows = _seed_subset(127970, 128004)
+    annual = FILE_URL.format(atch="7e5db8318bbd4568b70725dff2d76546")
+
+    def fetch_html(ntt_id):
+        if ntt_id == 128004:
+            state = json.loads((dest / "_state.json").read_text(encoding="utf-8"))
+            assert state["done"] == [127970]
+            assert state["probed"] == []
+            assert [row["nttId"] for row in _jsonl(dest / "manifest.jsonl")] == [127970]
+            raise RuntimeError("stop after first")
+        return _html(ntt_id)
+
+    with pytest.raises(RuntimeError, match="stop after first"):
+        fss_b0000291.crawl_seed(
+            rows,
+            dest,
+            fetch_html=fetch_html,
+            fetch_file=lambda url: b"annual-hwpx",
+            delay=0,
+        )
+    pages = []
+    files = []
+    fss_b0000291.crawl_seed(
+        rows,
+        dest,
+        fetch_html=lambda ntt_id: pages.append(ntt_id) or _html(ntt_id),
+        fetch_file=lambda url: files.append(url) or b"seah-hwp",
+        resume=True,
+        delay=0,
+    )
+    assert pages == [128004]
+    assert annual not in files
+    assert json.loads((dest / "_state.json").read_text(encoding="utf-8"))["done"] == [
+        127970,
+        128004,
+    ]
+
+
+def test_attachment_names_stay_inside_ntt_directory(tmp_path):
+    dest = tmp_path / "dest"
+    downloads = []
+    names = ["../etc/passwd", "foo/../../x.hwpx", ".", ".."]
+    for ntt_id, name in enumerate(names, start=1):
+        fss_b0000291.crawl_seed(
+            [_row(ntt_id, attach=name)],
+            dest,
+            fetch_html=lambda ntt, name=name: _page("예시회계법인", name),
+            fetch_file=lambda url, name=name: downloads.append(name) or b"body",
+            delay=0,
+        )
+    assert downloads == ["../etc/passwd", "foo/../../x.hwpx"]
+    assert (dest / "1" / "passwd").read_bytes() == b"body"
+    assert (dest / "2" / "x.hwpx").read_bytes() == b"body"
+    assert not (tmp_path / "etc" / "passwd").exists()
+    assert not (dest / "3").exists()
+    assert not (dest / "4").exists()
+    for path in tmp_path.rglob("*"):
+        if not path.is_file():
+            continue
+        relative = path.resolve().relative_to(dest.resolve())
+        assert relative.parts[0] in {"1", "2", "_state.json", "_failed.jsonl", "manifest.jsonl", "_pending-conversion.jsonl"}
+        if relative.parts[0] in {"1", "2"}:
+            assert len(relative.parts) == 2
+            assert relative.name not in {".", ".."}
+    failed_ids = {row["nttId"] for row in _jsonl(dest / "_failed.jsonl")}
+    assert failed_ids == {3, 4}
+    assert fss_b0000291._store_attachment(dest, 99, "", b"nope") is False
+    assert fss_b0000291._store_attachment(dest, 99, ".", b"nope") is False
+    assert fss_b0000291._store_attachment(dest, 99, "..", b"nope") is False
+    assert not (dest / "99").exists()
+
+
+def test_sweep_dry_run_does_not_write_or_download(tmp_path):
+    dest = tmp_path / "dest"
+    downloads = []
+    summary = fss_b0000291.crawl_sweep(
+        dest,
+        seed=[],
+        fetch_html=lambda ntt_id: _page("새회계법인", "새회계법인.hwpx"),
+        fetch_file=lambda url: downloads.append(url) or b"x",
+        range_spec="5-6",
+        coarse_from=8,
+        coarse_to=7,
+        coarse_stride=1,
+        dry_run=True,
+        delay=0,
+    )
+    assert summary == {"new": 2, "empty": 0, "failed": 0}
+    assert downloads == []
+    assert not dest.exists()

@@ -9,6 +9,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import os
 import re
 import time
 from dataclasses import dataclass
@@ -172,6 +173,9 @@ def sweep_ids(
             if ntt_id not in seen:
                 ids.append(ntt_id)
                 seen.add(ntt_id)
+        if coarse_to not in seen:
+            ids.append(coarse_to)
+            seen.add(coarse_to)
     return ids
 
 
@@ -233,7 +237,7 @@ def crawl_seed(
     sleeper=time.sleep,
 ) -> dict:
     dest = Path(dest)
-    done = _load_done(dest / "_state.json")
+    done, probed = _load_state(dest / "_state.json")
     failed = _load_keyed(dest / "_failed.jsonl", _failure_key)
     manifest = {row["nttId"]: row for row in _read_jsonl(dest / "manifest.jsonl")}
     pending = {
@@ -248,6 +252,9 @@ def crawl_seed(
             sleeper(delay)
         requested = True
 
+    def flush() -> None:
+        _write_seed_ledger(dest, manifest, done, pending, failed, probed)
+
     for row in seed:
         if resume and row.ntt_id in done:
             continue
@@ -260,6 +267,7 @@ def crawl_seed(
                 failed[_failure_key({"nttId": row.ntt_id})] = _failure_record(
                     row.ntt_id, exc, filename=None
                 )
+                flush()
             continue
         post = parse_view(html, row.ntt_id, kind=row.kind or None)
         if post is None:
@@ -276,13 +284,12 @@ def crawl_seed(
             failed[_failure_key({"nttId": post.ntt_id})] = _failure_record(
                 post.ntt_id, exc, filename=attachment.name
             )
+            flush()
             continue
         manifest[post.ntt_id] = post.to_manifest()
         done.add(post.ntt_id)
         failed.pop(_failure_key({"nttId": post.ntt_id}), None)
-
-    if not dry_run:
-        _write_seed_ledger(dest, manifest, done, pending, failed)
+        flush()
     return summary
 
 
@@ -304,7 +311,7 @@ def crawl_sweep(
 ) -> dict:
     dest = Path(dest)
     seed_ids = {row.ntt_id: row for row in seed}
-    done = _load_done(dest / "_state.json")
+    done, probed = _load_state(dest / "_state.json")
     records = {
         (row["type"], row["nttId"]): row for row in _read_jsonl(dest / "_sweep.jsonl")
     }
@@ -321,8 +328,31 @@ def crawl_sweep(
             sleeper(delay)
         requested = True
 
+    def flush() -> None:
+        dest.mkdir(parents=True, exist_ok=True)
+        _write_jsonl(
+            dest / "_sweep.jsonl",
+            sorted(records.values(), key=lambda row: (row["nttId"], row["type"])),
+        )
+        _write_text_if_changed(dest / "_state.json", _state_text(done, probed))
+        if sweep_download:
+            _write_jsonl(
+                dest / "manifest.jsonl",
+                sorted(manifest.values(), key=lambda row: row["nttId"]),
+            )
+            _write_jsonl(
+                dest / "_pending-conversion.jsonl",
+                sorted(pending.values(), key=lambda row: (row["nttId"], row["name"])),
+            )
+
+    def finish(ntt_id: int) -> None:
+        if dry_run:
+            return
+        probed.add(ntt_id)
+        flush()
+
     for ntt_id in sweep_ids(range_spec, coarse_from, coarse_to, coarse_stride):
-        if resume and ntt_id in done:
+        if resume and (ntt_id in probed or ntt_id in done):
             continue
         pause()
         try:
@@ -331,6 +361,7 @@ def crawl_sweep(
             summary["failed"] += 1
             records.pop(("post", ntt_id), None)
             records[("failure", ntt_id)] = _sweep_failure(ntt_id, exc, filename=None)
+            finish(ntt_id)
             continue
         seed_row = seed_ids.get(ntt_id)
         post = parse_view(html, ntt_id, kind=seed_row.kind if seed_row else None)
@@ -338,15 +369,18 @@ def crawl_sweep(
             summary["empty"] += 1
             records.pop(("post", ntt_id), None)
             records.pop(("failure", ntt_id), None)
+            finish(ntt_id)
             continue
         if ntt_id in seed_ids:
             records.pop(("post", ntt_id), None)
             records.pop(("failure", ntt_id), None)
+            finish(ntt_id)
             continue
         summary["new"] += 1
         records[("post", ntt_id)] = {"type": "post", **post.to_manifest()}
         records.pop(("failure", ntt_id), None)
         if dry_run or not sweep_download:
+            finish(ntt_id)
             continue
         error = _download_attachments(post, dest, fetch_file, pause, pending)
         if error is not None:
@@ -355,25 +389,11 @@ def crawl_sweep(
             records[("failure", ntt_id)] = _sweep_failure(
                 ntt_id, exc, filename=attachment.name
             )
+            finish(ntt_id)
             continue
         manifest[post.ntt_id] = post.to_manifest()
         done.add(post.ntt_id)
-
-    dest.mkdir(parents=True, exist_ok=True)
-    _write_jsonl(
-        dest / "_sweep.jsonl",
-        sorted(records.values(), key=lambda row: (row["nttId"], row["type"])),
-    )
-    if sweep_download and not dry_run:
-        _write_text_if_changed(
-            dest / "manifest.jsonl",
-            _jsonl_text(sorted(manifest.values(), key=lambda row: row["nttId"])),
-        )
-        _write_text_if_changed(dest / "_state.json", _state_text(done))
-        _write_jsonl(
-            dest / "_pending-conversion.jsonl",
-            sorted(pending.values(), key=lambda row: (row["nttId"], row["name"])),
-        )
+        finish(ntt_id)
     return summary
 
 
@@ -414,7 +434,7 @@ def _parse_range(spec: str) -> tuple[int, int]:
 
 
 def _retryable_transport(exc: BaseException) -> bool:
-    if isinstance(exc, requests.Timeout):
+    if isinstance(exc, (requests.ConnectionError, requests.Timeout)):
         return True
     text = str(exc).upper()
     return "UNEXPECTED_EOF" in text or "SSLEOFERROR" in text
@@ -422,28 +442,56 @@ def _retryable_transport(exc: BaseException) -> bool:
 
 def _download_attachments(post: Post, dest: Path, fetch_file, pause, pending: dict):
     for attachment in post.attachments:
+        leaf = _safe_leaf(attachment.name)
+        if leaf is None:
+            return attachment, FetchError(
+                "unsafe attachment name",
+                http_status=None,
+                attempts=1,
+                url=attachment.url,
+            )
         pause()
         try:
             content = fetch_file(attachment.url)
         except FetchError as exc:
             return attachment, exc
-        _store_attachment(dest, post.ntt_id, attachment.name, content)
+        if not _store_attachment(dest, post.ntt_id, leaf, content):
+            return attachment, FetchError(
+                "unsafe attachment name",
+                http_status=None,
+                attempts=1,
+                url=attachment.url,
+            )
         if attachment.ext in _CONVERT_EXT:
             pending[(post.ntt_id, attachment.name)] = {
                 "nttId": post.ntt_id,
                 "name": attachment.name,
                 "ext": attachment.ext,
-                "path": f"{post.ntt_id}/{attachment.name}",
+                "path": f"{post.ntt_id}/{leaf}",
             }
     return None
 
 
-def _store_attachment(dest: Path, ntt_id: int, name: str, content: bytes) -> None:
-    path = dest / str(ntt_id) / Path(name).name
+def _safe_leaf(name: str) -> str | None:
+    leaf = Path(name).name
+    if leaf in {"", ".", ".."} or "/" in leaf or "\\" in leaf or "\x00" in leaf:
+        return None
+    return leaf
+
+
+def _store_attachment(dest: Path, ntt_id: int, name: str, content: bytes) -> bool:
+    leaf = _safe_leaf(name)
+    if leaf is None:
+        return False
+    base = (dest / str(ntt_id)).resolve()
+    path = base / leaf
+    if path.resolve().parent != base:
+        return False
     path.parent.mkdir(parents=True, exist_ok=True)
     if path.exists() and hashlib.sha256(path.read_bytes()).digest() == hashlib.sha256(content).digest():
-        return
+        return True
     path.write_bytes(content)
+    return True
 
 
 def _failure_record(ntt_id: int, exc: FetchError, *, filename: str | None) -> dict:
@@ -469,15 +517,18 @@ def _failure_key(record: dict) -> str:
     return f"url:{record.get('url')}"
 
 
-def _load_done(path: Path) -> set[int]:
+def _load_state(path: Path) -> tuple[set[int], set[int]]:
     if not path.exists():
-        return set()
+        return set(), set()
     data = json.loads(path.read_text(encoding="utf-8"))
-    return {int(item) for item in data.get("done", [])}
+    done = {int(item) for item in data.get("done", [])}
+    probed = {int(item) for item in data.get("probed", [])}
+    return done, probed
 
 
-def _state_text(done: set[int]) -> str:
-    return json.dumps({"done": sorted(done)}, ensure_ascii=False, indent=2) + "\n"
+def _state_text(done: set[int], probed: set[int]) -> str:
+    payload = {"done": sorted(done), "probed": sorted(probed)}
+    return json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
 
 
 def _read_jsonl(path: Path) -> list[dict]:
@@ -503,7 +554,9 @@ def _write_text_if_changed(path: Path, text: str) -> None:
     if path.exists() and path.read_bytes() == content:
         return
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_bytes(content)
+    temporary = path.with_name(f".{path.name}.tmp")
+    temporary.write_bytes(content)
+    os.replace(temporary, path)
 
 
 def _write_jsonl(path: Path, rows: list[dict]) -> None:
@@ -514,18 +567,28 @@ def _write_jsonl(path: Path, rows: list[dict]) -> None:
     _write_text_if_changed(path, _jsonl_text(rows))
 
 
-def _write_seed_ledger(dest: Path, manifest: dict, done: set[int], pending: dict, failed: dict) -> None:
+def _write_seed_ledger(
+    dest: Path,
+    manifest: dict,
+    done: set[int],
+    pending: dict,
+    failed: dict,
+    probed: set[int],
+) -> None:
     dest.mkdir(parents=True, exist_ok=True)
     _write_jsonl(
         dest / "manifest.jsonl",
         sorted(manifest.values(), key=lambda row: row["nttId"]),
     )
-    _write_text_if_changed(dest / "_state.json", _state_text(done))
+    _write_text_if_changed(dest / "_state.json", _state_text(done, probed))
     _write_jsonl(
         dest / "_pending-conversion.jsonl",
         sorted(pending.values(), key=lambda row: (row["nttId"], row["name"])),
     )
     _write_jsonl(
         dest / "_failed.jsonl",
-        sorted(failed.values(), key=lambda row: (row.get("nttId") is None, row.get("nttId") or 0, row.get("url") or "")),
+        sorted(
+            failed.values(),
+            key=lambda row: (row.get("nttId") is None, row.get("nttId") or 0, row.get("url") or ""),
+        ),
     )
