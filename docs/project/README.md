@@ -70,6 +70,7 @@ README·CONTRIBUTING·AGENTS.md의 운영·큐레이션 요약은 위 문서를 
 | Agent 기획 | `AGENTS.md` |
 | 로컬 개발 | `README.md` |
 | PR/CI | `CONTRIBUTING.md` |
+| B0000291 2022 수집 | [fss-b0000291-collector.md](fss-b0000291-collector.md) |
 
 ## 저장소 트리
 
