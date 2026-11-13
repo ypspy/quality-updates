@@ -120,6 +120,9 @@ exclude_docs: |
 not_in_nav: |
   fss-review/fr2022.md
 
+watch:
+  - data/fss-review
+
 hooks:
   - scripts/mkdocs_drop_excluded.py
   - scripts/mkdocs_fss_review_year.py
