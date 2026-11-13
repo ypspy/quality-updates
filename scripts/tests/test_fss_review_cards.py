@@ -6,17 +6,23 @@ import sys
 import unicodedata
 from pathlib import Path
 
+import pytest
+
 from bs4 import BeautifulSoup
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+import fss_review_cards  # noqa: E402
 from fss_review_cards import (  # noqa: E402
     BOILERPLATE,
     PAGE,
     YEAR_2025_MARK,
+    YEAR_2025_PATH,
+    _inherit_severity,
     arrange_by_year,
     audit_review_html,
     collapse_document,
+    commit_parked_year_2025,
     load_year_2025,
     materialize_review_markdown,
     place_labels,
@@ -366,3 +372,94 @@ def test_build_hook_inserts_the_2025_year_once():
     assert built.count('data-year="2025"') == 1
     untouched = on_page_markdown("본문", _Page("index.md"), None, None)
     assert untouched == "본문"
+
+
+def test_year_2025_render_matches_the_pre_move_source_bytes():
+    with YEAR_2025_PATH.open(encoding="utf-8") as handle:
+        rendered = render_year_2025_html(json.load(handle)).encode("utf-8")
+    assert len(rendered) == 222790
+    assert hashlib.sha256(rendered).hexdigest() == (
+        "955cc59f1a8ad8119cc54f5ae18fb34a3861474bafd5759a875f1b3ce12e1355"
+    )
+
+
+def _finding(text, *, severity=None, badge=False):
+    return {"severity": severity, "badge": badge, "text": text}
+
+
+def _year_with(*bundles):
+    return {"year": "2025", "title": "2025년", "bundles": list(bundles)}
+
+
+def _bundle(name, firms):
+    return {
+        "name": name,
+        "sections": [
+            {
+                "title": "대분류",
+                "groups": [
+                    {
+                        "heading": "1.1",
+                        "name": "중분류",
+                        "blocks": [{"kind": "firms", "firms": firms}],
+                    }
+                ],
+            }
+        ],
+    }
+
+
+def test_unbadged_finding_does_not_inherit_another_firms_severity():
+    firm_a = {
+        "name": "법인A",
+        "findings": [
+            _finding("앞", severity="일부미흡", badge=True),
+            _finding("뒤", severity="미운영", badge=True),
+            _finding("이음", badge=False),
+        ],
+    }
+    firm_b = {
+        "name": "법인B",
+        "findings": [
+            _finding("시작", severity="일부미운영", badge=True),
+            _finding("이음", badge=False),
+        ],
+    }
+    data = _year_with(_bundle("묶음A", [firm_a]), _bundle("묶음B", [firm_b]))
+    _inherit_severity(data)
+    assert firm_a["findings"][2]["severity"] == "미운영"
+    assert firm_b["findings"][1]["severity"] == "일부미운영"
+
+
+def test_firm_that_opens_without_a_badge_raises():
+    firm_a = {
+        "name": "법인A",
+        "findings": [_finding("앞", severity="미운영", badge=True)],
+    }
+    firm_b = {
+        "name": "법인B",
+        "findings": [_finding("뱃지없음", badge=False)],
+    }
+    data = _year_with(_bundle("묶음A", [firm_a]), _bundle("묶음B", [firm_b]))
+    with pytest.raises(ValueError, match="법인B"):
+        _inherit_severity(data)
+    assert firm_b["findings"][0]["severity"] is None
+
+
+def test_commit_parked_year_writes_nothing_when_render_mismatches(tmp_path, monkeypatch):
+    firm = {
+        "name": "법인A",
+        "findings": [_finding("문장입니다", severity="일부미흡", badge=True)],
+    }
+    block = render_year_2025_html(_year_with(_bundle("등록", [firm])))
+    json_path = tmp_path / "year-2025.json"
+    page_path = tmp_path / "index.md"
+    json_path.write_text("sentinel-json", encoding="utf-8")
+    page_path.write_bytes(b"sentinel-page")
+    monkeypatch.setattr(fss_review_cards, "YEAR_2025_PATH", json_path)
+    monkeypatch.setattr(fss_review_cards, "PAGE", page_path)
+    monkeypatch.setattr(fss_review_cards, "render_year_2025_html", lambda _data: block + "x")
+    with pytest.raises(ValueError, match="보존할 수 없습니다"):
+        commit_parked_year_2025(block, "\n")
+    assert json_path.read_text(encoding="utf-8") == "sentinel-json"
+    assert page_path.read_bytes() == b"sentinel-page"

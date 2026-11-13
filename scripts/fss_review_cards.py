@@ -866,15 +866,28 @@ def _parse_bundle(cursor: _Cursor) -> dict:
     return bundle
 
 
+def _iter_year_firms(data: dict):
+    for bundle in data["bundles"]:
+        for section in bundle["sections"]:
+            for group in section["groups"]:
+                for block in group["blocks"]:
+                    if block.get("kind") != "firms":
+                        continue
+                    yield from block["firms"]
+
+
 def _inherit_severity(data: dict) -> None:
-    last = None
-    for _firm, finding in iter_year_findings(data):
-        if finding["badge"]:
-            last = finding["severity"]
-            continue
-        if not last:
-            raise ValueError("심각도 뱃지 없이 시작하는 지적이 있습니다.")
-        finding["severity"] = last
+    for firm in _iter_year_firms(data):
+        last = None
+        for finding in firm["findings"]:
+            if finding["badge"]:
+                last = finding["severity"]
+                continue
+            if not last:
+                raise ValueError(
+                    f"심각도 뱃지 없이 시작하는 지적이 있습니다: {firm['name']}"
+                )
+            finding["severity"] = last
 
 
 def parse_year_2025_html(year_html: str) -> dict:
@@ -895,15 +908,9 @@ def parse_year_2025_html(year_html: str) -> dict:
 
 def iter_year_findings(data: dict):
     """문서 순서의 (법인 이름, 지적) 쌍."""
-    for bundle in data["bundles"]:
-        for section in bundle["sections"]:
-            for group in section["groups"]:
-                for block in group["blocks"]:
-                    if block.get("kind") != "firms":
-                        continue
-                    for firm in block["firms"]:
-                        for finding in firm["findings"]:
-                            yield firm["name"], finding
+    for firm in _iter_year_firms(data):
+        for finding in firm["findings"]:
+            yield firm["name"], finding
 
 
 def _render_finding(finding: dict) -> str:
@@ -978,9 +985,12 @@ def load_year_2025() -> dict:
     return json.loads(YEAR_2025_PATH.read_text(encoding="utf-8"))
 
 
-def _write_year_2025(data: dict) -> None:
+def _year_2025_payload(data: dict) -> str:
+    return json.dumps(data, ensure_ascii=False, indent=2) + "\n"
+
+
+def _write_year_2025_payload(payload: str) -> None:
     YEAR_2025_PATH.parent.mkdir(parents=True, exist_ok=True)
-    payload = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
     YEAR_2025_PATH.write_text(payload, encoding="utf-8")
 
 
@@ -1004,15 +1014,24 @@ def _year_2025_span(text: str) -> tuple[int, int]:
     return found[0]
 
 
-def park_year_2025(text: str) -> str:
-    """2025 연도 블록을 데이터 파일에 두고, 페이지에는 훅만 남긴다."""
+def park_year_2025(text: str) -> tuple[str, str]:
+    """JSON payload와 훅 페이지를 메모리에서 만든다. 렌더가 원문과 같기 전에는 쓰지 않는다."""
     start, end = _year_2025_span(text)
     block = text[start:end]
     data = parse_year_2025_html(block)
     if render_year_2025_html(data) != block:
         raise ValueError("감리연도 2025 블록을 같은 HTML로 보존할 수 없습니다.")
-    _write_year_2025(data)
-    return text[:start] + YEAR_2025_MARK + text[end:]
+    payload = _year_2025_payload(data)
+    page = text[:start] + YEAR_2025_MARK + text[end:]
+    return page, payload
+
+
+def commit_parked_year_2025(text: str, newline: str) -> None:
+    """검증된 payload와 페이지 바이트를 연달아 쓴다. 검증에 실패하면 아무 파일도 쓰지 않는다."""
+    page, payload = park_year_2025(text)
+    page_bytes = page.replace("\r\n", "\n").replace("\n", newline).encode("utf-8")
+    _write_year_2025_payload(payload)
+    PAGE.write_bytes(page_bytes)
 
 
 def _newline_of(raw: bytes) -> str:
@@ -1033,9 +1052,7 @@ def main(argv: list[str] | None = None) -> int:
     rewritten = arrange_by_year(place_labels(collapse_document(text))) if args.write else text
     errors = audit_review_html(rewritten)
     if args.write:
-        stored = park_year_2025(rewritten)
-        newline = _newline_of(raw)
-        PAGE.write_bytes(stored.replace("\r\n", "\n").replace("\n", newline).encode("utf-8"))
+        commit_parked_year_2025(rewritten, _newline_of(raw))
         after = len(_ARTICLE.findall(rewritten))
         print(f"cards {before} -> {after}")
     for message in errors:
