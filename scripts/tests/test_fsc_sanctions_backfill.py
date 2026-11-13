@@ -137,11 +137,19 @@ def test_foreign_year_and_duplicate_bytes_are_dropped():
             ("의결 1.pdf", body),
             ("의결 2. 감사인 조사결과.pdf", b"other"),
             ("2008년 의사록.pdf", b"same-year"),
+            ("02년1차금감위의결결과.hwp", b"two-digit-start"),
+            ("2000억 과징금 의결서.pdf", b"amount"),
+            ("최근 10년 감리결과.pdf", b"span"),
+            ("의사록.pdf", b"no-year"),
         ],
     )
     names = [name for name, _payload in kept]
     assert "2009-제18차 증권선물위원회 의사록.hwp" not in names
     assert "제18차-09년 의사록.pdf" not in names
+    assert "02년1차금감위의결결과.hwp" not in names
+    assert "2000억 과징금 의결서.pdf" in names
+    assert "최근 10년 감리결과.pdf" in names
+    assert "의사록.pdf" in names
     assert "의결 1.pdf" in names
     assert "의결 1[1].pdf" not in names
     assert "의결 1 사본.pdf" not in names
@@ -649,6 +657,336 @@ def test_backfill_records_403_and_pending_hwp(tmp_path):
     assert not (downloads / "sanctions" / "2019-증선위-12차").exists()
     assert not list(downloads.rglob("*.hwp"))
     assert not list(downloads.rglob("*.zip"))
+
+
+def test_extract_kept_keeps_amounts_and_spans_that_are_not_years():
+    import io
+    import zipfile
+
+    from attach_sanction_minutes import _extract_kept
+
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as archive:
+        archive.writestr("(공개용) 최근 10년 감리결과.pdf", b"keep-span")
+        archive.writestr("(의결서) 2000억 과징금 감리결과.pdf", b"keep-amount")
+        archive.writestr("2009-제18차 금융위 의사록(홈).hwp", b"drop-year")
+    kept, _whale, notes = _extract_kept(buffer.getvalue(), 2008)
+    names = [name for _kind, name, _payload in kept]
+    assert "(공개용) 최근 10년 감리결과.pdf" in names
+    assert "(의결서) 2000억 과징금 감리결과.pdf" in names
+    assert any("2009-제18차" in note for note in notes)
+    assert not any("10년" in note or "2000억" in note for note in notes)
+
+
+def test_detail_403_continues_and_resume_skips_the_page(tmp_path):
+    import attach_sanction_minutes as asm
+
+    downloads = tmp_path / "downloads"
+    listing = """
+<ul>
+  <li><div class="inner"><div class="subject"><a href="/no020102/14">제14차 증권선물의원회 의사록</a></div><div class="day">2008-11-05</div></div></li>
+  <li><div class="inner"><div class="subject"><a href="/no020102/15">제15차 증권선물의원회 의사록</a></div><div class="day">2008-11-12</div></div></li>
+</ul>
+"""
+    detail_15 = """
+<a href="/comm/getFile?srvcId=BBSTY1&upperNo=15&fileTy=ATTACH&fileNo=1">2008년 제15차 증권선물의원회 의사록.pdf</a>
+"""
+    fetched: list[str] = []
+
+    def fetch_text(url: str) -> str:
+        fetched.append(url)
+        if "curPage=1" in url and "no020102" in url:
+            return listing
+        if "curPage=" in url:
+            return "<ul></ul>"
+        if url.endswith("/14"):
+            raise asm.FetchFailed(url, 403, "HTTP 403", 2)
+        if url.endswith("/15"):
+            return detail_15
+        raise AssertionError(url)
+
+    def download(url: str, dest: Path) -> None:
+        dest.write_bytes(b"%PDF-1.4 ok")
+
+    common = dict(
+        fetch_text=fetch_text,
+        download=download,
+        downloads=downloads,
+        since=date(2008, 1, 1),
+        until=date(2008, 12, 31),
+        board="증선위",
+        dry_run=False,
+    )
+    asm.run_backfill(**common, resume=False, retry_failed=False)
+    assert (downloads / "sanctions" / "2008-증선위-15차" / "minutes.pdf").is_file()
+    failed = [
+        json.loads(line)
+        for line in (downloads / "sanctions" / "_failed-downloads.jsonl").read_text(encoding="utf-8").splitlines()
+    ]
+    assert any(row["url"].endswith("/14") and row["http_status"] == 403 for row in failed)
+    state = json.loads((downloads / "sanctions" / "_backfill-state.json").read_text(encoding="utf-8"))
+    assert [item["post_id"] for item in state["posts"]] == ["15"]
+
+    fetched.clear()
+    asm.run_backfill(**common, resume=True, retry_failed=False)
+    assert not any(url.endswith("/14") for url in fetched)
+    assert not any(url.endswith("/15") for url in fetched)
+
+    fetched.clear()
+    asm.run_backfill(**common, resume=True, retry_failed=True)
+    assert any(url.endswith("/14") for url in fetched)
+
+
+def test_list_failure_does_not_abort_the_other_board(tmp_path):
+    import attach_sanction_minutes as asm
+
+    downloads = tmp_path / "downloads"
+    listing = """
+<ul>
+  <li><div class="inner"><div class="subject"><a href="/no020102/15">제15차 증권선물의원회 의사록</a></div><div class="day">2008-11-12</div></div></li>
+</ul>
+"""
+    detail = """
+<a href="/comm/getFile?fileNo=1">2008년 제15차 증권선물의원회 의사록.pdf</a>
+"""
+    downloaded: list[str] = []
+
+    def fetch_text(url: str) -> str:
+        if "no020101" in url and "curPage=" in url:
+            raise asm.FetchFailed(url, 403, "HTTP 403", 2)
+        if "curPage=1" in url and "no020102" in url:
+            return listing
+        if "curPage=" in url:
+            return "<ul></ul>"
+        if url.endswith("/15"):
+            return detail
+        raise AssertionError(url)
+
+    def download(url: str, dest: Path) -> None:
+        downloaded.append(url)
+        dest.write_bytes(b"%PDF-1.4 ok")
+
+    summary = asm.run_backfill(
+        fetch_text,
+        download,
+        downloads,
+        since=date(2008, 1, 1),
+        until=date(2008, 12, 31),
+        board=None,
+        dry_run=False,
+        resume=False,
+        retry_failed=False,
+    )
+    assert summary["folders"] == 1
+    assert downloaded
+    failed = (downloads / "sanctions" / "_failed-downloads.jsonl").read_text(encoding="utf-8")
+    assert "no020101" in failed
+    assert "403" in failed
+
+
+def test_http_retries_429_then_fails(monkeypatch):
+    import requests
+
+    import attach_sanction_minutes as asm
+
+    sleeps: list[float] = []
+    monkeypatch.setattr(asm.time, "sleep", lambda seconds: sleeps.append(seconds))
+    asm._requests_made = 0
+    asm._request_delay = 0
+    calls = {"n": 0}
+
+    class Response:
+        status_code = 429
+        text = "slow"
+        content = b"slow"
+
+        def raise_for_status(self):
+            raise requests.HTTPError("429")
+
+    def fake_get(url, timeout=30, headers=None):
+        calls["n"] += 1
+        return Response()
+
+    monkeypatch.setattr(requests, "get", fake_get)
+    with pytest.raises(asm.FetchFailed) as caught:
+        asm._http_text("https://fsc.go.kr/no020101")
+    assert caught.value.http_status == 429
+    assert caught.value.attempts == asm.HTTP_RETRY_ATTEMPTS
+    assert calls["n"] == asm.HTTP_RETRY_ATTEMPTS
+    assert sleeps == [asm._backoff_seconds(attempt) for attempt in range(1, asm.HTTP_RETRY_ATTEMPTS)]
+
+
+def test_hwp_only_post_is_done_and_resume_skips_the_detail(tmp_path):
+    import attach_sanction_minutes as asm
+
+    downloads = tmp_path / "downloads"
+    fetched: list[str] = []
+
+    def fetch_text(url: str) -> str:
+        fetched.append(url)
+        if "curPage=1" in url and "no020102" in url:
+            return DRY_LIST
+        if "curPage=" in url:
+            return "<ul></ul>"
+        if url.endswith("/14"):
+            return DRY_HWP
+        if url.endswith("/9"):
+            return DRY_PDF
+        if url.endswith("/12"):
+            return DRY_MARKET
+        raise AssertionError(url)
+
+    asm.run_backfill(
+        fetch_text,
+        lambda url, dest: dest.write_bytes(b"%PDF-1.4 ok"),
+        downloads,
+        since=date(2001, 2, 8),
+        until=date(2026, 11, 13),
+        board="증선위",
+        dry_run=False,
+        resume=False,
+        retry_failed=False,
+    )
+    state = json.loads((downloads / "sanctions" / "_backfill-state.json").read_text(encoding="utf-8"))
+    assert "14" in [item["post_id"] for item in state["posts"]]
+    fetched.clear()
+    asm.run_backfill(
+        fetch_text,
+        lambda url, dest: (_ for _ in ()).throw(AssertionError(url)),
+        downloads,
+        since=date(2001, 2, 8),
+        until=date(2026, 11, 13),
+        board="증선위",
+        dry_run=False,
+        resume=True,
+        retry_failed=False,
+    )
+    assert not any(url.endswith("/14") for url in fetched)
+
+
+def test_broken_jsonl_and_state_do_not_stop_resume(tmp_path, monkeypatch):
+    import attach_sanction_minutes as asm
+
+    sanctions = tmp_path / "downloads" / "sanctions"
+    sanctions.mkdir(parents=True)
+    failed = sanctions / "_failed-downloads.jsonl"
+    failed.write_text(
+        '{"url":"https://fsc.go.kr/keep","http_status":403,"board":"증선위"}\n{truncated\n',
+        encoding="utf-8",
+    )
+    rows = asm._read_jsonl(failed)
+    assert rows == [{"url": "https://fsc.go.kr/keep", "http_status": 403, "board": "증선위"}]
+    state = sanctions / "_backfill-state.json"
+    state.write_text("{truncated", encoding="utf-8")
+    assert asm.load_backfill_state(state) == {"pages": {}, "posts": []}
+
+    replaced: list[str] = []
+    real_replace = asm.os.replace
+
+    def spy(src, dst):
+        replaced.append(str(dst))
+        real_replace(src, dst)
+
+    monkeypatch.setattr(asm.os, "replace", spy)
+    asm.run_backfill(
+        lambda url: "<ul></ul>",
+        lambda url, dest: None,
+        tmp_path / "downloads",
+        since=date(2008, 1, 1),
+        until=date(2008, 12, 31),
+        board="증선위",
+        dry_run=False,
+        resume=True,
+        retry_failed=False,
+    )
+    asm.record_failure(
+        failed,
+        {
+            "attempts": 1,
+            "board": "증선위",
+            "error": "HTTP 403",
+            "filename": "",
+            "http_status": 403,
+            "page_url": "https://fsc.go.kr/no020102/1",
+            "post_id": "1",
+            "ts": "2026-11-13T00:00:00+00:00",
+            "url": "https://fsc.go.kr/no020102/1",
+        },
+    )
+    assert replaced
+    assert all(path.endswith("_failed-downloads.jsonl") or path.endswith("_backfill-state.json") for path in replaced)
+
+
+def test_pdf_minutes_suppress_hwp_pending_and_success_clears_failure(tmp_path):
+    import attach_sanction_minutes as asm
+
+    downloads = tmp_path / "downloads"
+    pdf_url = "https://fsc.go.kr/comm/getFile?srvcId=BBSTY1&upperNo=15&fileTy=ATTACH&fileNo=1"
+    listing = """
+<ul>
+  <li><div class="inner"><div class="subject"><a href="/no020102/15">제15차 증권선물의원회 의사록</a></div><div class="day">2008-11-12</div></div></li>
+</ul>
+"""
+    detail = """
+<a href="/comm/getFile?srvcId=BBSTY1&upperNo=15&fileTy=ATTACH&fileNo=1">2008년 제15차 증권선물의원회 의사록.pdf</a>
+<a href="/comm/getFile?srvcId=BBSTY1&upperNo=15&fileTy=ATTACH&fileNo=3">2008년 제15차 증권선물의원회 의사록.hwp</a>
+"""
+    asm.record_failure(
+        downloads / "sanctions" / "_failed-downloads.jsonl",
+        {
+            "attempts": 2,
+            "board": "증선위",
+            "error": "HTTP 403",
+            "filename": "minutes.pdf",
+            "http_status": 403,
+            "page_url": "https://fsc.go.kr/no020102/15",
+            "post_id": "15",
+            "ts": "2026-11-13T00:00:00+00:00",
+            "url": pdf_url,
+        },
+    )
+
+    def fetch_text(url: str) -> str:
+        if "curPage=1" in url and "no020102" in url:
+            return listing
+        if "curPage=" in url:
+            return "<ul></ul>"
+        if url.endswith("/15"):
+            return detail
+        raise AssertionError(url)
+
+    asm.run_backfill(
+        fetch_text,
+        lambda url, dest: dest.write_bytes(b"%PDF-1.4 ok"),
+        downloads,
+        since=date(2008, 1, 1),
+        until=date(2008, 12, 31),
+        board="증선위",
+        dry_run=False,
+        resume=False,
+        retry_failed=True,
+    )
+    assert (downloads / "sanctions" / "2008-증선위-15차" / "minutes.pdf").is_file()
+    pending = downloads / "sanctions" / "_pending-conversion.jsonl"
+    assert not pending.exists() or ".hwp" not in pending.read_text(encoding="utf-8")
+    failed = downloads / "sanctions" / "_failed-downloads.jsonl"
+    text = failed.read_text(encoding="utf-8") if failed.is_file() else ""
+    assert pdf_url not in text
+
+    pending_rows: list[dict] = []
+
+    def regular_fetch(url: str) -> str:
+        if "curPage=1" in url and "no020102" in url:
+            return listing
+        if "curPage=" in url:
+            return "<ul></ul>"
+        if url.endswith("/15"):
+            return detail
+        raise AssertionError(url)
+
+    posts = asm.collect_posts(regular_fetch, date(2008, 1, 1), date(2008, 12, 31), pending_rows)
+    assert posts and posts[0].pdf_url
+    assert pending_rows == []
 
 
 def test_readme_is_tracked_and_originals_stay_ignored():

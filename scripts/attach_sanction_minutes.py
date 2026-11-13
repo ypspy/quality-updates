@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import os
 import re
 import shutil
 import time
@@ -32,8 +33,14 @@ _DECISION_GLUED = re.compile(
 )
 _TITLE_YEAR = re.compile(r"(\d{4})\s*년\s*도?")
 _CLOSED_TITLE = re.compile(r"비공개\s*기간|비공개\s*사유")
-_FOUR_YEAR = re.compile(r"(?<!\d)((?:19|20)\d{2})")
-_TWO_YEAR = re.compile(r"(?<!\d)(\d{2})년")
+# 네 자리는 년 또는 - . _ 구분자일 때만 연도다. 2000억처럼 수량에 붙은 숫자는 연도가 아니다.
+_FOUR_YEAR = re.compile(
+    r"(?<!\d)((?:19|20)\d{2})\s*년"
+    r"|(?<!\d)((?:19|20)\d{2})(?=[-._])"
+    r"|(?<=[-._])((?:19|20)\d{2})(?!\d)"
+)
+# 두 자리는 시작·하이픈·밑줄·점 뒤의 09년·02년만 연도다. '최근 10년'은 빼다.
+_TWO_YEAR = re.compile(r"(?:^|[-._])(\d{2})년")
 POST_TITLE_WORDS = ("의사록", "안건", "의결서")
 # www 없는 호스트가 TLS에 더 안정적이다. 정규 경로와 백필이 같은 출처를 쓴다.
 FSC_ORIGIN = "https://fsc.go.kr"
@@ -172,13 +179,24 @@ def decision_key(
     return year, name, kind, int(matched.group("number"))
 
 
+def _year_token(matched: re.Match) -> int:
+    for group in matched.groups():
+        if group:
+            return int(group)
+    raise ValueError("year pattern had no digits")
+
+
 def filename_year_conflict(name: str, meeting_year: int) -> bool:
-    """파일명에 회의 연도와 다른 네 자리 연도나 ``09년`` 같은 두 자리 연도가 있으면 True."""
+    """파일명의 연도 표기가 회의 연도와 다르면 True.
+
+    ``2009-``·``2009년``·``-09년``·``02년``은 연도다.
+    ``2000억``과 ``최근 10년``처럼 수량에 붙은 숫자는 연도가 아니다.
+    """
     for matched in _FOUR_YEAR.finditer(name):
-        if int(matched.group(1)) != meeting_year:
+        if _year_token(matched) != meeting_year:
             return True
     for matched in _TWO_YEAR.finditer(name):
-        if 2000 + int(matched.group(1)) != meeting_year:
+        if 2000 + _year_token(matched) != meeting_year:
             return True
     return False
 
@@ -306,20 +324,41 @@ def _now_iso() -> str:
     return datetime.now().astimezone().isoformat(timespec="seconds")
 
 
+def _atomic_write_text(path: Path, text: str) -> None:
+    """같은 디렉터리의 임시 파일에 쓴 뒤 최종 경로로 교체한다."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    temporary.write_text(text, encoding="utf-8")
+    os.replace(temporary, path)
+
+
 def _read_jsonl(path: Path) -> list[dict]:
     if not path.is_file():
         return []
     rows: list[dict] = []
     for line in path.read_text(encoding="utf-8").splitlines():
-        if line.strip():
+        if not line.strip():
+            continue
+        try:
             rows.append(json.loads(line))
+        except json.JSONDecodeError:
+            continue
     return rows
 
 
 def _write_jsonl(path: Path, rows: list[dict]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
     body = "".join(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n" for row in rows)
-    path.write_text(body, encoding="utf-8")
+    _atomic_write_text(path, body)
+
+
+def clear_failure(path: Path, url: str) -> None:
+    """받아 낸 URL의 실패 행을 지운다."""
+    if not path.is_file():
+        return
+    rows = _read_jsonl(path)
+    kept = [row for row in rows if row.get("url") != url]
+    if len(kept) != len(rows):
+        _write_jsonl(path, kept)
 
 
 def record_failure(path: Path, row: dict) -> None:
@@ -337,20 +376,31 @@ def forbidden_urls(path: Path) -> set[str]:
     return {row["url"] for row in _read_jsonl(path) if row.get("http_status") == 403 and row.get("url")}
 
 
+def _empty_backfill_state() -> dict:
+    return {"pages": {}, "posts": []}
+
+
 def load_backfill_state(path: Path) -> dict:
     if not path.is_file():
-        return {"pages": {}, "posts": []}
-    data = json.loads(path.read_text(encoding="utf-8"))
-    data.setdefault("pages", {})
-    data.setdefault("posts", [])
-    return data
+        return _empty_backfill_state()
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, UnicodeError, OSError):
+        return _empty_backfill_state()
+    if not isinstance(data, dict):
+        return _empty_backfill_state()
+    pages = data.get("pages")
+    posts = data.get("posts")
+    return {
+        "pages": pages if isinstance(pages, dict) else {},
+        "posts": posts if isinstance(posts, list) else [],
+    }
 
 
 def save_backfill_state(path: Path, state: dict) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
+    _atomic_write_text(
+        path,
         json.dumps(state, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
     )
 
 
@@ -1267,6 +1317,7 @@ def collect_posts(
                 attachments = detail_attachments(detail)
                 pdfs: list[str] = []
                 zips: list[str] = []
+                pending_names: list[tuple[str, str]] = []
                 for name, link in attachments:
                     if filename_year_conflict(name, key[0]):
                         if notes is not None:
@@ -1274,7 +1325,12 @@ def collect_posts(
                         continue
                     if "의사록" in name and name.lower().endswith(".pdf"):
                         pdfs.append(link)
-                    elif is_pending_minutes(name) and pending is not None:
+                    elif is_pending_minutes(name):
+                        pending_names.append((name, link))
+                    elif name.lower().endswith(".zip"):
+                        zips.append(link)
+                if pending is not None and not pdfs:
+                    for name, link in pending_names:
                         pending.append(
                             {
                                 "board": board_label(board),
@@ -1286,8 +1342,6 @@ def collect_posts(
                                 "url": link,
                             }
                         )
-                    elif name.lower().endswith(".zip"):
-                        zips.append(link)
                 if not pdfs:
                     posts.append(DecisionPost(*key, "", zips, title, url))
                 else:
@@ -1448,14 +1502,16 @@ def _http_get(url: str, timeout: int):
                 continue
             raise FetchFailed(url, None, f"{type(exc).__name__}: {exc}", attempt) from exc
         status = getattr(response, "status_code", 200)
-        if status >= 500 and attempt < HTTP_RETRY_ATTEMPTS:
-            time.sleep(_backoff_seconds(attempt))
-            continue
+        if status == 429 or status >= 500:
+            if attempt < HTTP_RETRY_ATTEMPTS:
+                time.sleep(_backoff_seconds(attempt))
+                continue
+            raise FetchFailed(url, status, f"HTTP {status}", attempt)
         if status == 403 and forbidden_retries < HTTP_FORBIDDEN_RETRIES:
             forbidden_retries += 1
             time.sleep(HTTP_FORBIDDEN_DELAY)
             continue
-        if status == 403 or status >= 500:
+        if status == 403:
             raise FetchFailed(url, status, f"HTTP {status}", attempt)
         if status >= 400:
             response.raise_for_status()
@@ -1545,6 +1601,7 @@ def _download_or_record(
             ),
         )
         return False
+    clear_failure(failures, url)
     return True
 
 
@@ -1591,12 +1648,42 @@ def run_backfill(
     folders = 0
     files = 0
     skipped = 0
+    import requests
+
+    fetch_errors = (FetchFailed, requests.exceptions.RequestException)
+
+    def note_fetch_failure(exc: BaseException, *, board: str, post_id: str, page_url: str, url: str) -> None:
+        status = getattr(exc, "http_status", None)
+        response = getattr(exc, "response", None)
+        if status is None and response is not None:
+            status = getattr(response, "status_code", None)
+        error = getattr(exc, "error", "") or f"{type(exc).__name__}: {exc}"
+        record_failure(
+            failure_path,
+            _failure_row(
+                board=board,
+                post_id=post_id,
+                page_url=page_url,
+                url=url,
+                filename="",
+                http_status=status,
+                error=error,
+                attempts=getattr(exc, "attempts", 1),
+            ),
+        )
 
     for label, board_url in selected:
         page = 1
         last_page = 0
         while True:
-            rows = parse_board_rows(fetch_text(_list_url(board_url, page, since, until)))
+            list_url = _list_url(board_url, page, since, until)
+            if list_url in blocked:
+                break
+            try:
+                rows = parse_board_rows(fetch_text(list_url))
+            except fetch_errors as exc:
+                note_fetch_failure(exc, board=label, post_id="", page_url=list_url, url=list_url)
+                break
             if not rows:
                 break
             last_page = page
@@ -1611,7 +1698,19 @@ def run_backfill(
                     continue
                 if resume and post_id in done:
                     continue
-                detail = fetch_text(page_url)
+                if page_url in blocked:
+                    continue
+                try:
+                    detail = fetch_text(page_url)
+                except fetch_errors as exc:
+                    note_fetch_failure(
+                        exc,
+                        board=label,
+                        post_id=post_id,
+                        page_url=page_url,
+                        url=page_url,
+                    )
+                    continue
                 minutes: list[tuple[str, str]] = []
                 zips: list[tuple[str, str]] = []
                 pendings: list[tuple[str, str]] = []
@@ -1643,6 +1742,10 @@ def run_backfill(
                                     "url": url,
                                 },
                             )
+                        _mark_done(state, post_id, page, label, page_url)
+                        state["pages"][label] = last_page
+                        save_backfill_state(state_path, state)
+                        done.add(post_id)
                     continue
                 folders += 1
                 files += len(chosen) + len(zips)
@@ -1651,24 +1754,26 @@ def run_backfill(
                 folder = downloads / "sanctions" / sanction_folder(key)
                 failed = False
                 wrote = False
-                for name, url in pendings:
-                    record_pending(
-                        pending_path,
-                        {
-                            "board": label,
-                            "filename": name,
-                            "page_url": page_url,
-                            "post_id": post_id,
-                            "reason": "not-pdf",
-                            "ts": _now_iso(),
-                            "url": url,
-                        },
-                    )
+                if not chosen:
+                    for name, url in pendings:
+                        record_pending(
+                            pending_path,
+                            {
+                                "board": label,
+                                "filename": name,
+                                "page_url": page_url,
+                                "post_id": post_id,
+                                "reason": "not-pdf",
+                                "ts": _now_iso(),
+                                "url": url,
+                            },
+                        )
                 for name, url in chosen:
                     filename = _minutes_filename(url, key, title)
                     dest = folder / filename
                     if dest.is_file():
                         wrote = True
+                        clear_failure(failure_path, url)
                         continue
                     if url in blocked:
                         failed = True
