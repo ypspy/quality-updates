@@ -1522,10 +1522,20 @@ def _http_text(url: str) -> str:
     return _http_get(url, 30).text
 
 
+def _looks_like_pdf(content: bytes) -> bool:
+    """본문 앞이 PDF 시그니처인지. ZIP·HWP에는 쓰지 않는다."""
+    return content.lstrip(b"\xef\xbb\xbf\r\n\t ").startswith(b"%PDF-")
+
+
 def _http_download(url: str, dest: Path) -> None:
     response = _http_get(url, 60)
+    content = response.content
+    if dest.suffix.lower() == ".pdf" and not _looks_like_pdf(content):
+        if dest.is_file():
+            dest.unlink()
+        raise FetchFailed(url, None, "not a PDF", 1)
     dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_bytes(response.content)
+    dest.write_bytes(content)
 
 
 def _failure_row(

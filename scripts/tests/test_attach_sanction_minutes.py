@@ -1224,7 +1224,7 @@ def test_http_helpers_use_a_browser_agent_and_delay(tmp_path, monkeypatch):
 
     class Response:
         text = "ok"
-        content = b"ok"
+        content = b"%PDF-1.4\nok"
 
         def raise_for_status(self) -> None:
             return None
@@ -1238,11 +1238,71 @@ def test_http_helpers_use_a_browser_agent_and_delay(tmp_path, monkeypatch):
 
     monkeypatch.setattr(requests, "get", fake_get)
     assert asm._http_text("https://example.test/list") == "ok"
-    asm._http_download("https://example.test/file", tmp_path / "minutes.pdf")
+    minutes = tmp_path / "minutes.pdf"
+    asm._http_download("https://example.test/file", minutes)
+    assert minutes.read_bytes().startswith(b"%PDF-")
     assert sleeps == [0.3]
     assert seen[0].startswith("Mozilla/5.0")
     assert "Chrome/" in seen[0]
     assert seen[0] == seen[1]
+
+
+def test_http_download_rejects_html_saved_as_pdf(tmp_path, monkeypatch):
+    import pytest
+    import requests
+
+    import attach_sanction_minutes as asm
+
+    monkeypatch.setattr(asm.time, "sleep", lambda seconds: None)
+    asm._requests_made = 0
+    asm._request_delay = 0
+    html = b"<!DOCTYPE html><html>Access denied</html>"
+    bodies = [html, b"%PDF-1.4\n%", html, html]
+
+    class Response:
+        def __init__(self, content: bytes):
+            self.content = content
+            self.text = ""
+            self.status_code = 200
+
+        def raise_for_status(self) -> None:
+            return None
+
+    def fake_get(url, timeout=30, headers=None):
+        return Response(bodies.pop(0))
+
+    monkeypatch.setattr(requests, "get", fake_get)
+    assert asm._looks_like_pdf(b"%PDF-1.4\n") is True
+    assert asm._looks_like_pdf(html) is False
+
+    rejected = tmp_path / "minutes.pdf"
+    with pytest.raises(asm.FetchFailed) as caught:
+        asm._http_download("https://example.test/denied", rejected)
+    assert not rejected.exists()
+    assert caught.value.error == "not a PDF"
+
+    saved = tmp_path / "minutes-good.pdf"
+    asm._http_download("https://example.test/good", saved)
+    assert saved.read_bytes().startswith(b"%PDF-1.4")
+
+    archive = tmp_path / "agenda.zip"
+    asm._http_download("https://example.test/zip", archive)
+    assert archive.read_bytes() == html
+
+    failures = tmp_path / "_failed-downloads.jsonl"
+    recorded = asm._download_or_record(
+        asm._http_download,
+        tmp_path / "again.pdf",
+        board="증선위",
+        post_id="15",
+        page_url="https://example.test/page",
+        url="https://example.test/again",
+        filename="minutes.pdf",
+        failures=failures,
+    )
+    assert recorded is False
+    assert not (tmp_path / "again.pdf").exists()
+    assert "https://example.test/again" in failures.read_text(encoding="utf-8")
 
 
 def test_main_delay_until_and_extra_days(tmp_path, monkeypatch):
