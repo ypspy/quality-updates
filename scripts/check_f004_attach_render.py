@@ -151,6 +151,36 @@ def _reason_panels(html: str, firms: set[str]) -> tuple[int, int, int, int]:
     return total, panels, bad, differ
 
 
+def _reason_content(html: str, reasons: list[dict]) -> tuple[int, int]:
+    """사유 줄이 있는 사유 법인 수와, 사유 줄의 글·링크가 데이터(firm_reasons)와 다른 법인 수."""
+    soup = BeautifulSoup(html, "html.parser")
+    year = soup.select_one('div.fss-year[data-year="2025"]')
+    if year is None:
+        return 0, 0
+    found: dict[str, list] = {}
+    for panel in year.select("div.fss-original"):
+        for line in panel.select("p.fss-f004-reason"):
+            found.setdefault(panel.get("data-names"), []).append(line)
+    present = wrong = 0
+    for reason in reasons:
+        lines = found.get(reason["firm"])
+        if not lines:
+            continue
+        present += 1
+        disclosure = reason.get("disclosure")
+        text = reason["text"]
+        if disclosure:
+            text = f"{text} · {disclosure['rcept_no']}"
+        for line in lines:
+            link = line.find("a")
+            if line.get_text() != text or (
+                link.get("href") != disclosure["dart_url"] if disclosure else link is not None
+            ):
+                wrong += 1
+                break
+    return present, wrong
+
+
 def build_report(html: str, search_index: Path = SEARCH_INDEX) -> dict:
     errors: list[str] = []
     year_sha = _sha256(YEAR_2025_PATH)
@@ -192,6 +222,12 @@ def build_report(html: str, search_index: Path = SEARCH_INDEX) -> dict:
             f"2025 패널 화면 {page_total}(사유 법인 {page_reason})"
             f" / 기대 {source_total}(사유 법인 {source_reason})"
         )
+    # 사유 줄이 있는 법인 수는 counts.firm_reason_panels(= firm_reasons 수, load_attach가 확인)와 같아야 한다.
+    present, wrong = _reason_content(html, loaded["firm_reasons"])
+    if present != count_source["firm_reason_panels"]:
+        errors.append(f"사유 줄이 있는 사유 법인 화면 {present} / 기대 {count_source['firm_reason_panels']}")
+    if wrong:
+        errors.append(f"사유 줄 글·링크가 데이터와 다른 사유 법인 {wrong}곳")
     if year_sha not in RENDERED:
         errors.append(f"year-2025.json sha를 알 수 없습니다: {year_sha}")
         rendered_size = 0

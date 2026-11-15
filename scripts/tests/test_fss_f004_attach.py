@@ -665,6 +665,22 @@ def test_each_firm_reason_is_full_and_identical_on_every_panel():
     assert total == 136
 
 
+def test_check_compares_reason_lines_with_the_data():
+    data = load_attach()
+    html = _injected()
+    assert check_mod._reason_content(html, data["firm_reasons"]) == (41, 0)
+    taesung = next(r for r in data["firm_reasons"] if r["firm"] == "태성회계법인")
+    rcept = taesung["disclosure"]["rcept_no"]
+    wrong_text = html.replace(f">{rcept}</a>", ">20990101000000</a>")
+    assert wrong_text.count(">20990101000000</a>") == 9
+    assert check_mod._reason_content(wrong_text, data["firm_reasons"]) == (41, 1)
+    url = taesung["disclosure"]["dart_url"]
+    wrong_link = html.replace(f'href="{url}"', 'href="https://dart.fss.or.kr/dsaf001/main.do?rcpNo=0"')
+    assert check_mod._reason_content(wrong_link, data["firm_reasons"]) == (41, 1)
+    extra = dict(taesung, firm="없는회계법인")
+    assert check_mod._reason_content(html, data["firm_reasons"] + [extra]) == (41, 0)
+
+
 def test_dongsung_11_and_52_follow_the_confirmed_rows():
     data = load_attach()
     html = _injected()
