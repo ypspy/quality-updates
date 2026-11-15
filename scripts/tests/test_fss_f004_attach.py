@@ -26,6 +26,7 @@ from fss_review_cards import (  # noqa: E402
 from mkdocs_fss_review_year import on_page_markdown  # noqa: E402
 from tests.test_fss_review_cards import _Page  # noqa: E402
 
+import check_f004_attach_render as check_mod  # noqa: E402
 import fss_f004_attach  # noqa: E402
 
 # sha256sum data/fss-review/f004-item-attach.json
@@ -536,3 +537,79 @@ def test_rendered_block_has_no_internal_ids():
     html = _injected()
     for token in _INTERNAL_IDS:
         assert token not in html
+
+
+_OUTSIDE_PHRASE = "<p>원문: 지적사항 없음, 권고일 표기 불일치, 권고일 기재 없음</p>"
+_INSIDE_PHRASE = "원문: 지적사항 없음, 권고일 표기 불일치, 권고일 기재 없음"
+
+
+def test_phrase_counts_only_inside_f004_elements():
+    html = _injected()
+    finding = html.find('<p class="fss-finding">')
+    assert finding >= 0
+    outside = html[:finding] + _OUTSIDE_PHRASE + html[finding:]
+    counts = check_mod._phrase_counts(outside)
+    assert counts["no_finding"] == 0
+    assert counts["mismatch"] == 0
+    assert counts["no_date"] == 7
+    action = '<p class="fss-f004-action">'
+    at = html.find(action)
+    assert at >= 0
+    insert_at = at + len(action)
+    inside = html[:insert_at] + _INSIDE_PHRASE + html[insert_at:]
+    assert check_mod._phrase_counts(inside)["no_finding"] == 1
+
+
+def test_search_index_report(tmp_path):
+    clean = tmp_path / "clean" / "search_index.json"
+    clean.parent.mkdir()
+    clean.write_text(
+        '{"docs":[{"location":"x","title":"t","text":"본문"}]}',
+        encoding="utf-8",
+    )
+    report = check_mod._search_index_report(clean)
+    assert report["ids"] == 0
+    assert report["errors"] == []
+
+    dirty = tmp_path / "dirty" / "search_index.json"
+    dirty.parent.mkdir()
+    dirty.write_text(
+        '{"docs":[{"text":"date_mismatch qu_dongsung"}]}',
+        encoding="utf-8",
+    )
+    report = check_mod._search_index_report(dirty)
+    assert report["ids"] == 2
+    assert report["errors"]
+
+    mismatch = tmp_path / "mismatch" / "search_index.json"
+    mismatch.parent.mkdir()
+    mismatch.write_text(
+        '{"docs":[{"text":"권고일 표기 불일치"}]}',
+        encoding="utf-8",
+    )
+    report = check_mod._search_index_report(mismatch)
+    assert report["mismatch"] == 1
+    assert report["errors"]
+
+    missing = check_mod._search_index_report(tmp_path / "missing" / "search_index.json")
+    assert "search_index.json이 없습니다." in missing["errors"]
+    assert check_mod._internal_hits("<p>pending f004_row_id</p>") == 2
+
+
+def test_consistent_new_counts_still_attach(tmp_path, monkeypatch, caplog):
+    data = _copy_attach()
+    removed = data["attachments"].pop()
+    data["firm_reasons"].pop()
+    data["counts"]["attach_slots"] = 123
+    data["counts"]["firm_reason_lines"] = 40
+    path = _dump_attach(tmp_path, data)
+    assert len(load_attach(path)["attachments"]) == 123
+    source = PAGE.read_text(encoding="utf-8")
+    plain = materialize_review_markdown(source)
+    monkeypatch.setattr(fss_f004_attach, "ATTACH_PATH", path)
+    built = _hook(source, caplog)
+    assert built != plain
+    assert built.count('class="fss-f004-attach"') == 128 - len(removed["f004"])
+    assert built.count('class="fss-f004-reason"') < 136
+    assert "자리 123/123" in caplog.text
+    assert "건너뜀 0" in caplog.text

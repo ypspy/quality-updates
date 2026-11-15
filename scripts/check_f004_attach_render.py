@@ -106,6 +106,21 @@ def _phrase_counts(html: str) -> dict[str, int]:
     }
 
 
+def _search_index_report(path: Path) -> dict:
+    """검색 색인의 내부 id와 화면 밖 문구를 센다."""
+    if not path.is_file():
+        return {"ids": 0, "mismatch": 0, "errors": ["search_index.json이 없습니다."]}
+    search_text = path.read_text(encoding="utf-8")
+    ids = _internal_hits(search_text)
+    mismatch = search_text.count("권고일 표기 불일치")
+    errors: list[str] = []
+    if ids:
+        errors.append(f"내부 id가 검색 색인에 {ids}건 있습니다.")
+    if mismatch:
+        errors.append(f"검색 색인의 권고일 표기 불일치 {mismatch}건")
+    return {"ids": ids, "mismatch": mismatch, "errors": errors}
+
+
 def _dongsung(html: str) -> int:
     soup = BeautifulSoup(html, "html.parser")
     count = 0
@@ -116,7 +131,7 @@ def _dongsung(html: str) -> int:
     return count
 
 
-def build_report(html: str) -> dict:
+def build_report(html: str, search_index: Path = SEARCH_INDEX) -> dict:
     errors: list[str] = []
     year_sha = _sha256(YEAR_2025_PATH)
     attach_raw = ATTACH_PATH.read_bytes()
@@ -157,17 +172,8 @@ def build_report(html: str) -> dict:
     page_ids = _internal_hits(html)
     if page_ids:
         errors.append(f"내부 id가 페이지에 {page_ids}건 있습니다.")
-    search_ids = 0
-    if SEARCH_INDEX.is_file():
-        search_text = SEARCH_INDEX.read_text(encoding="utf-8")
-        search_ids = _internal_hits(search_text)
-        if search_ids:
-            errors.append(f"내부 id가 검색 색인에 {search_ids}건 있습니다.")
-        search_mismatch = search_text.count("권고일 표기 불일치")
-        if search_mismatch:
-            errors.append(f"검색 색인의 권고일 표기 불일치 {search_mismatch}건")
-    else:
-        errors.append("search_index.json이 없습니다.")
+    search = _search_index_report(search_index)
+    errors.extend(search["errors"])
     for key, expected in EXPECTED.items():
         if counts[key] != expected:
             errors.append(f"{key} 화면 {counts[key]} / 기대 {expected}")
@@ -187,7 +193,7 @@ def build_report(html: str) -> dict:
         "counts": counts,
         "prior_year_sha_match": prior_match,
         "internal_ids_in_page": page_ids,
-        "internal_ids_in_search_index": search_ids,
+        "internal_ids_in_search_index": search["ids"],
         "errors": errors,
     }
 
@@ -239,13 +245,17 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="F004 부착 렌더를 확인합니다.")
     parser.add_argument("--report", type=Path, help="통과할 때만 같은 결과를 JSON으로 씁니다.")
     parser.add_argument("--html", type=Path, default=SITE_HTML, help="빌드된 감리 페이지")
+    parser.add_argument("--search-index", type=Path, help="빌드된 검색 색인")
     args = parser.parse_args(argv)
     if not args.html.is_file():
         print(f"오류: {args.html} 이 없습니다. mkdocs build --strict 를 먼저 실행하세요.")
         return 1
+    search_index = args.search_index
+    if search_index is None:
+        search_index = args.html.parent.parent / "search" / "search_index.json"
     try:
         html = args.html.read_text(encoding="utf-8")
-        report = build_report(html)
+        report = build_report(html, search_index)
     except Exception as exc:
         print(f"오류: {exc}")
         return 1
