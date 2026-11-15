@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 import html
 import json
+import logging
 import re
 from pathlib import Path
 
@@ -16,6 +17,12 @@ import fss_review_cards
 
 ROOT = Path(__file__).resolve().parent.parent
 FOLLOWUP_PATH = ROOT / "data" / "fss-review" / "f004-followup.json"
+_LOG = logging.getLogger("mkdocs.plugins.fss_f004")
+_DISCLAIMER = (
+    '<p class="fss-f004-disclaimer">'
+    "회사가 DART에 공시한 이행내역 원문이며, 이 사이트가 검증하지 않았습니다."
+    "</p>"
+)
 
 _SOURCE_KEYS = frozenset(
     {
@@ -124,9 +131,35 @@ def _validate_item(item: object, match_labels: dict, year_labels: dict, *, indiv
             raise ValueError("dart_url 형식이 아닙니다.")
 
 
+def _manifest_path(path: Path) -> Path:
+    name = path.name
+    if name.endswith(".json"):
+        return path.with_name(name[: -len(".json")] + ".manifest.json")
+    return path.with_name(name + ".manifest.json")
+
+
+def _verify_manifest(path: Path) -> None:
+    """파일 바이트 sha256과 길이가 옆의 manifest와 같은지 확인한다."""
+    if not path.is_file():
+        raise FileNotFoundError("F004 파일이 없습니다.")
+    manifest = _manifest_path(path)
+    if not manifest.is_file():
+        raise FileNotFoundError("F004 manifest가 없습니다.")
+    try:
+        meta = json.loads(manifest.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError("F004 manifest를 읽지 못했습니다.") from exc
+    raw = path.read_bytes()
+    digest = hashlib.sha256(raw).hexdigest()
+    if digest != meta.get("sha256") or len(raw) != meta.get("bytes"):
+        raise ValueError("F004 sha256이 manifest와 다릅니다.")
+
+
 def load_followup(path: Path = FOLLOWUP_PATH) -> dict:
     """UTF-8 JSON을 읽고 2025 이행내역 제약을 확인한다."""
-    data = json.loads(path.read_text(encoding="utf-8"))
+    if Path(path).resolve() == Path(FOLLOWUP_PATH).resolve():
+        _verify_manifest(Path(path))
+    data = json.loads(Path(path).read_text(encoding="utf-8"))
     if not isinstance(data, dict):
         raise ValueError("이행내역 JSON이 객체가 아닙니다.")
     if data.get("inspection_year") != 2025:
@@ -200,7 +233,7 @@ def _meta_line(item: dict) -> str:
 
 
 def _labels_line(item: dict, labels: dict) -> str:
-    spans = [f'<span class="fss-f004-level">{_esc_text(item.get("match_level_label") or "")}</span>']
+    spans: list[str] = []
     if item.get("year_basis") == "disclosure_year_fallback":
         spans.append(
             f'<span class="fss-f004-fallback">{_esc_text(item.get("year_basis_label") or "")}</span>'
@@ -208,6 +241,8 @@ def _labels_line(item: dict, labels: dict) -> str:
     if item.get("date_mismatch") is True:
         mismatch = labels["match_level"]["date_mismatch"]
         spans.append(f'<span class="fss-f004-mismatch">{_esc_text(mismatch)}</span>')
+    if not spans:
+        return ""
     return '<p class="fss-f004-labels">' + " ".join(spans) + "</p>"
 
 
@@ -239,9 +274,9 @@ def _render_item(item: dict, labels: dict) -> str:
         '<div class="fss-f004-item">'
         + _meta_line(item)
         + _labels_line(item, labels)
-        + f'<p class="fss-f004-rec"><span class="fss-f004-k">개선권고</span> '
+        + '<p class="fss-f004-rec"><span class="fss-f004-k">개선권고</span> '
         + f'<span class="fss-f004-src">{_esc_text(item.get("recommendation"))}</span></p>'
-        + f'<p class="fss-f004-act"><span class="fss-f004-k">이행 내용</span> '
+        + '<p class="fss-f004-act"><span class="fss-f004-k">이행 내용</span> '
         + f'<span class="fss-f004-src">{_esc_text(item.get("action"))}</span></p>'
         + "".join(notes)
         + _history_block(item)
@@ -250,10 +285,25 @@ def _render_item(item: dict, labels: dict) -> str:
 
 
 def _memo_box(memo: object) -> str:
-    body = _esc_text(memo) if memo else ""
+    if not memo:
+        return ""
     return (
         '<div class="fss-f004-memo"><p class="fss-f004-memo-title">검토 메모</p>'
-        f'<div class="fss-f004-memo-body">{body}</div></div>'
+        f'<div class="fss-f004-memo-body">{_esc_text(memo)}</div></div>'
+    )
+
+
+def _disclosure_link(firm: dict) -> str:
+    latest = firm.get("latest_2026_disclosure")
+    if not isinstance(latest, dict):
+        return ""
+    url = latest.get("dart_url")
+    number = latest.get("rcept_no")
+    if not isinstance(url, str) or not _DART_URL.match(url) or not number:
+        return ""
+    return (
+        f'<p class="fss-f004-latest"><a href="{_esc_attr(url)}" rel="noopener" target="_blank">'
+        f"{_esc_text(number)}</a></p>"
     )
 
 
@@ -263,7 +313,10 @@ def _firm_details(firm: dict, dae: dict, labels: dict) -> str:
     name = firm.get("firm") or ""
     body = "".join(_render_item(item, labels) for item in items)
     if not items and dae.get("f004_display") is not None:
-        body = f'<p class="fss-f004-none">{_esc_text(dae.get("f004_display"))}</p>'
+        body = (
+            f'<p class="fss-f004-none">{_esc_text(dae.get("f004_display"))}</p>'
+            + _disclosure_link(firm)
+        )
     return (
         f'<details class="fss-f004-firm" id="{_esc_attr(element_id)}" '
         f'data-f004-firm="{_esc_attr(name)}">'
@@ -286,6 +339,7 @@ def render_dae_block(bundle_firms: list[dict], dae_title: str, labels: dict) -> 
     return _one_line(
         f'<div class="fss-f004-block" data-f004-dae="{_esc_attr(dae_title)}">'
         '<p class="fss-f004-title">이행내역 공시 (F004)</p>'
+        + _DISCLAIMER
         + "".join(details)
         + "</div>"
     )
@@ -303,7 +357,8 @@ def render_individual_block(bundle_firms: list[dict], labels: dict) -> str:
         blocks.append(
             f'<div class="fss-f004-individual" data-f004-firm="{_esc_attr(name)}">'
             '<p class="fss-f004-title">개별 감사보고서 관련 이행내역</p>'
-            f'<p><span class="fss-f004-firm-name">{_esc_text(name)}</span> '
+            + _DISCLAIMER
+            + f'<p><span class="fss-f004-firm-name">{_esc_text(name)}</span> '
             f'<span class="fss-f004-count">{len(items)}건</span></p>'
             f"{body}</div>"
         )
@@ -345,21 +400,84 @@ def _inject_bundle(bundle_html: str, firms: list[dict], labels: dict) -> str:
     return injected[: -len("</div>")] + individual + "</div>"
 
 
-def _expected_link_keys(data: dict) -> list[str]:
-    keys: list[str] = []
+def _site_firm_names(block: str) -> set[str]:
+    names: set[str] = set()
+    for raw in re.findall(r'data-names="([^"]*)"', block):
+        for part in html.unescape(raw).split("|"):
+            if part:
+                names.add(part)
+    return names
+
+
+def _bundle_titles(block: str) -> dict[str, set[str]]:
+    found: dict[str, set[str]] = {}
+    for start, end in fss_review_cards._regions(block, '<div class="fss-bundle">'):
+        bundle_html = block[start:end]
+        name_match = _BUNDLE_NAME.search(bundle_html)
+        if not name_match:
+            continue
+        titles: set[str] = set()
+        for section_start, section_end in fss_review_cards._iter_sections(bundle_html, "fss-dae"):
+            title_match = _DAE_TITLE.search(bundle_html[section_start:section_end])
+            if title_match:
+                titles.add(html.unescape(title_match.group(1)))
+        found[html.unescape(name_match.group(1))] = titles
+    return found
+
+
+def _classify(data: dict, bundles: dict[str, set[str]], site_firms: set[str]) -> tuple[list[str], list[str], int]:
+    """렌더할 link_key, 사이트에 없는 link_key, no_site_dae 항목 수."""
+    matched: list[str] = []
+    unmatched: list[str] = []
+    no_site = 0
+    for firm in data.get("firms") or []:
+        bundle = firm.get("bundle")
+        name = firm.get("firm") or ""
+        off_site = bundle not in bundles or (bool(site_firms) and name not in site_firms)
+        titles = bundles.get(bundle, set())
+        for dae in firm.get("dae") or []:
+            link_key = str(dae.get("link_key") or "")
+            if off_site or dae.get("dae_standard") not in titles:
+                unmatched.append(link_key)
+            else:
+                matched.append(link_key)
+            for item in dae.get("items") or []:
+                if item.get("match_level") == "no_site_dae":
+                    no_site += 1
+        for item in firm.get("individual_audit") or []:
+            if item.get("match_level") == "no_site_dae":
+                no_site += 1
+    return matched, unmatched, no_site
+
+
+def _visible_firms(firms: list[dict], site_firms: set[str]) -> list[dict]:
+    if not site_firms:
+        return firms
+    return [firm for firm in firms if (firm.get("firm") or "") in site_firms]
+
+
+def _summary(data: dict, matched: list[str], unmatched: list[str], no_site: int) -> str:
+    matched_set = set(matched)
+    firms: set[str] = set()
+    slots = 0
+    items = 0
+    history = 0
     for firm in data.get("firms") or []:
         for dae in firm.get("dae") or []:
-            link_key = dae.get("link_key")
-            if not isinstance(link_key, str) or not link_key:
-                raise ValueError("link_key가 없습니다.")
-            keys.append(link_key)
-    return keys
+            if str(dae.get("link_key") or "") not in matched_set:
+                continue
+            firms.add(firm.get("firm") or "")
+            slots += 1
+            rows = dae.get("items") or []
+            items += len(rows)
+            history += sum(len(row.get("history") or []) for row in rows)
+    return (
+        f"F004 이행내역: 법인 {len(firms)}, 대분류 {slots}, 항목 {items}, "
+        f"이전 공시 {history}, 비매칭 {len(unmatched)}, 사이트 대분류 없음 {no_site}"
+    )
 
 
-def inject_f004_followup(page: str, data: dict | None = None) -> str:
-    """2025 연도 블록의 대분류 절 끝에 이행내역을 붙인다. 블록 밖은 그대로 둔다."""
-    if data is None:
-        data = load_followup()
+def _insert_followup(page: str, data: dict, *, strict: bool) -> str:
     found: list[tuple[int, int]] = []
     for start, end in fss_review_cards._year_regions(page):
         head_end = page.find(">", start)
@@ -371,6 +489,11 @@ def inject_f004_followup(page: str, data: dict | None = None) -> str:
         raise ValueError("감리연도 2025 블록이 하나가 아닙니다.")
     start, end = found[0]
     block = page[start:end]
+    bundles = _bundle_titles(block)
+    site_firms = _site_firm_names(block)
+    matched, unmatched, no_site = _classify(data, bundles, site_firms)
+    if strict and unmatched:
+        raise ValueError("대분류 이행내역을 한 번씩 그리지 못했습니다.")
     by_bundle = _firms_by_bundle(data)
     parts: list[str] = []
     cursor = 0
@@ -380,21 +503,45 @@ def inject_f004_followup(page: str, data: dict | None = None) -> str:
         if not name_match:
             raise ValueError("묶음 이름이 없습니다.")
         bundle_name = html.unescape(name_match.group(1))
+        firms = _visible_firms(by_bundle.get(bundle_name, []), site_firms)
         parts.append(block[cursor:bundle_start])
-        parts.append(_inject_bundle(bundle_html, by_bundle.get(bundle_name, []), data["labels"]))
+        parts.append(_inject_bundle(bundle_html, firms, data["labels"]))
         cursor = bundle_end
     parts.append(block[cursor:])
     updated = "".join(parts)
-    expected = _expected_link_keys(data)
-    if updated.count('class="fss-f004-firm"') != len(expected):
+    if updated.count('class="fss-f004-firm"') != len(matched):
         raise ValueError("대분류 이행내역을 한 번씩 그리지 못했습니다.")
-    for link_key in expected:
-        element_id = _element_id(link_key)
-        if updated.count(f'id="{element_id}"') != 1:
+    for link_key in matched:
+        if updated.count(f'id="{_element_id(link_key)}"') != 1:
             raise ValueError("대분류 이행내역을 한 번씩 그리지 못했습니다.")
     if ("\n" not in block and "\r" not in block) and ("\n" in updated or "\r" in updated):
         raise ValueError("F004 출력에 줄바꿈이 있습니다.")
+    _LOG.info("%s", _summary(data, matched, unmatched, no_site))
     return page[:start] + updated + page[end:]
+
+
+def inject_f004_followup(page: str, data: dict | None = None, *, strict: bool | None = None) -> str:
+    """2025 연도 블록의 대분류 절 끝에 이행내역을 붙인다. 블록 밖은 그대로 둔다.
+
+    파일을 직접 읽는 빌드 경로는 실패 대신 입력 페이지를 그대로 돌려준다.
+    ``data``를 넘기면 기본은 엄격하다. ``strict=False``면 사이트에 없는 키만 건너뛴다.
+    """
+    original = page
+    cleaned = strip_f004_followup(page)
+    if data is None:
+        try:
+            data = load_followup(FOLLOWUP_PATH)
+        except (OSError, ValueError) as exc:
+            _LOG.info("F004 이행내역을 붙이지 않습니다: %s", exc)
+            return original
+        try:
+            return _insert_followup(cleaned, data, strict=False)
+        except ValueError as exc:
+            _LOG.info("F004 이행내역을 붙이지 않습니다: %s", exc)
+            return original
+    if strict is None:
+        strict = True
+    return _insert_followup(cleaned, data, strict=strict)
 
 
 def strip_f004_followup(page: str) -> str:

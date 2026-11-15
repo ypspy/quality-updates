@@ -163,6 +163,8 @@ def _html_counts(built: str) -> dict[str, object]:
         if "fss-f004-firm" not in match.group(0):
             anchors_only_on_firm = False
     outside, inside = _banned_in_f004(built)
+    blocks = len(soup.select(".fss-f004-block"))
+    individual = len(soup.select(".fss-f004-individual"))
     return {
         "firm": len(soup.select(".fss-f004-firm")),
         "item": len(soup.select(".fss-f004-item")),
@@ -171,7 +173,11 @@ def _html_counts(built: str) -> dict[str, object]:
         "mismatch": len(soup.select(".fss-f004-mismatch")),
         "none_empty": none_empty,
         "none_na": none_na,
-        "individual": len(soup.select(".fss-f004-individual")),
+        "individual": individual,
+        "level": len(soup.select(".fss-f004-level")),
+        "memo": len(soup.select(".fss-f004-memo")),
+        "disclaimer": len(soup.select(".fss-f004-disclaimer")),
+        "block": blocks,
         "anchors": anchors,
         "anchors_only_on_firm": anchors_only_on_firm,
         "prior_year_sha_match": prior_match,
@@ -229,6 +235,14 @@ def build_report() -> dict:
         errors.append("strip 결과가 materialize 출력과 다릅니다.")
     if audit_errors:
         errors.append(f"audit_review_html 오류 {len(audit_errors)}건")
+    if html_counts["level"] != 0:
+        errors.append(f"fss-f004-level {html_counts['level']}")
+    if html_counts["memo"] != 0:
+        errors.append(f"fss-f004-memo {html_counts['memo']}")
+    if html_counts["disclaimer"] != html_counts["block"] + html_counts["individual"]:
+        errors.append(
+            f"안내 문구 {html_counts['disclaimer']} / 블록 {html_counts['block'] + html_counts['individual']}"
+        )
     return {
         "year_2025_sha256": _sha256(YEAR_2025_PATH),
         "followup_sha256": _sha256(FOLLOWUP_PATH),
@@ -242,6 +256,10 @@ def build_report() -> dict:
         "fss_f004_none_empty": html_counts["none_empty"],
         "fss_f004_none_na": html_counts["none_na"],
         "fss_f004_individual": html_counts["individual"],
+        "fss_f004_level": html_counts["level"],
+        "fss_f004_memo": html_counts["memo"],
+        "fss_f004_disclaimer": html_counts["disclaimer"],
+        "fss_f004_block": html_counts["block"],
         "anchors": html_counts["anchors"],
         "anchors_only_on_firm": html_counts["anchors_only_on_firm"],
         "prior_year_sha_match": html_counts["prior_year_sha_match"],
@@ -267,6 +285,10 @@ def render_text(report: dict) -> str:
         f"fss-f004-none 기재 없음: {report['fss_f004_none_empty']}",
         f"fss-f004-none 해당 없음: {report['fss_f004_none_na']}",
         f"fss-f004-individual: {report['fss_f004_individual']}",
+        f"fss-f004-level: {report['fss_f004_level']}",
+        f"fss-f004-memo: {report['fss_f004_memo']}",
+        f"fss-f004-disclaimer: {report['fss_f004_disclaimer']}",
+        f"fss-f004-block: {report['fss_f004_block']}",
         f"anchors: {report['anchors']}",
         f"anchors_only_on_firm: {str(report['anchors_only_on_firm']).lower()}",
         f"prior_year_sha_match: {str(report['prior_year_sha_match']).lower()}",

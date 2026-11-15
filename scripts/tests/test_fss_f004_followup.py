@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import hashlib
 import json
+import logging
 import sys
 from collections import Counter
 from pathlib import Path
@@ -11,6 +12,7 @@ from bs4 import BeautifulSoup
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import check_f004_followup_render as check_mod  # noqa: E402
+import fss_f004_followup  # noqa: E402
 from fss_f004_followup import (  # noqa: E402
     FOLLOWUP_PATH,
     inject_f004_followup,
@@ -332,7 +334,7 @@ def test_date_mismatch_mark_keeps_raw_recommend_date():
     mark = first.select_one(".fss-f004-mismatch")
     assert mark is not None
     assert mark.get_text(strip=True) == "표기 확인"
-    assert first.select_one(".fss-f004-level").get_text(strip=True) == "권고일 표기 불일치"
+    assert first.select_one(".fss-f004-level") is None
     assert "2025.05.12" in first.select_one(".fss-f004-meta").get_text()
     assert second.select_one(".fss-f004-mismatch") is None
     assert first.select_one(".fss-f004-fallback") is None
@@ -353,7 +355,7 @@ def test_real_mismatch_counts_and_raw_dates(built_page):
             continue
         firm = item.find_parent(class_="fss-f004-firm")
         counts[firm.get("data-f004-firm")] += 1
-        assert item.select_one(".fss-f004-level").get_text(strip=True)
+        assert item.select_one(".fss-f004-mismatch").get_text(strip=True) == "권고일 표기 불일치"
         if "2025.05.12" in item.select_one(".fss-f004-meta").get_text():
             raw_seen = True
     assert both == 0
@@ -472,7 +474,7 @@ def test_individual_block_is_per_firm_and_has_no_id():
 def test_review_memo_is_empty_or_escaped():
     firm = _firm("일반회계법인", "회계법인 현", dae=[_dae(display="기재 없음")])
     empty = render_dae_block([firm], DAE, _labels())
-    assert '<div class="fss-f004-memo-body"></div>' in empty
+    assert "fss-f004-memo" not in empty
     filled = _firm(
         "일반회계법인",
         "회계법인 현",
@@ -561,3 +563,123 @@ def test_check_script_removes_temp_file_when_replace_fails(tmp_path, monkeypatch
     assert check_mod.main(["--report", str(report)]) == 1
     assert not report.exists()
     assert list(tmp_path.iterdir()) == []
+
+
+_DISCLAIMER = "회사가 DART에 공시한 이행내역 원문이며, 이 사이트가 검증하지 않았습니다."
+
+
+def _hook(source: str, caplog) -> str:
+    with caplog.at_level(logging.INFO, logger="mkdocs.plugins.fss_f004"):
+        return on_page_markdown(source, _Page("fss-review/index.md"), None, None)
+
+
+def test_missing_file_keeps_the_materialized_page(monkeypatch, caplog):
+    monkeypatch.setattr(fss_f004_followup, "FOLLOWUP_PATH", Path("/tmp/f004-followup-missing.json"))
+    source = PAGE.read_text(encoding="utf-8")
+    built = _hook(source, caplog)
+    assert built == materialize_review_markdown(source)
+    assert "F004 이행내역을 붙이지 않습니다" in caplog.text
+
+
+def test_sha_mismatch_keeps_the_materialized_page(tmp_path, monkeypatch, caplog):
+    raw = bytearray(FOLLOWUP_PATH.read_bytes())
+    raw[20] ^= 0x01
+    path = tmp_path / "f004-followup.json"
+    path.write_bytes(raw)
+    (tmp_path / "f004-followup.manifest.json").write_text(
+        json.dumps({"file": "f004-followup.json", "sha256": FOLLOWUP_SHA, "bytes": FOLLOWUP_BYTES}),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(fss_f004_followup, "FOLLOWUP_PATH", path)
+    source = PAGE.read_text(encoding="utf-8")
+    built = _hook(source, caplog)
+    assert built == materialize_review_markdown(source)
+    assert "sha256" in caplog.text
+
+
+def test_missing_manifest_and_broken_json_keep_the_page(tmp_path, monkeypatch, caplog):
+    source = PAGE.read_text(encoding="utf-8")
+    expected = materialize_review_markdown(source)
+    plain = tmp_path / "f004-followup.json"
+    plain.write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(fss_f004_followup, "FOLLOWUP_PATH", plain)
+    assert _hook(source, caplog) == expected
+    assert "manifest" in caplog.text
+    caplog.clear()
+    broken = tmp_path / "broken" / "f004-followup.json"
+    broken.parent.mkdir()
+    payload = b"{"
+    broken.write_bytes(payload)
+    (broken.parent / "f004-followup.manifest.json").write_text(
+        json.dumps(
+            {
+                "file": "f004-followup.json",
+                "sha256": hashlib.sha256(payload).hexdigest(),
+                "bytes": len(payload),
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(fss_f004_followup, "FOLLOWUP_PATH", broken)
+    assert _hook(source, caplog) == expected
+    assert "F004 이행내역을 붙이지 않습니다" in caplog.text
+
+
+def test_unmatched_bundle_and_dae_are_skipped(caplog):
+    page = _page([("일반회계법인", [DAE])])
+    kept = _firm("일반회계법인", "회계법인 현", dae=[_dae(items=[_item()])])
+    other_bundle = _firm("없는묶음", "없는 법인", dae=[_dae(firm="없는 법인")])
+    with caplog.at_level(logging.INFO, logger="mkdocs.plugins.fss_f004"):
+        built = inject_f004_followup(page, _payload([kept, other_bundle]), strict=False)
+    assert "회계법인 현" in built
+    assert "없는 법인" not in built
+    assert "비매칭 1," in caplog.text or "비매칭 1 " in caplog.text
+    caplog.clear()
+    both = _firm(
+        "일반회계법인",
+        "회계법인 현",
+        dae=[
+            _dae(items=[_item()]),
+            _dae(standard="6. 모니터링", display="기재 없음"),
+        ],
+    )
+    with caplog.at_level(logging.INFO, logger="mkdocs.plugins.fss_f004"):
+        built = inject_f004_followup(page, _payload([both]), strict=False)
+    assert built.count('class="fss-f004-firm"') == 1
+    assert "비매칭 1" in caplog.text
+
+
+def test_inject_is_idempotent():
+    firm = _firm("일반회계법인", "회계법인 현", dae=[_dae(items=[_item()])])
+    page = _page([("일반회계법인", [DAE])])
+    data = _payload([firm])
+    once = inject_f004_followup(page, data)
+    assert inject_f004_followup(once, data) == once
+
+
+def test_disclaimer_replaces_empty_memo_and_level_label(built_page):
+    firm = _firm("일반회계법인", "회계법인 현", dae=[_dae(items=[_item()], display=None)])
+    rendered = render_dae_block([firm], DAE, _labels())
+    assert rendered.count("fss-f004-disclaimer") == 1
+    assert _DISCLAIMER in rendered
+    assert "fss-f004-level" not in rendered
+    assert "fss-f004-memo" not in rendered
+    _source, built = built_page
+    soup = BeautifulSoup(built, "html.parser")
+    assert soup.select(".fss-f004-level") == []
+    assert soup.select(".fss-f004-memo") == []
+    assert len(soup.select(".fss-f004-disclaimer")) == len(soup.select(".fss-f004-block, .fss-f004-individual"))
+    assert all(node.get_text(strip=True) == _DISCLAIMER for node in soup.select(".fss-f004-disclaimer"))
+
+
+def test_empty_slot_can_link_the_latest_disclosure():
+    firm = _firm("일반회계법인", "회계법인 현", dae=[_dae(display="기재 없음")])
+    firm["latest_2026_disclosure"] = {"rcept_no": "20260630000001", "dart_url": DART}
+    rendered = render_dae_block([firm], DAE, _labels())
+    assert "fss-f004-none" in rendered
+    assert f'href="{DART}"' in rendered
+    assert "20260630000001" in rendered
+    firm["latest_2026_disclosure"] = {"rcept_no": "1", "dart_url": "https://example.invalid/x"}
+    hidden = render_dae_block([firm], DAE, _labels())
+    assert "example.invalid" not in hidden
+    assert "fss-f004-latest" not in hidden

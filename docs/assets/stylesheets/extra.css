@@ -416,3 +416,8 @@ iframe {
   margin: 0;
   font-weight: 700;
 }
+.fss-f004-disclaimer {
+  margin: 0.15rem 0 0.45rem;
+  color: var(--md-default-fg-color--light);
+  font-size: 0.84rem;
+}
