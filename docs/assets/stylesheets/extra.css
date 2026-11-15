@@ -355,3 +355,31 @@ iframe {
     print-color-adjust: exact;
   }
 }
+
+/* 감리연도 2025 지적 문단 아래 F004 개선권고 이행사항 */
+.fss-f004-attach {
+  margin: 0.45rem 0 0.55rem;
+  padding: 0.1rem 0 0.1rem 0.75rem;
+  border-left: 1px solid var(--md-default-fg-color--lightest);
+}
+.fss-f004-head {
+  margin: 0.1rem 0;
+  color: var(--md-default-fg-color--light);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+.fss-f004-head a,
+.fss-f004-reason a {
+  color: var(--md-typeset-a-color);
+}
+.fss-f004-action {
+  margin: 0.15rem 0 0.2rem;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+.fss-f004-reason {
+  margin: 0.45rem 0 0.15rem;
+  color: var(--md-default-fg-color--light);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}

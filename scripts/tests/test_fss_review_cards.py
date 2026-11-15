@@ -13,6 +13,7 @@ from bs4 import BeautifulSoup
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import fss_review_cards  # noqa: E402
+from fss_f004_attach import strip_f004_attach  # noqa: E402
 from fss_review_cards import (  # noqa: E402
     BOILERPLATE,
     PAGE,
@@ -368,7 +369,8 @@ class _Page:
 def test_build_hook_inserts_the_2025_year_once():
     source = PAGE.read_text(encoding="utf-8")
     built = on_page_markdown(source, _Page("fss-review/index.md"), None, None)
-    assert built == _review_page()
+    assert strip_f004_attach(built) == _review_page()
+    assert built.count('class="fss-f004-attach"') == 151
     assert built.count('data-year="2025"') == 1
     untouched = on_page_markdown("본문", _Page("index.md"), None, None)
     assert untouched == "본문"
