@@ -29,6 +29,7 @@ from fss_review_cards import (  # noqa: E402
     render_year_2025_html,
     repair_severity_gap,
 )
+from fss_f004_followup import strip_f004_followup  # noqa: E402
 from mkdocs_fss_review_year import on_page_markdown  # noqa: E402
 
 TEXT_SHA = "1bcd9dfc6a4f96534765a756e936c5d066a999a069a2bc92317c70ab29d0431f"
@@ -368,7 +369,9 @@ class _Page:
 def test_build_hook_inserts_the_2025_year_once():
     source = PAGE.read_text(encoding="utf-8")
     built = on_page_markdown(source, _Page("fss-review/index.md"), None, None)
-    assert built == _review_page()
+    assert strip_f004_followup(built) == _review_page()
+    assert built != _review_page()
+    assert built.count('class="fss-f004-block"') > 0
     assert built.count('data-year="2025"') == 1
     untouched = on_page_markdown("본문", _Page("index.md"), None, None)
     assert untouched == "본문"
