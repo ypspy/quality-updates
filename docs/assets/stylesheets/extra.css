@@ -356,30 +356,32 @@ iframe {
   }
 }
 
-/* 감리연도 2025 지적 문단 아래 F004 개선권고 이행사항 */
-.fss-f004-attach {
-  margin: 0.45rem 0 0.55rem;
-  padding: 0.1rem 0 0.1rem 0.75rem;
-  border-left: 1px solid var(--md-default-fg-color--lightest);
+/* 감리연도 2025 지적 문단 아래 F004 개선권고 이행사항
+   크기는 .md-typeset 기준 em으로 맞춘다(본문 0.8rem = 지적 문단과 같은 크기).
+   rem을 쓰면 html 기준(Material 125%)이라 본문보다 커진다. */
+.md-typeset .fss-f004-attach {
+  margin: 0.5em 0 0;
+  padding: 0 0 0 0.75em;
+  border-left: 0.1rem solid var(--md-default-fg-color--lightest);
 }
-.fss-f004-head {
-  margin: 0.1rem 0;
+.md-typeset .fss-f004-head,
+.md-typeset .fss-f004-reason {
   color: var(--md-default-fg-color--light);
-  font-size: 0.8rem;
-  line-height: 1.45;
+  font-size: 0.8em;
+  line-height: 1.5;
 }
-.fss-f004-head a,
-.fss-f004-reason a {
-  color: var(--md-typeset-a-color);
+.md-typeset .fss-f004-head {
+  margin: 0 0 0.25em;
 }
-.fss-f004-action {
-  margin: 0.15rem 0 0.2rem;
-  font-size: 1rem;
+.md-typeset .fss-f004-action {
+  margin: 0;
+  font-size: 1em;
   line-height: 1.6;
 }
-.fss-f004-reason {
-  margin: 0.45rem 0 0.15rem;
-  color: var(--md-default-fg-color--light);
-  font-size: 0.8rem;
-  line-height: 1.45;
+.md-typeset .fss-f004-reason {
+  margin: 0.75em 0 0;
+}
+.md-typeset .fss-f004-head a,
+.md-typeset .fss-f004-reason a {
+  color: var(--md-typeset-a-color);
 }
