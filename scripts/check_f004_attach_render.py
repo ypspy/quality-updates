@@ -117,20 +117,21 @@ def _dongsung(html: str) -> int:
     return count
 
 
-def _reason_panels(html: str, firms: set[str]) -> tuple[int, int]:
-    """사유 법인의 2025 패널 수와, 사유 줄이 정확히 하나가 아닌 패널 수."""
+def _reason_panels(html: str, firms: set[str]) -> tuple[int, int, int]:
+    """2025 패널 수, 그중 사유 법인 패널 수, 사유 줄이 정확히 하나가 아닌 사유 법인 패널 수."""
     soup = BeautifulSoup(html, "html.parser")
     year = soup.select_one('div.fss-year[data-year="2025"]')
     if year is None:
-        return 0, 0
-    panels = bad = 0
+        return 0, 0, 0
+    total = panels = bad = 0
     for panel in year.select("div.fss-original"):
+        total += 1
         if panel.get("data-names") not in firms:
             continue
         panels += 1
         if len(panel.select("p.fss-f004-reason")) != 1:
             bad += 1
-    return panels, bad
+    return total, panels, bad
 
 
 def build_report(html: str, search_index: Path = SEARCH_INDEX) -> dict:
@@ -159,8 +160,18 @@ def build_report(html: str, search_index: Path = SEARCH_INDEX) -> dict:
         "dongsung": count_source["dongsung_blocks"],
     }
     reason_firms = {reason["firm"] for reason in loaded["firm_reasons"]}
-    reason_panel_total, reason_panel_bad = _reason_panels(html, reason_firms)
-    expected_counts["same"] = reason_panel_total - len(reason_firms)
+    # 기대 패널 수는 검사할 페이지가 아니라 year-2025.json 렌더(부착 전)에서 센다.
+    # 고정 상수(136)를 두지 않아 데이터가 바뀌어도 그대로 맞고, 페이지에서 패널이 빠지면 잡힌다.
+    source_total, source_reason, _ = _reason_panels(
+        render_year_2025_html(load_year_2025()), reason_firms
+    )
+    page_total, page_reason, reason_panel_bad = _reason_panels(html, reason_firms)
+    expected_counts["same"] = source_reason - len(reason_firms)
+    if page_total != source_total or page_reason != source_reason:
+        errors.append(
+            f"2025 패널 화면 {page_total}(사유 법인 {page_reason})"
+            f" / 기대 {source_total}(사유 법인 {source_reason})"
+        )
     if year_sha not in RENDERED:
         errors.append(f"year-2025.json sha를 알 수 없습니다: {year_sha}")
         rendered_size = 0

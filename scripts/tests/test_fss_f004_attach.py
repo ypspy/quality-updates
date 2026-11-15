@@ -609,7 +609,7 @@ def test_search_index_report(tmp_path):
 def test_consistent_new_counts_still_attach(tmp_path, monkeypatch, caplog):
     data = _copy_attach()
     removed = data["attachments"].pop()
-    data["firm_reasons"].pop()
+    assert data["firm_reasons"].pop()["firm"] == "효림회계법인"
     data["counts"]["attach_slots"] = 142
     data["counts"]["firm_reason_lines"] = 40
     data["counts"]["attach_blocks"] = 151 - len(removed["f004"])
@@ -623,8 +623,10 @@ def test_consistent_new_counts_still_attach(tmp_path, monkeypatch, caplog):
     assert built != plain
     assert built.count('class="fss-f004-attach"') == 151 - len(removed["f004"])
     assert built.count('class="fss-f004-reason"') == 40
+    # 빠진 사유 법인(효림회계법인) 패널 4개만큼 칸과 짧은 줄이 준다: 136 - 4 = 132칸, 132 - 40 = 92.
+    assert built.count(_SAME) == 92
     assert "자리 142/142" in caplog.text
-    assert "법인 사유 40곳(" in caplog.text
+    assert "법인 사유 40곳(132칸)" in caplog.text
     assert "건너뜀 0" in caplog.text
 
 
