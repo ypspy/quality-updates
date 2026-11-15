@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parent.parent
 ATTACH_PATH = ROOT / "data" / "fss-review" / "f004-item-attach.json"
 _LOG = logging.getLogger("mkdocs.plugins.fss_f004_attach")
 _DART_URL = re.compile(r"^https://dart\.fss\.or\.kr/dsaf001/main\.do\?rcpNo=\d{14}$")
+_RCEPT_NO = re.compile(r"\d{14}")
 _BANNED = "미" + "이행"
 _NO_DATE = frozenset({"", "-"})
 _FINDING = re.compile(r'<p class="fss-finding">(.*?)</p>', re.S)
@@ -90,17 +91,82 @@ def _reject_dart_url(obj: object) -> None:
             _reject_dart_url(value)
 
 
+def _require_rcept_pair(rcept: object, url: object) -> None:
+    if not isinstance(rcept, str) or _RCEPT_NO.fullmatch(rcept) is None:
+        raise ValueError("rcept_no 형식이 아닙니다.")
+    expected = f"https://dart.fss.or.kr/dsaf001/main.do?rcpNo={rcept}"
+    if url != expected:
+        raise ValueError("dart_url이 rcept_no와 맞지 않습니다.")
+
+
+def _validate_f004_row(row_id: object, row: object) -> None:
+    if not isinstance(row, dict):
+        raise ValueError("f004_rows 행이 객체가 아닙니다.")
+    _require_rcept_pair(row.get("rcept_no"), row.get("dart_url"))
+    rcept = row["rcept_no"]
+    if not isinstance(row_id, str) or not row_id.startswith(rcept + ":"):
+        raise ValueError("행 id가 rcept_no로 시작하지 않습니다.")
+    kind = row.get("action_kind")
+    if not isinstance(kind, str) or not kind:
+        raise ValueError("action_kind 형식이 아닙니다.")
+    action = row.get("action")
+    if kind == "none":
+        if action is not None and not isinstance(action, str):
+            raise ValueError("action 형식이 아닙니다.")
+    elif not isinstance(action, str):
+        raise ValueError("action 형식이 아닙니다.")
+    raw_date = row.get("recommend_date_raw")
+    if raw_date is not None and not isinstance(raw_date, str):
+        raise ValueError("recommend_date_raw 형식이 아닙니다.")
+
+
+def _path_key(path: dict) -> tuple:
+    try:
+        bundle = path["bundle"]
+        section = path["section"]
+        group = path["group"]
+        gun = path["gun"]
+        firm = path["firm"]
+        index = path["index"]
+    except KeyError as exc:
+        raise ValueError("attachment path 키가 없습니다.") from exc
+    for name, value in (
+        ("bundle", bundle),
+        ("section", section),
+        ("group", group),
+        ("firm", firm),
+    ):
+        if not isinstance(value, str) or not value:
+            raise ValueError(f"path {name} 형식이 아닙니다.")
+    if gun is not None and not isinstance(gun, str):
+        raise ValueError("path gun 형식이 아닙니다.")
+    if type(index) is not int:
+        raise ValueError("attachment index가 정수가 아닙니다.")
+    return (bundle, section, group, gun, firm, index)
+
+
 def _validate(data: dict) -> None:
     attachments = data.get("attachments")
     reasons = data.get("firm_reasons")
     rows = data.get("f004_rows")
-    if not isinstance(attachments, list) or len(attachments) != 124:
-        raise ValueError("attachments가 124개가 아닙니다.")
-    if not isinstance(reasons, list) or len(reasons) != 41:
-        raise ValueError("firm_reasons가 41개가 아닙니다.")
+    counts = data.get("counts")
+    if not isinstance(counts, dict):
+        raise ValueError("counts가 객체가 아닙니다.")
+    slots = counts.get("attach_slots")
+    lines = counts.get("firm_reason_lines")
+    if type(slots) is not int or type(lines) is not int:
+        raise ValueError("counts 형식이 아닙니다.")
+    if not isinstance(attachments, list) or not attachments:
+        raise ValueError("attachments가 비어 있습니다.")
+    if not isinstance(reasons, list):
+        raise ValueError("firm_reasons가 목록이 아닙니다.")
+    if slots != len(attachments) or lines != len(reasons):
+        raise ValueError("counts가 목록 길이와 다릅니다.")
     if not isinstance(rows, dict):
         raise ValueError("f004_rows가 없습니다.")
     _reject_dart_url(data)
+    for row_id, row in rows.items():
+        _validate_f004_row(row_id, row)
     seen: set[tuple] = set()
     for att in attachments:
         if not isinstance(att, dict):
@@ -108,19 +174,7 @@ def _validate(data: dict) -> None:
         path = att.get("path")
         if not isinstance(path, dict):
             raise ValueError("attachment path가 없습니다.")
-        try:
-            key = (
-                path["bundle"],
-                path["section"],
-                path["group"],
-                path["gun"],
-                path["firm"],
-                path["index"],
-            )
-        except KeyError as exc:
-            raise ValueError("attachment path 키가 없습니다.") from exc
-        if not isinstance(key[5], int) or isinstance(key[5], bool):
-            raise ValueError("attachment index가 정수가 아닙니다.")
+        key = _path_key(path)
         if key in seen:
             raise ValueError("부착 자리가 겹칩니다.")
         seen.add(key)
@@ -134,16 +188,30 @@ def _validate(data: dict) -> None:
             if not isinstance(row_id, str) or row_id not in rows:
                 raise ValueError("f004_row_id가 f004_rows에 없습니다.")
             note = item.get("note")
-            if note is not None and (not isinstance(note, str) or _BANNED in note):
+            if note is not None and not isinstance(note, str):
+                raise ValueError("note 형식이 아닙니다.")
+            if isinstance(note, str) and _BANNED in note:
                 raise ValueError("원문 필드 밖에 금지어가 있습니다.")
+    seen_firms: set[str] = set()
     for reason in reasons:
         if not isinstance(reason, dict):
             raise ValueError("firm_reasons 항목이 객체가 아닙니다.")
         text = reason.get("text")
-        if not isinstance(text, str) or _BANNED in text:
+        if not isinstance(text, str):
+            raise ValueError("text 형식이 아닙니다.")
+        if _BANNED in text:
             raise ValueError("원문 필드 밖에 금지어가 있습니다.")
-        if not isinstance(reason.get("firm"), str) or not reason.get("firm"):
+        firm = reason.get("firm")
+        if not isinstance(firm, str) or not firm:
             raise ValueError("firm_reasons 법인 이름이 없습니다.")
+        if firm in seen_firms:
+            raise ValueError("firm_reasons 법인이 겹칩니다.")
+        seen_firms.add(firm)
+        disclosure = reason.get("disclosure")
+        if disclosure is not None and not isinstance(disclosure, dict):
+            raise ValueError("disclosure 형식이 아닙니다.")
+        if isinstance(disclosure, dict):
+            _require_rcept_pair(disclosure.get("rcept_no"), disclosure.get("dart_url"))
 
 
 def load_attach(path: Path = ATTACH_PATH) -> dict:
@@ -394,11 +462,28 @@ def inject_f004_attach(page: str, data: dict | None = None, *, strict: bool | No
     return _insert_attach(strip_f004_attach(page), data, strict=strict)
 
 
+def _merge_spans(spans: list[tuple[int, int]]) -> list[tuple[int, int]]:
+    if not spans:
+        return []
+    merged: list[list[int]] = []
+    for start, end in sorted(spans):
+        if merged and start <= merged[-1][1]:
+            if end > merged[-1][1]:
+                merged[-1][1] = end
+            continue
+        merged.append([start, end])
+    return [(start, end) for start, end in merged]
+
+
 def strip_f004_attach(page: str) -> str:
-    """붙인 이행사항 블록과 법인 사유 줄만 지운다."""
-    spans = list(fss_review_cards._regions(page, '<div class="fss-f004-attach"'))
-    for match in _REASON_P.finditer(page):
-        spans.append((match.start(), match.end()))
-    for start, end in sorted(spans, reverse=True):
-        page = page[:start] + page[end:]
-    return page
+    """2025 블록 안에 붙인 이행사항과 법인 사유만 지운다."""
+    try:
+        start, end = _year_span(page)
+    except ValueError:
+        return page
+    block = page[start:end]
+    spans = list(fss_review_cards._regions(block, '<div class="fss-f004-attach"'))
+    spans.extend((match.start(), match.end()) for match in _REASON_P.finditer(block))
+    for rel_start, rel_end in reversed(_merge_spans(spans)):
+        block = block[:rel_start] + block[rel_end:]
+    return page[:start] + block + page[end:]

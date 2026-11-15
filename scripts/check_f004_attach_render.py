@@ -54,6 +54,19 @@ EXPECTED = {
     "no_finding": 0,
     "dongsung": 0,
 }
+_INTERNAL_IDS = (
+    "f004_row_id",
+    "text_sha256",
+    "finding_id",
+    "match_level",
+    "year_basis",
+    "date_mismatch",
+    "f004_no_finding",
+    "pending",
+    "qu_review31",
+    "qu_dongsung",
+)
+SEARCH_INDEX = ROOT / "site" / "search" / "search_index.json"
 
 
 def _sha256(path: Path) -> str:
@@ -72,6 +85,25 @@ def _prior_year_hashes(html: str) -> dict[str, str]:
         if year in PRIOR_YEAR_SHA:
             found[year] = hashlib.sha256(str(div).encode("utf-8")).hexdigest()
     return found
+
+
+def _internal_hits(text: str) -> int:
+    return sum(text.count(token) for token in _INTERNAL_IDS)
+
+
+def _phrase_counts(html: str) -> dict[str, int]:
+    """F004로 붙인 요소의 텍스트만 센다."""
+    soup = BeautifulSoup(html, "html.parser")
+    text = "\n".join(
+        node.get_text() for node in soup.select(".fss-f004-attach, .fss-f004-reason")
+    )
+    return {
+        "no_date": text.count("권고일 기재 없음"),
+        "no_action": text.count("이행사항 기재 없음"),
+        "note": text.count("한 행으로 공시"),
+        "mismatch": text.count("권고일 표기 불일치"),
+        "no_finding": text.count("지적사항 없음"),
+    }
 
 
 def _dongsung(html: str) -> int:
@@ -111,16 +143,31 @@ def build_report(html: str) -> dict:
             errors.append(
                 f"2025 렌더 부착 {rendered_size} B {rendered_sha} / 기대 {expect_size} B {expect_sha}"
             )
+    phrases = _phrase_counts(html)
     counts = {
         "attach": html.count('class="fss-f004-attach"'),
         "reason": html.count('class="fss-f004-reason"'),
-        "no_date": html.count("권고일 기재 없음"),
-        "no_action": html.count("이행사항 기재 없음"),
-        "note": html.count("한 행으로 공시"),
-        "mismatch": html.count("권고일 표기 불일치"),
-        "no_finding": html.count("지적사항 없음"),
+        "no_date": phrases["no_date"],
+        "no_action": phrases["no_action"],
+        "note": phrases["note"],
+        "mismatch": phrases["mismatch"],
+        "no_finding": phrases["no_finding"],
         "dongsung": _dongsung(html),
     }
+    page_ids = _internal_hits(html)
+    if page_ids:
+        errors.append(f"내부 id가 페이지에 {page_ids}건 있습니다.")
+    search_ids = 0
+    if SEARCH_INDEX.is_file():
+        search_text = SEARCH_INDEX.read_text(encoding="utf-8")
+        search_ids = _internal_hits(search_text)
+        if search_ids:
+            errors.append(f"내부 id가 검색 색인에 {search_ids}건 있습니다.")
+        search_mismatch = search_text.count("권고일 표기 불일치")
+        if search_mismatch:
+            errors.append(f"검색 색인의 권고일 표기 불일치 {search_mismatch}건")
+    else:
+        errors.append("search_index.json이 없습니다.")
     for key, expected in EXPECTED.items():
         if counts[key] != expected:
             errors.append(f"{key} 화면 {counts[key]} / 기대 {expected}")
@@ -139,6 +186,8 @@ def build_report(html: str) -> dict:
         "rendered_sha256": rendered_sha,
         "counts": counts,
         "prior_year_sha_match": prior_match,
+        "internal_ids_in_page": page_ids,
+        "internal_ids_in_search_index": search_ids,
         "errors": errors,
     }
 
@@ -161,6 +210,8 @@ def render_text(report: dict) -> str:
         f"지적사항 없음: {counts['no_finding']}",
         f"동성회계법인 F004: {counts['dongsung']}",
         f"prior_year_sha_match: {str(report['prior_year_sha_match']).lower()}",
+        f"internal_ids_in_page: {report['internal_ids_in_page']}",
+        f"internal_ids_in_search_index: {report['internal_ids_in_search_index']}",
         f"errors: {len(report['errors'])}",
     ]
     for error in report["errors"]:

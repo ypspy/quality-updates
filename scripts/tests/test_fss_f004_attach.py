@@ -352,3 +352,187 @@ def test_our_phrases_do_not_contain_the_banned_word(tmp_path):
     path.write_text(json.dumps(copied, ensure_ascii=False), encoding="utf-8")
     with pytest.raises(ValueError):
         load_attach(path)
+
+
+_LOOKALIKE_REASON = '<p class="fss-f004-reason">2024 원문</p>'
+_LOOKALIKE_ATTACH = '<div class="fss-f004-attach"><p>2024 원문</p></div>'
+_LOOKALIKE_MENTION = '<p class="fss-f004-reason">2024 짝없음'
+_INTERNAL_IDS = (
+    "f004_row_id",
+    "text_sha256",
+    "finding_id",
+    "match_level",
+    "year_basis",
+    "date_mismatch",
+    "f004_no_finding",
+    "pending",
+    "qu_review31",
+    "qu_dongsung",
+)
+
+
+def _copy_attach() -> dict:
+    return json.loads(json.dumps(load_attach()))
+
+
+def _dump_attach(directory: Path, data: dict) -> Path:
+    payload = json.dumps(data, ensure_ascii=False).encode("utf-8")
+    directory.mkdir(parents=True, exist_ok=True)
+    path = directory / "f004-item-attach.json"
+    path.write_bytes(payload)
+    manifest = {
+        "file": "f004-item-attach.json",
+        "sha256": hashlib.sha256(payload).hexdigest(),
+        "bytes": len(payload),
+    }
+    (directory / "f004-item-attach.manifest.json").write_text(
+        json.dumps(manifest, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    return path
+
+
+def _with_2024_lookalikes(page: str) -> str:
+    marker = '<div class="fss-year" data-year="2024" hidden>'
+    at = page.find(marker)
+    assert at >= 0
+    insert_at = at + len(marker)
+    extra = _LOOKALIKE_REASON + _LOOKALIKE_ATTACH + _LOOKALIKE_MENTION
+    return page[:insert_at] + extra + page[insert_at:]
+
+
+def test_lookalikes_outside_2025_stay_in_place():
+    page = _with_2024_lookalikes(materialize_review_markdown(PAGE.read_text(encoding="utf-8")))
+    built = inject_f004_attach(page, data=load_attach())
+    assert _LOOKALIKE_REASON in built
+    assert _LOOKALIKE_ATTACH in built
+    assert _LOOKALIKE_MENTION in built
+    start, end = fss_f004_attach._year_span(built)
+    assert built[start:end].count('class="fss-f004-attach"') == 128
+    assert built.count('class="fss-f004-attach"') == 129
+
+
+def test_strip_ignores_pages_without_2025_and_outside_lookalikes():
+    lone = _LOOKALIKE_REASON + _LOOKALIKE_ATTACH + _LOOKALIKE_MENTION
+    assert strip_f004_attach(lone) == lone
+    page = _with_2024_lookalikes(materialize_review_markdown(PAGE.read_text(encoding="utf-8")))
+    stripped = strip_f004_attach(page)
+    assert _LOOKALIKE_REASON in stripped
+    assert _LOOKALIKE_ATTACH in stripped
+    assert _LOOKALIKE_MENTION in stripped
+    assert strip_f004_attach(stripped) == stripped
+
+
+def test_counts_mismatch_rejects_and_build_falls_back(tmp_path, monkeypatch, caplog):
+    source = PAGE.read_text(encoding="utf-8")
+    expected = materialize_review_markdown(source)
+    for name, key in (("slots", "attach_slots"), ("lines", "firm_reason_lines")):
+        data = _copy_attach()
+        data["counts"][key] = data["counts"][key] + 1
+        path = _dump_attach(tmp_path / name, data)
+        with pytest.raises(ValueError):
+            load_attach(path)
+        monkeypatch.setattr(fss_f004_attach, "ATTACH_PATH", path)
+        assert _hook(source, caplog) == expected
+        caplog.clear()
+
+
+def test_f004_row_shape_rejects_and_build_falls_back(tmp_path, monkeypatch, caplog):
+    source = PAGE.read_text(encoding="utf-8")
+    expected = materialize_review_markdown(source)
+    row_id = next(iter(load_attach()["f004_rows"]))
+
+    def set_rcept_list(data: dict) -> None:
+        data["f004_rows"][row_id]["rcept_no"] = []
+
+    def set_rcept_short(data: dict) -> None:
+        data["f004_rows"][row_id]["rcept_no"] = "1234567890123"
+
+    def set_url_mismatch(data: dict) -> None:
+        data["f004_rows"][row_id]["dart_url"] = (
+            "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=00000000000000"
+        )
+
+    def set_action_none(data: dict) -> None:
+        data["f004_rows"][row_id]["action"] = None
+        data["f004_rows"][row_id]["action_kind"] = "text"
+
+    def set_date_number(data: dict) -> None:
+        data["f004_rows"][row_id]["recommend_date_raw"] = 5
+
+    def set_row_none(data: dict) -> None:
+        data["f004_rows"][row_id] = None
+
+    cases = (
+        set_rcept_list,
+        set_rcept_short,
+        set_url_mismatch,
+        set_action_none,
+        set_date_number,
+        set_row_none,
+    )
+    for index, mutate in enumerate(cases):
+        data = _copy_attach()
+        mutate(data)
+        path = _dump_attach(tmp_path / str(index), data)
+        with pytest.raises(ValueError):
+            load_attach(path)
+        monkeypatch.setattr(fss_f004_attach, "ATTACH_PATH", path)
+        assert _hook(source, caplog) == expected
+        caplog.clear()
+
+
+def test_disclosure_shape_is_rejected(tmp_path):
+    data = _copy_attach()
+    target = next(reason for reason in data["firm_reasons"] if reason.get("disclosure"))
+    saved = json.loads(json.dumps(target["disclosure"]))
+
+    target["disclosure"] = "x"
+    with pytest.raises(ValueError):
+        load_attach(_dump_attach(tmp_path / "text", data))
+
+    data = _copy_attach()
+    target = next(reason for reason in data["firm_reasons"] if reason.get("disclosure"))
+    target["disclosure"]["rcept_no"] = "123"
+    with pytest.raises(ValueError):
+        load_attach(_dump_attach(tmp_path / "short", data))
+
+    data = _copy_attach()
+    target = next(reason for reason in data["firm_reasons"] if reason.get("disclosure"))
+    target["disclosure"] = saved
+    target["disclosure"]["dart_url"] = "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=00000000000000"
+    with pytest.raises(ValueError):
+        load_attach(_dump_attach(tmp_path / "url", data))
+
+
+def test_duplicate_firm_reason_is_rejected(tmp_path):
+    data = _copy_attach()
+    data["firm_reasons"].append(json.loads(json.dumps(data["firm_reasons"][0])))
+    data["counts"]["firm_reason_lines"] = len(data["firm_reasons"])
+    with pytest.raises(ValueError):
+        load_attach(_dump_attach(tmp_path, data))
+
+
+def test_path_type_errors_are_value_errors(tmp_path):
+    data = _copy_attach()
+    data["attachments"][0]["path"]["section"] = []
+    with pytest.raises(ValueError):
+        load_attach(_dump_attach(tmp_path / "section", data))
+
+    data = _copy_attach()
+    data["attachments"][0]["path"]["firm"] = None
+    with pytest.raises(ValueError):
+        load_attach(_dump_attach(tmp_path / "firm", data))
+
+
+def test_bad_note_type_says_format(tmp_path):
+    data = _copy_attach()
+    data["attachments"][0]["f004"][0]["note"] = 5
+    with pytest.raises(ValueError, match="형식"):
+        load_attach(_dump_attach(tmp_path, data))
+
+
+def test_rendered_block_has_no_internal_ids():
+    html = _injected()
+    for token in _INTERNAL_IDS:
+        assert token not in html
