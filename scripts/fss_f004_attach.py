@@ -30,9 +30,7 @@ _BUNDLE_NAME = re.compile(r'<p class="fss-bundle-name">(.*?)</p>', re.S)
 _H2 = re.compile(r"<h2>(.*?)</h2>", re.S)
 _H3 = re.compile(r"<h3>(.*?)</h3>", re.S)
 _GUN_NAME = re.compile(r'<p class="fss-gun-name">(.*?)</p>', re.S)
-_REASON_P = re.compile(r'<p class="fss-f004-reason(?: fss-f004-same)?">.*?</p>', re.S)
-# 같은 법인의 두 번째 패널부터 쓰는 짧은 사유 줄 (사용자 결정 2026-11-15 R1)
-_SAME_REASON_TEXT = "F004 이행사항: 위와 같음"
+_REASON_P = re.compile(r'<p class="fss-f004-reason">.*?</p>', re.S)
 
 
 def _esc_text(value: object) -> str:
@@ -271,7 +269,7 @@ def _render_one(item: dict, row: dict) -> str:
     )
 
 
-def _render_reason(reason: dict, *, same: bool = False) -> str:
+def _render_reason(reason: dict) -> str:
     link = ""
     disclosure = reason.get("disclosure")
     if disclosure:
@@ -280,8 +278,6 @@ def _render_reason(reason: dict, *, same: bool = False) -> str:
             f'<a href="{_esc_attr(disclosure.get("dart_url"))}" rel="noopener" target="_blank">'
             f'{_esc_text(disclosure.get("rcept_no"))}</a>'
         )
-    if same:
-        return _one_line(f'<p class="fss-f004-reason fss-f004-same">{_SAME_REASON_TEXT}{link}</p>')
     return _one_line(f'<p class="fss-f004-reason">{_esc_text(reason.get("text"))}{link}</p>')
 
 
@@ -342,9 +338,7 @@ def _index_attachments(data: dict) -> dict[tuple, dict[int, dict]]:
     return indexed
 
 
-def _fill_panel(
-    panel: str, indexed: dict[int, dict], reason: dict | None, rows: dict, *, same: bool = False
-):
+def _fill_panel(panel: str, indexed: dict[int, dict], reason: dict | None, rows: dict):
     matches = list(_FINDING.finditer(panel))
     inserts: dict[int, str] = {}
     resolved: list[dict] = []
@@ -377,7 +371,7 @@ def _fill_panel(
         cursor = pos
     parts.append(panel[cursor:body_end])
     if reason is not None:
-        parts.append(_render_reason(reason, same=same))
+        parts.append(_render_reason(reason))
     parts.append("</div>")
     return _one_line("".join(parts)), resolved, skipped
 
@@ -419,9 +413,9 @@ def _insert_attach(page: str, data: dict, *, strict: bool) -> str:
             for index, att in by_key.get(key, {}).items()
             if id(att) not in seen
         }
+        # 사유 법인은 모든 2025 패널에 같은 사유 줄 전체를 단다 (사용자 결정 2026-11-15 9:14 AM CT).
         reason = reasons.get(firm)
-        same = reason is not None and firm in reason_firms
-        updated, got, missed = _fill_panel(panel["html"], indexed, reason, rows, same=same)
+        updated, got, missed = _fill_panel(panel["html"], indexed, reason, rows)
         for att in got:
             seen.add(id(att))
         for att in missed:

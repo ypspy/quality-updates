@@ -11,6 +11,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import sys
 import tempfile
 from pathlib import Path
@@ -36,8 +37,8 @@ PRIOR_YEAR_SHA = {
 }
 RENDERED = {
     "1c6df2500ba918054bd4b22b3a983af9ef3bdecdedc54908d4a54a04e1ea72e4": (
-        313703,
-        "ef266044ee0914a1f81aed7765d2b9771f2e05201e5cc0fd41574ed82850293e",
+        317065,
+        "c250624d21907095667438d0326c1e7765464575da6655d3a119db3dc7e774cc",
     ),
 }
 _INTERNAL_IDS = (
@@ -117,21 +118,37 @@ def _dongsung(html: str) -> int:
     return count
 
 
-def _reason_panels(html: str, firms: set[str]) -> tuple[int, int, int]:
-    """2025 패널 수, 그중 사유 법인 패널 수, 사유 줄이 정확히 하나가 아닌 사유 법인 패널 수."""
+def _short_reason_lines(html: str) -> int:
+    """「위와 같음」 짧은 사유 줄(v2 R1 형식) 수. 지금 형식에서는 0이어야 한다."""
+    return sum(
+        1
+        for line in re.findall(r'<p class="fss-f004-reason[^"]*">.*?</p>', html, re.S)
+        if "fss-f004-same" in line or "위와 같음" in line
+    )
+
+
+def _reason_panels(html: str, firms: set[str]) -> tuple[int, int, int, int]:
+    """2025 패널 수, 그중 사유 법인 패널 수, 사유 줄이 정확히 하나가 아닌 사유 법인 패널 수,
+    패널마다 사유 줄이 같지 않은 사유 법인 수."""
     soup = BeautifulSoup(html, "html.parser")
     year = soup.select_one('div.fss-year[data-year="2025"]')
     if year is None:
-        return 0, 0, 0
+        return 0, 0, 0, 0
     total = panels = bad = 0
+    lines: dict[str, set[str]] = {}
     for panel in year.select("div.fss-original"):
         total += 1
-        if panel.get("data-names") not in firms:
+        firm = panel.get("data-names")
+        if firm not in firms:
             continue
         panels += 1
-        if len(panel.select("p.fss-f004-reason")) != 1:
+        found = panel.select("p.fss-f004-reason")
+        if len(found) != 1:
             bad += 1
-    return total, panels, bad
+            continue
+        lines.setdefault(firm, set()).add(str(found[0]))
+    differ = sum(1 for seen in lines.values() if len(seen) > 1)
+    return total, panels, bad, differ
 
 
 def build_report(html: str, search_index: Path = SEARCH_INDEX) -> dict:
@@ -151,7 +168,7 @@ def build_report(html: str, search_index: Path = SEARCH_INDEX) -> dict:
     count_source = loaded["counts"]
     expected_counts = {
         "attach": count_source["attach_blocks"],
-        "reason": count_source["firm_reason_panels"],
+        "same": 0,
         "no_date": count_source["no_date_blocks"],
         "no_action": count_source["no_action_blocks"],
         "note": count_source["notes"],
@@ -162,11 +179,14 @@ def build_report(html: str, search_index: Path = SEARCH_INDEX) -> dict:
     reason_firms = {reason["firm"] for reason in loaded["firm_reasons"]}
     # 기대 패널 수는 검사할 페이지가 아니라 year-2025.json 렌더(부착 전)에서 센다.
     # 고정 상수(136)를 두지 않아 데이터가 바뀌어도 그대로 맞고, 페이지에서 패널이 빠지면 잡힌다.
-    source_total, source_reason, _ = _reason_panels(
+    source_total, source_reason, _, _ = _reason_panels(
         render_year_2025_html(load_year_2025()), reason_firms
     )
-    page_total, page_reason, reason_panel_bad = _reason_panels(html, reason_firms)
-    expected_counts["same"] = source_reason - len(reason_firms)
+    page_total, page_reason, reason_panel_bad, reason_firm_differ = _reason_panels(
+        html, reason_firms
+    )
+    # 사유 법인은 모든 패널에 같은 사유 줄 전체(사용자 결정 2026-11-15 9:14 AM CT).
+    expected_counts["reason"] = source_reason
     if page_total != source_total or page_reason != source_reason:
         errors.append(
             f"2025 패널 화면 {page_total}(사유 법인 {page_reason})"
@@ -189,7 +209,7 @@ def build_report(html: str, search_index: Path = SEARCH_INDEX) -> dict:
     counts = {
         "attach": html.count('class="fss-f004-attach"'),
         "reason": html.count('class="fss-f004-reason"'),
-        "same": html.count('class="fss-f004-reason fss-f004-same"'),
+        "same": _short_reason_lines(html),
         "no_date": phrases["no_date"],
         "no_action": phrases["no_action"],
         "note": phrases["note"],
@@ -199,6 +219,8 @@ def build_report(html: str, search_index: Path = SEARCH_INDEX) -> dict:
     }
     if reason_panel_bad:
         errors.append(f"사유 줄이 하나가 아닌 사유 법인 패널 {reason_panel_bad}개")
+    if reason_firm_differ:
+        errors.append(f"패널마다 사유 줄이 다른 사유 법인 {reason_firm_differ}곳")
     page_ids = _internal_hits(html)
     if page_ids:
         errors.append(f"내부 id가 페이지에 {page_ids}건 있습니다.")
@@ -239,7 +261,7 @@ def render_text(report: dict) -> str:
         f"rendered sha256: {report['rendered_sha256']}",
         f"fss-f004-attach: {counts['attach']}",
         f"fss-f004-reason: {counts['reason']}",
-        f"fss-f004-reason 위와 같음: {counts['same']}",
+        f"위와 같음·fss-f004-same: {counts['same']}",
         f"권고일 기재 없음: {counts['no_date']}",
         f"이행사항 기재 없음: {counts['no_action']}",
         f"한 행으로 공시: {counts['note']}",

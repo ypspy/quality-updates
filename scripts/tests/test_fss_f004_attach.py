@@ -35,12 +35,12 @@ ATTACH_BYTES = 246423
 # render_year_2025_html(load_year_2025())에 부착한 2025 블록.
 RENDERED = {
     "1c6df2500ba918054bd4b22b3a983af9ef3bdecdedc54908d4a54a04e1ea72e4": (
-        313703,
-        "ef266044ee0914a1f81aed7765d2b9771f2e05201e5cc0fd41574ed82850293e",
+        317065,
+        "c250624d21907095667438d0326c1e7765464575da6655d3a119db3dc7e774cc",
     ),
 }
 _SUMMARY = "F004 부착: 자리 143/143, 이행사항 151, 법인 사유 41곳(136칸), 건너뜀 0"
-_SAME = 'class="fss-f004-reason fss-f004-same"'
+_REASON = 'class="fss-f004-reason"'
 
 
 def _banned() -> str:
@@ -137,8 +137,9 @@ def test_every_slot_resolves(caplog):
         built = _injected()
     assert _SUMMARY in caplog.text
     assert built.count('class="fss-f004-attach"') == 151
-    assert built.count('class="fss-f004-reason"') == 41
-    assert built.count(_SAME) == 95
+    assert built.count(_REASON) == 136
+    assert "위와 같음" not in built
+    assert "fss-f004-same" not in built
     assert "건너뜀 0" in caplog.text
 
 
@@ -158,8 +159,8 @@ def test_changed_paragraph_is_strict_or_skipped(caplog):
     at = built.find(marker + "추가")
     end = built.find("</p>", at)
     assert not built.startswith('<div class="fss-f004-attach"', end + len("</p>"))
-    assert built.count('class="fss-f004-reason"') == 41
-    assert built.count(_SAME) == 95
+    assert built.count(_REASON) == 136
+    assert "위와 같음" not in built
 
 
 def test_bad_file_keeps_the_materialized_page(tmp_path, monkeypatch, caplog):
@@ -283,10 +284,11 @@ def test_daeju_panels_link_the_disclosure_and_audit_teams_do_not():
     assert daeju[0].count('class="fss-f004-reason"') == 1
     assert "20260630000869" in daeju[0]
     assert 'href="https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000869"' in daeju[0]
+    assert len(daeju) >= 2
+    first = re.search(r'<p class="fss-f004-reason">.*?</p>', daeju[0]).group(0)
     for panel in daeju[1:]:
-        assert 'class="fss-f004-reason"' not in panel
-        assert panel.count(_SAME) == 1
-        assert "F004 이행사항: 위와 같음 · " in panel
+        assert panel.count(_REASON) == 1
+        assert first in panel
         assert 'href="https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000869"' in panel
     audit_firms = [reason["firm"] for reason in data["firm_reasons"] if reason["reason"] == "audit_team"]
     assert len(audit_firms) == 19
@@ -299,10 +301,10 @@ def test_daeju_panels_link_the_disclosure_and_audit_teams_do_not():
         assert match
         assert "<a " not in match.group(0)
         for panel in panels[1:]:
-            assert 'class="fss-f004-reason"' not in panel
-            same = re.search(r'<p class="fss-f004-reason fss-f004-same">.*?</p>', panel)
-            assert same
-            assert same.group(0) == '<p class="fss-f004-reason fss-f004-same">F004 이행사항: 위와 같음</p>'
+            again = re.search(r'<p class="fss-f004-reason">.*?</p>', panel)
+            assert again
+            assert again.group(0) == match.group(0)
+            assert "<a " not in again.group(0)
     assert seen == 19
 
 
@@ -622,9 +624,9 @@ def test_consistent_new_counts_still_attach(tmp_path, monkeypatch, caplog):
     built = _hook(source, caplog)
     assert built != plain
     assert built.count('class="fss-f004-attach"') == 151 - len(removed["f004"])
-    assert built.count('class="fss-f004-reason"') == 40
-    # 빠진 사유 법인(효림회계법인) 패널 4개만큼 칸과 짧은 줄이 준다: 136 - 4 = 132칸, 132 - 40 = 92.
-    assert built.count(_SAME) == 92
+    # 빠진 사유 법인(효림회계법인) 패널 4개만큼 사유 줄이 준다: 136 - 4 = 132칸.
+    assert built.count(_REASON) == 132
+    assert "위와 같음" not in built
     assert "자리 142/142" in caplog.text
     assert "법인 사유 40곳(132칸)" in caplog.text
     assert "건너뜀 0" in caplog.text
@@ -643,22 +645,22 @@ def _firm_group_panel(html: str, firm: str, group_prefix: str) -> str:
     return found[0]
 
 
-def test_each_firm_reason_is_full_on_the_first_panel_and_short_after():
+def test_each_firm_reason_is_full_and_identical_on_every_panel():
     data = load_attach()
     html = _injected()
-    assert html.count('class="fss-f004-reason"') == 41
-    assert html.count(_SAME) == 95
+    assert html.count(_REASON) == 136
+    assert "위와 같음" not in html
     total = 0
     for reason in data["firm_reasons"]:
         panels = _panels_named(html, reason["firm"])
         assert panels
         total += len(panels)
-        assert panels[0].count('class="fss-f004-reason"') == 1
-        assert _SAME not in panels[0]
-        assert reason["text"] in panels[0]
-        for panel in panels[1:]:
-            assert 'class="fss-f004-reason"' not in panel
-            assert panel.count(_SAME) == 1
+        first = re.search(r'<p class="fss-f004-reason">.*?</p>', panels[0])
+        assert first
+        assert reason["text"] in first.group(0)
+        for panel in panels:
+            assert panel.count(_REASON) == 1
+            assert first.group(0) in panel
             assert panel.endswith("</p></div>")
     assert total == 136
 
