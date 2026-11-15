@@ -1,0 +1,6350 @@
+{
+ "version": "item-attach-v1-2026-11-15",
+ "status": "draft: 동성 재분류 PR과 9행 결정 뒤 v2로 다시 만듦",
+ "source": {
+  "main_commit": "94f4882d6cb98a2bab6d20247f4b5c963eb9800f",
+  "year_2025_json_sha256": "e8f7c3d54a44247ef1e7827970f90c55a5c6fb3f4a31257effa54ca0608470ab",
+  "f004_followup_v4_sha256": "617ccf2d8dd778c7235c6f9809b3fe57ea0798226b25eabc407b2f47e9132798",
+  "proposal": "proposal-item-attach/proposal.md sha256 4f0d8843a21bb1e48910aa666fbbf19fdafec0d4519961a4579bf5b673c9d860"
+ },
+ "serialization": "json.dumps(ensure_ascii=False, indent=1), UTF-8, LF, 마지막 줄바꿈 없음. 키 순서는 이 파일 그대로.",
+ "finding_id_format": "2025/{bundle}/{중분류 번호}/{gun 또는 -}/{firm}/{firm.findings 안 0부터 순번}. text_sha256은 NFC 문단 텍스트의 sha256",
+ "rules": [
+  "감리 주기 필터: F004 행의 감리연도(권고일 연도 − 1, 권고일이 없으면 처음 공시 연도 − 1)가 2025인 행만 후보. 16개 예외 유지 (사용자 결정 2026-11-14, 2026-11-15 proposal 4절).",
+  "자동 부착은 높음과 중간만. 사람 확인 31개는 자동으로 붙이지 않음 (사용자 결정 2026-11-15 #1).",
+  "F004 한 행이 같은 법인·같은 중분류의 문단 여러 개를 다루면 마지막 문단 아래에 한 번만 붙임 (사용자 결정 2026-11-15 #2).",
+  "F004가 없는 법인은 법인당 사유 한 줄. 개별 문단의 연결 실패 문구는 화면에 내지 않음 (사용자 결정 2026-11-15 #3).",
+  "붙을 곳 없던 13행 중 같은 주제 4행은 그 법인 6.1 문단에 두 번째 이행사항으로 붙임. 9행은 검토 후 결정 (사용자 결정 2026-11-15 #4).",
+  "동성 지적은 사이트 분류 수정 PR 뒤에 다시 매칭. 그 전에는 동성 문단에 붙이지 않음 (사용자 결정 2026-11-15 #5).",
+  "연결은 지적 문단 단위. 11/13의 법인 × 감리연도 × 대분류 링크 규칙을 대체 (사용자 결정 2026-11-15 #6).",
+  "권고일 표기 불일치(date_mismatch)와 지적사항 없음(no_finding)은 데이터에만 두고 화면에 내지 않음 (사용자 결정 2026-11-15 #7).",
+  "권고일이 없으면 머리줄에 권고일 기재 없음 (사용자 결정 2026-11-14 약 10:35 PM CT, 2026-11-15 유지).",
+  "이력 표시는 보류, 개별 감사보고서 이행사항은 범위 밖, 1절 제재 표와 stale 행 제외 (2026-11-15 proposal 4절).",
+  "이행사항과 권고 문구는 원문 그대로. 우리 문구에는 금지어를 쓰지 않음 (사용자 결정 2026-11-14)."
+ ],
+ "display": {
+  "head": "F004 개선권고 이행사항 · 권고일 {recommend_date_raw 또는 기재 없음} · {rcept_no 링크}",
+  "action_none": "이행사항 기재 없음",
+  "reason_line": "firm_reasons[].text, disclosure가 있으면 뒤에 · 접수번호 링크. 법인의 모든 fss-original 패널 끝에 한 줄",
+  "hidden_fields": [
+   "date_mismatch",
+   "year_basis",
+   "match_level_v4",
+   "f004_no_finding"
+  ]
+ },
+ "counts": {
+  "qu_findings": 370,
+  "qu_findings_with_attach": 147,
+  "attach_slots": 124,
+  "attached_f004_rows": 121,
+  "attachments_by_basis": {
+   "auto_medium": 76,
+   "auto_high": 48,
+   "same_topic_second_row": 4
+  },
+  "pending_review31": 20,
+  "pending_dongsung": 14,
+  "pending_f004_rows": 22,
+  "firm_reason_lines": 41,
+  "firm_reason_by_code": {
+   "no_cycle_rows": 9,
+   "table_empty": 13,
+   "audit_team": 19
+  },
+  "no_reason_and_no_attach": 6,
+  "qu_findings_under_reason_lines": 183
+ },
+ "f004_rows": {
+  "20260629000099:0:10": {
+   "firm": "동남회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "업무품질관리검토(사전심리 및 사후심리) 절차의 미흡",
+   "action": "주요 입증감사절차 등 감사조서에 대한 사전심리 및 사후심리 모니터링 수행 절차를 점검하고, 관련 문서화 절차를 보완 진행 중임",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.03.20",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260629000099",
+   "rcept_dt": "2026-06-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260629000099",
+   "match_level_v4": "matched_high"
+  },
+  "20260629000099:0:8": {
+   "firm": "동남회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사조서 작성ㆍ관리 절차(감사조서 취합 통제절차 및 감사조서 관리 감독절차)의 미흡",
+   "action": "감사업무 품질관리규정에 따른 감사조서 취합기한 준수 여부를 점검하고, 회계법인내 감사조서 관리 감독절차를 보완 진행 중임",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.03.20",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260629000099",
+   "rcept_dt": "2026-06-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260629000099",
+   "match_level_v4": "matched_high"
+  },
+  "20260629000099:0:9": {
+   "firm": "동남회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사시간 관리 절차(감사투입시간 통제절차 및 감사투입시간 관리 감독절차)의 미흡",
+   "action": "감사업무 품질관리규정에 따른 감사시간 관리 및 통제절차 준수 여부를 점검하고, 회계법인내 감사투입시간 관리 감독절차를 보완 진행 중임",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.03.20",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260629000099",
+   "rcept_dt": "2026-06-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260629000099",
+   "match_level_v4": "matched_high"
+  },
+  "20260629000292:0:8": {
+   "firm": "신성회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "(일부미흡) 감사인은 감사보고서 발행 이전에 업무품질관리검토(사전심리)가 종료되었음을 확인하기 위해 감사보고서 발행 관련 통제문서(Report Docket 등)를 작성하고 업무품질관리검토자의 검토 서명을 확인한 후 감사보고서를 인쇄하거나 전자공시하는 정책과 절차를 수립하고는 있으나, 일부 개별감사업무에서 감사보고서 발행 관련 통제문서가 작성되니 않는 등 감사보고서 발행 이전에 사전 심리가 완료되었음을 확인하는 통제절차가 미흡함.",
+   "action": "감사보고서 발행 이전에 사전심리가 완료되도록 정책을 수립하고 있으며, 반드시 수립된 정책에 따라 감사보고서 발행 절차가 이루어지도록 전체구성원에게 안내 및 교육을 실시하였으며, 추후 이를 확인하는 통제문서를 작성하여 관리하기로 함",
+   "action_kind": "text",
+   "recommend_date_raw": "2025년 10월 23일",
+   "recommend_date_iso": "2025-10-23",
+   "year_basis": "recommend_date_mismatch_exception",
+   "date_mismatch": true,
+   "rcept_no": "20260629000292",
+   "rcept_dt": "2026-06-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260629000292",
+   "match_level_v4": "date_mismatch"
+  },
+  "20260629000292:0:9": {
+   "firm": "신성회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "(일부미흡) 감사인은 감사조서 관리대장을 유지하고 있으나, 일부 감사업무에서 실물조서와 조서관리대장의 수량이 일치하지 않는 사례가 발견되는 등 미흡한 점이 있음",
+   "action": "실무조서와 보관대장이 일치하도록 모니터링을 강화하고 감사조서 보관대장 작성 및 유지에 대한 통제를 강화함",
+   "action_kind": "text",
+   "recommend_date_raw": "2025년 10월 23일",
+   "recommend_date_iso": "2025-10-23",
+   "year_basis": "recommend_date_mismatch_exception",
+   "date_mismatch": true,
+   "rcept_no": "20260629000292",
+   "rcept_dt": "2026-06-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260629000292",
+   "match_level_v4": "date_mismatch"
+  },
+  "20260629000338:0:11": {
+   "firm": "정일회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "-사후심리 관련 정책과 절차 일부 미흡 -사후심리결과에 대한 관리절차 미운영",
+   "action": "-법인이 정한 일정한 주기에 사후심리가 수행되고 문서화되도록 정책과 절차 수립 운영 필요 -사후심리에서 식별된 개선권고사항에 대한 적절한 조치가 이행되도록 절차 마련하고 관련 구성원에게 안내 등의 방식으로 공유하도록 함",
+   "action_kind": "text",
+   "recommend_date_raw": "2025년 09월 18일",
+   "recommend_date_iso": "2025-09-18",
+   "year_basis": "recommend_date_mismatch_exception",
+   "date_mismatch": true,
+   "rcept_no": "20260629000338",
+   "rcept_dt": "2026-06-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260629000338",
+   "match_level_v4": "date_mismatch"
+  },
+  "20260629000338:0:6": {
+   "firm": "정일회계법인",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "-감사시간 집계·검증시스템일부 미흡 -감사시간 모니터링 절차 미운영",
+   "action": "-감사참여인원별 감사투입시간을 적시에 누락없이 집계하고 집계된 감사시간이 임의로 수정되지 않도록 하는 통제절차 마련 -모든 외부감사업무에 대하여 시간예산 편성하고 실재성과 정확성 등 검증하며 적정시간이 투입되었는지 모니터링하는 절차 마련",
+   "action_kind": "text",
+   "recommend_date_raw": "2025년 09월 18일",
+   "recommend_date_iso": "2025-09-18",
+   "year_basis": "recommend_date_mismatch_exception",
+   "date_mismatch": true,
+   "rcept_no": "20260629000338",
+   "rcept_dt": "2026-06-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260629000338",
+   "match_level_v4": "date_mismatch"
+  },
+  "20260629000338:0:9": {
+   "firm": "정일회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "-사전심리수행과 해결사항의 문서화 일부 미흡 -감사보고서 발행 통제절차 일부 미흡 -감사조서 작성관리절차 일부 미흡 -감사조서 보존관리절차 일부 미흡",
+   "action": "-감사보고서초안에 대한 검토 뿐아니라 주요 감사절차를 포함한 조서검토 수행 필요 -적절한 관리자가 인증서를 관리하고 감사보고서의 최종 발행이전에 사전심리가 종료되었음을 확인후 발행되도록 운영 필요 -감사보고서가 확정된 후 적시에 최종업무파일을 취합하도록 절차를 운영하고 조서관리담당자업무에 대한 모니터링 절차 운영필요 -모든 조서를 안전한 보관과 출입통제 등이 가능한 장소에 보관하는 정책과 절차 실행 필요",
+   "action_kind": "text",
+   "recommend_date_raw": "2025년 09월 18일",
+   "recommend_date_iso": "2025-09-18",
+   "year_basis": "recommend_date_mismatch_exception",
+   "date_mismatch": true,
+   "rcept_no": "20260629000338",
+   "rcept_dt": "2026-06-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260629000338",
+   "match_level_v4": "date_mismatch"
+  },
+  "20260629000416:0:0": {
+   "firm": "예지회계법인",
+   "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
+   "category_raw": "회계법인내 품질에 대한 리더십 책임",
+   "recommendation": "- 이사 성과평가시 품질지표 중심의 성과평가 시스템을 적절하게 구현하지 못하는 등 보상체계 운영 미흡 등 - 이사의 직위를 결정 관련 자료의 일부만을 보관하는 등 인사관리 운영 미흡",
+   "action": "(*)",
+   "action_kind": "footnote_mark_verbatim",
+   "recommend_date_raw": "2025.05.12",
+   "recommend_date_iso": "2025-05-12",
+   "year_basis": "recommend_date_mismatch_exception",
+   "date_mismatch": true,
+   "rcept_no": "20260629000416",
+   "rcept_dt": "2026-06-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260629000416",
+   "match_level_v4": "date_mismatch"
+  },
+  "20260629000416:0:1": {
+   "firm": "예지회계법인",
+   "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
+   "category_raw": "회계법인내 품질에 대한 리더십 책임",
+   "recommendation": "- 퇴직연금 회사 부담금을 오납하는 등 자금관리 운영 미흡 - 업체 전문성 등 확인 없이 용역계약을 체결하고 산출물 검증 없이 용역 대금을 지급하는 등 자금관리 체계 및 운영이 미흡",
+   "action": "(*)",
+   "action_kind": "footnote_mark_verbatim",
+   "recommend_date_raw": "2025.05.12",
+   "recommend_date_iso": "2025-05-12",
+   "year_basis": "recommend_date_mismatch_exception",
+   "date_mismatch": true,
+   "rcept_no": "20260629000416",
+   "rcept_dt": "2026-06-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260629000416",
+   "match_level_v4": "date_mismatch"
+  },
+  "20260629000416:0:2": {
+   "firm": "예지회계법인",
+   "dae_standard": "2. 관련 윤리적 요구사항",
+   "category_raw": "윤리적 요구사항",
+   "recommendation": "유가증권 관리시스템 운영과 관련하여, 비감사대상 회사 주식거래 내역의 입력 지연/누락, 일부 사원의 경우 입력 지연/누락, 일부 입력정보 오류 등 미흡",
+   "action": "(*)",
+   "action_kind": "footnote_mark_verbatim",
+   "recommend_date_raw": "2025.05.12",
+   "recommend_date_iso": "2025-05-12",
+   "year_basis": "recommend_date_mismatch_exception",
+   "date_mismatch": true,
+   "rcept_no": "20260629000416",
+   "rcept_dt": "2026-06-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260629000416",
+   "match_level_v4": "date_mismatch"
+  },
+  "20260629000416:0:3": {
+   "firm": "예지회계법인",
+   "dae_standard": "2. 관련 윤리적 요구사항",
+   "category_raw": "윤리적 요구사항",
+   "recommendation": "신규 사원 선임자 및 그 배우자에 대한 독립성 점검의 적시성이 미흡하고, 외부감사 체결 전 감사대상회사에 제공한 비감사용역 관련 윤리적 요구사항 관련 검토내용 문서화 미흡",
+   "action": "(*)",
+   "action_kind": "footnote_mark_verbatim",
+   "recommend_date_raw": "2025.05.12",
+   "recommend_date_iso": "2025-05-12",
+   "year_basis": "recommend_date_mismatch_exception",
+   "date_mismatch": true,
+   "rcept_no": "20260629000416",
+   "rcept_dt": "2026-06-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260629000416",
+   "match_level_v4": "date_mismatch"
+  },
+  "20260629000416:0:4": {
+   "firm": "예지회계법인",
+   "dae_standard": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+   "category_raw": "업무의 수용과 유지",
+   "recommendation": "계약전 위험평가를 부적절하게 수행하거나 위험평가 재수행 절차를 미이행하는 등 감사업무 수임 및 품질관리 미흡",
+   "action": "(*)",
+   "action_kind": "footnote_mark_verbatim",
+   "recommend_date_raw": "2025.05.12",
+   "recommend_date_iso": "2025-05-12",
+   "year_basis": "recommend_date_mismatch_exception",
+   "date_mismatch": true,
+   "rcept_no": "20260629000416",
+   "rcept_dt": "2026-06-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260629000416",
+   "match_level_v4": "date_mismatch"
+  },
+  "20260629000416:0:6": {
+   "firm": "예지회계법인",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "감사업무 배정 및 승인의 적정성을 확인할 수 있는 증빙자료를 구비하지 않는 등 관련 업무 운영 미흡",
+   "action": "(*)",
+   "action_kind": "footnote_mark_verbatim",
+   "recommend_date_raw": "2025.05.12",
+   "recommend_date_iso": "2025-05-12",
+   "year_basis": "recommend_date_mismatch_exception",
+   "date_mismatch": true,
+   "rcept_no": "20260629000416",
+   "rcept_dt": "2026-06-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260629000416",
+   "match_level_v4": "date_mismatch"
+  },
+  "20260629000416:0:8": {
+   "firm": "예지회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "사전심리 지적사항 후속처리 등 심리체계 운영 미흡",
+   "action": "(*)",
+   "action_kind": "footnote_mark_verbatim",
+   "recommend_date_raw": "2025.05.12",
+   "recommend_date_iso": "2025-05-12",
+   "year_basis": "recommend_date_mismatch_exception",
+   "date_mismatch": true,
+   "rcept_no": "20260629000416",
+   "rcept_dt": "2026-06-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260629000416",
+   "match_level_v4": "date_mismatch"
+  },
+  "20260629000546:0:10": {
+   "firm": "다음회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "사후심리결과에 대한 관리절차 일부 미흡",
+   "action": "대표이사가 지정한 모니터링담당자가 6월에 사후심리를 실시하고 사후심리내용과 개선사항을 정기사원총회에서 보고하도록 개선하고 있음. 또한, 법인그룹웨어를 통하여 전구성원에게 관련 내용이 전파되도록 계획하고 있음.",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 20일",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260629000546",
+   "rcept_dt": "2026-06-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260629000546",
+   "match_level_v4": "matched_high"
+  },
+  "20260629000546:0:8": {
+   "firm": "다음회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "사전심리수행과 해결사항의 문서화 일부 미흡",
+   "action": "사전심리절차를 법인그룹웨어의 클라우드시스템을 통하여 수행하며, 클라우드시스템의 추가기능을 활용하여 심리내용과 해결사항의 문서화가 가능하도록 내부심리절차를 개선하고 있음.",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 20일",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260629000546",
+   "rcept_dt": "2026-06-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260629000546",
+   "match_level_v4": "matched_high"
+  },
+  "20260629000546:0:9": {
+   "firm": "다음회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사조서 관리대장 작성과 유지절차 일부 미흡",
+   "action": "법인그룹웨어의 클라우드시스템을통하여 감사조서현황을 실시간으로 작성 및 관리하도록 개선 중임. 또한, 점진적으로 전자문서형태로 아카이브가 가능하도록 조서입고절차를 실물조서형태와 병행하여 운영할 계획을 수립하고 있음.",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 20일",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260629000546",
+   "rcept_dt": "2026-06-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260629000546",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000059:0:10": {
+   "firm": "보람회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "사후심리 관련 정책과 절차 일부 미흡",
+   "action": "사후심리대상과 사후심리 시 점검항목을 사전에 공지하고, 사후심리내역의 문서화를 강화하여 사후심리의 효과성을 제고할 계획임",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.03.23",
+   "recommend_date_iso": "2026-03-23",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000059",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000059",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000059:0:8": {
+   "firm": "보람회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사시간 모니터링 절차 미운영",
+   "action": "감사업무시간집계표, 감사시간 집계결과 및 외부감사실시내용을 점검하여 감사시간 관리에 대한 통제를 강화할 계획임",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.03.23",
+   "recommend_date_iso": "2026-03-23",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000059",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000059",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000059:0:9": {
+   "firm": "보람회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "최종 감사파일 취합과 조서관리담당자 지정 일부미흡",
+   "action": "품질관리 규정을 개정하고, 조서관리대장의 양식과 조서관리 절차를 개선하여 감사조서의 취합 완료기간 관리를 강화할 계획임",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.03.23",
+   "recommend_date_iso": "2026-03-23",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000059",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000059",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000064:0:13": {
+   "firm": "예일회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사의견에 영향을 미칠 수 있는 유의적인 판단 등 사전심리 수행내역을 감사조서로 작성하여야 함에도, 그룹웨어 전자결재 시스템으로만 작성 및 관리하고 있음 내규에 따르면, 감사업무의 경우 감사보고서일로부터 3일 전까지 사전심리를 요청해야 함에도, 일부 감사업무는 요청기한을 준수하지 않았음",
+   "action": "- 감사의견에 영향을 미칠 수 있는 유의적인 판단 등을 감사조서에 첨부하도록 조서서식 개정 및 운영 실시 -매월 사전심리요청기한 준수요청에 대한 안내 자동공지 실시",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.05.06",
+   "recommend_date_iso": "2026-05-06",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000064",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000064",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000064:0:14": {
+   "firm": "예일회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "내규에 따르면, 작성이 완료된 감사조서를 감사보고서일로부터 60일 이내에 취합 및 보관(archive)하여야 하나, 일부 감사업무는 조서 취합 기한을 준수하지 않았음",
+   "action": "-감사조서 취합기한 14일전부터 대상자에게 취합기한 안내 이메일 송부 - 감사조서관리시스템에서 자동으로 감사조서 취한기한 안내 - 취합기한 1일전까지 조서가 취합되지 않는 경우 강제아카이브 실시",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.05.06",
+   "recommend_date_iso": "2026-05-06",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000064",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000064",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000064:0:2": {
+   "firm": "예일회계법인",
+   "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
+   "category_raw": "회계법인내 품질에 대한 리더십 책임",
+   "recommendation": "급여 산정시 내규 등에 정하지 않은 ‘기본상여금’을 임의로 책정하여 각 파트너들의 기본급에 가산함으로써, 기본급과 성과급을 사후조정하였음.",
+   "action": "이사의 성과평가결과와 보상이 연결되도록 이사 성과평가 및 보상체계 관련 규정 개정예정",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.05.06",
+   "recommend_date_iso": "2026-05-06",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000064",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000064",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000064:0:5": {
+   "firm": "예일회계법인",
+   "dae_standard": "2. 관련 윤리적 요구사항",
+   "category_raw": "윤리적 요구사항",
+   "recommendation": "구성원들이 고용관계 등 관련 독립성 정보를 완전하게 입력할 수 있도록 절차를 효과적으로 운영(*)하지 않음. *고용관계 등이 있는 경우 업무 수행여부와 무관하게 ERP에 신고하도록 지속적인 교육 강화, 위반사례 전파, 위반자에 대한 실질적인 징계조치 수행 등",
+   "action": "- 매월 자동으로 고용정보 변동시 ERP 입력기한에 대한 안내 실시 - 고용정보 미등록자 및 지연등록자가 발견되는 경우 성과평가에 불이익으로 반영함. - 독립성정보 등록에 대하여 교육강화",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.05.06",
+   "recommend_date_iso": "2026-05-06",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000064",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000064",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000064:0:7": {
+   "firm": "예일회계법인",
+   "dae_standard": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+   "category_raw": "업무의 수용과 유지",
+   "recommendation": "내규에 따라 감사계약 수임시 고려할 사항 및 절차 등을 규정하고 있으나, 일부 감사업무의 경우 내규 상 고위험업무에 해당함에도, 위험평가를 ‘보통’ 또는 ‘낮음’으로 평가하는 등 계약전 위험평가가 미흡",
+   "action": "입력된 정보에 따라 감사위험이 자동으로 산정되는 개선된 계약전위험평가표 서식을 사용하여 감사위험이 잘못 평가되지 않도록 함",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.05.06",
+   "recommend_date_iso": "2026-05-06",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000064",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000064",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000064:0:9": {
+   "firm": "예일회계법인",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "내규로 감사투입시간의 입력 및 승인 규정을 정하고 모니터링 수행 및 위반 내역에 대해 성과평가에 반영하는 등 감사업무시간의 점검 및 관리절차를 운용하고 있으나, 일부 감사업무는 업무시간이 지연입력되고 지연승인",
+   "action": "- 매월 정기적으로 타임레포트 입력기한 및 승인기한 준수요청 이메일 자동으로 송부 - 회계법인 ERP시스템 로그인시 메인화면에 타임레포트 미승인건수와 미입력건수 표시 - 미승인건과 미입력건이 있는 경우 이메일로 해당내용 자동 이메일로 통지",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.05.06",
+   "recommend_date_iso": "2026-05-06",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000064",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000064",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000159:0:10": {
+   "firm": "회계법인 예광",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "사후심리관련 정책과 절차 및 관리절차 미운영",
+   "action": "2026. 04.23 이행계획서 제출",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 13일",
+   "recommend_date_iso": "2026-03-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000159",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000159",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000159:0:8": {
+   "firm": "회계법인 예광",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사시간 집계·검증시스템 일부 미흡",
+   "action": "2026. 04.23 이행계획서 제출",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 13일",
+   "recommend_date_iso": "2026-03-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000159",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000159",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000159:0:9": {
+   "firm": "회계법인 예광",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "사전심리 수행과 해결사항의 문서화 미운영",
+   "action": "2026. 04.23 이행계획서 제출",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 13일",
+   "recommend_date_iso": "2026-03-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000159",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000159",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000197:0:10": {
+   "firm": "미립회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "모니터링(사후심리) 절차 일부 미흡",
+   "action": "개선권고에 따라 일부 미흡한사항에 대한 관리절차를 마련하여 계획수립 하고 있음",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 13일",
+   "recommend_date_iso": "2026-03-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000197",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000197",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000197:0:6": {
+   "firm": "미립회계법인",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "감사시간 관리절차 일부 미흡",
+   "action": "개선권고에 따라 일부 미흡한사항에 대한 관리절차를 마련하여 계획수립 하고 있음",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 13일",
+   "recommend_date_iso": "2026-03-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000197",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000197",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000197:0:8": {
+   "firm": "미립회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "업무품질관리검토절차(사전심리)의 절차 일부 미흡",
+   "action": "개선권고에 따라 일부 미흡한사항에 대한 관리절차를 마련하여 계획을 수립하고 있음",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 13일",
+   "recommend_date_iso": "2026-03-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000197",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000197",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000261:0:8": {
+   "firm": "위드회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사조서 작성 ·관리절차 관련(설계·운영상 일부 미흡)",
+   "action": "미흡한 사항을 보완하여 절차 운영중",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 20일",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000261",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000261",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000261:0:9": {
+   "firm": "위드회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "모니터링(사후심리)절차 관련(미운영)",
+   "action": "모니터링(사후심리)절차 수립하여 운영중",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 20일",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000261",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000261",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000265:0:10": {
+   "firm": "서원회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "③ 대표이사를 조서관리담당자로 지정하여 연1회 실사 등 조서관리활동을 수행하고 있으나, 실사조서 등이 별도로 문서화되어 있지 않는 등 미흡한 점이 있음",
+   "action": "ㅇ 감사보고서가 확정된 후 적시(감사보고서일로부터 60일 이내)에 최종 업무파일의 취합을 완료하도록 하는 정책과 절차 수립 및 운영할 예정 ㅇ 감사조서 입고 관련하게 감사보고서일로부터 60일 이내에 취합 완료할 수 있도록 전체 구성원에게 공지 필요: 조서 미제출 시 패널티 규정을 마련하여 절차의 실효성 마련할 예정 ㅇ 회사별 조서취합완료일 관리할 예정 (감사조서관리대장에 회사별 입고일자 기재) ㅇ 본/지점에 감사조서 관리담당자가 지정되어 있는 경우 품질관리실장의 본/지점의 감사조서의 입출고관리, 조서실사 등 조서업무수행내역에 대한 모니터링할 예정",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 23일",
+   "recommend_date_iso": "2026-03-23",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000265",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000265",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000265:0:11": {
+   "firm": "서원회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "① 일부 감사업무에서는 사후심리결과 등이 형식적으로 작성되는 등 운영이 미흡함",
+   "action": "ㅇ 사후심리 관련 정책과 절차 수립 및 운영 내역을 문서화할 예정. ㅇ 사후심리대상 선정 및 담당자 배정 관련 내용을 문서화할 예정. - 담당이사 상호간에 교차심리 금지(검토자의 객관성 결여), 사전심리담당자 배제",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 23일",
+   "recommend_date_iso": "2026-03-23",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000265",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000265",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000265:0:12": {
+   "firm": "서원회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "② 감사보고서 발행 이후 사후심리 결과를 내부 구성원에게 전파하도록 하는 정책과 절차를 마련하고 있으나, 교육이나 안내 등 구성원들에게 사후심리 결과를 전파하지 않는 등 미흡한 점이 있음",
+   "action": "ㅇ 사후심리결과에 대한 사후관리에 대한 정책과 절차를 수립 및 운영할 예정 ㅇ 사후심리 결과를 대표이사, 이사회(또는 사원총회) 보고 및 조치할 계획임 ㅇ 법규 및 내규 위반사항이 발견(특히, 반복적 미준수자)된 경우 제재조치를 가할 예정임. ㅇ 사후심리 결과 등에 대한 사내 전파(교육 등)할 예정임.",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 23일",
+   "recommend_date_iso": "2026-03-23",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000265",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000265",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000265:0:8": {
+   "firm": "서원회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "① 일부 감사업무에서 집계된 감사시간이 감사보고서에 공시된 외부감사실시현황과 차이가 있는 등 일부 미흡",
+   "action": "구성원별 또는 감사팀별로 감사인이 규정한 주기별(최대 30일)로 감사투입시간을 작성, 취합 및 승인하는 절차 수립 및 운영할 계획임. (업무담당자가 주기별로 타임레포트 시스템에 입력→ 담당이사가 업무 담당자의 감사투입시간을 집계 및 승인 → 주기별로 품질관리실에서 검토 완료 → 전산부서에서 타임레포트 해당 주기 경과후 입력 방지)",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 23일",
+   "recommend_date_iso": "2026-03-23",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000265",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000265",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000265:0:9": {
+   "firm": "서원회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "② 일부 감사업무에서 사전심리가 감사보고서 초안에 대한 검토만 수행되고, 주요 감사절차 등 감사조서에 대한 검토는 이루어지지 않는 등 미흡",
+   "action": "ㅇ 사전심리 문서화 절차 및 운영할 계획임 ㅇ 사전심리사항점검표 및 리뷰노트 작성할 계획임 ㅇ 감사보고서 초안 뿐만아니라 주요 계정과목 조서에 대한 검토 절차 예정임",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 23일",
+   "recommend_date_iso": "2026-03-23",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000265",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000265",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000269:0:10": {
+   "firm": "회계법인 상지원",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사시간 관리절차 미흡 1. 감사시간 집계 검증시스템 일부 미흡 - 개별감사업무별 및 구성원별로 1일을 주기로 감사 투입시간을 입력하고 매월 집계하는 정책과 절차를 수립하고 감사시간을 집계하고는 있으나 승인절차 없이 집계된 감사투입시간의 임의 수정 등이 가능하여 감사투입시간관리 및 통제절차가 일부 미흡함 2. 감사시간 모니터링 절차 일부 미흡 - 일부감사업무에서 특정일의 감사투입시간이 과다하게 책정되는 등 사례가 발견되는 등 투입시간에 대한 실재성과 정확성을 확인하기 위한 모니터링 절차의 운영이 미흡함.",
+   "action": "1. 업무수행이사는 매월별로 감사업무별/참여인원별 투입시간을 작성 집계하여 업무수행이사의 승인을 득하고 익월 초 대표이사에게 직접 보고토록 함. 이를 통해 업무수행이사 임의로 투입시간 변경 등의 행위를 제한하는 업무 절차를 도입함. 2. 대표이사는 업무수행이사로부터 보고된 업무투입시간 내용을 집계하여 품질관리실장과 공유하며, 업무투입시간이 수정이 필요한 경우 업무수행이사가 직접 대표이사에게 문서로서 수정요청토록 하며 대표이사는 보고된 내용을 검토하여 변경 승인 여부를 결정토록 함.",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.03.13",
+   "recommend_date_iso": "2026-03-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000269",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000269",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000269:0:11": {
+   "firm": "회계법인 상지원",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사조서 작성, 관리절차 관련 일부 미흡 1. 감사보고서가 확정된 후 적시에 최종 업무파일의 취합을 완료하도록 하는 정책과 절차를 수립하여 실시하고 있으나 일부 감사업무에서 감사조거사 취합되지 않고 개인 컴퓨터에 보관되어 있는 사례 바견되는 등 조서관리 업무에 미흡한 점 발견됨.",
+   "action": "1. 감사보고서일 후 지정된 시간 내에 누락없이 최종 조서가 취합 완료되어 적절히 입고되도록 재차 교육 진행 하였으며, 지점별 조서관리담당자에게도 해당 조서 입고시 누락된 조서가 없는 지 재확인토록 하였습니다.",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.03.13",
+   "recommend_date_iso": "2026-03-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000269",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000269",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000269:0:12": {
+   "firm": "회계법인 상지원",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "사후심리절차 미운영 1. 사후심리 관련 정책과 절차 미운영 - 사후심리와 관련된 정책과 문서화에 대한 규정이 있으나 종결된 감사업무에 대한 사후심리 절차를 실시하지 아니함 2. 사후심리결과에 대한 관리절차 미운영 - 사후심리를 수행하도록 하는 정책과 절차를 수립하고 있으나 사후심리 결과 발견된 미비점에 대한 대표이사, 이사회에 대한 보고 및 적합한 사후관리 절차가 적절히 운영되지 아니함.",
+   "action": "1. 과거 사후심리를 사실상 미운영하였으나 신규로 정책을 수립하고 바로 시행하였습니다. 2. 품질관리실장은 보고된 사후심리 결과에 대해 이를 검토하고 대표이사에게 보고 및 전체 공지하여 발견된 미비점을 공유하고 보완절차를 수립하여 미비점의 재발을 방지할 예정입니다.",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.03.13",
+   "recommend_date_iso": "2026-03-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000269",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000269",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000310:0:8": {
+   "firm": "회계법인 동행",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "[품질관리절차에 관한 사항] 1.감사시간 관리절차 일부 미흡 2.업무품질관리검토 절차 일부 미흡 3.감사보서 작성관리절차 일부 미흡 4.모티터링 절차 일부 미흡",
+   "action": "당사는 2026년 4월 개선권고사항에 대한 이행계획 및 중간이행내역를 담은 보고서를 제출하였습니다.",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 13일",
+   "recommend_date_iso": "2026-03-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000310",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000310",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000316:0:14": {
+   "firm": "회계법인 하나로",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "사후심리 관련 정책과 절차 일부 미흡",
+   "action": "사후심리 절차 교육 및 문서화 추진",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 20일",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000316",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000316",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000316:0:15": {
+   "firm": "회계법인 하나로",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "사후심리결과에 대한 관리절차 일부 미흡",
+   "action": "사후심리결과에 대한 전달 및 교육 수행",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 20일",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000316",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000316",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000316:0:8": {
+   "firm": "회계법인 하나로",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사보고서 발행 통제절차 미운영",
+   "action": "감사보고서 발행 및 공시관리자 지정 후 공시관리자를 통한 통제 수행",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 20일",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000316",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000316",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000394:0:10": {
+   "firm": "회계법인 서정",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "모니터링(사후심리) 절차 일부 미흡(교육이나 안내 등 구성원들에게 사후심리 결과를 전파하지 않음)",
+   "action": "식별된 미비점과 개선권고 사항을 전 구성원에게 이메일을 통해 전파할 예정임.",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 20일",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000394",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000394",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000394:0:8": {
+   "firm": "회계법인 서정",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사조서 작성,관리 절차 일부 미흡(지점 조서관리에 대한 모니터링 미흡)",
+   "action": "품질관리실장이 조서에 대한 모니터링 절차 수행함.",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 20일",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000394",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000394",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000394:0:9": {
+   "firm": "회계법인 서정",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "업무품질관리검토(사전심리) 절차 일부 미흡(공시전 감사보고서 발행 관련 통제문서 확인절차 미흡)",
+   "action": "공시 담당자가 공시전 감사보고서 발행과 관련한 통제문서를 수령하여 확인 후 공시 진행함.",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 20일",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000394",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000394",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000400:0:10": {
+   "firm": "세정회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사보고서가 확정된 후 적시(감사보고서일로부터 60일 이내)에 최종 업무파일의 취합을 완료하고, 일정 기간 도래시 감사조서 취합을 위해 전체 구성원에 대한 안내 및 독려를 실시하고 있으나, 일부 감사업무에서 감사조서가 취합되지 않고 개인 컴퓨터에 보관되어 있는 사례가 발견되는 등 미흡한 점이 있음",
+   "action": "감사보고서일로부터 60일 이내에 최종 업무파일 취합 및 개인 컴퓨터에 보관된 감사조서(soft copy)의 삭제 여부를 품질관리실의 검사를 받도록 조치",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 20일",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000400",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000400",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000400:0:12": {
+   "firm": "세정회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "감사보고서 발행 이후 사후심리를 수행하고 그 결과를 문서화하도록 정책과 절차를 수립하고 있으나, 종결된 감사업무에 대한 사후심리 절차를 미운영",
+   "action": "담당이사별 감사업무에 대하여 사후심리가 수행되고 문서화될 수 있도록 정책과 절차를 수립, 운영",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 20일",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000400",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000400",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000421:0:10": {
+   "firm": "송정회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "모니터링(사후심리) 절차 관련(설계운영상 일부 미흡) 1. 사후심리결과에 대한 관리절차 미운영",
+   "action": "1. 사후심리결과 발견된 미비점에 대해 담당이사에게 전달하고 개선계획 이행 요구하는 방식으로 변경 사원총회 또는 이사회 보고/ 구성원 전파",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 02월 26일",
+   "recommend_date_iso": "2026-02-26",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000421",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000421",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000421:0:6": {
+   "firm": "송정회계법인",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "감사시간 관리절차 관련(미운영) 1. 감사시간 집계·검증시스템 미운영",
+   "action": "1. 매월 엑셀템플릿을 통한 시간입력으로 시간입력의 적시성 향상/담당이사가 입력한 시간을 매월 품질관리실장이 확인",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 02월 26일",
+   "recommend_date_iso": "2026-02-26",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000421",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000421",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000421:0:8": {
+   "firm": "송정회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "업무품질관리검토(사전심리) 절차 관련(설계운영상 일부 미흡) 1. 업무품질관리검토절차 수립과 업무배정 일부 미흡 2. 사전심리수행과 해결사항의 문서화 일부 미흡 3. 감사보고서 발행 통제절차 미운영",
+   "action": "1. 품질관리자 배정 시 교차심리되는 부분이 없도록 배정 2. 사전심리 내용을 회계감사심리점검표에 기재하고 심리위원이 지적한 사항에 대한 해결 내용을 동 사전심리검토표에 기재 관리 3. 모든 감사보고서 공시는 품질관리실장을 통하여 이루어지도록 창구 일원화.",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 02월 26일",
+   "recommend_date_iso": "2026-02-26",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000421",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000421",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000421:0:9": {
+   "firm": "송정회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사조서 작성·관리절차 관련(미운영) 1. 최종감사파일 취합과 조서관리담당자 지정 일부 미흡 2. 감사조서 관리대장 작성과 유지절차 미운영",
+   "action": "1. 조서관리담당자를 지정하고, 최종감사조서에 대해 감사보고서일로부터 60일 이내 취합 2. 감사조서 관리대장을 정비하여 담당이사, 조서권수, 조서종류, 보관기관 포함. 조서관리담당자 지정을 통해 감사조서 입/출고 통제 등 조서관리",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 02월 26일",
+   "recommend_date_iso": "2026-02-26",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000421",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000421",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000428:0:10": {
+   "firm": "신영회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "사전심리수행과 해결사항의 문서화 일부 미흡",
+   "action": "모든 외감대상회사에 대하여 사전심리를 수행하고 있으며, 심리내용과 그 해결사항에 대해모두 문서할 예정입니다.",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 13일",
+   "recommend_date_iso": "2026-03-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000428",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000428",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000428:0:11": {
+   "firm": "신영회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사보고서 발행 통제절차 미운영",
+   "action": "전자공시용 인증서 관리자를 본/지점별로 1인씩 지정하며, 감사보고서 최종 발행 이전에 사전심리가 종료되었음을 확인후 전자공시 할 수 있도록 관련 양식(Report Control Slip)을 통해 문서화 하고 있습니다.",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 13일",
+   "recommend_date_iso": "2026-03-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000428",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000428",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000428:0:12": {
+   "firm": "신영회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "최종 감사파일 취합과 조서관리 담당자 지정 일부 미흡",
+   "action": "품질관리실에서 매년 1회 이상 지점의 조서실사등을 통한 조서관리를 수행 예정입니다.",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 13일",
+   "recommend_date_iso": "2026-03-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000428",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000428",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000428:0:13": {
+   "firm": "신영회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사조서의 보존 및 관리절차 일부 미흡",
+   "action": "지점에서도 조서의 안전한 보관과 출입통제가 가능한 장소에 조서를 보관 예정입니다.",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 13일",
+   "recommend_date_iso": "2026-03-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000428",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000428",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000428:0:14": {
+   "firm": "신영회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사조서 관리대장 작성과 유지절차 일부 미흡",
+   "action": "감사조서 관리대장에 관리번호를 부여하고 보관기간 및 입출고 기록이 유지되도록 관리할예정입니다.",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 13일",
+   "recommend_date_iso": "2026-03-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000428",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000428",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000428:0:16": {
+   "firm": "신영회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "사후심리 관련 정책과 절차 미운영",
+   "action": "매년 감사보고서 공시 후 담당이사별 감사업무에 대해 사후 심리가 수행하고 문서화 할 예정입니다.",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 13일",
+   "recommend_date_iso": "2026-03-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000428",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000428",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000428:0:17": {
+   "firm": "신영회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "사후심리 결과에 대한 관리 절차 미운영",
+   "action": "사후심리에서 식별된 미비점과 개선권고 사항에 대해 적절한 시정조치가 이행될 수 있도록 하며, 관련 결과를 구성원에게 공유할 예정입니다.",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 13일",
+   "recommend_date_iso": "2026-03-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000428",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000428",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000428:0:9": {
+   "firm": "신영회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "-감사시간 집계 및 검증시스템 미운영 -감사시간 모니터링 절차 미운영",
+   "action": "- 감사참여인원별로 감사투입시간을 집계하여익월초까지 품질관리실에서 집계할 수 있도록 시스템 구축중입니다. -외부감사업무에 대하여 투입시간의 실재성과 정확성을 확인하며 외부감사실시현황의 공시 내역과 차이를 분석 예정입니다.",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 13일",
+   "recommend_date_iso": "2026-03-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000428",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000428",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000430:0:10": {
+   "firm": "회계법인 현",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "개별감사업무별 및 구성원별로 감사투입시간을 집계하는 정책과 절차를 수립하고 감사투입시간을 집계하고 있으나, 일부 개별감사업무에서 감사투입시간 관련 사유 등의 구체적 기재 없이 일자별로 시간 총량만 기록한 경우가 있고, 일부 개별감사업무에서 집계된 감사시간의 참여인원과 ‘외부감사실시현황’의 참여인원이 차이가 있는 등 감사투입시간 관리 및 통제절차에 미흡한 점이 있음",
+   "action": "감사투입시간 관리 및 통제절차를 보완함",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.03.20",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000430",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000430",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000430:0:11": {
+   "firm": "회계법인 현",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "감사보고서 발행 이후 사후심리를 수행하고 그 결과를 문서화하도록 정책과 절차를 수립하고 사후심리를 수행하고 있으나, 주요 계정조서에 대한 심리내역이 없고, 교육이나 안내 등 구성원들에게 사후심리 결과를 전파하지 않는 등 미흡한 점이 있음",
+   "action": "감사보고서 발행 이후 사후심리시 주요 계정조서에 대한 심리 및 구성원들에게 사후심리 결과를 전파하도록 보완함",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.03.20",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000430",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000430",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000430:0:8": {
+   "firm": "회계법인 현",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "별도의 조서보관창고에 전자형태문서(soft copy) 포함한 전체 조서를 보관하고 있으나, 일부 감사조서는 담당 감사팀에서 보관하고 있는 등 미흡한 점이 있음 감사조서관리대장을 유지하고 있으나, 품질관리실에서 보관하고 있는 전자형태문서(soft copy)가 감사조서관리대장에 포함되지 않는 등 미흡한 점이 있음",
+   "action": "별도의 조서보관창고에 전자형태문서(soft copy)를 포함한 전체 조서를 보관하도록 보완함 품질관리실에서 보관하고 있는 전자형태문서(soft copy)를 감사조서관리대장에 포함되도록 보완함",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.03.20",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000430",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000430",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000430:0:9": {
+   "firm": "회계법인 현",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "모든 외감대상회사에 대하여 업무품질관리검토(사전심리)를 수행하고 있으나, 사전심리의 성격, 시기 및 범위를 구체적으로 문서화하지 않는 등 미흡한 점이 있음 업무품질관리검토(사전심리)를 수행하고 있으나, 일부 개별감사업무에서 사전심리내용과 해결사항의 문서화(감사조서에 대한 리뷰노트 등)가 확인되지 않는 등 미흡한 점이 있음 감사보고서 발행 이전에 업무품질관리검토(사전심리)가 종료되었음을 확인하기 위해 감사보고서 발행 관련 통제문서를 작성하고 업무품질관리검토자의 검토 서명을 확인한 후 감사보고서를 인쇄하거나 전자공시하는 정책과 절차를 수립하고는 있으나, 일부 감사업무에서 감사보고서 발행 요청시 감사보고서 발행 관련 통제문서를 첨부하지 않는 등 미흡한 점이 있음",
+   "action": "사전심리의 성격, 시기 및 범위를 구체적으로 문서화 하도록 보완함 사전심리내용과 해결사항의 문서화(감사조서에 대한 리뷰노트 등) 하도록 보완함 감사보고서 발행 요청시 감사보고서 발행 관련 통제문서를 첨부하도록 보완함",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.03.20",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000430",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000430",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000442:0:10": {
+   "firm": "회계법인 공감",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사인은 모든 외부감사업무에 대하여 적절한 시간예산을 편성하고, 투입시간의 실재성과 정확성 및 공시의 적정성을 검증하며, 집계된 감사시간을 통해 적정시간이 투입되었는지 모니터링 절차를 수행해야 함",
+   "action": "-모든 구성원이 월별로 업무시간을 기록ㆍ사인하고, 품질관리실장은 업무수행이사 등 구성원의 감사업무시간, 품질관리검토시간, 모니터링시간 등의 적정성을 파악하기 위하여 개인별, 업무별 감사업무시간 집계결과를 주기적으로 점검함",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.03.20",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000442",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000442",
+   "match_level_v4": "no_site_dae"
+  },
+  "20260630000442:0:11": {
+   "firm": "회계법인 공감",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "감사인은 감사보고서 발행 이후 법인이 정한 주기에 따라 담당이사별 감사업무에 대해 사후심리사 실질적으로 수행되고 적절하게 문서화될 수 있도록 정책과 절차를 수립ㆍ운영하여야 함",
+   "action": "-모니터링책임자는 모니터링 대상업무에 대해 4 년 이내에 대상업무를 수행하고 있는 모든 업무수행이사에 1 개 이상 대상업무가 포함되도록 모니터링 계획을 해야 한다(2025.11.30 개정).",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.03.20",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000442",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000442",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000442:0:9": {
+   "firm": "회계법인 공감",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "모든 외부감사업무에 대하여 감사참여인원별 감사투입시간을 적시에 누락없이 집계하고, 집계된 감사시간이 임의로 수정되지 않도록 하는 통제절차를 마련하는 등 감사시간 집계ㆍ검증시스템을 실효성있게 설계 및운영하여야 함",
+   "action": "관련 품질관리 규정을 개정하여 실시하고 있음 -업무팀원은 매월 감사수행시간을 집계하여 확인 후 담당 업무수행이사에게 익월 10일 이전까지 전자적 방법으로 전송하고, 담당파트너는 이를 검토ㆍ승인하여 심리실장에게 익월 10일까지 전자적 방법으로 송부하여 품질관리실장이 확인하도록 해야 한다. 기록된 시간은 불가피한 사유가 있는 경우에 한해 품질관리실장의 승인을 받아 수정함(2025.11.30 개정)",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.03.20",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000442",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000442",
+   "match_level_v4": "no_site_dae"
+  },
+  "20260630000446:0:10": {
+   "firm": "회계법인 길인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사조서 작성 관리절차 관련 일부 미흡",
+   "action": "2026년 3월 개선권고에 따른 감사조사 작성 관리절차를 마련하여 운영할 예정임",
+   "action_kind": "text",
+   "recommend_date_raw": "2025년 12월 19일",
+   "recommend_date_iso": "2025-12-19",
+   "year_basis": "recommend_date_mismatch_exception",
+   "date_mismatch": true,
+   "rcept_no": "20260630000446",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000446",
+   "match_level_v4": "date_mismatch"
+  },
+  "20260630000446:0:12": {
+   "firm": "회계법인 길인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "모니터링(사후심리) 절차 미운영",
+   "action": "2026년 3월 개선권고에 따른 사후심리 절차를 마련하여 운영할 예정임",
+   "action_kind": "text",
+   "recommend_date_raw": "2025년 12월 19일",
+   "recommend_date_iso": "2025-12-19",
+   "year_basis": "recommend_date_mismatch_exception",
+   "date_mismatch": true,
+   "rcept_no": "20260630000446",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000446",
+   "match_level_v4": "date_mismatch"
+  },
+  "20260630000446:0:9": {
+   "firm": "회계법인 길인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사시간관리절차 미운영",
+   "action": "2026년 3월 개선권고에 따른 감사시간 관리 절차를 마련하여 운영할 예정임",
+   "action_kind": "text",
+   "recommend_date_raw": "2025년 12월 19일",
+   "recommend_date_iso": "2025-12-19",
+   "year_basis": "recommend_date_mismatch_exception",
+   "date_mismatch": true,
+   "rcept_no": "20260630000446",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000446",
+   "match_level_v4": "date_mismatch"
+  },
+  "20260630000511:0:10": {
+   "firm": "회계법인 새시대",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사조서 작성관리 절차 관련(설계운영상 일부 미흡) 1.최종감사파일 취합과 조서관리담당자 지정 일부 미흡",
+   "action": "자체 품질관리시스템을 개발하여 2026년 1월 14일부로 운용하여 조서관리담당자 지정 및 최종감사파일 취합프로세스 개선",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 13일",
+   "recommend_date_iso": "2026-03-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000511",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000511",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000511:0:11": {
+   "firm": "회계법인 새시대",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "모니터링(사후심리)절차 관련(미운영) 1. 사후심리관련 정책과 절차 미운영 2. 사후심리결과에 대한 관리절차 미운영",
+   "action": "자체 품질관리시스템 개발 및 품질관리규정 개정으로 모니터링(사후심리)절차 운영",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 13일",
+   "recommend_date_iso": "2026-03-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000511",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000511",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000511:0:8": {
+   "firm": "회계법인 새시대",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사시간 관리 절차 관련(미운영) 1. 감사시간 집계검증시스템 미운영 2. 감사시간 모니터링 절차 미운영",
+   "action": "자체 품질관리시스템을 개발하여 2026년 1월 14일부로 운용하여 개선",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 13일",
+   "recommend_date_iso": "2026-03-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000511",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000511",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000511:0:9": {
+   "firm": "회계법인 새시대",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "업무품질관리검토(사전심리) 절차 관련(설계운영상 일부 미흡) 1.업무품질관리검토절차 수립과 업무배정 일부 미흡 2. 사전심리수행과 해결사항의 문서화 일부미흡 3. 감사보고서 발행 통제절차 일부미흡",
+   "action": "자체 품질관리시스템 개발 운영 및, 품질관리규정 개정 및 운영으로 개선",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 13일",
+   "recommend_date_iso": "2026-03-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000511",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000511",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000534:0:10": {
+   "firm": "회계법인 청담",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "모니터링(사후심리) 절차 일부미흡",
+   "action": "개선권고사항에 대한 이행계획서 제출(2026.04.23)",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.03.20",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000534",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000534",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000534:0:6": {
+   "firm": "회계법인 청담",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "감사시간 관리 절차 미운영",
+   "action": "개선권고사항에 대한 이행계획서 제출(2026.04.23)",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.03.20",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000534",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000534",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000602:0:10": {
+   "firm": "선명회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "감사보고서 발행 이후 사후심리 운영 미흡",
+   "action": "담당이사별 사후심리가 실질적으로 수행되고 문서화 되도록 절차수립, 운영",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 04월 23일",
+   "recommend_date_iso": "2026-04-23",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000602",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000602",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000602:0:11": {
+   "firm": "선명회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "내부구성원에 대한 사후심리결과 및 교육에 대한 안내 미흡",
+   "action": "사후심리결과에 대해 관련 구성원에게 교육, 안내 등 공유절차 마련",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 04월 23일",
+   "recommend_date_iso": "2026-04-23",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000602",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000602",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000602:0:8": {
+   "firm": "선명회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "업무품질관리검토(사전심리)의 심리내용과 그 해결사항 등에 대한 문서화 미흡",
+   "action": "실시된 사전심리내용과 그 해결사항 등을 적절히 문서화 하도록 작성 기준 및 절차를 정비하고 구성원에게 내용을 교육함",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 04월 23일",
+   "recommend_date_iso": "2026-04-23",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000602",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000602",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000602:0:9": {
+   "firm": "선명회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사보고서 발행 이전, 업무품질관리검토가 종료됨을 확인하기 위한 통제 문서 작성 및 업무품질관리검토자의 검토서명 확인 후 감사보고서를 인쇄, 공시하는 절차를 수립하고 있으나, 감사보고서 발행 이전 품질관리검토가 종료되었는지 확인하는 통제 절차 미흡",
+   "action": "공시관리자를 지정하여 본점에서 지점을 포함한 모든 감사보고서의 공시, 발행 등을 통제하는 절차 수립",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 04월 23일",
+   "recommend_date_iso": "2026-04-23",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000602",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000602",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000660:0:10": {
+   "firm": "태일회계법인",
+   "dae_standard": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+   "category_raw": "업무의 수용과 유지",
+   "recommendation": "품질관리실장의 승인을 받아 감사계약을 체결하도록 정하고 있으나 품질관리실장의 승인 없이 감사계약을 체결한 사례가 일부 발견됨",
+   "action": "이행계획 보고 중",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 05월 12일",
+   "recommend_date_iso": "2026-05-12",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000660",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000660",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000660:0:13": {
+   "firm": "태일회계법인",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "품질관리실에서 담당이사의 전문성을 검토하는 절차가 없고, 일부 감사업무 담당이사의 전문성 관련 데이터를 관리하지 않아 감사업무 배정시 담당이사의 전문성이 적절히 고려되었는지 확인하기 어려움",
+   "action": "이행계획 보고 중",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 05월 12일",
+   "recommend_date_iso": "2026-05-12",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000660",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000660",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000660:0:14": {
+   "firm": "태일회계법인",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "내규를 통해 대표이사의 승인 후 채용여부를 결정하도록 정하고 있으나, 실제 채용시에는 소속 사업본부장의 승인으로 이루어지고 있음",
+   "action": "이행계획 보고 중",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 05월 12일",
+   "recommend_date_iso": "2026-05-12",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000660",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000660",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000660:0:15": {
+   "firm": "태일회계법인",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "일반직원 채용과 관련하여 채용규정이 없고 각 사업본부 소속 사원이 채용 여부를 결정",
+   "action": "이행계획 보고 중",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 05월 12일",
+   "recommend_date_iso": "2026-05-12",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000660",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000660",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000660:0:16": {
+   "firm": "태일회계법인",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "내규상 업무수행실적 등을 고려하여 소속 공인회계사의 보수를 정하도록 규정하였음에도 법인 전체차원의 세부 지급기준이 없어 각 소속 사원이 사원별 사업예산서에 따라 결정하고, 일반직원의 급여에 관한 법인 차원의 세부 지급기준이 없음",
+   "action": "이행계획 보고 중",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 05월 12일",
+   "recommend_date_iso": "2026-05-12",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000660",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000660",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000660:0:2": {
+   "firm": "태일회계법인",
+   "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
+   "category_raw": "회계법인내 품질에 대한 리더십 책임",
+   "recommendation": "외주용역계약 체결 전 특수관계자 여부, 용역의 필요성, 거래처의 용역수행 능력 여부, 용역대가의 적정성, 최종 용역 산출물 제출여부 등에 대한 행정대표의 검토·승인 절차 없이 특수관계자에게 용역비를 지급한 사례가 발견되는 등 특수관계자 자금 관련 통합관리가 미흡함",
+   "action": "이행계획 보고 중",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 05월 12일",
+   "recommend_date_iso": "2026-05-12",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000660",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000660",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000660:0:20": {
+   "firm": "태일회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "회사 경영진에 의한 통제무력화 위험에 대응하기 위한 감사절차와 관련하여 총계정원장에 기록된 분개와 재무제표 작성시 이루어진 조정사항의 적절성 테스트(Journal Entry test) 관련 감사조서를 부실하게 작성한 사례가 다수 발견",
+   "action": "이행계획 보고 중",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 05월 12일",
+   "recommend_date_iso": "2026-05-12",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000660",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000660",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000660:0:21": {
+   "firm": "태일회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "사전심리 대상인 비상장회사 감사업무의 경우 사전심리 요청기한을 두고 있지 않아 충분한 사전심리 시간이 확보되지 않을 소지가 있음",
+   "action": "이행계획 보고 중",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 05월 12일",
+   "recommend_date_iso": "2026-05-12",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000660",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000660",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000660:0:22": {
+   "firm": "태일회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "내규상 감사조서를 감사보고서일로부터 60일 이내에 취합하여야 하나, 일부 감사업무는 조서 취합 기한을 준수하지 않았음",
+   "action": "이행계획 보고 중",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 05월 12일",
+   "recommend_date_iso": "2026-05-12",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000660",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000660",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000660:0:23": {
+   "firm": "태일회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "취합된 조서 반출 후 재입고 시 원형유지 여부 확인에 대한 통제절차가 미흡하여 반출된 조서가 임의로 변경될 위험 등이 존재",
+   "action": "이행계획 보고 중",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 05월 12일",
+   "recommend_date_iso": "2026-05-12",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000660",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000660",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000660:0:25": {
+   "firm": "태일회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "내규에 따르면 직전 사업연도 사후심리결과 발견된 미비점에 대해서는 그 영향의 중요성에 따라 담당이사 및 관련자에게 통보하여 적절한 수정 및 보완조치를 요구하도록 정하고 있으나, 수정 및 보완조치된 사항의 이행여부를 확인하는 절차를 정하고 있지 않아, 사후심리 수행결과 발견된 미비점에 대해 실제 보완 및 개선여부를 별도로 확인하지 않는 등 사후심리 후속조치 관련 절차의 운영이 미흡",
+   "action": "이행계획 보고 중",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 05월 12일",
+   "recommend_date_iso": "2026-05-12",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000660",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000660",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000660:0:3": {
+   "firm": "태일회계법인",
+   "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
+   "category_raw": "회계법인내 품질에 대한 리더십 책임",
+   "recommendation": "감사대상회사 등으로부터 수신하는 공문서는 경영관리본부에서 일괄로 수신하여 보관·관리하고 있으나, 각 지점에서 회계법인 명의로 대외공문 발송 시 법인차원의 적절한 승인절차(내규) 없이 발송하고, 경영관리본부에서 해당 공문을 확인·보관하지 않는 등 대외공문 발송 관련 내부통제 통합관리가 미흡함",
+   "action": "이행계획 보고 중",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 05월 12일",
+   "recommend_date_iso": "2026-05-12",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000660",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000660",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000660:0:4": {
+   "firm": "태일회계법인",
+   "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
+   "category_raw": "회계법인내 품질에 대한 리더십 책임",
+   "recommendation": "이사의 기본급 책정 시 기초자료인 사업예산서(수입-비용)상 이사의 예상감사보수(매출액)를 수입으로 전액 인정하는 등 실질적으로 수임수당을 기본급에 포함하여 지급하고 있으며, 사업연도 중 이사의 수임실적 변동에 따라 기본급(연봉)을 임의로 변경한 사례도 발견되는 등 기본급을 감사품질에 따른 성과평가제도 우회 수단으로 활용",
+   "action": "이행계획 보고 중",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 05월 12일",
+   "recommend_date_iso": "2026-05-12",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000660",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000660",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000660:0:5": {
+   "firm": "태일회계법인",
+   "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
+   "category_raw": "회계법인내 품질에 대한 리더십 책임",
+   "recommendation": "감사업무 수행이사의 성과평가 수행 시 감사팀의 산업전문성에 대한 평가지표를 포함하지 않았음",
+   "action": "이행계획 보고 중",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 05월 12일",
+   "recommend_date_iso": "2026-05-12",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000660",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000660",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000660:0:8": {
+   "firm": "태일회계법인",
+   "dae_standard": "2. 관련 윤리적 요구사항",
+   "category_raw": "윤리적 요구사항",
+   "recommendation": "주식거래내역 및 ‘독립성준수확인서’를 지연미신고 또는 지연미제출한 사례가 확인되고, 오입력 또는 누락 사실이 발견됨",
+   "action": "이행계획 보고 중",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 05월 12일",
+   "recommend_date_iso": "2026-05-12",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000660",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000660",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000862:0:10": {
+   "firm": "바름회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "모니터링(사후심리) 절차 관련(미운영)",
+   "action": "사후심리 절차를 추가하여 기말감사종료 후 수행할 계획",
+   "action_kind": "text",
+   "recommend_date_raw": "-",
+   "recommend_date_iso": null,
+   "year_basis": "disclosure_year_fallback",
+   "date_mismatch": false,
+   "rcept_no": "20260630000862",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000862",
+   "match_level_v4": "year_fallback"
+  },
+  "20260630000862:0:8": {
+   "firm": "바름회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사시간 관리절차 관련(미운영): 감사시간 집계,검증시스템 미운영, 감사시간 모니터링 절차 미운영",
+   "action": "감사시간 집계를 위한 내부양식(Time Report) 마련 및 내부구성원에 작성권고, 기말감사 사전심리시 취합하여 감사시간 모니터링 계획",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 20일",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000862",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000862",
+   "match_level_v4": "matched_high"
+  },
+  "20260630000911:0:11": {
+   "firm": "지안회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "정책·규정은 있으나 종결된 감사업무에 대한 사후심리 절차 미실시",
+   "action": "연간 사후심리 계획 수립 및 이사별 최소 1건 실시, 전담자 지정·내부지침 마련, 결과 문서화 및 분기별 보고",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 04월 23일",
+   "recommend_date_iso": "2026-04-23",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000911",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000911",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000911:0:8": {
+   "firm": "지안회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "조서관리대장에 결산일·조서종류·폐기예정일 등 누락, 입고일·취합완료일 불명확 기재",
+   "action": "관리대장 서식을 개편하여 담당이사·조서권수·조서종류·결산일·입고일·취합완료일·폐기예정일·관리번호·보관위치 등 필수 항목 기재함",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 04월 23일",
+   "recommend_date_iso": "2026-04-23",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000911",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000911",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000928:0:10": {
+   "firm": "세아회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사조서 관리대장 작성과 유지절차 일부 미흡",
+   "action": "상동",
+   "action_kind": "same_as_above_verbatim",
+   "recommend_date_raw": "2026년 04월 22일",
+   "recommend_date_iso": "2026-04-22",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000928",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000928",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000928:0:11": {
+   "firm": "세아회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "사후심리결과에 대한 관리절차 일부 미흡",
+   "action": "상동",
+   "action_kind": "same_as_above_verbatim",
+   "recommend_date_raw": "2026년 04월 22일",
+   "recommend_date_iso": "2026-04-22",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000928",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000928",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000928:0:8": {
+   "firm": "세아회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사시간 집계·검증시스템 일부 미흡",
+   "action": "이행계획서 제출하였으며, 중간이행 내용 및 최종이행 내용은 한공회 요구기간에 맞추어 완료 후 보고예정임",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 04월 22일",
+   "recommend_date_iso": "2026-04-22",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000928",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000928",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630000928:0:9": {
+   "firm": "세아회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "최종 감사파일 취합과 조서관리담당자 지정 일부 미흡",
+   "action": "상동",
+   "action_kind": "same_as_above_verbatim",
+   "recommend_date_raw": "2026년 04월 22일",
+   "recommend_date_iso": "2026-04-22",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260630000928",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000928",
+   "match_level_v4": "matched_medium"
+  },
+  "20260630001078:0:0": {
+   "firm": "상록회계법인",
+   "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
+   "category_raw": "회계법인내 품질에 대한 리더십 책임",
+   "recommendation": "감사투입시간 사유 등의 세부 업무내역 기재 없이 일자별 투입시간 총량만을 기록하는 등 미흡한 점이 있음",
+   "action": "완료",
+   "action_kind": "text",
+   "recommend_date_raw": "2025년 09월 19일",
+   "recommend_date_iso": "2025-09-19",
+   "year_basis": "recommend_date_mismatch_exception",
+   "date_mismatch": true,
+   "rcept_no": "20260630001078",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630001078",
+   "match_level_v4": "date_mismatch"
+  },
+  "20260630001078:0:1": {
+   "firm": "상록회계법인",
+   "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
+   "category_raw": "회계법인내 품질에 대한 리더십 책임",
+   "recommendation": "감사보고서일 로부터 60일 이내에 조서가 입고되었는지 여부에 대한 통제활동이 미흡함",
+   "action": "기재 없음",
+   "action_kind": "none",
+   "recommend_date_raw": "-",
+   "recommend_date_iso": null,
+   "year_basis": "disclosure_year_fallback",
+   "date_mismatch": false,
+   "rcept_no": "20260630001078",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630001078",
+   "match_level_v4": "year_fallback"
+  },
+  "20260630001078:0:10": {
+   "firm": "상록회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "감사업무에서 감사시간 집계 결과를 외부감사실시현황 공시 내역과 대사하지 않는 등 감사시간관리에 대한 통제활동이 수행 되지 아니함",
+   "action": "기재 없음",
+   "action_kind": "none",
+   "recommend_date_raw": "-",
+   "recommend_date_iso": null,
+   "year_basis": "disclosure_year_fallback",
+   "date_mismatch": false,
+   "rcept_no": "20260630001078",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630001078",
+   "match_level_v4": "year_fallback"
+  },
+  "20260630001078:0:11": {
+   "firm": "상록회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "감사인은 사후심리를 수행하도록 정책과 절차를 수립하고 있으나, 사후심리 결과 발견된 미비점에 대한 적합한 사후관리 절차에 일부 미흡한 점이 있음",
+   "action": "기재 없음",
+   "action_kind": "none",
+   "recommend_date_raw": "-",
+   "recommend_date_iso": null,
+   "year_basis": "disclosure_year_fallback",
+   "date_mismatch": false,
+   "rcept_no": "20260630001078",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630001078",
+   "match_level_v4": "year_fallback"
+  },
+  "20260630001078:0:4": {
+   "firm": "상록회계법인",
+   "dae_standard": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+   "category_raw": "업무의 수용과 유지",
+   "recommendation": "감사조서보관장소에 시건장치가 없거나 물리적으로 통제가 되지 않는 개방된 공간에 보관 하고 있는 등 일부 미흡한 점이 있으며,실물조서와 조서보관대장의 수량이 일치하지 않 는 사례가 발견되고, 감사조서 입출고와 폐기 등 관리를 수행하지 아니함",
+   "action": "기재 없음",
+   "action_kind": "none",
+   "recommend_date_raw": "-",
+   "recommend_date_iso": null,
+   "year_basis": "disclosure_year_fallback",
+   "date_mismatch": false,
+   "rcept_no": "20260630001078",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630001078",
+   "match_level_v4": "year_fallback"
+  },
+  "20260630001098:0:10": {
+   "firm": "가립회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "모니터링(사후심리) 절차 미흡",
+   "action": "사후심리의 결과를 모든 구성원에게 교육, 안내 등 적절한 방식으로 공유할 수 있는 절차를 구축 함.",
+   "action_kind": "text",
+   "recommend_date_raw": "-",
+   "recommend_date_iso": null,
+   "year_basis": "disclosure_year_fallback",
+   "date_mismatch": false,
+   "rcept_no": "20260630001098",
+   "rcept_dt": "2026-06-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630001098",
+   "match_level_v4": "year_fallback"
+  },
+  "20260701000301:0:10": {
+   "firm": "선율회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "사후심리 정책과 절차 수립",
+   "action": "개선이행계획서 제출",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 20일",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260701000301",
+   "rcept_dt": "2026-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260701000301",
+   "match_level_v4": "matched_high"
+  },
+  "20260928000049:0:8": {
+   "firm": "회계법인 이상",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "최종 감사파일 취합과 조서관리 담당자 지정 일부 미흡",
+   "action": "이행계획서 제출",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 20일",
+   "recommend_date_iso": "2026-03-20",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260928000049",
+   "rcept_dt": "2026-09-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260928000049",
+   "match_level_v4": "matched_high"
+  },
+  "20260929000399:0:0": {
+   "firm": "동성회계법인",
+   "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
+   "category_raw": "회계법인내 품질에 대한 리더십 책임",
+   "recommendation": "품질지향 내부문화를 위한 보상체계의 설계 및 운영 미흡(일부 미운영)",
+   "action": "기재 없음",
+   "action_kind": "none",
+   "recommend_date_raw": "2026년 05월 13일",
+   "recommend_date_iso": "2026-05-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260929000399",
+   "rcept_dt": "2026-09-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260929000399",
+   "match_level_v4": "matched_medium"
+  },
+  "20260929000399:0:1": {
+   "firm": "동성회계법인",
+   "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
+   "category_raw": "회계법인내 품질에 대한 리더십 책임",
+   "recommendation": "품질관리 효과성·일관성 확보를 위한 자금 등 경영 전반의 통합관리체계 절차 운영 미흡(일부 미운영)",
+   "action": "기재 없음",
+   "action_kind": "none",
+   "recommend_date_raw": "2026년 05월 13일",
+   "recommend_date_iso": "2026-05-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260929000399",
+   "rcept_dt": "2026-09-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260929000399",
+   "match_level_v4": "matched_medium"
+  },
+  "20260929000399:0:10": {
+   "firm": "동성회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "업무품질관리검토 절차의 운영 미흡(일부 미운영)",
+   "action": "기재 없음",
+   "action_kind": "none",
+   "recommend_date_raw": "2026년 05월 13일",
+   "recommend_date_iso": "2026-05-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260929000399",
+   "rcept_dt": "2026-09-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260929000399",
+   "match_level_v4": "matched_medium"
+  },
+  "20260929000399:0:11": {
+   "firm": "동성회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사조서 관리 정책과 절차의 운영 미흡(일부 미운영)",
+   "action": "기재 없음",
+   "action_kind": "none",
+   "recommend_date_raw": "2026년 05월 13일",
+   "recommend_date_iso": "2026-05-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260929000399",
+   "rcept_dt": "2026-09-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260929000399",
+   "match_level_v4": "matched_medium"
+  },
+  "20260929000399:0:2": {
+   "firm": "동성회계법인",
+   "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
+   "category_raw": "회계법인내 품질에 대한 리더십 책임",
+   "recommendation": "품질관리 권한 및 책임 관련 절차의 운영 미흡(일부 미운영)",
+   "action": "기재 없음",
+   "action_kind": "none",
+   "recommend_date_raw": "2026년 05월 13일",
+   "recommend_date_iso": "2026-05-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260929000399",
+   "rcept_dt": "2026-09-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260929000399",
+   "match_level_v4": "matched_medium"
+  },
+  "20260929000399:0:3": {
+   "firm": "동성회계법인",
+   "dae_standard": "2. 관련 윤리적 요구사항",
+   "category_raw": "윤리적 요구사항",
+   "recommendation": "독립성 정보 수집·관리 절차의 설계 및 운영 미흡(일부 미운영)",
+   "action": "기재 없음",
+   "action_kind": "none",
+   "recommend_date_raw": "2026년 05월 13일",
+   "recommend_date_iso": "2026-05-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260929000399",
+   "rcept_dt": "2026-09-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260929000399",
+   "match_level_v4": "matched_medium"
+  },
+  "20260929000399:0:5": {
+   "firm": "동성회계법인",
+   "dae_standard": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+   "category_raw": "업무의 수용과 유지",
+   "recommendation": "업무의 수용 및 유지 정책과 절차의 설계 및 운영 미흡(일부 미운영)",
+   "action": "기재 없음",
+   "action_kind": "none",
+   "recommend_date_raw": "2026년 05월 13일",
+   "recommend_date_iso": "2026-05-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260929000399",
+   "rcept_dt": "2026-09-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260929000399",
+   "match_level_v4": "matched_medium"
+  },
+  "20260929000399:0:7": {
+   "firm": "동성회계법인",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "인적자원 관리 절차의 설계 및 운영 미흡(일부 미운영)",
+   "action": "기재 없음",
+   "action_kind": "none",
+   "recommend_date_raw": "2026년 05월 13일",
+   "recommend_date_iso": "2026-05-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260929000399",
+   "rcept_dt": "2026-09-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260929000399",
+   "match_level_v4": "matched_medium"
+  },
+  "20260929000399:0:8": {
+   "firm": "동성회계법인",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "감사업무시간 관리 절차의 운영 미흡(일부 미운영)",
+   "action": "기재 없음",
+   "action_kind": "none",
+   "recommend_date_raw": "2026년 05월 13일",
+   "recommend_date_iso": "2026-05-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260929000399",
+   "rcept_dt": "2026-09-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260929000399",
+   "match_level_v4": "matched_medium"
+  },
+  "20260929000399:0:9": {
+   "firm": "동성회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "지시, 감독, 검토 관련 절차의 운영 미흡(일부 미운영)",
+   "action": "기재 없음",
+   "action_kind": "none",
+   "recommend_date_raw": "2026년 05월 13일",
+   "recommend_date_iso": "2026-05-13",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260929000399",
+   "rcept_dt": "2026-09-29",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260929000399",
+   "match_level_v4": "matched_medium"
+  },
+  "20260930000048:0:10": {
+   "firm": "성문회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "업무품질관리검토(사전심리) 미흡",
+   "action": "이행계획서 제출",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 23일",
+   "recommend_date_iso": "2026-03-23",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260930000048",
+   "rcept_dt": "2026-09-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260930000048",
+   "match_level_v4": "matched_medium"
+  },
+  "20260930000048:0:11": {
+   "firm": "성문회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "모니터링(사후심리) 미운영",
+   "action": "이행계획서 제출",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 23일",
+   "recommend_date_iso": "2026-03-23",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260930000048",
+   "rcept_dt": "2026-09-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260930000048",
+   "match_level_v4": "matched_medium"
+  },
+  "20260930000048:0:8": {
+   "firm": "성문회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사시간 관리절차 미운영",
+   "action": "이행계획서 제출",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 23일",
+   "recommend_date_iso": "2026-03-23",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260930000048",
+   "rcept_dt": "2026-09-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260930000048",
+   "match_level_v4": "matched_medium"
+  },
+  "20260930000048:0:9": {
+   "firm": "성문회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사조서 작성, 관리절차 미흡",
+   "action": "이행계획서 제출",
+   "action_kind": "text",
+   "recommend_date_raw": "2026년 03월 23일",
+   "recommend_date_iso": "2026-03-23",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260930000048",
+   "rcept_dt": "2026-09-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260930000048",
+   "match_level_v4": "matched_medium"
+  },
+  "20260930000134:0:1": {
+   "firm": "삼일회계법인",
+   "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
+   "category_raw": "회계법인내 품질에 대한 리더십 책임",
+   "recommendation": "공식 성과평가와는 별도로 특별상여금 추가 지급, 규정화되지 않은 성과급 조정 및 P2ㆍP3 승진 첫 해 성과급 일률 지급 등 품질관리 보상체계 운영 일부 미흡",
+   "action": "감사품질 내부문화를 확립하고, 성과평가 결과와 보상이 일관되게 연계될 수 있도록 보상체계 운영을 개선함 (예, 성과평가 결과에 따라 산정된 성과급 추가조정 금지, 승진 첫해에도 성과평가 결과에 따라 성과급 차등 지급)",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.05.12",
+   "recommend_date_iso": "2026-05-12",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260930000134",
+   "rcept_dt": "2026-09-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260930000134",
+   "match_level_v4": "matched_high"
+  },
+  "20260930000134:0:3": {
+   "firm": "삼일회계법인",
+   "dae_standard": "2. 관련 윤리적 요구사항",
+   "category_raw": "윤리적 요구사항",
+   "recommendation": "기존 비감사 업무가 감사계약 체결일 이후에 일부 제공된 사례, 독립성 평가시 감사기간 중 수행된 비감사업무 일부 누락 사례, 감사팀원과 비감사업무팀원 일부 중복 사례 등 독립성 이슈를 해소하기 위해 마련된 안전장치의 적용이 미흡한 사례 발견 독립성 관련 정보 점검시 표본 선정 기준이 명확하지 않으며, 주식보유 내역 모니터링 시 공인된 외부 증빙을 사용하지 않은 사례 등 독립성 점검 절차 및 윤리기준 변경에 따라 사전 예방조치를 마련하는 절차 일부 미흡",
+   "action": "감사계약 체결 이전에 금지된 비감사업무가 완료되도록 교육 및 안내를 강화하고, 업무 완료 여부에 대한 사전확인 절차를 개선함. 감사기간중 수행된 비감사업무가 모두 독립성 평가에 반영되도록 조회 방법 개선함. 감사고객에 대한 비감사업무 수임시 팀구분 안전장치 이행 준수 교육 및 이행 확인을 통해 재발방지 체계를 마련함. 점검 표본 선정 방법을 개선하고, 공인된 외부증빙 제출 방법을 안내하고, 점검시 제출받아 확인하도록 함. 윤리기준 변경내용 재 안내 및 추가 교육 수행함",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.05.12",
+   "recommend_date_iso": "2026-05-12",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260930000134",
+   "rcept_dt": "2026-09-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260930000134",
+   "match_level_v4": "matched_high"
+  },
+  "20260930000134:0:7": {
+   "firm": "삼일회계법인",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "일부 감사업무에 대해 동일 본부 내 다른 회계사들(파트너 등)이 검토 및 코칭 업무를 수행하였다고 Time report에 입력 및 승인하였으나, 업무수행사실이 구체적으로 확인되지 않는 등 감사시간 입력 및 승인에 대한 통제절차가 일부 미흡하고, 공시되는 외부감사 투입시간 집계 절차 운영 일부 미흡",
+   "action": "Time 집계 시스템 및 Time report 시스템을 외부감사 업무에 해당하는 프로젝트에 한하여 업무가 입력되며, 시간이 집계되도록 개선하였으며, 감사업무 시간관리와 관련하여 전사 공지 및 교육을 수행함. 또한, 외감실시내용 작성 내역 및 담당 이사가 아닌 이사가 업무참여자로 참여한 회사에 대한 실제 업무 참여 여부 확인하는 모니터링를 수행함",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.05.12",
+   "recommend_date_iso": "2026-05-12",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260930000134",
+   "rcept_dt": "2026-09-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260930000134",
+   "match_level_v4": "matched_high"
+  },
+  "20260930000134:0:9": {
+   "firm": "삼일회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사업무프로그램(Aura) 및 감사 기초자료 입수 웹사이트(Connect)에 대하여 감사업무팀원이 아닌 인원이 접근 승인 권한을 갖는 등 접근성 통제절차가 일부 미흡",
+   "action": "Aura 및 Connect 권한자 관리에 대한 구체적인 관리지침을 수립 및 배포하였으며, 권한자 모니터링을 수행하여, 적절한 권한을 가진 인원만 접근 권한을 유지하도록 개선함",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.05.12",
+   "recommend_date_iso": "2026-05-12",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20260930000134",
+   "rcept_dt": "2026-09-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260930000134",
+   "match_level_v4": "matched_high"
+  },
+  "20260930000167:0:10": {
+   "firm": "태인회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "1",
+   "action": "1",
+   "action_kind": "count_only_verbatim",
+   "recommend_date_raw": "-",
+   "recommend_date_iso": null,
+   "year_basis": "disclosure_year_fallback",
+   "date_mismatch": false,
+   "rcept_no": "20260930000167",
+   "rcept_dt": "2026-09-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260930000167",
+   "match_level_v4": "year_fallback"
+  },
+  "20260930000167:0:8": {
+   "firm": "태인회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "3",
+   "action": "3",
+   "action_kind": "count_only_verbatim",
+   "recommend_date_raw": "-",
+   "recommend_date_iso": null,
+   "year_basis": "disclosure_year_fallback",
+   "date_mismatch": false,
+   "rcept_no": "20260930000167",
+   "rcept_dt": "2026-09-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260930000167",
+   "match_level_v4": "year_fallback"
+  },
+  "20261006000135:0:1": {
+   "firm": "선일회계법인",
+   "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
+   "category_raw": "회계법인내 품질에 대한 리더십 책임",
+   "recommendation": "품질관리업무 담당자의 전업의무 소흘",
+   "action": "지점장 업무를 수행한 품질관리업무 담당자는 품질관리업무만을 수행하도록 하고 해당 지점의 지점장을 교체함",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.05.06",
+   "recommend_date_iso": "2026-05-06",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20261006000135",
+   "rcept_dt": "2026-10-06",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261006000135",
+   "match_level_v4": "matched_medium"
+  },
+  "20261006000135:0:15": {
+   "firm": "선일회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "지시, 감독, 검토 관련 절차 운영 미흡",
+   "action": "기업 및 기업환경의 이해조서와 위험평가조서의 충실한 조서화 및 점검을 위하여 사전심리 체크리스트를 보완하고, J/E test 조서에 대하여 감사이사 및 품질관리검토자의 필수 리뷰조서로 지정 및 사전심리/사후심리 체크리스트상 점검항목으로 추가함",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.05.06",
+   "recommend_date_iso": "2026-05-06",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20261006000135",
+   "rcept_dt": "2026-10-06",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261006000135",
+   "match_level_v4": "matched_medium"
+  },
+  "20261006000135:0:16": {
+   "firm": "선일회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "사전심리 관련 정책과 절차의 운영 미흡",
+   "action": "품질관리검토자 배정시점에 해당 회사의 전기 감사참여여부를 점검하여 객관성이 유지되도록 함",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.05.06",
+   "recommend_date_iso": "2026-05-06",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20261006000135",
+   "rcept_dt": "2026-10-06",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261006000135",
+   "match_level_v4": "matched_medium"
+  },
+  "20261006000135:0:18": {
+   "firm": "선일회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "사후심리 관련 정책과 절차 운영 미흡",
+   "action": "- 품질관리업무매뉴얼을 개정하여 사후심리 대상회사 선정기준, 사후심리 대상회사의 품질관리검토자 및 품질관리실 담당자는 해당 회사의 사후심리담당자에서 배제, 사후심리담당자의 최소투입시간을 규정함 - 사후심리 투입시간 관리를 위하여 회사별 심리코드를 통한 시간집계 및 사후심리 담당자의 최소투입시간 충족여부를 점검함",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.05.06",
+   "recommend_date_iso": "2026-05-06",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20261006000135",
+   "rcept_dt": "2026-10-06",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261006000135",
+   "match_level_v4": "matched_medium"
+  },
+  "20261006000135:0:2": {
+   "firm": "선일회계법인",
+   "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
+   "category_raw": "회계법인내 품질에 대한 리더십 책임",
+   "recommendation": "품질지향 내부문화를 위한 보상체계관련 절차 운영 미흡",
+   "action": "성과급 지급지침을 개정하여 특별상여금 지급시 성과평가등급별 지급기준 상회 및 성과평가 상위자와 하위자의 지급률 역전현상을 방지하고, 실제 성과급 지급시 해당 사항을 점검함",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.05.06",
+   "recommend_date_iso": "2026-05-06",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20261006000135",
+   "rcept_dt": "2026-10-06",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261006000135",
+   "match_level_v4": "matched_medium"
+  },
+  "20261006000135:0:4": {
+   "firm": "선일회계법인",
+   "dae_standard": "2. 관련 윤리적 요구사항",
+   "category_raw": "윤리적 요구사항",
+   "recommendation": "독립성 정보 수집 관리 절차 운영 미흡",
+   "action": "- ERP 시스템상 독립성준수확인서에 서명을 하지 않은 인원은 타임리포트 작성이 불가능하도록 구현되어 있으며, 연 1회 독립성준수확인서 서명 누락여부를 점검함 - 윤리규정을 개정하여 ERP시스템상 공인회계사 및 배우자의 전직 고용관계를 등록하고, 정기적으로 ERP 시스템에 등록된 고용관계 정보 및 기혼 여부를 점검함",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.05.06",
+   "recommend_date_iso": "2026-05-06",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20261006000135",
+   "rcept_dt": "2026-10-06",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261006000135",
+   "match_level_v4": "matched_medium"
+  },
+  "20261006000135:0:6": {
+   "firm": "선일회계법인",
+   "dae_standard": "2. 관련 윤리적 요구사항",
+   "category_raw": "윤리적 요구사항",
+   "recommendation": "독립성 점검 관련 정책과 절차 구축 및 운영 미흡",
+   "action": "- 주식회사 등의 외부감사에 관한 법률 제9조에 따른 6개사업연도 감사업무 제한 위반 회사의 감사이사를 교체하고, 해당 감사이사에게 상벌규정에 따라 징계조치함 - 감사이사 배정시 연속참여연수 모니터링 강화, ERP 시스템상 감사참여자의 연속참여연수 관리 및 연속감사참여제한자의 감사참여자 등록이 불가능하도록 ERP 시스템을 개선함 - 윤리규정을 개정하여 신규 사원 가입시 본인 및 배우자의 독립성 점검 절차를 신설하고, 신규 사원 가입시 전수로 ERP시스템의 독립성 관련 정보를 점검함 - 감사대상회사에게 비감사업무 제공시 AFS 승인 누락 및 지연승인이 발생하지 않도록 교육, 공지 및 모니터링 절차를 강화함",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.05.06",
+   "recommend_date_iso": "2026-05-06",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20261006000135",
+   "rcept_dt": "2026-10-06",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261006000135",
+   "match_level_v4": "matched_medium"
+  },
+  "20261006000135:0:8": {
+   "firm": "선일회계법인",
+   "dae_standard": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+   "category_raw": "업무의 수용과 유지",
+   "recommendation": "업무의 수용 및 유지 정책과 절차의 운영 미흡",
+   "action": "감사계약 전 위험평가서의 지연승인이 발생하지 않도록 교육, 공지 및 모니터링 절차를 강화함",
+   "action_kind": "text",
+   "recommend_date_raw": "2026.05.06",
+   "recommend_date_iso": "2026-05-06",
+   "year_basis": "recommend_date",
+   "date_mismatch": false,
+   "rcept_no": "20261006000135",
+   "rcept_dt": "2026-10-06",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261006000135",
+   "match_level_v4": "matched_medium"
+  }
+ },
+ "attachments": [
+  {
+   "finding_id": "2025/등록/1.1/라군/선일회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "1. 회계법인 내 품질에 대한 리더십 책임",
+    "group": "1.1 지배구조",
+    "gun": "라군",
+    "firm": "선일회계법인",
+    "index": 0
+   },
+   "text_sha256": "fb9c2498a541a7fb11c37472ab6c4e16a4205268f5cc3072d38c2284c02f32de",
+   "f004": [
+    {
+     "f004_row_id": "20261006000135:0:1",
+     "covers": [
+      "2025/등록/1.1/라군/선일회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/등록/1.1/라군/선일회계법인/0": 0.553
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/등록/1.2/가군/삼일회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "1. 회계법인 내 품질에 대한 리더십 책임",
+    "group": "1.2 성과 연동 보상",
+    "gun": "가군",
+    "firm": "삼일회계법인",
+    "index": 0
+   },
+   "text_sha256": "3da4fc4e36702ac208d40effec8e34e404210b9638a73f82ab372a859440ca26",
+   "f004": [
+    {
+     "f004_row_id": "20260930000134:0:1",
+     "covers": [
+      "2025/등록/1.2/가군/삼일회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/등록/1.2/가군/삼일회계법인/0": 0.559
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/등록/1.2/라군/예일회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "1. 회계법인 내 품질에 대한 리더십 책임",
+    "group": "1.2 성과 연동 보상",
+    "gun": "라군",
+    "firm": "예일회계법인",
+    "index": 0
+   },
+   "text_sha256": "5b0568f609c56c41dccab842f4cbea7793941c90ca5d83550f416105e260bd67",
+   "f004": [
+    {
+     "f004_row_id": "20260630000064:0:2",
+     "covers": [
+      "2025/등록/1.2/라군/예일회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/등록/1.2/라군/예일회계법인/0": 0.831
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/등록/2.1/가군/삼일회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "2. 관련 윤리적 요구사항",
+    "group": "2.1 독립성 정보 관리",
+    "gun": "가군",
+    "firm": "삼일회계법인",
+    "index": 0
+   },
+   "text_sha256": "597a33483c91fa1eb0ca78c717e9b1ebafd31af6e8866a05b058ddcddd00570d",
+   "f004": [
+    {
+     "f004_row_id": "20260930000134:0:3",
+     "covers": [
+      "2025/등록/2.1/가군/삼일회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/등록/2.1/가군/삼일회계법인/0": 0.967
+     },
+     "note": "F004에서 2.1·2.2 지적을 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/등록/2.1/라군/예일회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "2. 관련 윤리적 요구사항",
+    "group": "2.1 독립성 정보 관리",
+    "gun": "라군",
+    "firm": "예일회계법인",
+    "index": 0
+   },
+   "text_sha256": "3834cbaeda4f2959babd596ec110f122baa144433909a98cc3599eeab8c01e17",
+   "f004": [
+    {
+     "f004_row_id": "20260630000064:0:5",
+     "covers": [
+      "2025/등록/2.1/라군/예일회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/등록/2.1/라군/예일회계법인/0": 0.63
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/등록/2.2/가군/삼일회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "2. 관련 윤리적 요구사항",
+    "group": "2.2 업무수임유지 단계 독립성 검토",
+    "gun": "가군",
+    "firm": "삼일회계법인",
+    "index": 0
+   },
+   "text_sha256": "7355c169dba618535b4955633c4056ca6b365896630794d802ef3348302e330b",
+   "f004": [
+    {
+     "f004_row_id": "20260930000134:0:3",
+     "covers": [
+      "2025/등록/2.2/가군/삼일회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/등록/2.2/가군/삼일회계법인/0": 0.736
+     },
+     "note": "F004에서 2.1·2.2 지적을 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/등록/3.1/라군/예일회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+    "group": "3.1 위험평가 정보 관리",
+    "gun": "라군",
+    "firm": "예일회계법인",
+    "index": 0
+   },
+   "text_sha256": "243ea7097da8a43bab9fa16116b7582de0a8c3215ada3b6bb0e24464ab29717d",
+   "f004": [
+    {
+     "f004_row_id": "20260630000064:0:7",
+     "covers": [
+      "2025/등록/3.1/라군/예일회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/등록/3.1/라군/예일회계법인/0": 1.084
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/등록/4.1/가군/삼일회계법인/1",
+   "path": {
+    "bundle": "등록",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": "가군",
+    "firm": "삼일회계법인",
+    "index": 1
+   },
+   "text_sha256": "2f1952307eb3ff4df790c13555a15c17e776805684aa92466bb6b165b7916e9d",
+   "f004": [
+    {
+     "f004_row_id": "20260930000134:0:7",
+     "covers": [
+      "2025/등록/4.1/가군/삼일회계법인/0",
+      "2025/등록/4.1/가군/삼일회계법인/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/등록/4.1/가군/삼일회계법인/0": 0.762,
+      "2025/등록/4.1/가군/삼일회계법인/1": 0.82
+     },
+     "note": "위 2개 문단을 F004 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/등록/4.1/라군/예일회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": "라군",
+    "firm": "예일회계법인",
+    "index": 0
+   },
+   "text_sha256": "faac3d3639c6486edb339e450cfc8b2357afdc6db3ecba47ae5402fff2afc72b",
+   "f004": [
+    {
+     "f004_row_id": "20260630000064:0:9",
+     "covers": [
+      "2025/등록/4.1/라군/예일회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/등록/4.1/라군/예일회계법인/0": 1.1
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/등록/5.2/라군/선일회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": "라군",
+    "firm": "선일회계법인",
+    "index": 0
+   },
+   "text_sha256": "1a58670f13ff46e24b698dcba6a07eabf5f6d8b0b4cb25d3e9e9e772e0b40a30",
+   "f004": [
+    {
+     "f004_row_id": "20261006000135:0:16",
+     "covers": [
+      "2025/등록/5.2/라군/선일회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/등록/5.2/라군/선일회계법인/0": 0.27
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/등록/5.2/라군/예일회계법인/1",
+   "path": {
+    "bundle": "등록",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": "라군",
+    "firm": "예일회계법인",
+    "index": 1
+   },
+   "text_sha256": "6b7bfd1881ba40add01eb2827bd7821f0aec58f340bf2850cad398e6b520423d",
+   "f004": [
+    {
+     "f004_row_id": "20260630000064:0:13",
+     "covers": [
+      "2025/등록/5.2/라군/예일회계법인/0",
+      "2025/등록/5.2/라군/예일회계법인/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/등록/5.2/라군/예일회계법인/0": 1.083,
+      "2025/등록/5.2/라군/예일회계법인/1": 1.079
+     },
+     "note": "위 2개 문단을 F004 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/등록/5.3/라군/예일회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": "라군",
+    "firm": "예일회계법인",
+    "index": 0
+   },
+   "text_sha256": "a17b7eb9a387cb1bb231ea77267b372e0b6bc1b33ec25d51f4042d73a9dc23db",
+   "f004": [
+    {
+     "f004_row_id": "20260630000064:0:14",
+     "covers": [
+      "2025/등록/5.3/라군/예일회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/등록/5.3/라군/예일회계법인/0": 1.0
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/등록/5.4/가군/삼일회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "5. 업무의 수행",
+    "group": "5.4 일반 조서 문서화 미비 등",
+    "gun": "가군",
+    "firm": "삼일회계법인",
+    "index": 0
+   },
+   "text_sha256": "21c49738a3336bac666caeeb5c89ea03075b3e5394243a85209d004472f999de",
+   "f004": [
+    {
+     "f004_row_id": "20260930000134:0:9",
+     "covers": [
+      "2025/등록/5.4/가군/삼일회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/등록/5.4/가군/삼일회계법인/0": 1.1
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/등록/6.1/라군/선일회계법인/2",
+   "path": {
+    "bundle": "등록",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": "라군",
+    "firm": "선일회계법인",
+    "index": 2
+   },
+   "text_sha256": "2da12960919e223a7c66abe0056009a5e6187e3c2043bafe0399c1cc5d9494ca",
+   "f004": [
+    {
+     "f004_row_id": "20261006000135:0:18",
+     "covers": [
+      "2025/등록/6.1/라군/선일회계법인/0",
+      "2025/등록/6.1/라군/선일회계법인/1",
+      "2025/등록/6.1/라군/선일회계법인/2"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/등록/6.1/라군/선일회계법인/0": 0.343,
+      "2025/등록/6.1/라군/선일회계법인/1": 0.343,
+      "2025/등록/6.1/라군/선일회계법인/2": 0.282
+     },
+     "note": "위 3개 문단을 F004 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/1.1/-/예지회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "1. 회계법인 내 품질에 대한 리더십 책임",
+    "group": "1.1 지배구조",
+    "gun": null,
+    "firm": "예지회계법인",
+    "index": 0
+   },
+   "text_sha256": "1cbccc116110d9f82adab363820110fdc812ac60a4511e4f4901adafef480a9f",
+   "f004": [
+    {
+     "f004_row_id": "20260629000416:0:0",
+     "covers": [
+      "2025/일반회계법인/1.1/-/예지회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/1.1/-/예지회계법인/0": 0.642
+     },
+     "note": "F004에서 1.1·1.2 지적을 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/1.1/-/예지회계법인/1",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "1. 회계법인 내 품질에 대한 리더십 책임",
+    "group": "1.1 지배구조",
+    "gun": null,
+    "firm": "예지회계법인",
+    "index": 1
+   },
+   "text_sha256": "d1333163029cd9e40ab3bc16b40570d9f8c05eab93e65c4cfbd825b29e4597c8",
+   "f004": [
+    {
+     "f004_row_id": "20260629000416:0:1",
+     "covers": [
+      "2025/일반회계법인/1.1/-/예지회계법인/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/1.1/-/예지회계법인/1": 1.1
+     },
+     "note": "F004에서 1.1·1.2 지적을 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/1.1/-/태일회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "1. 회계법인 내 품질에 대한 리더십 책임",
+    "group": "1.1 지배구조",
+    "gun": null,
+    "firm": "태일회계법인",
+    "index": 0
+   },
+   "text_sha256": "48a99640ebbf4f37e7c01723ee63111fef24bf603b332fb2d15eac83ff1feb69",
+   "f004": [
+    {
+     "f004_row_id": "20260630000660:0:2",
+     "covers": [
+      "2025/일반회계법인/1.1/-/태일회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/1.1/-/태일회계법인/0": 1.1
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/1.1/-/태일회계법인/1",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "1. 회계법인 내 품질에 대한 리더십 책임",
+    "group": "1.1 지배구조",
+    "gun": null,
+    "firm": "태일회계법인",
+    "index": 1
+   },
+   "text_sha256": "f8a77d454cce8fc474b9e0eca271236b7d7424e388d9cfce7ea771149364f0c5",
+   "f004": [
+    {
+     "f004_row_id": "20260630000660:0:3",
+     "covers": [
+      "2025/일반회계법인/1.1/-/태일회계법인/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/1.1/-/태일회계법인/1": 1.1
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/1.2/-/예지회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "1. 회계법인 내 품질에 대한 리더십 책임",
+    "group": "1.2 성과 연동 보상",
+    "gun": null,
+    "firm": "예지회계법인",
+    "index": 0
+   },
+   "text_sha256": "12c06ff5f8108c4b55fcea76395b1af3b7a8ed03712170d25398c72947f513d9",
+   "f004": [
+    {
+     "f004_row_id": "20260629000416:0:0",
+     "covers": [
+      "2025/일반회계법인/1.2/-/예지회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/1.2/-/예지회계법인/0": 0.836
+     },
+     "note": "F004에서 1.1·1.2 지적을 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/1.2/-/예지회계법인/1",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "1. 회계법인 내 품질에 대한 리더십 책임",
+    "group": "1.2 성과 연동 보상",
+    "gun": null,
+    "firm": "예지회계법인",
+    "index": 1
+   },
+   "text_sha256": "ce2a736bc55d6453ea1ee8399921fedcea2ebc01e4957ad198694ce3a7a9dbe6",
+   "f004": [
+    {
+     "f004_row_id": "20260629000416:0:1",
+     "covers": [
+      "2025/일반회계법인/1.2/-/예지회계법인/1"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/1.2/-/예지회계법인/1": 0.642
+     },
+     "note": "F004에서 1.1·1.2 지적을 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/1.2/-/태일회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "1. 회계법인 내 품질에 대한 리더십 책임",
+    "group": "1.2 성과 연동 보상",
+    "gun": null,
+    "firm": "태일회계법인",
+    "index": 0
+   },
+   "text_sha256": "26e96333d4bbd5fe475d15b812369a9b4f51703bee1d498f326c697a1eb86868",
+   "f004": [
+    {
+     "f004_row_id": "20260630000660:0:4",
+     "covers": [
+      "2025/일반회계법인/1.2/-/태일회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/1.2/-/태일회계법인/0": 1.1
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/1.2/-/태일회계법인/1",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "1. 회계법인 내 품질에 대한 리더십 책임",
+    "group": "1.2 성과 연동 보상",
+    "gun": null,
+    "firm": "태일회계법인",
+    "index": 1
+   },
+   "text_sha256": "e3355e8c593c39331af72fd076b2c1b456adfdd3a8207bf3a570294de8a49797",
+   "f004": [
+    {
+     "f004_row_id": "20260630000660:0:5",
+     "covers": [
+      "2025/일반회계법인/1.2/-/태일회계법인/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/1.2/-/태일회계법인/1": 1.1
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/2.1/-/태일회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "2. 관련 윤리적 요구사항",
+    "group": "2.1 독립성 정보 관리",
+    "gun": null,
+    "firm": "태일회계법인",
+    "index": 0
+   },
+   "text_sha256": "2d1b83cd4de9491538adf094f759336dffbadb4f8673e7928d1540b38cc7affe",
+   "f004": [
+    {
+     "f004_row_id": "20260630000660:0:8",
+     "covers": [
+      "2025/일반회계법인/2.1/-/태일회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/2.1/-/태일회계법인/0": 1.1
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/2.2/-/예지회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "2. 관련 윤리적 요구사항",
+    "group": "2.2 업무수임유지 단계 독립성 검토",
+    "gun": null,
+    "firm": "예지회계법인",
+    "index": 0
+   },
+   "text_sha256": "b0e439cf34897b3d7cb53f631700eb5982edc79c22e108c5c962f4b28d065ce1",
+   "f004": [
+    {
+     "f004_row_id": "20260629000416:0:2",
+     "covers": [
+      "2025/일반회계법인/2.2/-/예지회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/2.2/-/예지회계법인/0": 0.864
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/2.2/-/예지회계법인/2",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "2. 관련 윤리적 요구사항",
+    "group": "2.2 업무수임유지 단계 독립성 검토",
+    "gun": null,
+    "firm": "예지회계법인",
+    "index": 2
+   },
+   "text_sha256": "9a0d089066c4428c21b12cf655aab3d9241deaa1ff3db12ee8946d70b325b93a",
+   "f004": [
+    {
+     "f004_row_id": "20260629000416:0:3",
+     "covers": [
+      "2025/일반회계법인/2.2/-/예지회계법인/1",
+      "2025/일반회계법인/2.2/-/예지회계법인/2"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/2.2/-/예지회계법인/1": 1.1,
+      "2025/일반회계법인/2.2/-/예지회계법인/2": 0.866
+     },
+     "note": "위 2개 문단을 F004 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/3.1/-/예지회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+    "group": "3.1 위험평가 정보 관리",
+    "gun": null,
+    "firm": "예지회계법인",
+    "index": 0
+   },
+   "text_sha256": "166f5ad0f2fe64f50ec6afba96395f98fdea7449d6b02c07404bd05e1fbf9bc6",
+   "f004": [
+    {
+     "f004_row_id": "20260629000416:0:4",
+     "covers": [
+      "2025/일반회계법인/3.1/-/예지회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/3.1/-/예지회계법인/0": 1.018
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/3.1/-/태일회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+    "group": "3.1 위험평가 정보 관리",
+    "gun": null,
+    "firm": "태일회계법인",
+    "index": 0
+   },
+   "text_sha256": "db832e0a56513693a4bbf85a2913306f00bea766fb54c314a41f2afb9b8191cc",
+   "f004": [
+    {
+     "f004_row_id": "20260630000660:0:10",
+     "covers": [
+      "2025/일반회계법인/3.1/-/태일회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/3.1/-/태일회계법인/0": 1.1
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.1/-/동남회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": null,
+    "firm": "동남회계법인",
+    "index": 0
+   },
+   "text_sha256": "d7619482dbca2ea7877b1fd7c680fbb8a6a413b2e59b71e88e2faa038e1da7dc",
+   "f004": [
+    {
+     "f004_row_id": "20260629000099:0:9",
+     "covers": [
+      "2025/일반회계법인/4.1/-/동남회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/4.1/-/동남회계법인/0": 0.541
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.1/-/바름회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": null,
+    "firm": "바름회계법인",
+    "index": 0
+   },
+   "text_sha256": "cc12ddc49a162145c39e3e0251881ab46eb68c2cba45bd009d752dc0ef03a250",
+   "f004": [
+    {
+     "f004_row_id": "20260630000862:0:8",
+     "covers": [
+      "2025/일반회계법인/4.1/-/바름회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/4.1/-/바름회계법인/0": 0.371
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.1/-/성문회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": null,
+    "firm": "성문회계법인",
+    "index": 0
+   },
+   "text_sha256": "8ebe812924a880fa5be7146ef25141174c47816cdfa2ffa3c0bffd389f589262",
+   "f004": [
+    {
+     "f004_row_id": "20260930000048:0:8",
+     "covers": [
+      "2025/일반회계법인/4.1/-/성문회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/4.1/-/성문회계법인/0": 0.51
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.1/-/회계법인 새시대/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": null,
+    "firm": "회계법인 새시대",
+    "index": 0
+   },
+   "text_sha256": "79b45f1ce4419c30e902057b89aa83d00616f6b44a31ce9d5de33da76e76972b",
+   "f004": [
+    {
+     "f004_row_id": "20260630000511:0:8",
+     "covers": [
+      "2025/일반회계법인/4.1/-/회계법인 새시대/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/4.1/-/회계법인 새시대/0": 0.373
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.1/-/미립회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": null,
+    "firm": "미립회계법인",
+    "index": 0
+   },
+   "text_sha256": "8c943ae65609f1a169d4ec9ead50d5168ed1e0157efef107112fb3d633dfdda0",
+   "f004": [
+    {
+     "f004_row_id": "20260630000197:0:6",
+     "covers": [
+      "2025/일반회계법인/4.1/-/미립회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/4.1/-/미립회계법인/0": 0.718
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.1/-/보람회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": null,
+    "firm": "보람회계법인",
+    "index": 0
+   },
+   "text_sha256": "7496825f56b7197f597d48bd7f295d861514942a3ef8dc086525651b188554a8",
+   "f004": [
+    {
+     "f004_row_id": "20260630000059:0:8",
+     "covers": [
+      "2025/일반회계법인/4.1/-/보람회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/4.1/-/보람회계법인/0": 0.496
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.1/-/정일회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": null,
+    "firm": "정일회계법인",
+    "index": 0
+   },
+   "text_sha256": "8c054d5d71d565e483103c8dd87cbc6d1a7e139a53e280427a284174f0876f3a",
+   "f004": [
+    {
+     "f004_row_id": "20260629000338:0:6",
+     "covers": [
+      "2025/일반회계법인/4.1/-/정일회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/4.1/-/정일회계법인/0": 0.572
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.1/-/상록회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": null,
+    "firm": "상록회계법인",
+    "index": 0
+   },
+   "text_sha256": "1da7ceb9ba5806ae3eb4168e0f7722670b220ec65dcd21d0a5e74c0c3753e2a7",
+   "f004": [
+    {
+     "f004_row_id": "20260630001078:0:10",
+     "covers": [
+      "2025/일반회계법인/4.1/-/상록회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/4.1/-/상록회계법인/0": 0.572
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.1/-/서원회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": null,
+    "firm": "서원회계법인",
+    "index": 0
+   },
+   "text_sha256": "0472d8213f22bb095c167c854407b9b11e084f4409581e9ce6f735996133d719",
+   "f004": [
+    {
+     "f004_row_id": "20260630000265:0:8",
+     "covers": [
+      "2025/일반회계법인/4.1/-/서원회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/4.1/-/서원회계법인/0": 0.831
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.1/-/회계법인 길인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": null,
+    "firm": "회계법인 길인",
+    "index": 0
+   },
+   "text_sha256": "954e560d442e75db9e184ebc75dffdce7e31d873ae6ee30d7c42ff5eed26ebf8",
+   "f004": [
+    {
+     "f004_row_id": "20260630000446:0:9",
+     "covers": [
+      "2025/일반회계법인/4.1/-/회계법인 길인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/4.1/-/회계법인 길인/0": 0.51
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.1/-/세아회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": null,
+    "firm": "세아회계법인",
+    "index": 0
+   },
+   "text_sha256": "ae44ccd18701adb357dc59942d205bc37c697ac1b8f32ba9572300f2022da409",
+   "f004": [
+    {
+     "f004_row_id": "20260630000928:0:8",
+     "covers": [
+      "2025/일반회계법인/4.1/-/세아회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/4.1/-/세아회계법인/0": 0.243
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.1/-/송정회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": null,
+    "firm": "송정회계법인",
+    "index": 0
+   },
+   "text_sha256": "c56fc0d95edfb9427f4b839bc1846d85c71b90800feba046984df5eec0e17f22",
+   "f004": [
+    {
+     "f004_row_id": "20260630000421:0:6",
+     "covers": [
+      "2025/일반회계법인/4.1/-/송정회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/4.1/-/송정회계법인/0": 0.383
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.1/-/신영회계법인/1",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": null,
+    "firm": "신영회계법인",
+    "index": 1
+   },
+   "text_sha256": "bc0fb85b4f29c21ec22c56374166096b323c7cc1629726615bb241280fa7ba68",
+   "f004": [
+    {
+     "f004_row_id": "20260630000428:0:9",
+     "covers": [
+      "2025/일반회계법인/4.1/-/신영회계법인/0",
+      "2025/일반회계법인/4.1/-/신영회계법인/1"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/4.1/-/신영회계법인/0": 0.22,
+      "2025/일반회계법인/4.1/-/신영회계법인/1": 0.252
+     },
+     "note": "위 2개 문단을 F004 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.1/-/회계법인 동행/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": null,
+    "firm": "회계법인 동행",
+    "index": 0
+   },
+   "text_sha256": "0e58ceb9b682df3ee2a606a796a0eab0d458e72d836a0a342853f3cbdff77767",
+   "f004": [
+    {
+     "f004_row_id": "20260630000310:0:8",
+     "covers": [
+      "2025/일반회계법인/4.1/-/회계법인 동행/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/4.1/-/회계법인 동행/0": 0.173
+     },
+     "note": "F004에서 4.1·5.2 지적을 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.1/-/회계법인 상지원/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": null,
+    "firm": "회계법인 상지원",
+    "index": 0
+   },
+   "text_sha256": "eaa64977fefd39bf4f0cb4dfad97e0e5af8029ac506f9abeae1c6a9705664693",
+   "f004": [
+    {
+     "f004_row_id": "20260630000269:0:10",
+     "covers": [
+      "2025/일반회계법인/4.1/-/회계법인 상지원/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/4.1/-/회계법인 상지원/0": 0.846
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.1/-/회계법인 예광/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": null,
+    "firm": "회계법인 예광",
+    "index": 0
+   },
+   "text_sha256": "1cadce9c63ed9efdc750a79176e4ec2aac00c62140e15ce819ab3865e60ada35",
+   "f004": [
+    {
+     "f004_row_id": "20260630000159:0:8",
+     "covers": [
+      "2025/일반회계법인/4.1/-/회계법인 예광/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/4.1/-/회계법인 예광/0": 0.486
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.1/-/회계법인 청담/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": null,
+    "firm": "회계법인 청담",
+    "index": 0
+   },
+   "text_sha256": "6579a4feae9ab3427fb09520aa5111af27b370937f42f86f75e09eb73172137c",
+   "f004": [
+    {
+     "f004_row_id": "20260630000534:0:6",
+     "covers": [
+      "2025/일반회계법인/4.1/-/회계법인 청담/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/4.1/-/회계법인 청담/0": 0.525
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.1/-/회계법인 현/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": null,
+    "firm": "회계법인 현",
+    "index": 0
+   },
+   "text_sha256": "d538a0d0be9f60491e2ebaec680eefdcc206c82a8f9d49659f8214178471975c",
+   "f004": [
+    {
+     "f004_row_id": "20260630000430:0:10",
+     "covers": [
+      "2025/일반회계법인/4.1/-/회계법인 현/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/4.1/-/회계법인 현/0": 1.0
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.2/-/예지회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.2 업무수행이사 배정 관리",
+    "gun": null,
+    "firm": "예지회계법인",
+    "index": 0
+   },
+   "text_sha256": "b63144509562c3ab78200ac789a3f601fd15cb60115f92f66178b2a45aaf0f11",
+   "f004": [
+    {
+     "f004_row_id": "20260629000416:0:6",
+     "covers": [
+      "2025/일반회계법인/4.2/-/예지회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/4.2/-/예지회계법인/0": 1.05
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.2/-/태일회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.2 업무수행이사 배정 관리",
+    "gun": null,
+    "firm": "태일회계법인",
+    "index": 0
+   },
+   "text_sha256": "10748e488a0390ee20e75bbbf398d2452c9f32b70e77202a33ae8eb8627c9bd2",
+   "f004": [
+    {
+     "f004_row_id": "20260630000660:0:13",
+     "covers": [
+      "2025/일반회계법인/4.2/-/태일회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/4.2/-/태일회계법인/0": 1.1
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.3/-/태일회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.3 교육 훈련",
+    "gun": null,
+    "firm": "태일회계법인",
+    "index": 0
+   },
+   "text_sha256": "3f78b39365cb5e3c6348640dcff6654fc6002d9d3f012ee5b2c0893dd8f71fbf",
+   "f004": [
+    {
+     "f004_row_id": "20260630000660:0:14",
+     "covers": [
+      "2025/일반회계법인/4.3/-/태일회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/4.3/-/태일회계법인/0": 1.1
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.3/-/태일회계법인/1",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.3 교육 훈련",
+    "gun": null,
+    "firm": "태일회계법인",
+    "index": 1
+   },
+   "text_sha256": "c78c39ceeffacabe0e077e687f44dba5fcab69c963f80101652c1d66684f509c",
+   "f004": [
+    {
+     "f004_row_id": "20260630000660:0:15",
+     "covers": [
+      "2025/일반회계법인/4.3/-/태일회계법인/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/4.3/-/태일회계법인/1": 1.044
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.3/-/태일회계법인/2",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.3 교육 훈련",
+    "gun": null,
+    "firm": "태일회계법인",
+    "index": 2
+   },
+   "text_sha256": "b1cdc80e9323fbaf6515d5fdad07d56c040df490b8f203d35bd22eee85fa5323",
+   "f004": [
+    {
+     "f004_row_id": "20260630000660:0:16",
+     "covers": [
+      "2025/일반회계법인/4.3/-/태일회계법인/2"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/4.3/-/태일회계법인/2": 1.1
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.2/-/다음회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": null,
+    "firm": "다음회계법인",
+    "index": 0
+   },
+   "text_sha256": "9dbac07d610b0b862bf1e89692213ce01469b3d5d11cebe1cac3d7cd6a199f07",
+   "f004": [
+    {
+     "f004_row_id": "20260629000546:0:8",
+     "covers": [
+      "2025/일반회계법인/5.2/-/다음회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.2/-/다음회계법인/0": 0.619
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.2/-/미립회계법인/1",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": null,
+    "firm": "미립회계법인",
+    "index": 1
+   },
+   "text_sha256": "a2f703f2be863635af4d5be0989ed7805182d7623c5a0729bff84babc841a60c",
+   "f004": [
+    {
+     "f004_row_id": "20260630000197:0:8",
+     "covers": [
+      "2025/일반회계법인/5.2/-/미립회계법인/0",
+      "2025/일반회계법인/5.2/-/미립회계법인/1"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.2/-/미립회계법인/0": 0.652,
+      "2025/일반회계법인/5.2/-/미립회계법인/1": 0.695
+     },
+     "note": "위 2개 문단을 F004 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.2/-/동남회계법인/1",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": null,
+    "firm": "동남회계법인",
+    "index": 1
+   },
+   "text_sha256": "af287a4ed6abc56f8679c33110a3149cabfe908ae96b5702a02cd72b85ee9f95",
+   "f004": [
+    {
+     "f004_row_id": "20260629000099:0:10",
+     "covers": [
+      "2025/일반회계법인/5.2/-/동남회계법인/0",
+      "2025/일반회계법인/5.2/-/동남회계법인/1"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.2/-/동남회계법인/0": 0.567,
+      "2025/일반회계법인/5.2/-/동남회계법인/1": 0.567
+     },
+     "note": "F004에서 5.2·6.1 지적을 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.2/-/성문회계법인/1",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": null,
+    "firm": "성문회계법인",
+    "index": 1
+   },
+   "text_sha256": "fd9d480aa419c69fb2417abbbd276171045e279213d2f9a8eb5d86044a91049f",
+   "f004": [
+    {
+     "f004_row_id": "20260930000048:0:10",
+     "covers": [
+      "2025/일반회계법인/5.2/-/성문회계법인/0",
+      "2025/일반회계법인/5.2/-/성문회계법인/1"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.2/-/성문회계법인/0": 0.785,
+      "2025/일반회계법인/5.2/-/성문회계법인/1": 0.785
+     },
+     "note": "위 2개 문단을 F004 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.2/-/서원회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": null,
+    "firm": "서원회계법인",
+    "index": 0
+   },
+   "text_sha256": "6a61ba33d1bcbfe29a51f07f9e38f56e3a319e98dfdcd023a9e4ab65b3c252b7",
+   "f004": [
+    {
+     "f004_row_id": "20260630000265:0:9",
+     "covers": [
+      "2025/일반회계법인/5.2/-/서원회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/5.2/-/서원회계법인/0": 0.935
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.2/-/선명회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": null,
+    "firm": "선명회계법인",
+    "index": 0
+   },
+   "text_sha256": "c9a94ed0b80584104c3b9a6dd8fe2243a8d74a76b081fedbaed235c4d3adb449",
+   "f004": [
+    {
+     "f004_row_id": "20260630000602:0:8",
+     "covers": [
+      "2025/일반회계법인/5.2/-/선명회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/5.2/-/선명회계법인/0": 0.868
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.2/-/선명회계법인/1",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": null,
+    "firm": "선명회계법인",
+    "index": 1
+   },
+   "text_sha256": "f1a04850875dce4ff7b6258546e07b12675defc17de4a31f2296d3d371fe6621",
+   "f004": [
+    {
+     "f004_row_id": "20260630000602:0:9",
+     "covers": [
+      "2025/일반회계법인/5.2/-/선명회계법인/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/5.2/-/선명회계법인/1": 0.82
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.2/-/송정회계법인/1",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": null,
+    "firm": "송정회계법인",
+    "index": 1
+   },
+   "text_sha256": "709b429b8bd554744d88cddae29e0327287a0e21c9efddaeb257cbae8badb606",
+   "f004": [
+    {
+     "f004_row_id": "20260630000421:0:8",
+     "covers": [
+      "2025/일반회계법인/5.2/-/송정회계법인/0",
+      "2025/일반회계법인/5.2/-/송정회계법인/1"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.2/-/송정회계법인/0": 0.373,
+      "2025/일반회계법인/5.2/-/송정회계법인/1": 0.467
+     },
+     "note": "위 2개 문단을 F004 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.2/-/신영회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": null,
+    "firm": "신영회계법인",
+    "index": 0
+   },
+   "text_sha256": "14b07dcab7fd5d39f7ffc03f0853597c68c764241566264dc17dca3565f5915b",
+   "f004": [
+    {
+     "f004_row_id": "20260630000428:0:10",
+     "covers": [
+      "2025/일반회계법인/5.2/-/신영회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.2/-/신영회계법인/0": 0.619
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.2/-/신영회계법인/1",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": null,
+    "firm": "신영회계법인",
+    "index": 1
+   },
+   "text_sha256": "288d4a817204bec46aefdf02e85b82b84fd94dcaf5411f4a9ea683b7372a0d84",
+   "f004": [
+    {
+     "f004_row_id": "20260630000428:0:11",
+     "covers": [
+      "2025/일반회계법인/5.2/-/신영회계법인/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/5.2/-/신영회계법인/1": 0.754
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.2/-/신성회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": null,
+    "firm": "신성회계법인",
+    "index": 0
+   },
+   "text_sha256": "adf84ebc963e367cc6f44a34e8c9ed880a4f0f2c9925393c4405e93f96558984",
+   "f004": [
+    {
+     "f004_row_id": "20260629000292:0:8",
+     "covers": [
+      "2025/일반회계법인/5.2/-/신성회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/5.2/-/신성회계법인/0": 1.076
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.2/-/회계법인 서정/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": null,
+    "firm": "회계법인 서정",
+    "index": 0
+   },
+   "text_sha256": "2ff29728f185d86b9783f3bb108dbef1d48ee93be515e01bf81c562c5b1a7d51",
+   "f004": [
+    {
+     "f004_row_id": "20260630000394:0:9",
+     "covers": [
+      "2025/일반회계법인/5.2/-/회계법인 서정/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/5.2/-/회계법인 서정/0": 0.797
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.2/-/회계법인 하나로/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": null,
+    "firm": "회계법인 하나로",
+    "index": 0
+   },
+   "text_sha256": "377c52e661f73a8775d9a9c46e4ac9669a8e2f7706e39cbf71de64e13c4a4706",
+   "f004": [
+    {
+     "f004_row_id": "20260630000316:0:8",
+     "covers": [
+      "2025/일반회계법인/5.2/-/회계법인 하나로/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.2/-/회계법인 하나로/0": 0.688
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.2/-/예지회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": null,
+    "firm": "예지회계법인",
+    "index": 0
+   },
+   "text_sha256": "6bef738dd992efd3a2aeb7336401e2cd39be6049822a09e42270cdd181444821",
+   "f004": [
+    {
+     "f004_row_id": "20260629000416:0:8",
+     "covers": [
+      "2025/일반회계법인/5.2/-/예지회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/5.2/-/예지회계법인/0": 1.005
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.2/-/정일회계법인/1",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": null,
+    "firm": "정일회계법인",
+    "index": 1
+   },
+   "text_sha256": "f0cc51997679a1a4040398f732d569ce97715b83892976e342109f83b4d76157",
+   "f004": [
+    {
+     "f004_row_id": "20260629000338:0:9",
+     "covers": [
+      "2025/일반회계법인/5.2/-/정일회계법인/0",
+      "2025/일반회계법인/5.2/-/정일회계법인/1"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.2/-/정일회계법인/0": 0.379,
+      "2025/일반회계법인/5.2/-/정일회계법인/1": 0.434
+     },
+     "note": "F004에서 5.2·5.3 지적을 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.2/-/태인회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": null,
+    "firm": "태인회계법인",
+    "index": 0
+   },
+   "text_sha256": "ce5eca68a4940f3fd657087e1dc129e9602810612b52d31be56bfd4f39122ed8",
+   "f004": [
+    {
+     "f004_row_id": "20260930000167:0:8",
+     "covers": [
+      "2025/일반회계법인/5.2/-/태인회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.2/-/태인회계법인/0": 0.1
+     },
+     "note": "F004에서 5.2·5.3 지적을 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.2/-/태일회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": null,
+    "firm": "태일회계법인",
+    "index": 0
+   },
+   "text_sha256": "2c3c78f3afeceaf08e377156043d786fb191699e875fa4de416b2c8ad8b3e0ae",
+   "f004": [
+    {
+     "f004_row_id": "20260630000660:0:21",
+     "covers": [
+      "2025/일반회계법인/5.2/-/태일회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/5.2/-/태일회계법인/0": 1.1
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.2/-/회계법인 동행/2",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": null,
+    "firm": "회계법인 동행",
+    "index": 2
+   },
+   "text_sha256": "31dad968c8a7ea6b5826153ff675695844aab050e6f6d584514bb0fd47bd096f",
+   "f004": [
+    {
+     "f004_row_id": "20260630000310:0:8",
+     "covers": [
+      "2025/일반회계법인/5.2/-/회계법인 동행/0",
+      "2025/일반회계법인/5.2/-/회계법인 동행/1",
+      "2025/일반회계법인/5.2/-/회계법인 동행/2"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.2/-/회계법인 동행/0": 0.239,
+      "2025/일반회계법인/5.2/-/회계법인 동행/1": 0.292,
+      "2025/일반회계법인/5.2/-/회계법인 동행/2": 0.392
+     },
+     "note": "F004에서 4.1·5.2 지적을 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.2/-/회계법인 현/2",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": null,
+    "firm": "회계법인 현",
+    "index": 2
+   },
+   "text_sha256": "e990169c1d4e15b71e4b1dbb6707649a91cfbd2a979d4e73c7c91f2991c94cfd",
+   "f004": [
+    {
+     "f004_row_id": "20260630000430:0:9",
+     "covers": [
+      "2025/일반회계법인/5.2/-/회계법인 현/0",
+      "2025/일반회계법인/5.2/-/회계법인 현/1",
+      "2025/일반회계법인/5.2/-/회계법인 현/2"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/5.2/-/회계법인 현/0": 1.1,
+      "2025/일반회계법인/5.2/-/회계법인 현/1": 1.1,
+      "2025/일반회계법인/5.2/-/회계법인 현/2": 1.1
+     },
+     "note": "위 3개 문단을 F004 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.2/-/회계법인 새시대/2",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": null,
+    "firm": "회계법인 새시대",
+    "index": 2
+   },
+   "text_sha256": "9163e249ab43a7a8dd2af7713f993d3b975aa92086c1ddfb9998c30e6ca911cc",
+   "f004": [
+    {
+     "f004_row_id": "20260630000511:0:9",
+     "covers": [
+      "2025/일반회계법인/5.2/-/회계법인 새시대/0",
+      "2025/일반회계법인/5.2/-/회계법인 새시대/1",
+      "2025/일반회계법인/5.2/-/회계법인 새시대/2"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.2/-/회계법인 새시대/0": 0.349,
+      "2025/일반회계법인/5.2/-/회계법인 새시대/1": 0.515,
+      "2025/일반회계법인/5.2/-/회계법인 새시대/2": 0.494
+     },
+     "note": "위 3개 문단을 F004 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.2/-/회계법인 예광/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": null,
+    "firm": "회계법인 예광",
+    "index": 0
+   },
+   "text_sha256": "00872a658dbea8d1c816162ccb87e41a550eb20545f377d2b292e0dee5d06cc3",
+   "f004": [
+    {
+     "f004_row_id": "20260630000159:0:9",
+     "covers": [
+      "2025/일반회계법인/5.2/-/회계법인 예광/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.2/-/회계법인 예광/0": 0.55
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.3/-/태인회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "태인회계법인",
+    "index": 0
+   },
+   "text_sha256": "2f74b82c11a0856e1da52903df256581eef4ca60b270ae866c92ae9a9faf10bc",
+   "f004": [
+    {
+     "f004_row_id": "20260930000167:0:8",
+     "covers": [
+      "2025/일반회계법인/5.3/-/태인회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.3/-/태인회계법인/0": 0.1
+     },
+     "note": "F004에서 5.2·5.3 지적을 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.3/-/회계법인 상지원/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "회계법인 상지원",
+    "index": 0
+   },
+   "text_sha256": "2f74b82c11a0856e1da52903df256581eef4ca60b270ae866c92ae9a9faf10bc",
+   "f004": [
+    {
+     "f004_row_id": "20260630000269:0:11",
+     "covers": [
+      "2025/일반회계법인/5.3/-/회계법인 상지원/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/5.3/-/회계법인 상지원/0": 0.773
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.3/-/다음회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "다음회계법인",
+    "index": 0
+   },
+   "text_sha256": "0b84de8eecf438ac98160d730044bac41fc3a85385e920803d433481d6b9a0f3",
+   "f004": [
+    {
+     "f004_row_id": "20260629000546:0:9",
+     "covers": [
+      "2025/일반회계법인/5.3/-/다음회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.3/-/다음회계법인/0": 0.572
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.3/-/정일회계법인/1",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "정일회계법인",
+    "index": 1
+   },
+   "text_sha256": "d96d2cae89951e2356386c107e69bd7b62dcfc6a6378f94aca144d89552231c1",
+   "f004": [
+    {
+     "f004_row_id": "20260629000338:0:9",
+     "covers": [
+      "2025/일반회계법인/5.3/-/정일회계법인/0",
+      "2025/일반회계법인/5.3/-/정일회계법인/1"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.3/-/정일회계법인/0": 0.323,
+      "2025/일반회계법인/5.3/-/정일회계법인/1": 0.211
+     },
+     "note": "F004에서 5.2·5.3 지적을 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.3/-/동남회계법인/1",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "동남회계법인",
+    "index": 1
+   },
+   "text_sha256": "7e9cd60d081d95edd6fed9c96d13ce22ef9ad6480be6c66b2b7c602b3e6abf1f",
+   "f004": [
+    {
+     "f004_row_id": "20260629000099:0:8",
+     "covers": [
+      "2025/일반회계법인/5.3/-/동남회계법인/0",
+      "2025/일반회계법인/5.3/-/동남회계법인/1"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.3/-/동남회계법인/0": 0.425,
+      "2025/일반회계법인/5.3/-/동남회계법인/1": 0.25
+     },
+     "note": "위 2개 문단을 F004 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.3/-/보람회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "보람회계법인",
+    "index": 0
+   },
+   "text_sha256": "74a50e8fbbb352fb491d15bfe8ed790d6eded30d449661457646d58194999a71",
+   "f004": [
+    {
+     "f004_row_id": "20260630000059:0:9",
+     "covers": [
+      "2025/일반회계법인/5.3/-/보람회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.3/-/보람회계법인/0": 0.383
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.3/-/세정회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "세정회계법인",
+    "index": 0
+   },
+   "text_sha256": "5ec393ca3f68aae81ad343697fd910aab11cb441e914e01b5778f93ff5f14878",
+   "f004": [
+    {
+     "f004_row_id": "20260630000400:0:10",
+     "covers": [
+      "2025/일반회계법인/5.3/-/세정회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/5.3/-/세정회계법인/0": 1.1
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.3/-/회계법인 이상/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "회계법인 이상",
+    "index": 0
+   },
+   "text_sha256": "fb0e6c33eae5bcbc16ac75ce6d2799c9884604816c9a57f0018678da4cb7c47c",
+   "f004": [
+    {
+     "f004_row_id": "20260928000049:0:8",
+     "covers": [
+      "2025/일반회계법인/5.3/-/회계법인 이상/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.3/-/회계법인 이상/0": 0.464
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.3/-/서원회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "서원회계법인",
+    "index": 0
+   },
+   "text_sha256": "971e59fdb50728d081e8414d6301263047a35c730dc9e3caf3ceaacab3019e94",
+   "f004": [
+    {
+     "f004_row_id": "20260630000265:0:10",
+     "covers": [
+      "2025/일반회계법인/5.3/-/서원회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.3/-/서원회계법인/0": 0.586
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.3/-/회계법인 새시대/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "회계법인 새시대",
+    "index": 0
+   },
+   "text_sha256": "859a483642529f1982a7a9c773a50a61fc5a001adf19029af8c7bf393921aeef",
+   "f004": [
+    {
+     "f004_row_id": "20260630000511:0:10",
+     "covers": [
+      "2025/일반회계법인/5.3/-/회계법인 새시대/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.3/-/회계법인 새시대/0": 0.377
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.3/-/성문회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "성문회계법인",
+    "index": 0
+   },
+   "text_sha256": "32959e528666f6a0d2cccfe53b151ad3b0b44785f2f4556fb17afe20ef2c6c41",
+   "f004": [
+    {
+     "f004_row_id": "20260930000048:0:9",
+     "covers": [
+      "2025/일반회계법인/5.3/-/성문회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.3/-/성문회계법인/0": 0.486
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.3/-/신영회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "신영회계법인",
+    "index": 0
+   },
+   "text_sha256": "8501694c795649f41fa9ab9e124853cf8878019df37042ceb8e217f75835998a",
+   "f004": [
+    {
+     "f004_row_id": "20260630000428:0:12",
+     "covers": [
+      "2025/일반회계법인/5.3/-/신영회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.3/-/신영회계법인/0": 0.464
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.3/-/신영회계법인/2",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "신영회계법인",
+    "index": 2
+   },
+   "text_sha256": "e6af2fad9db45c5a131025540fd106152244538483a6c5edfb2ab07354be573c",
+   "f004": [
+    {
+     "f004_row_id": "20260630000428:0:14",
+     "covers": [
+      "2025/일반회계법인/5.3/-/신영회계법인/2"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.3/-/신영회계법인/2": 0.525
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.3/-/세아회계법인/1",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "세아회계법인",
+    "index": 1
+   },
+   "text_sha256": "3bf88343e5383b8927d03b069cbb1794023c6562545312fb4d23c4b1dc4e3023",
+   "f004": [
+    {
+     "f004_row_id": "20260630000928:0:10",
+     "covers": [
+      "2025/일반회계법인/5.3/-/세아회계법인/1"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.3/-/세아회계법인/1": 0.525
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.3/-/송정회계법인/1",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "송정회계법인",
+    "index": 1
+   },
+   "text_sha256": "9d86ca4fe384e89baba94cb6f32132fdca77bca9e5d64be3d9a86576c9bd1abc",
+   "f004": [
+    {
+     "f004_row_id": "20260630000421:0:9",
+     "covers": [
+      "2025/일반회계법인/5.3/-/송정회계법인/0",
+      "2025/일반회계법인/5.3/-/송정회계법인/1"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.3/-/송정회계법인/0": 0.373,
+      "2025/일반회계법인/5.3/-/송정회계법인/1": 0.343
+     },
+     "note": "위 2개 문단을 F004 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.3/-/신성회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "신성회계법인",
+    "index": 0
+   },
+   "text_sha256": "bf8184faabc7a29dd5a61b953d9bc252e3453612780ca4c432cd49a063f20b2f",
+   "f004": [
+    {
+     "f004_row_id": "20260629000292:0:9",
+     "covers": [
+      "2025/일반회계법인/5.3/-/신성회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/5.3/-/신성회계법인/0": 1.1
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.3/-/위드회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "위드회계법인",
+    "index": 0
+   },
+   "text_sha256": "d316566526be6e435f25c27faa85e6d8d3cd2f77cbd2695985faf8fa3e566d71",
+   "f004": [
+    {
+     "f004_row_id": "20260630000261:0:8",
+     "covers": [
+      "2025/일반회계법인/5.3/-/위드회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.3/-/위드회계법인/0": 0.397
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.3/-/지안회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "지안회계법인",
+    "index": 0
+   },
+   "text_sha256": "bb072e59900bb9eaa148b0db5f3237dc93803d3aaf925a9f10b63f8a639e08a8",
+   "f004": [
+    {
+     "f004_row_id": "20260630000911:0:8",
+     "covers": [
+      "2025/일반회계법인/5.3/-/지안회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/5.3/-/지안회계법인/0": 0.8
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.3/-/태일회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "태일회계법인",
+    "index": 0
+   },
+   "text_sha256": "ddddb960f98a31ecd0dfe85a82b1bf23759eb9bce711fe549ba68a4caeebce8d",
+   "f004": [
+    {
+     "f004_row_id": "20260630000660:0:22",
+     "covers": [
+      "2025/일반회계법인/5.3/-/태일회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/5.3/-/태일회계법인/0": 1.1
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.3/-/태일회계법인/1",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "태일회계법인",
+    "index": 1
+   },
+   "text_sha256": "de20e4328b5b42038e7f569cbf928aef6c616790eab19b179f79c951727dc84b",
+   "f004": [
+    {
+     "f004_row_id": "20260630000660:0:23",
+     "covers": [
+      "2025/일반회계법인/5.3/-/태일회계법인/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/5.3/-/태일회계법인/1": 1.1
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.3/-/회계법인 길인/2",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "회계법인 길인",
+    "index": 2
+   },
+   "text_sha256": "dd28b7096160f94d743e318c05490ec899f75abfc9748b7eca198a31fe8f1e7d",
+   "f004": [
+    {
+     "f004_row_id": "20260630000446:0:10",
+     "covers": [
+      "2025/일반회계법인/5.3/-/회계법인 길인/0",
+      "2025/일반회계법인/5.3/-/회계법인 길인/1",
+      "2025/일반회계법인/5.3/-/회계법인 길인/2"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.3/-/회계법인 길인/0": 0.44,
+      "2025/일반회계법인/5.3/-/회계법인 길인/1": 0.383,
+      "2025/일반회계법인/5.3/-/회계법인 길인/2": 0.44
+     },
+     "note": "위 3개 문단을 F004 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.3/-/회계법인 서정/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "회계법인 서정",
+    "index": 0
+   },
+   "text_sha256": "3f4cea2d769b292f9efa3e8687d4247957d51b54f4f1656789a7514b63ac3e17",
+   "f004": [
+    {
+     "f004_row_id": "20260630000394:0:8",
+     "covers": [
+      "2025/일반회계법인/5.3/-/회계법인 서정/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/5.3/-/회계법인 서정/0": 0.616
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.3/-/회계법인 현/1",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "회계법인 현",
+    "index": 1
+   },
+   "text_sha256": "9009e52e992cb8b12e53f4dbce6cd68dcf537d631f984598faccdb0d550457f0",
+   "f004": [
+    {
+     "f004_row_id": "20260630000430:0:8",
+     "covers": [
+      "2025/일반회계법인/5.3/-/회계법인 현/0",
+      "2025/일반회계법인/5.3/-/회계법인 현/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/5.3/-/회계법인 현/0": 1.1,
+      "2025/일반회계법인/5.3/-/회계법인 현/1": 1.1
+     },
+     "note": "위 2개 문단을 F004 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.4/-/태일회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.4 일반 조서 문서화 미비 등",
+    "gun": null,
+    "firm": "태일회계법인",
+    "index": 0
+   },
+   "text_sha256": "cb44d5e0e3831aecf378582ccc7a482558aabdfc288f881c0bf4a716b46c7f2e",
+   "f004": [
+    {
+     "f004_row_id": "20260630000660:0:20",
+     "covers": [
+      "2025/일반회계법인/5.4/-/태일회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/5.4/-/태일회계법인/0": 1.1
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/가립회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "가립회계법인",
+    "index": 0
+   },
+   "text_sha256": "d9f6ae297b0be9cc9731524df5a3fd435efb4a81f51cb72acdd62cd5f1c52fe6",
+   "f004": [
+    {
+     "f004_row_id": "20260630001098:0:10",
+     "covers": [
+      "2025/일반회계법인/6.1/-/가립회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/6.1/-/가립회계법인/0": 0.486
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/다음회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "다음회계법인",
+    "index": 0
+   },
+   "text_sha256": "fca93a86d762e148c04fa38a68ec70fb1b0c17f47309371851e7a1f66fa1a42e",
+   "f004": [
+    {
+     "f004_row_id": "20260629000546:0:10",
+     "covers": [
+      "2025/일반회계법인/6.1/-/다음회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/6.1/-/다음회계법인/0": 0.578
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/상록회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "상록회계법인",
+    "index": 0
+   },
+   "text_sha256": "d9f6ae297b0be9cc9731524df5a3fd435efb4a81f51cb72acdd62cd5f1c52fe6",
+   "f004": [
+    {
+     "f004_row_id": "20260630001078:0:11",
+     "covers": [
+      "2025/일반회계법인/6.1/-/상록회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/6.1/-/상록회계법인/0": 0.468
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/서원회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "서원회계법인",
+    "index": 0
+   },
+   "text_sha256": "bfc400ce4f98e0bc22bf3114c74a7e982cb895f48a3e5da438e538baa13aa8bc",
+   "f004": [
+    {
+     "f004_row_id": "20260630000265:0:12",
+     "covers": [
+      "2025/일반회계법인/6.1/-/서원회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/6.1/-/서원회계법인/0": 0.751
+     },
+     "note": null
+    },
+    {
+     "f004_row_id": "20260630000265:0:11",
+     "covers": [
+      "2025/일반회계법인/6.1/-/서원회계법인/0"
+     ],
+     "basis": "same_topic_second_row",
+     "scores": null,
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/회계법인 서정/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "회계법인 서정",
+    "index": 0
+   },
+   "text_sha256": "f1eb0193e2a7f33540075098b9b38719812f20d0678629e639cee9defca72915",
+   "f004": [
+    {
+     "f004_row_id": "20260630000394:0:10",
+     "covers": [
+      "2025/일반회계법인/6.1/-/회계법인 서정/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/6.1/-/회계법인 서정/0": 0.732
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/회계법인 현/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "회계법인 현",
+    "index": 0
+   },
+   "text_sha256": "afa559c6981f4d82b63ad47c559bfee5948a2ed903fea0c43ca8c0911c857fa8",
+   "f004": [
+    {
+     "f004_row_id": "20260630000430:0:11",
+     "covers": [
+      "2025/일반회계법인/6.1/-/회계법인 현/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/6.1/-/회계법인 현/0": 1.1
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/보람회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "보람회계법인",
+    "index": 0
+   },
+   "text_sha256": "489e6f98940bcd6498d410b2d02812eabd36a56d5f52ca9d11d19ed18ffd314f",
+   "f004": [
+    {
+     "f004_row_id": "20260630000059:0:10",
+     "covers": [
+      "2025/일반회계법인/6.1/-/보람회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/6.1/-/보람회계법인/0": 0.646
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/회계법인 하나로/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "회계법인 하나로",
+    "index": 0
+   },
+   "text_sha256": "b5ca5ee42e57701538e14d4bbb0f2c000f6b030734594e54d3eec1f410f3a44e",
+   "f004": [
+    {
+     "f004_row_id": "20260630000316:0:14",
+     "covers": [
+      "2025/일반회계법인/6.1/-/회계법인 하나로/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/6.1/-/회계법인 하나로/0": 0.646
+     },
+     "note": null
+    },
+    {
+     "f004_row_id": "20260630000316:0:15",
+     "covers": [
+      "2025/일반회계법인/6.1/-/회계법인 하나로/0"
+     ],
+     "basis": "same_topic_second_row",
+     "scores": null,
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/동남회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "동남회계법인",
+    "index": 0
+   },
+   "text_sha256": "29aca08e5ae6479325f0b2deadba36bf36f5056bad20c92db30960e58a35ea73",
+   "f004": [
+    {
+     "f004_row_id": "20260629000099:0:10",
+     "covers": [
+      "2025/일반회계법인/6.1/-/동남회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/6.1/-/동남회계법인/0": 0.383
+     },
+     "note": "F004에서 5.2·6.1 지적을 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/미립회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "미립회계법인",
+    "index": 0
+   },
+   "text_sha256": "827ec69689d7ab7e156dfefada517944b313262555fcce0f9c43f01df472c9e2",
+   "f004": [
+    {
+     "f004_row_id": "20260630000197:0:10",
+     "covers": [
+      "2025/일반회계법인/6.1/-/미립회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/6.1/-/미립회계법인/0": 0.427
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/바름회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "바름회계법인",
+    "index": 0
+   },
+   "text_sha256": "827ec69689d7ab7e156dfefada517944b313262555fcce0f9c43f01df472c9e2",
+   "f004": [
+    {
+     "f004_row_id": "20260630000862:0:10",
+     "covers": [
+      "2025/일반회계법인/6.1/-/바름회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/6.1/-/바름회계법인/0": 0.404
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/성문회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "성문회계법인",
+    "index": 0
+   },
+   "text_sha256": "29aca08e5ae6479325f0b2deadba36bf36f5056bad20c92db30960e58a35ea73",
+   "f004": [
+    {
+     "f004_row_id": "20260930000048:0:11",
+     "covers": [
+      "2025/일반회계법인/6.1/-/성문회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/6.1/-/성문회계법인/0": 0.355
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/세정회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "세정회계법인",
+    "index": 0
+   },
+   "text_sha256": "827ec69689d7ab7e156dfefada517944b313262555fcce0f9c43f01df472c9e2",
+   "f004": [
+    {
+     "f004_row_id": "20260630000400:0:12",
+     "covers": [
+      "2025/일반회계법인/6.1/-/세정회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/6.1/-/세정회계법인/0": 0.991
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/신영회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "신영회계법인",
+    "index": 0
+   },
+   "text_sha256": "827ec69689d7ab7e156dfefada517944b313262555fcce0f9c43f01df472c9e2",
+   "f004": [
+    {
+     "f004_row_id": "20260630000428:0:16",
+     "covers": [
+      "2025/일반회계법인/6.1/-/신영회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/6.1/-/신영회계법인/0": 0.558
+     },
+     "note": null
+    },
+    {
+     "f004_row_id": "20260630000428:0:17",
+     "covers": [
+      "2025/일반회계법인/6.1/-/신영회계법인/0"
+     ],
+     "basis": "same_topic_second_row",
+     "scores": null,
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/위드회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "위드회계법인",
+    "index": 0
+   },
+   "text_sha256": "827ec69689d7ab7e156dfefada517944b313262555fcce0f9c43f01df472c9e2",
+   "f004": [
+    {
+     "f004_row_id": "20260630000261:0:9",
+     "covers": [
+      "2025/일반회계법인/6.1/-/위드회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/6.1/-/위드회계법인/0": 0.304
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/지안회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "지안회계법인",
+    "index": 0
+   },
+   "text_sha256": "827ec69689d7ab7e156dfefada517944b313262555fcce0f9c43f01df472c9e2",
+   "f004": [
+    {
+     "f004_row_id": "20260630000911:0:11",
+     "covers": [
+      "2025/일반회계법인/6.1/-/지안회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/6.1/-/지안회계법인/0": 0.754
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/태인회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "태인회계법인",
+    "index": 0
+   },
+   "text_sha256": "827ec69689d7ab7e156dfefada517944b313262555fcce0f9c43f01df472c9e2",
+   "f004": [
+    {
+     "f004_row_id": "20260930000167:0:10",
+     "covers": [
+      "2025/일반회계법인/6.1/-/태인회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/6.1/-/태인회계법인/0": 0.1
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/회계법인 길인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "회계법인 길인",
+    "index": 0
+   },
+   "text_sha256": "827ec69689d7ab7e156dfefada517944b313262555fcce0f9c43f01df472c9e2",
+   "f004": [
+    {
+     "f004_row_id": "20260630000446:0:12",
+     "covers": [
+      "2025/일반회계법인/6.1/-/회계법인 길인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/6.1/-/회계법인 길인/0": 0.454
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/회계법인 상지원/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "회계법인 상지원",
+    "index": 0
+   },
+   "text_sha256": "827ec69689d7ab7e156dfefada517944b313262555fcce0f9c43f01df472c9e2",
+   "f004": [
+    {
+     "f004_row_id": "20260630000269:0:12",
+     "covers": [
+      "2025/일반회계법인/6.1/-/회계법인 상지원/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/6.1/-/회계법인 상지원/0": 0.866
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/회계법인 새시대/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "회계법인 새시대",
+    "index": 0
+   },
+   "text_sha256": "29aca08e5ae6479325f0b2deadba36bf36f5056bad20c92db30960e58a35ea73",
+   "f004": [
+    {
+     "f004_row_id": "20260630000511:0:11",
+     "covers": [
+      "2025/일반회계법인/6.1/-/회계법인 새시대/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/6.1/-/회계법인 새시대/0": 0.359
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/회계법인 공감/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "회계법인 공감",
+    "index": 0
+   },
+   "text_sha256": "3180d267db4fce5365ace0b0438d49f623a8bf91364209b12b45b18b35f5388a",
+   "f004": [
+    {
+     "f004_row_id": "20260630000442:0:11",
+     "covers": [
+      "2025/일반회계법인/6.1/-/회계법인 공감/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/6.1/-/회계법인 공감/0": 0.404
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/선명회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "선명회계법인",
+    "index": 0
+   },
+   "text_sha256": "26fab4d14ecb2ab879e29632f865ba745b3e50ae3e4d64f6b662b53724996d97",
+   "f004": [
+    {
+     "f004_row_id": "20260630000602:0:10",
+     "covers": [
+      "2025/일반회계법인/6.1/-/선명회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/6.1/-/선명회계법인/0": 0.791
+     },
+     "note": null
+    },
+    {
+     "f004_row_id": "20260630000602:0:11",
+     "covers": [
+      "2025/일반회계법인/6.1/-/선명회계법인/0"
+     ],
+     "basis": "same_topic_second_row",
+     "scores": null,
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/회계법인 청담/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "회계법인 청담",
+    "index": 0
+   },
+   "text_sha256": "63b598425f97ac3668b284877646e04fb8460c7e6fdb8e40c09b1511509c70a8",
+   "f004": [
+    {
+     "f004_row_id": "20260630000534:0:10",
+     "covers": [
+      "2025/일반회계법인/6.1/-/회계법인 청담/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/6.1/-/회계법인 청담/0": 0.492
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/선율회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "선율회계법인",
+    "index": 0
+   },
+   "text_sha256": "50b788d9d386d868c3308548d2da8297b56d72ae94573bbaa6f6680efb6cad48",
+   "f004": [
+    {
+     "f004_row_id": "20260701000301:0:10",
+     "covers": [
+      "2025/일반회계법인/6.1/-/선율회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/6.1/-/선율회계법인/0": 0.695
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/세아회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "세아회계법인",
+    "index": 0
+   },
+   "text_sha256": "034fc7c11c8afdb2a1b07242919a8b95c094c97556cf7b3cd87ec4a6465f683a",
+   "f004": [
+    {
+     "f004_row_id": "20260630000928:0:11",
+     "covers": [
+      "2025/일반회계법인/6.1/-/세아회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/6.1/-/세아회계법인/0": 0.525
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/송정회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "송정회계법인",
+    "index": 0
+   },
+   "text_sha256": "e5f3545e1801b6f563221da051990b4ca3dcf2a412febd836baab37a47c9aded",
+   "f004": [
+    {
+     "f004_row_id": "20260630000421:0:10",
+     "covers": [
+      "2025/일반회계법인/6.1/-/송정회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/6.1/-/송정회계법인/0": 0.468
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/정일회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "정일회계법인",
+    "index": 0
+   },
+   "text_sha256": "bbf2b132a1d80431f10e3f8f75e922c95fd02904150bcf99e395f963ec7910ec",
+   "f004": [
+    {
+     "f004_row_id": "20260629000338:0:11",
+     "covers": [
+      "2025/일반회계법인/6.1/-/정일회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/6.1/-/정일회계법인/0": 0.582
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/태일회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "태일회계법인",
+    "index": 0
+   },
+   "text_sha256": "76175b2706c74294a745d3f5cf8cf425cbe4a5e2917039a5580e8e97f275bbbd",
+   "f004": [
+    {
+     "f004_row_id": "20260630000660:0:25",
+     "covers": [
+      "2025/일반회계법인/6.1/-/태일회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2025/일반회계법인/6.1/-/태일회계법인/0": 1.1
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/6.1/-/회계법인 예광/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": null,
+    "firm": "회계법인 예광",
+    "index": 0
+   },
+   "text_sha256": "e315a2dbdc8480955a452022eb983362d32ab2b2a25fb0d0ac68a74439ef2ee3",
+   "f004": [
+    {
+     "f004_row_id": "20260630000159:0:10",
+     "covers": [
+      "2025/일반회계법인/6.1/-/회계법인 예광/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2025/일반회계법인/6.1/-/회계법인 예광/0": 0.478
+     },
+     "note": null
+    }
+   ]
+  }
+ ],
+ "firm_reasons": [
+  {
+   "firm": "나라공인회계사감사반(제47호)",
+   "bundle": "감사반",
+   "reason": "audit_team",
+   "text": "F004 이행사항: 감사반은 회계법인 사업보고서(F004)를 내지 않음",
+   "disclosure": null,
+   "qu_findings": 3
+  },
+  {
+   "firm": "다솔공인회계사감사반(제450호)",
+   "bundle": "감사반",
+   "reason": "audit_team",
+   "text": "F004 이행사항: 감사반은 회계법인 사업보고서(F004)를 내지 않음",
+   "disclosure": null,
+   "qu_findings": 3
+  },
+  {
+   "firm": "대건공인회계사감사반(제337호)",
+   "bundle": "감사반",
+   "reason": "audit_team",
+   "text": "F004 이행사항: 감사반은 회계법인 사업보고서(F004)를 내지 않음",
+   "disclosure": null,
+   "qu_findings": 3
+  },
+  {
+   "firm": "드림공인회계사감사반(제456호)",
+   "bundle": "감사반",
+   "reason": "audit_team",
+   "text": "F004 이행사항: 감사반은 회계법인 사업보고서(F004)를 내지 않음",
+   "disclosure": null,
+   "qu_findings": 3
+  },
+  {
+   "firm": "명도공인회계사감사반(제253호)",
+   "bundle": "감사반",
+   "reason": "audit_team",
+   "text": "F004 이행사항: 감사반은 회계법인 사업보고서(F004)를 내지 않음",
+   "disclosure": null,
+   "qu_findings": 3
+  },
+  {
+   "firm": "백팔공인회계사감사반(제108호)",
+   "bundle": "감사반",
+   "reason": "audit_team",
+   "text": "F004 이행사항: 감사반은 회계법인 사업보고서(F004)를 내지 않음",
+   "disclosure": null,
+   "qu_findings": 2
+  },
+  {
+   "firm": "신진공인회계사감사반(제237호)",
+   "bundle": "감사반",
+   "reason": "audit_team",
+   "text": "F004 이행사항: 감사반은 회계법인 사업보고서(F004)를 내지 않음",
+   "disclosure": null,
+   "qu_findings": 2
+  },
+  {
+   "firm": "알천공인회계사감사반(제51호)",
+   "bundle": "감사반",
+   "reason": "audit_team",
+   "text": "F004 이행사항: 감사반은 회계법인 사업보고서(F004)를 내지 않음",
+   "disclosure": null,
+   "qu_findings": 3
+  },
+  {
+   "firm": "이칠공공인회계사감사반(제270호)",
+   "bundle": "감사반",
+   "reason": "audit_team",
+   "text": "F004 이행사항: 감사반은 회계법인 사업보고서(F004)를 내지 않음",
+   "disclosure": null,
+   "qu_findings": 4
+  },
+  {
+   "firm": "정림공인회계사감사반(제352호)",
+   "bundle": "감사반",
+   "reason": "audit_team",
+   "text": "F004 이행사항: 감사반은 회계법인 사업보고서(F004)를 내지 않음",
+   "disclosure": null,
+   "qu_findings": 3
+  },
+  {
+   "firm": "정민공인회계사감사반(제518호)",
+   "bundle": "감사반",
+   "reason": "audit_team",
+   "text": "F004 이행사항: 감사반은 회계법인 사업보고서(F004)를 내지 않음",
+   "disclosure": null,
+   "qu_findings": 3
+  },
+  {
+   "firm": "정석공인회계사감사반(제487호)",
+   "bundle": "감사반",
+   "reason": "audit_team",
+   "text": "F004 이행사항: 감사반은 회계법인 사업보고서(F004)를 내지 않음",
+   "disclosure": null,
+   "qu_findings": 3
+  },
+  {
+   "firm": "조안공인회계사감사반(제129호)",
+   "bundle": "감사반",
+   "reason": "audit_team",
+   "text": "F004 이행사항: 감사반은 회계법인 사업보고서(F004)를 내지 않음",
+   "disclosure": null,
+   "qu_findings": 1
+  },
+  {
+   "firm": "참벗공인회계사감사반(제153호)",
+   "bundle": "감사반",
+   "reason": "audit_team",
+   "text": "F004 이행사항: 감사반은 회계법인 사업보고서(F004)를 내지 않음",
+   "disclosure": null,
+   "qu_findings": 3
+  },
+  {
+   "firm": "청림공인회계사감사반(제443호)",
+   "bundle": "감사반",
+   "reason": "audit_team",
+   "text": "F004 이행사항: 감사반은 회계법인 사업보고서(F004)를 내지 않음",
+   "disclosure": null,
+   "qu_findings": 4
+  },
+  {
+   "firm": "청하공인회계사감사반(제235호)",
+   "bundle": "감사반",
+   "reason": "audit_team",
+   "text": "F004 이행사항: 감사반은 회계법인 사업보고서(F004)를 내지 않음",
+   "disclosure": null,
+   "qu_findings": 2
+  },
+  {
+   "firm": "태웅공인회계사감사반(제50호)",
+   "bundle": "감사반",
+   "reason": "audit_team",
+   "text": "F004 이행사항: 감사반은 회계법인 사업보고서(F004)를 내지 않음",
+   "disclosure": null,
+   "qu_findings": 4
+  },
+  {
+   "firm": "태흥공인회계사감사반(제303호)",
+   "bundle": "감사반",
+   "reason": "audit_team",
+   "text": "F004 이행사항: 감사반은 회계법인 사업보고서(F004)를 내지 않음",
+   "disclosure": null,
+   "qu_findings": 4
+  },
+  {
+   "firm": "한음공인회계사감사반(제138호)",
+   "bundle": "감사반",
+   "reason": "audit_team",
+   "text": "F004 이행사항: 감사반은 회계법인 사업보고서(F004)를 내지 않음",
+   "disclosure": null,
+   "qu_findings": 4
+  },
+  {
+   "firm": "대주회계법인",
+   "bundle": "등록",
+   "reason": "no_cycle_rows",
+   "text": "F004 이행사항: 최신 사업보고서에 이번 감리 권고 행 없음",
+   "disclosure": {
+    "rcept_no": "20260630000869",
+    "rcept_dt": "2026-06-30",
+    "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000869"
+   },
+   "qu_findings": 14
+  },
+  {
+   "firm": "신한회계법인",
+   "bundle": "등록",
+   "reason": "no_cycle_rows",
+   "text": "F004 이행사항: 최신 사업보고서에 이번 감리 권고 행 없음",
+   "disclosure": {
+    "rcept_no": "20260630000667",
+    "rcept_dt": "2026-06-30",
+    "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000667"
+   },
+   "qu_findings": 12
+  },
+  {
+   "firm": "안경회계법인",
+   "bundle": "등록",
+   "reason": "no_cycle_rows",
+   "text": "F004 이행사항: 최신 사업보고서에 이번 감리 권고 행 없음",
+   "disclosure": {
+    "rcept_no": "20260626000153",
+    "rcept_dt": "2026-06-26",
+    "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260626000153"
+   },
+   "qu_findings": 10
+  },
+  {
+   "firm": "태성회계법인",
+   "bundle": "등록",
+   "reason": "no_cycle_rows",
+   "text": "F004 이행사항: 최신 사업보고서에 이번 감리 권고 행 없음",
+   "disclosure": {
+    "rcept_no": "20260630000970",
+    "rcept_dt": "2026-06-30",
+    "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000970"
+   },
+   "qu_findings": 19
+  },
+  {
+   "firm": "다율회계법인",
+   "bundle": "일반회계법인",
+   "reason": "table_empty",
+   "text": "F004 이행사항: 최신 사업보고서의 감사인 감리결과 표가 비어 있음",
+   "disclosure": {
+    "rcept_no": "20260629000150",
+    "rcept_dt": "2026-06-29",
+    "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260629000150"
+   },
+   "qu_findings": 2
+  },
+  {
+   "firm": "대영회계법인",
+   "bundle": "일반회계법인",
+   "reason": "table_empty",
+   "text": "F004 이행사항: 최신 사업보고서의 감사인 감리결과 표가 비어 있음",
+   "disclosure": {
+    "rcept_no": "20260630000490",
+    "rcept_dt": "2026-06-30",
+    "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000490"
+   },
+   "qu_findings": 6
+  },
+  {
+   "firm": "동신회계법인",
+   "bundle": "일반회계법인",
+   "reason": "table_empty",
+   "text": "F004 이행사항: 최신 사업보고서의 감사인 감리결과 표가 비어 있음",
+   "disclosure": {
+    "rcept_no": "20260630001088",
+    "rcept_dt": "2026-06-30",
+    "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630001088"
+   },
+   "qu_findings": 2
+  },
+  {
+   "firm": "삼지회계법인",
+   "bundle": "일반회계법인",
+   "reason": "no_cycle_rows",
+   "text": "F004 이행사항: 최신 사업보고서에 이번 감리 권고 행 없음",
+   "disclosure": {
+    "rcept_no": "20260630000852",
+    "rcept_dt": "2026-06-30",
+    "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000852"
+   },
+   "qu_findings": 8
+  },
+  {
+   "firm": "서율회계법인",
+   "bundle": "일반회계법인",
+   "reason": "no_cycle_rows",
+   "text": "F004 이행사항: 최신 사업보고서에 이번 감리 권고 행 없음",
+   "disclosure": {
+    "rcept_no": "20260630001099",
+    "rcept_dt": "2026-06-30",
+    "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630001099"
+   },
+   "qu_findings": 3
+  },
+  {
+   "firm": "성운회계법인",
+   "bundle": "일반회계법인",
+   "reason": "table_empty",
+   "text": "F004 이행사항: 최신 사업보고서의 감사인 감리결과 표가 비어 있음",
+   "disclosure": {
+    "rcept_no": "20260630000739",
+    "rcept_dt": "2026-06-30",
+    "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000739"
+   },
+   "qu_findings": 6
+  },
+  {
+   "firm": "오늘회계법인",
+   "bundle": "일반회계법인",
+   "reason": "no_cycle_rows",
+   "text": "F004 이행사항: 최신 사업보고서에 이번 감리 권고 행 없음",
+   "disclosure": {
+    "rcept_no": "20260710000198",
+    "rcept_dt": "2026-07-10",
+    "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260710000198"
+   },
+   "qu_findings": 2
+  },
+  {
+   "firm": "이지회계법인",
+   "bundle": "일반회계법인",
+   "reason": "table_empty",
+   "text": "F004 이행사항: 최신 사업보고서의 감사인 감리결과 표가 비어 있음",
+   "disclosure": {
+    "rcept_no": "20260630000821",
+    "rcept_dt": "2026-06-30",
+    "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000821"
+   },
+   "qu_findings": 2
+  },
+  {
+   "firm": "정명회계법인",
+   "bundle": "일반회계법인",
+   "reason": "table_empty",
+   "text": "F004 이행사항: 최신 사업보고서의 감사인 감리결과 표가 비어 있음",
+   "disclosure": {
+    "rcept_no": "20260629000193",
+    "rcept_dt": "2026-06-29",
+    "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260629000193"
+   },
+   "qu_findings": 2
+  },
+  {
+   "firm": "지우회계법인",
+   "bundle": "일반회계법인",
+   "reason": "table_empty",
+   "text": "F004 이행사항: 최신 사업보고서의 감사인 감리결과 표가 비어 있음",
+   "disclosure": {
+    "rcept_no": "20260630000696",
+    "rcept_dt": "2026-06-30",
+    "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000696"
+   },
+   "qu_findings": 3
+  },
+  {
+   "firm": "진산회계법인",
+   "bundle": "일반회계법인",
+   "reason": "table_empty",
+   "text": "F004 이행사항: 최신 사업보고서의 감사인 감리결과 표가 비어 있음",
+   "disclosure": {
+    "rcept_no": "20260630000814",
+    "rcept_dt": "2026-06-30",
+    "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000814"
+   },
+   "qu_findings": 6
+  },
+  {
+   "firm": "태경회계법인",
+   "bundle": "일반회계법인",
+   "reason": "table_empty",
+   "text": "F004 이행사항: 최신 사업보고서의 감사인 감리결과 표가 비어 있음",
+   "disclosure": {
+    "rcept_no": "20260701000678",
+    "rcept_dt": "2026-07-01",
+    "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260701000678"
+   },
+   "qu_findings": 5
+  },
+  {
+   "firm": "한성회계법인",
+   "bundle": "일반회계법인",
+   "reason": "table_empty",
+   "text": "F004 이행사항: 최신 사업보고서의 감사인 감리결과 표가 비어 있음",
+   "disclosure": {
+    "rcept_no": "20260630000722",
+    "rcept_dt": "2026-06-30",
+    "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000722"
+   },
+   "qu_findings": 3
+  },
+  {
+   "firm": "한일회계법인",
+   "bundle": "일반회계법인",
+   "reason": "table_empty",
+   "text": "F004 이행사항: 최신 사업보고서의 감사인 감리결과 표가 비어 있음",
+   "disclosure": {
+    "rcept_no": "20260630000222",
+    "rcept_dt": "2026-06-30",
+    "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000222"
+   },
+   "qu_findings": 1
+  },
+  {
+   "firm": "호수회계법인",
+   "bundle": "일반회계법인",
+   "reason": "table_empty",
+   "text": "F004 이행사항: 최신 사업보고서의 감사인 감리결과 표가 비어 있음",
+   "disclosure": {
+    "rcept_no": "20260629000087",
+    "rcept_dt": "2026-06-29",
+    "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260629000087"
+   },
+   "qu_findings": 7
+  },
+  {
+   "firm": "회계법인 오현",
+   "bundle": "일반회계법인",
+   "reason": "no_cycle_rows",
+   "text": "F004 이행사항: 최신 사업보고서에 이번 감리 권고 행 없음",
+   "disclosure": {
+    "rcept_no": "20260630000238",
+    "rcept_dt": "2026-06-30",
+    "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000238"
+   },
+   "qu_findings": 5
+  },
+  {
+   "firm": "회계법인 원지",
+   "bundle": "일반회계법인",
+   "reason": "no_cycle_rows",
+   "text": "F004 이행사항: 최신 사업보고서에 이번 감리 권고 행 없음",
+   "disclosure": {
+    "rcept_no": "20260630000468",
+    "rcept_dt": "2026-06-30",
+    "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000468"
+   },
+   "qu_findings": 3
+  },
+  {
+   "firm": "효림회계법인",
+   "bundle": "일반회계법인",
+   "reason": "table_empty",
+   "text": "F004 이행사항: 최신 사업보고서의 감사인 감리결과 표가 비어 있음",
+   "disclosure": {
+    "rcept_no": "20260630000520",
+    "rcept_dt": "2026-06-30",
+    "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000520"
+   },
+   "qu_findings": 5
+  }
+ ],
+ "pending": {
+  "qu_review31": [
+   {
+    "finding_id": "2025/등록/1.2/라군/선일회계법인/0",
+    "text_sha256": "3309bc4e0d90c926b12d83dd4aeec7e02131debe27befa274d50bf825bb47f63",
+    "reason": "review31",
+    "candidate_f004_row_id": "20261006000135:0:2",
+    "tier": "review",
+    "score": 0.1
+   },
+   {
+    "finding_id": "2025/등록/2.1/라군/선일회계법인/0",
+    "text_sha256": "8fb06ebaa00a0a945f77a4582e1849844df7ca86a56784e5a3315fb265f69c5a",
+    "reason": "review31",
+    "candidate_f004_row_id": "20261006000135:0:6",
+    "tier": "review",
+    "score": 0.242
+   },
+   {
+    "finding_id": "2025/등록/2.1/라군/선일회계법인/1",
+    "text_sha256": "7e10cf58775e87e53c14ffb5d8549b96294003a131648f2adfedc80e21e3b7d5",
+    "reason": "review31",
+    "candidate_f004_row_id": "20261006000135:0:4",
+    "tier": "review",
+    "score": 0.221
+   },
+   {
+    "finding_id": "2025/등록/2.1/라군/선일회계법인/2",
+    "text_sha256": "baf52dd5695b2d99cb5220e0b9c68403eb1c586831b87a91d67fd8131bec3152",
+    "reason": "review31",
+    "candidate_f004_row_id": "20261006000135:0:4",
+    "tier": "review",
+    "score": 0.1
+   },
+   {
+    "finding_id": "2025/등록/2.1/라군/선일회계법인/3",
+    "text_sha256": "8549457880ca8c8f3a9b10b230f79263cff9dc04946910c3766e3cf79c9715ae",
+    "reason": "review31",
+    "candidate_f004_row_id": "20261006000135:0:4",
+    "tier": "review",
+    "score": 0.221
+   },
+   {
+    "finding_id": "2025/등록/2.2/라군/선일회계법인/0",
+    "text_sha256": "ba6152479c64f897e856ebf26ba5061ec3aec08bee4537b985d4b5b72d166504",
+    "reason": "review31",
+    "candidate_f004_row_id": "20261006000135:0:6",
+    "tier": "review",
+    "score": 0.383
+   },
+   {
+    "finding_id": "2025/등록/2.2/라군/선일회계법인/1",
+    "text_sha256": "c307b4807c4283de2d887a66808d92381c807c73a841dd53e238b6482d4f1225",
+    "reason": "review31",
+    "candidate_f004_row_id": "20261006000135:0:4",
+    "tier": "review",
+    "score": 0.161
+   },
+   {
+    "finding_id": "2025/등록/3.1/라군/선일회계법인/0",
+    "text_sha256": "abefa82ae9628f5541704db0eb21f2737017453e89e0db45648d6ecdaca4a37e",
+    "reason": "review31",
+    "candidate_f004_row_id": "20261006000135:0:8",
+    "tier": "review",
+    "score": 0.15
+   },
+   {
+    "finding_id": "2025/등록/5.4/라군/선일회계법인/0",
+    "text_sha256": "ac8338ea8edffafeb47fbac4be64f9ea9b28fa1bc654f007c38c3b00bd0a851f",
+    "reason": "review31",
+    "candidate_f004_row_id": "20261006000135:0:2",
+    "tier": "review",
+    "score": 0.155
+   },
+   {
+    "finding_id": "2025/일반회계법인/4.1/-/지안회계법인/0",
+    "text_sha256": "13fa58bac28022b1e1436134159b2f2660e44098896483157303795d207147d8",
+    "reason": "review31",
+    "candidate_f004_row_id": "20260630000911:0:11",
+    "tier": "review",
+    "score": 0.36
+   },
+   {
+    "finding_id": "2025/일반회계법인/4.1/-/선율회계법인/0",
+    "text_sha256": "bc7588687f3b799b4b5fc962d3721c1eef89b53956ecceb23db2a77a50fcff27",
+    "reason": "review31",
+    "candidate_f004_row_id": "20260701000301:0:10",
+    "tier": "review",
+    "score": 0.425
+   },
+   {
+    "finding_id": "2025/일반회계법인/4.1/-/회계법인 공감/0",
+    "text_sha256": "0b1bc7da5934260efca2e057fcf9c3bd16354b49e367790dcde31ecb8962fc4a",
+    "reason": "review31",
+    "candidate_f004_row_id": "20260630000442:0:10",
+    "tier": "review",
+    "score": 0.374
+   },
+   {
+    "finding_id": "2025/일반회계법인/5.2/-/바름회계법인/0",
+    "text_sha256": "14b07dcab7fd5d39f7ffc03f0853597c68c764241566264dc17dca3565f5915b",
+    "reason": "review31",
+    "candidate_f004_row_id": "20260630000862:0:8",
+    "tier": "review",
+    "score": 0.165
+   },
+   {
+    "finding_id": "2025/일반회계법인/5.3/-/바름회계법인/0",
+    "text_sha256": "aff78e7b9d7b7f9bb841d603c9de416c84b356d03cd0de7a0c6062785a56f0bc",
+    "reason": "review31",
+    "candidate_f004_row_id": "20260630000862:0:8",
+    "tier": "review",
+    "score": 0.274
+   },
+   {
+    "finding_id": "2025/일반회계법인/5.3/-/미립회계법인/0",
+    "text_sha256": "5d15d2f3120f5035a0fa6219b18169e3f7b3290e6d505c9c0ef45c3f74eb5bab",
+    "reason": "review31",
+    "candidate_f004_row_id": "20260630000197:0:8",
+    "tier": "review",
+    "score": 0.312
+   },
+   {
+    "finding_id": "2025/일반회계법인/5.3/-/상록회계법인/0",
+    "text_sha256": "e85193d40a59b1a99ba4e90ad205629a97d4be207c9c626b8bb240d846c0afe5",
+    "reason": "review31",
+    "candidate_f004_row_id": "20260630001078:0:1",
+    "tier": "review",
+    "score": 0.449
+   },
+   {
+    "finding_id": "2025/일반회계법인/5.3/-/신영회계법인/1",
+    "text_sha256": "df2ed20ac97ffae1b5a500c646d16565e0a9b099ed45f15b8c6d954e34dafde1",
+    "reason": "review31",
+    "candidate_f004_row_id": "20260630000428:0:13",
+    "tier": "review",
+    "score": 0.383
+   },
+   {
+    "finding_id": "2025/일반회계법인/5.3/-/세아회계법인/0",
+    "text_sha256": "136a53033fa615ff6dbb1c25695ca1a20efc78d6de5643773e94be7bcb0ff51c",
+    "reason": "review31",
+    "candidate_f004_row_id": "20260630000928:0:9",
+    "tier": "review",
+    "score": 0.343
+   },
+   {
+    "finding_id": "2025/일반회계법인/5.3/-/회계법인 동행/0",
+    "text_sha256": "20b5e4316e587762ccdd757e908074b6b0bbfda514066cfa0c8f113af167af3f",
+    "reason": "review31",
+    "candidate_f004_row_id": "20260630000310:0:8",
+    "tier": "review",
+    "score": 0.185
+   },
+   {
+    "finding_id": "2025/일반회계법인/5.3/-/회계법인 동행/1",
+    "text_sha256": "74cd15b8c258b0bfa52e36e6ebafb1b562457189ce61b75135f4e4905a3b2d38",
+    "reason": "review31",
+    "candidate_f004_row_id": "20260630000310:0:8",
+    "tier": "review",
+    "score": 0.136
+   }
+  ],
+  "qu_dongsung": [
+   {
+    "finding_id": "2025/일반회계법인/1.2/-/동성회계법인/0",
+    "text_sha256": "073c7bffc0abf483a5fd587e5cdc3f19ca1543062e4d2706631a21a43edaef91",
+    "reason": "dongsung_reclass",
+    "candidate_f004_row_id": "20260929000399:0:0",
+    "tier": "review",
+    "score": 0.1
+   },
+   {
+    "finding_id": "2025/일반회계법인/1.2/-/동성회계법인/1",
+    "text_sha256": "0b4d7e0d4c7d9a1e29b06fff052e25170a7fc178b55b005c15601cbd21f0cf89",
+    "reason": "dongsung_reclass",
+    "candidate_f004_row_id": "20260929000399:0:0",
+    "tier": "review",
+    "score": 0.131
+   },
+   {
+    "finding_id": "2025/일반회계법인/1.2/-/동성회계법인/2",
+    "text_sha256": "2ee2224a81aa4cfa0cad0994b5b68f281adb7bd1bf64b3527091a05f993c5f5c",
+    "reason": "dongsung_reclass",
+    "candidate_f004_row_id": "20260929000399:0:0",
+    "tier": "review",
+    "score": 0.148
+   },
+   {
+    "finding_id": "2025/일반회계법인/1.2/-/동성회계법인/3",
+    "text_sha256": "64cee1ddad7c385b12b6e86e37e075f3b26c60fac84f88bdc721f5f1b3bbd615",
+    "reason": "dongsung_reclass",
+    "candidate_f004_row_id": "20260929000399:0:0",
+    "tier": "review",
+    "score": 0.1
+   },
+   {
+    "finding_id": "2025/일반회계법인/1.2/-/동성회계법인/4",
+    "text_sha256": "25788cf93b9a3294f05f7a6dd2d395e30208c05c1de8778615a838139641cf7c",
+    "reason": "dongsung_reclass",
+    "candidate_f004_row_id": "20260929000399:0:0",
+    "tier": "review",
+    "score": 0.1
+   },
+   {
+    "finding_id": "2025/일반회계법인/1.2/-/동성회계법인/5",
+    "text_sha256": "590cd98e8507904dd1e440b1db85c66064098dcce941bbf49cb1a9f714379302",
+    "reason": "dongsung_reclass",
+    "candidate_f004_row_id": "20260929000399:0:0",
+    "tier": "review",
+    "score": 0.131
+   },
+   {
+    "finding_id": "2025/일반회계법인/1.2/-/동성회계법인/6",
+    "text_sha256": "a2ee78763a14bb8ac7c70150ef0ee98d7b58778ec372f681c55c333db9393e1e",
+    "reason": "dongsung_reclass",
+    "candidate_f004_row_id": "20260929000399:0:0",
+    "tier": "review",
+    "score": 0.1
+   },
+   {
+    "finding_id": "2025/일반회계법인/2.1/-/동성회계법인/0",
+    "text_sha256": "2762147fad2e1d03f193ca0cf3747197fe6532e52f2f6b1905c73929061ffb35",
+    "reason": "dongsung_reclass",
+    "candidate_f004_row_id": "20260929000399:0:3",
+    "tier": "medium",
+    "score": 0.285
+   },
+   {
+    "finding_id": "2025/일반회계법인/2.1/-/동성회계법인/1",
+    "text_sha256": "9af0639c815fd0eae10e0c918d43ebaba32e64ed55aa862eb1d1136eac5d724b",
+    "reason": "dongsung_reclass",
+    "candidate_f004_row_id": "20260929000399:0:3",
+    "tier": "medium",
+    "score": 0.29
+   },
+   {
+    "finding_id": "2025/일반회계법인/3.1/-/동성회계법인/0",
+    "text_sha256": "bce55022db600c0fd1b7a01ca9283d666f1f6b5d7f48a3e74b8f3b66e775341e",
+    "reason": "dongsung_reclass",
+    "candidate_f004_row_id": "20260929000399:0:5",
+    "tier": "review",
+    "score": 0.134
+   },
+   {
+    "finding_id": "2025/일반회계법인/4.3/-/동성회계법인/0",
+    "text_sha256": "9f2a1dc48f61a458f8959eb13cd7ccdd3383fc4462011c795fdab946cf4d0c47",
+    "reason": "dongsung_reclass",
+    "candidate_f004_row_id": "20260929000399:0:8",
+    "tier": "none",
+    "score": 0.145
+   },
+   {
+    "finding_id": "2025/일반회계법인/4.3/-/동성회계법인/1",
+    "text_sha256": "c02e2a330f47813c2ee09e3f521b8ea109b0dee8dc64c324af3ff61004726da4",
+    "reason": "dongsung_reclass",
+    "candidate_f004_row_id": "20260929000399:0:8",
+    "tier": "review",
+    "score": 0.324
+   },
+   {
+    "finding_id": "2025/일반회계법인/5.2/-/동성회계법인/0",
+    "text_sha256": "b63838f0462070257e83c0cff5650ccc3e1870c55bdcca24e086a2cbacf9e0ad",
+    "reason": "dongsung_reclass",
+    "candidate_f004_row_id": "20260929000399:0:10",
+    "tier": "review",
+    "score": 0.145
+   },
+   {
+    "finding_id": "2025/일반회계법인/5.2/-/동성회계법인/1",
+    "text_sha256": "35830cc850841968b45682336e945ec2e2ad2a2b94faeda716aa80c46e968c7b",
+    "reason": "dongsung_reclass",
+    "candidate_f004_row_id": "20260929000399:0:10",
+    "tier": "review",
+    "score": 0.189
+   }
+  ],
+  "f004_rows": [
+   {
+    "f004_row_id": "20260630000428:0:13",
+    "reason": "review31_only"
+   },
+   {
+    "f004_row_id": "20260630000442:0:10",
+    "reason": "review31_only"
+   },
+   {
+    "f004_row_id": "20260630000442:0:9",
+    "reason": "orphan_review9"
+   },
+   {
+    "f004_row_id": "20260630000928:0:9",
+    "reason": "review31_only"
+   },
+   {
+    "f004_row_id": "20260630001078:0:0",
+    "reason": "orphan_review9"
+   },
+   {
+    "f004_row_id": "20260630001078:0:1",
+    "reason": "review31_only"
+   },
+   {
+    "f004_row_id": "20260630001078:0:4",
+    "reason": "orphan_review9"
+   },
+   {
+    "f004_row_id": "20260929000399:0:0",
+    "reason": "dongsung_reclass"
+   },
+   {
+    "f004_row_id": "20260929000399:0:1",
+    "reason": "orphan_review9"
+   },
+   {
+    "f004_row_id": "20260929000399:0:10",
+    "reason": "dongsung_reclass"
+   },
+   {
+    "f004_row_id": "20260929000399:0:11",
+    "reason": "orphan_review9"
+   },
+   {
+    "f004_row_id": "20260929000399:0:2",
+    "reason": "orphan_review9"
+   },
+   {
+    "f004_row_id": "20260929000399:0:3",
+    "reason": "dongsung_reclass"
+   },
+   {
+    "f004_row_id": "20260929000399:0:5",
+    "reason": "dongsung_reclass"
+   },
+   {
+    "f004_row_id": "20260929000399:0:7",
+    "reason": "orphan_review9"
+   },
+   {
+    "f004_row_id": "20260929000399:0:8",
+    "reason": "dongsung_reclass"
+   },
+   {
+    "f004_row_id": "20260929000399:0:9",
+    "reason": "orphan_review9"
+   },
+   {
+    "f004_row_id": "20261006000135:0:15",
+    "reason": "orphan_review9"
+   },
+   {
+    "f004_row_id": "20261006000135:0:2",
+    "reason": "review31_only"
+   },
+   {
+    "f004_row_id": "20261006000135:0:4",
+    "reason": "review31_only"
+   },
+   {
+    "f004_row_id": "20261006000135:0:6",
+    "reason": "review31_only"
+   },
+   {
+    "f004_row_id": "20261006000135:0:8",
+    "reason": "review31_only"
+   }
+  ]
+ },
+ "f004_no_finding": [
+  {
+   "firm": "삼일회계법인",
+   "dae_standard": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+   "screen": false,
+   "row_id": "20260930000134:0:5",
+   "rcept_no": "20260930000134",
+   "rcept_dt": "2026-09-30",
+   "correction_type": "최초공시",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260930000134",
+   "category_raw": "업무의 수용과 유지",
+   "recommend_date_raw": "2026.05.12",
+   "recommend_date_iso": "2026-05-12",
+   "recommendation": "지적사항 없음",
+   "action_raw": "해당사항 없음"
+  },
+  {
+   "firm": "삼일회계법인",
+   "dae_standard": "6. 모니터링",
+   "screen": false,
+   "row_id": "20260930000134:0:11",
+   "rcept_no": "20260930000134",
+   "rcept_dt": "2026-09-30",
+   "correction_type": "최초공시",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260930000134",
+   "category_raw": "모니터링",
+   "recommend_date_raw": "2026.05.12",
+   "recommend_date_iso": "2026-05-12",
+   "recommendation": "지적사항 없음",
+   "action_raw": "해당사항 없음"
+  }
+ ]
+}
