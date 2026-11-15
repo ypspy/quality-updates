@@ -162,10 +162,6 @@ def _validate(data: dict) -> None:
         raise ValueError("firm_reasons가 목록이 아닙니다.")
     if slots != len(attachments) or lines != len(reasons):
         raise ValueError("counts가 목록 길이와 다릅니다.")
-    blocks = counts.get("attach_blocks")
-    if blocks is not None:
-        if type(blocks) is not int or blocks != sum(len(att["f004"]) for att in attachments):
-            raise ValueError("counts가 목록 길이와 다릅니다.")
     reason_panels = counts.get("firm_reason_panels")
     if reason_panels is not None:
         if type(reason_panels) is not int or reason_panels != len(reasons):
@@ -200,6 +196,10 @@ def _validate(data: dict) -> None:
                 raise ValueError("note 형식이 아닙니다.")
             if isinstance(note, str) and _BANNED in note:
                 raise ValueError("원문 필드 밖에 금지어가 있습니다.")
+    blocks = counts.get("attach_blocks")
+    if blocks is not None:
+        if type(blocks) is not int or blocks != sum(len(att["f004"]) for att in attachments):
+            raise ValueError("counts가 목록 길이와 다릅니다.")
     seen_firms: set[str] = set()
     for reason in reasons:
         if not isinstance(reason, dict):

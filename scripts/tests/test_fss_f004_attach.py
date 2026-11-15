@@ -729,3 +729,28 @@ def test_block_count_mismatch_rejects_and_build_falls_back(tmp_path, monkeypatch
         monkeypatch.setattr(fss_f004_attach, "ATTACH_PATH", path)
         assert _hook(source, caplog) == expected
         caplog.clear()
+
+
+def test_malformed_attachment_raises_value_error_before_block_sum(tmp_path, monkeypatch, caplog):
+    source = PAGE.read_text(encoding="utf-8")
+    expected = materialize_review_markdown(source)
+    missing = _copy_attach()
+    del missing["attachments"][0]["f004"]
+    missing_path = _dump_attach(tmp_path / "missing", missing)
+    with pytest.raises(ValueError):
+        load_attach(missing_path)
+    text = _copy_attach()
+    text["attachments"][0] = "x"
+    with pytest.raises(ValueError):
+        load_attach(_dump_attach(tmp_path / "text", text))
+    null_rows = _copy_attach()
+    null_rows["attachments"][0]["f004"] = None
+    with pytest.raises(ValueError):
+        load_attach(_dump_attach(tmp_path / "null", null_rows))
+    null_item = _copy_attach()
+    null_item["attachments"][0] = None
+    with pytest.raises(ValueError):
+        load_attach(_dump_attach(tmp_path / "item", null_item))
+    monkeypatch.setattr(fss_f004_attach, "ATTACH_PATH", missing_path)
+    assert _hook(source, caplog) == expected
+    assert "ValueError" in caplog.text
