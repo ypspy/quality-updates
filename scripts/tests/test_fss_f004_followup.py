@@ -37,7 +37,7 @@ from tests.test_fss_review_cards import (  # noqa: E402
 )
 
 # sha256sum data/fss-review/f004-followup.json
-FOLLOWUP_SHA = "82afae7d7823ceb77dceb38a983054ce80e143b8769cddd08ebcfb9cad128ead"
+FOLLOWUP_SHA = "dc5d8cd7e1f74488e1e5f3fc4186c64ca157e1050512a7e38a4dc8eaf006bddb"
 # wc -c data/fss-review/f004-followup.json
 FOLLOWUP_BYTES = 365540
 
@@ -683,3 +683,34 @@ def test_empty_slot_can_link_the_latest_disclosure():
     hidden = render_dae_block([firm], DAE, _labels())
     assert "example.invalid" not in hidden
     assert "fss-f004-latest" not in hidden
+
+
+def test_individual_group_has_one_disclaimer_and_strips():
+    def person(name: str, rcept: str) -> dict:
+        item = _item(
+            dae_standard=None,
+            match_level="individual_audit",
+            match_level_label="개별 감사보고서",
+            rcept_no=rcept,
+            dart_url=f"https://dart.fss.or.kr/dsaf001/main.do?rcpNo={rcept}",
+        )
+        return _firm("일반회계법인", name, individual=[item])
+
+    firms = [
+        person("회계법인 현", "20260630000001"),
+        person("다른 법인", "20260630000002"),
+    ]
+    page = "앞" + _page([("일반회계법인", [DAE])]) + "뒤"
+    built = inject_f004_followup(page, _payload(firms))
+    assert built.count("fss-f004-disclaimer") == 1
+    assert built.count('class="fss-f004-individual"') == 2
+    assert 'class="fss-f004-individual-group"' in built
+    assert strip_f004_followup(built) == page
+
+
+def test_summary_counts_slots_without_site_findings(caplog):
+    source = PAGE.read_text(encoding="utf-8")
+    with caplog.at_level(logging.INFO, logger="mkdocs.plugins.fss_f004"):
+        on_page_markdown(source, _Page("fss-review/index.md"), None, None)
+    assert "사이트 대분류 없음 4" in caplog.text
+    assert "사이트 지적 0칸 5칸/7건" in caplog.text

@@ -27,14 +27,14 @@
  "rules": [
   "link unit = 법인×감리연도×대분류",
   "감리연도 = 권고일 연도 − 1; 권고일 없으면 처음 실린 공시 연도 − 1 (year_basis=disclosure_year_fallback, 대체 표시) — 사용자 결정 2026-11-14 약 21:19 CT",
-  "예외(가안, 2026-11-14 약 21:43 CT): 권고일 2025이나 2026 공시에 처음 실린 2025 블록 법인 16키는 2025에 두고 date_mismatch=true, 라벨 권고일 표기 불일치",
+  "예외(사용자 결정, Vegetable 전달 2026-11-14 CT): 권고일 2025이나 2026 공시에 처음 실린 2025 블록 법인 16키는 2025에 두고 date_mismatch=true, 라벨 권고일 표기 불일치",
   "반복 공시: 권고 키별 최신 (rcept_dt, rcept_no) + history",
   "개별 감사보고서 관련은 법인별 별도 묶음",
   "1절 제재 표·stale·finding_text \"-\" 제외",
   "review_memo 빈칸, 별칭·#24는 proposed"
  ],
  "schema": {
-  "top": "{version, generated_at_ct, status:\"draft\", inputs{...}, rules[...], schema, firms[]}",
+  "top": "{version, status:\"draft\", inputs{...}, rules[...], schema, firms[]}",
   "firms[]": "firm(사이트 이름), bundle, gun, corp_code(제안), f004_corp_name, alias_status=proposed, fss_recommend_date(pdf/firms/2026 파일명), f004_status∈{has_items,f004_empty,no_2025_rows,해당 없음}, latest_2026_disclosure, dae[], individual_audit[]",
   "dae[]": "link_key=\"법인|2025|대분류\"(공개 링크 단위, 항목 링크 없음), dae_standard(6개 표준값), site_finding_count, f004_item_count, f004_display(항목 없을 때 기재 없음/해당 없음), items[], review_memo=\"\"",
   "items[]": "row_id(rcept_no:table_idx:row_idx), report_nm, correction_type, fiscal_year, period_key, rcept_dt(접수일), rcept_no, dart_url, dae_standard, category_raw(원문 구분), recommend_date_raw/iso, fss_recommend_date, recommendation(원문 그대로), action(원문 그대로, 빈 값·-는 기재 없음), action_raw, date_mismatch(bool), match_level∈{matched_high,matched_medium,no_site_dae,year_fallback,date_mismatch,individual_audit}, match_level_label, year_basis∈{recommend_date,disclosure_year_fallback,recommend_date_mismatch_exception}, year_basis_label, inspection_year(오프셋 규칙 값), inspection_year_literal(권고연도 그대로), history[](이전 공시: rcept_no, rcept_dt, correction_type, period_key, dart_url, row_id, action_text, action_text_raw, action_changed), history_depth, review_memo=\"\"",

@@ -357,14 +357,18 @@ def render_individual_block(bundle_firms: list[dict], labels: dict) -> str:
         blocks.append(
             f'<div class="fss-f004-individual" data-f004-firm="{_esc_attr(name)}">'
             '<p class="fss-f004-title">개별 감사보고서 관련 이행내역</p>'
-            + _DISCLAIMER
-            + f'<p><span class="fss-f004-firm-name">{_esc_text(name)}</span> '
+            f'<p><span class="fss-f004-firm-name">{_esc_text(name)}</span> '
             f'<span class="fss-f004-count">{len(items)}건</span></p>'
             f"{body}</div>"
         )
     if not blocks:
         return ""
-    return _one_line("".join(blocks))
+    return _one_line(
+        '<div class="fss-f004-individual-group">'
+        + _DISCLAIMER
+        + "".join(blocks)
+        + "</div>"
+    )
 
 
 def _firms_by_bundle(data: dict) -> dict[str, list[dict]]:
@@ -471,9 +475,20 @@ def _summary(data: dict, matched: list[str], unmatched: list[str], no_site: int)
             rows = dae.get("items") or []
             items += len(rows)
             history += sum(len(row.get("history") or []) for row in rows)
+    zero_slots = 0
+    zero_items = 0
+    for firm in data.get("firms") or []:
+        for dae in firm.get("dae") or []:
+            if str(dae.get("link_key") or "") not in matched_set:
+                continue
+            rows = dae.get("items") or []
+            if dae.get("site_finding_count") == 0 and rows:
+                zero_slots += 1
+                zero_items += len(rows)
     return (
         f"F004 이행내역: 법인 {len(firms)}, 대분류 {slots}, 항목 {items}, "
-        f"이전 공시 {history}, 비매칭 {len(unmatched)}, 사이트 대분류 없음 {no_site}"
+        f"이전 공시 {history}, 비매칭 {len(unmatched)}, 사이트 대분류 없음 {no_site}, "
+        f"사이트 지적 0칸 {zero_slots}칸/{zero_items}건"
     )
 
 
@@ -546,10 +561,19 @@ def inject_f004_followup(page: str, data: dict | None = None, *, strict: bool | 
 
 def strip_f004_followup(page: str) -> str:
     """hook이 붙인 이행내역 블록을 지운다."""
-    spans = [
-        *fss_review_cards._regions(page, '<div class="fss-f004-block"'),
-        *fss_review_cards._regions(page, '<div class="fss-f004-individual"'),
+    needles = (
+        '<div class="fss-f004-block"',
+        '<div class="fss-f004-individual-group"',
+        '<div class="fss-f004-individual"',
+    )
+    spans: list[tuple[int, int]] = []
+    for needle in needles:
+        spans.extend(fss_review_cards._regions(page, needle))
+    outer = [
+        (start, end)
+        for start, end in spans
+        if not any(os <= start and end <= oe and (os, oe) != (start, end) for os, oe in spans)
     ]
-    for start, end in sorted(spans, key=lambda pair: pair[0], reverse=True):
+    for start, end in sorted(outer, reverse=True):
         page = page[:start] + page[end:]
     return page
