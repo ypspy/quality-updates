@@ -112,6 +112,11 @@ def _non_source_banned(obj: object, *, skip: bool = False) -> int:
     return 0
 
 
+def _recommend_date_missing(item: dict) -> bool:
+    raw = item.get("recommend_date_raw")
+    return raw is None or str(raw).strip() in {"", "-"}
+
+
 def _json_counts(data: dict) -> dict[str, int]:
     dae_rows = [dae for firm in data["firms"] for dae in firm.get("dae") or []]
     items = [item for dae in dae_rows for item in dae.get("items") or []]
@@ -128,6 +133,8 @@ def _json_counts(data: dict) -> dict[str, int]:
         "mismatch": sum(1 for item in items if item.get("date_mismatch") is True),
         "none_empty": display.get("기재 없음", 0),
         "none_na": display.get("해당 없음", 0),
+        "nofinding": display.get("지적사항 없음", 0),
+        "meta_no_date": sum(1 for item in items if _recommend_date_missing(item)),
         "individual": sum(1 for firm in data["firms"] if firm.get("individual_audit")),
         "banned_inside": _rendered_source_banned(data),
         "banned_outside": _non_source_banned(data),
@@ -173,6 +180,11 @@ def _html_counts(built: str) -> dict[str, object]:
         "mismatch": len(soup.select(".fss-f004-mismatch")),
         "none_empty": none_empty,
         "none_na": none_na,
+        "nofinding": len(soup.select(".fss-f004-nofinding")),
+        "meta_no_date": sum(
+            1 for node in soup.select(".fss-f004-meta") if "권고일 기재 없음" in node.get_text()
+        ),
+        "dash_date": sum(1 for node in soup.select(".fss-f004-meta") if "권고일 -" in node.get_text()),
         "individual": individual,
         "level": len(soup.select(".fss-f004-level")),
         "memo": len(soup.select(".fss-f004-memo")),
@@ -218,6 +230,8 @@ def build_report() -> dict:
         ("fss-f004-mismatch", "mismatch"),
         ("fss-f004-none 기재 없음", "none_empty"),
         ("fss-f004-none 해당 없음", "none_na"),
+        ("fss-f004-nofinding", "nofinding"),
+        ("권고일 기재 없음", "meta_no_date"),
         ("fss-f004-individual", "individual"),
         ("금지어 원문 안", "banned_inside"),
         ("금지어 원문 밖", "banned_outside"),
@@ -235,6 +249,8 @@ def build_report() -> dict:
         errors.append("strip 결과가 materialize 출력과 다릅니다.")
     if audit_errors:
         errors.append(f"audit_review_html 오류 {len(audit_errors)}건")
+    if html_counts["dash_date"]:
+        errors.append(f"권고일 - {html_counts['dash_date']}")
     if html_counts["level"] != 0:
         errors.append(f"fss-f004-level {html_counts['level']}")
     if html_counts["memo"] != 0:
@@ -255,6 +271,8 @@ def build_report() -> dict:
         "fss_f004_mismatch": html_counts["mismatch"],
         "fss_f004_none_empty": html_counts["none_empty"],
         "fss_f004_none_na": html_counts["none_na"],
+        "fss_f004_nofinding": html_counts["nofinding"],
+        "meta_no_date": html_counts["meta_no_date"],
         "fss_f004_individual": html_counts["individual"],
         "fss_f004_level": html_counts["level"],
         "fss_f004_memo": html_counts["memo"],
@@ -284,6 +302,8 @@ def render_text(report: dict) -> str:
         f"fss-f004-mismatch: {report['fss_f004_mismatch']}",
         f"fss-f004-none 기재 없음: {report['fss_f004_none_empty']}",
         f"fss-f004-none 해당 없음: {report['fss_f004_none_na']}",
+        f"fss-f004-nofinding: {report['fss_f004_nofinding']}",
+        f"meta_no_date: {report['meta_no_date']}",
         f"fss-f004-individual: {report['fss_f004_individual']}",
         f"fss-f004-level: {report['fss_f004_level']}",
         f"fss-f004-memo: {report['fss_f004_memo']}",

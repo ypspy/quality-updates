@@ -46,6 +46,11 @@ _DAE_STANDARDS = frozenset(
 )
 _DART_URL = re.compile(r"^https://dart\.fss\.or\.kr/dsaf001/main\.do\?rcpNo=\d{14}$")
 _BANNED = "미" + "이행"
+_NO_DATE_RAW = frozenset({"", "-"})
+_NO_DATE_TEXT = "기재 없음"
+_NO_FINDING = "지적사항 없음"
+_NO_FINDING_TEXT = "F004: 지적사항 없음"
+_DISPLAY_VALUES = frozenset({None, "기재 없음", "해당 없음", "지적사항 없음"})
 _BUNDLE_NAME = re.compile(r'<p class="fss-bundle-name">(.*?)</p>')
 _DAE_TITLE = re.compile(r"<h2>(.*?)</h2>")
 
@@ -187,6 +192,22 @@ def load_followup(path: Path = FOLLOWUP_PATH) -> dict:
             items = dae.get("items") or []
             if not isinstance(items, list):
                 raise ValueError("items가 목록이 아닙니다.")
+            if dae.get("f004_display", None) not in _DISPLAY_VALUES:
+                raise ValueError("f004_display 값을 알 수 없습니다.")
+            finding_rows = dae.get("no_finding_rows")
+            if finding_rows is not None:
+                if not isinstance(finding_rows, list):
+                    raise ValueError("no_finding_rows가 목록이 아닙니다.")
+                for row in finding_rows:
+                    if not isinstance(row, dict):
+                        raise ValueError("no_finding_rows 행이 객체가 아닙니다.")
+                    url = row.get("dart_url")
+                    if not isinstance(url, str) or not _DART_URL.match(url):
+                        raise ValueError("dart_url 형식이 아닙니다.")
+            if dae.get("f004_display") == _NO_FINDING and not finding_rows:
+                raise ValueError("지적사항 없음 칸에 행이 없습니다.")
+            if "f004_item_count" in dae and dae.get("f004_item_count") != len(items):
+                raise ValueError("f004_item_count가 항목 수와 다릅니다.")
             for item in items:
                 _validate_item(item, match_labels, year_labels, individual=False)
         individual = firm.get("individual_audit") or []
@@ -227,9 +248,15 @@ def _meta_line(item: dict) -> str:
         parts.append(f"대분류 {_esc_text(standard)}")
     elif category:
         parts.append(f"원문 구분: {_esc_text(category)}")
-    if item.get("recommend_date_raw"):
-        parts.append(f"권고일 {_esc_text(item['recommend_date_raw'])}")
+    parts.append(f"권고일 {_recommend_date_text(item)}")
     return '<p class="fss-f004-meta">' + " · ".join(parts) + "</p>"
+
+
+def _recommend_date_text(item: dict) -> str:
+    raw = item.get("recommend_date_raw")
+    if raw is None or str(raw).strip() in _NO_DATE_RAW:
+        return _NO_DATE_TEXT
+    return _esc_text(raw)
 
 
 def _labels_line(item: dict, labels: dict) -> str:
@@ -307,16 +334,50 @@ def _disclosure_link(firm: dict) -> str:
     )
 
 
+def _no_finding_line(dae: dict) -> str:
+    rows = dae.get("no_finding_rows") or []
+    if not rows:
+        return ""
+    seen: set[str] = set()
+    links: list[str] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        url = row.get("dart_url")
+        number = row.get("rcept_no")
+        if not isinstance(url, str) or not _DART_URL.match(url) or not number:
+            continue
+        if str(number) in seen:
+            continue
+        seen.add(str(number))
+        links.append(
+            f'<a href="{_esc_attr(url)}" rel="noopener" target="_blank">{_esc_text(number)}</a>'
+        )
+    if not links:
+        return f'<p class="fss-f004-nofinding">{_NO_FINDING_TEXT}</p>'
+    return (
+        f'<p class="fss-f004-nofinding">{_NO_FINDING_TEXT} · '
+        + " · ".join(links)
+        + "</p>"
+    )
+
+
 def _firm_details(firm: dict, dae: dict, labels: dict) -> str:
     items = dae.get("items") or []
     element_id = _element_id(str(dae["link_key"]))
     name = firm.get("firm") or ""
-    body = "".join(_render_item(item, labels) for item in items)
-    if not items and dae.get("f004_display") is not None:
-        body = (
-            f'<p class="fss-f004-none">{_esc_text(dae.get("f004_display"))}</p>'
-            + _disclosure_link(firm)
-        )
+    finding = _no_finding_line(dae)
+    if not items and dae.get("f004_display") == _NO_FINDING:
+        body = finding or f'<p class="fss-f004-nofinding">{_NO_FINDING_TEXT}</p>'
+    else:
+        body = "".join(_render_item(item, labels) for item in items)
+        if items and dae.get("no_finding_rows"):
+            body = finding + body
+        elif not items and dae.get("f004_display") is not None:
+            body = (
+                f'<p class="fss-f004-none">{_esc_text(dae.get("f004_display"))}</p>'
+                + _disclosure_link(firm)
+            )
     return (
         f'<details class="fss-f004-firm" id="{_esc_attr(element_id)}" '
         f'data-f004-firm="{_esc_attr(name)}">'
@@ -485,10 +546,17 @@ def _summary(data: dict, matched: list[str], unmatched: list[str], no_site: int)
             if dae.get("site_finding_count") == 0 and rows:
                 zero_slots += 1
                 zero_items += len(rows)
+    no_finding_slots = 0
+    for firm in data.get("firms") or []:
+        for dae in firm.get("dae") or []:
+            if str(dae.get("link_key") or "") not in matched_set:
+                continue
+            if dae.get("f004_display") == _NO_FINDING:
+                no_finding_slots += 1
     return (
         f"F004 이행내역: 법인 {len(firms)}, 대분류 {slots}, 항목 {items}, "
         f"이전 공시 {history}, 비매칭 {len(unmatched)}, 사이트 대분류 없음 {no_site}, "
-        f"사이트 지적 0칸 {zero_slots}칸/{zero_items}건"
+        f"사이트 지적 0칸 {zero_slots}칸/{zero_items}건, 지적사항 없음 {no_finding_slots}칸"
     )
 
 

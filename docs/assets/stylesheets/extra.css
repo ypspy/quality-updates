@@ -421,3 +421,9 @@ iframe {
   color: var(--md-default-fg-color--light);
   font-size: 0.84rem;
 }
+.fss-f004-nofinding {
+  color: var(--md-default-fg-color--light);
+}
+.fss-f004-nofinding a {
+  color: var(--md-typeset-a-color);
+}

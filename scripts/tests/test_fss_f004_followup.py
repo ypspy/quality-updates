@@ -37,22 +37,24 @@ from tests.test_fss_review_cards import (  # noqa: E402
 )
 
 # sha256sum data/fss-review/f004-followup.json
-FOLLOWUP_SHA = "dc5d8cd7e1f74488e1e5f3fc4186c64ca157e1050512a7e38a4dc8eaf006bddb"
+FOLLOWUP_SHA = "617ccf2d8dd778c7235c6f9809b3fe57ea0798226b25eabc407b2f47e9132798"
 # wc -c data/fss-review/f004-followup.json
-FOLLOWUP_BYTES = 365540
+FOLLOWUP_BYTES = 365025
 
 # python scripts/check_f004_followup_render.py 출력 (main 94f4882 + 이 브랜치, 2026-11-15)
 N_FIRMS = 78
 N_DAE = 212
-N_DAE_WITH_ITEMS = 92
-N_ITEMS = 145
+N_DAE_WITH_ITEMS = 90
+N_ITEMS = 143
 N_INDIVIDUAL = 0
 N_HISTORY = 9
 N_FALLBACK = 8
 N_MISMATCH = 16
 N_NONE_EMPTY = 86
 N_NONE_NA = 34
-N_DISPLAY_NULL = 92
+N_DISPLAY_NULL = 90
+N_NO_FINDING = 2
+N_META_NO_DATE = 8
 # 예지 7, 정일 3, 길인 3, 신성 2, 상록 1
 MISMATCH_BY_FIRM = {
     "예지회계법인": 7,
@@ -64,7 +66,7 @@ MISMATCH_BY_FIRM = {
 MATCH_LEVELS = {
     "matched_high": 45,
     "matched_medium": 72,
-    "no_site_dae": 4,
+    "no_site_dae": 2,
     "year_fallback": 8,
     "date_mismatch": 16,
 }
@@ -187,7 +189,7 @@ def test_followup_file_matches_locked_counts():
     assert len(raw) == FOLLOWUP_BYTES
     assert hashlib.sha256(raw).hexdigest() == FOLLOWUP_SHA
     data = load_followup()
-    assert data["version"] == "draft-2026-11-15-v3"
+    assert data["version"] == "draft-2026-11-15-v4"
     assert data["status"] == "draft"
     assert {firm["alias_status"] for firm in data["firms"]} == {"proposed"}
     year = json.loads(YEAR_2025_PATH.read_text(encoding="utf-8"))
@@ -218,7 +220,16 @@ def test_followup_file_matches_locked_counts():
     display = Counter(dae["f004_display"] for dae in dae_rows)
     assert display["기재 없음"] == N_NONE_EMPTY
     assert display["해당 없음"] == N_NONE_NA
+    assert display["지적사항 없음"] == N_NO_FINDING
     assert display[None] == N_DISPLAY_NULL
+    finding_ids = {
+        row.get("row_id")
+        for dae in dae_rows
+        for row in dae.get("no_finding_rows") or []
+    }
+    assert finding_ids == {"20260930000134:0:5", "20260930000134:0:11"}
+    item_ids = {item.get("row_id") for item in items}
+    assert finding_ids.isdisjoint(item_ids)
     assert Counter(item["match_level"] for item in items) == MATCH_LEVELS
     assert sum(
         1
@@ -247,6 +258,10 @@ def test_hook_output_keeps_year_bytes_and_counts(built_page):
     assert len(soup.select(".fss-f004-fallback")) == N_FALLBACK
     assert len(soup.select(".fss-f004-mismatch")) == N_MISMATCH
     assert len(soup.select(".fss-f004-individual")) == N_INDIVIDUAL
+    assert len(soup.select(".fss-f004-nofinding")) == N_NO_FINDING
+    metas = [node.get_text() for node in soup.select(".fss-f004-meta")]
+    assert sum("권고일 기재 없음" in text for text in metas) == N_META_NO_DATE
+    assert sum("권고일 -" in text for text in metas) == 0
     records = finding_records(soup.select_one('div.fss-year[data-year="2025"]'))
     assert len(records) == 370
     assert len({record["firm"] for record in records}) == N_FIRMS
@@ -519,6 +534,8 @@ def test_check_script_writes_report_on_success(tmp_path):
     assert payload["findings"] == 370
     assert payload["fss_f004_firm"] == N_DAE
     assert payload["fss_f004_item"] == N_ITEMS
+    assert payload["fss_f004_nofinding"] == N_NO_FINDING
+    assert payload["meta_no_date"] == N_META_NO_DATE
     assert payload["fss_f004_hist"] == N_HISTORY
     assert payload["fss_f004_fallback"] == N_FALLBACK
     assert payload["fss_f004_mismatch"] == N_MISMATCH
@@ -712,5 +729,98 @@ def test_summary_counts_slots_without_site_findings(caplog):
     source = PAGE.read_text(encoding="utf-8")
     with caplog.at_level(logging.INFO, logger="mkdocs.plugins.fss_f004"):
         on_page_markdown(source, _Page("fss-review/index.md"), None, None)
-    assert "사이트 대분류 없음 4" in caplog.text
-    assert "사이트 지적 0칸 5칸/7건" in caplog.text
+    assert "사이트 대분류 없음 2" in caplog.text
+    assert "사이트 지적 0칸 3칸/5건" in caplog.text
+    assert "지적사항 없음 2칸" in caplog.text
+
+
+def _finding_row(**kwargs) -> dict:
+    row = {
+        "row_id": "20260630000001:0:0",
+        "rcept_no": "20260630000001",
+        "rcept_dt": "2026-06-30",
+        "correction_type": "최초공시",
+        "dart_url": DART,
+        "category_raw": "업무의 수행",
+        "recommend_date_raw": "-",
+        "recommend_date_iso": None,
+        "recommendation": "지적사항 없음",
+        "action_raw": "해당사항 없음",
+    }
+    row.update(kwargs)
+    return row
+
+
+def test_no_finding_slot_shows_f004_mark():
+    dae = _dae(display="지적사항 없음")
+    dae["no_finding_rows"] = [_finding_row()]
+    firm = _firm("일반회계법인", "회계법인 현", dae=[dae])
+    soup = BeautifulSoup(render_dae_block([firm], DAE, _labels()), "html.parser")
+    mark = soup.select_one(".fss-f004-nofinding")
+    assert mark.get_text(strip=True).startswith("F004: 지적사항 없음")
+    assert [link.get("href") for link in mark.select("a")] == [DART]
+    assert soup.select(".fss-f004-none") == []
+    assert soup.select(".fss-f004-item") == []
+    assert soup.select(".fss-f004-latest") == []
+    assert soup.select_one(".fss-f004-count").get_text(strip=True) == "0건"
+    assert mark.get("id") is None
+    assert mark.select("[id]") == []
+
+
+def test_no_finding_mark_with_items_comes_first():
+    dae = _dae(items=[_item()], display="지적사항 없음")
+    dae["no_finding_rows"] = [_finding_row()]
+    rendered = render_dae_block([_firm("일반회계법인", "회계법인 현", dae=[dae])], DAE, _labels())
+    assert rendered.index("fss-f004-nofinding") < rendered.index("fss-f004-item")
+    assert rendered.count('class="fss-f004-item"') == 1
+
+
+def test_missing_recommend_date_shows_gisae_eopseum():
+    raws = ["-", "", None, "2026.03.20"]
+    items = []
+    for index, raw in enumerate(raws, start=1):
+        number = f"2026063000000{index}"
+        items.append(
+            _item(
+                recommend_date_raw=raw,
+                rcept_no=number,
+                dart_url=f"https://dart.fss.or.kr/dsaf001/main.do?rcpNo={number}",
+            )
+        )
+    rendered = render_dae_block(
+        [_firm("일반회계법인", "회계법인 현", dae=[_dae(items=items)])],
+        DAE,
+        _labels(),
+    )
+    metas = [node.get_text() for node in BeautifulSoup(rendered, "html.parser").select(".fss-f004-meta")]
+    assert len(metas) == 4
+    for text in metas[:3]:
+        assert "권고일 기재 없음" in text
+        assert "권고일 -" not in text
+    assert "권고일 2026.03.20" in metas[3]
+    assert [item["recommend_date_raw"] for item in items] == raws
+
+
+def test_load_followup_rejects_bad_no_finding_data(tmp_path):
+    missing_rows = _dae(display="지적사항 없음")
+    bad_url = _dae(display="지적사항 없음")
+    bad_url["no_finding_rows"] = [_finding_row(dart_url="https://example.invalid/x")]
+    unknown = _dae(display="없음")
+    mismatch = _dae(display="기재 없음")
+    mismatch["f004_item_count"] = 2
+    cases = (missing_rows, bad_url, unknown, mismatch)
+    for dae in cases:
+        payload = _payload([_firm("일반회계법인", "회계법인 현", dae=[dae])])
+        with pytest.raises(ValueError):
+            load_followup(_write(tmp_path, payload))
+
+
+def test_no_finding_source_banned_word_stays_in_data_only(tmp_path):
+    word = _banned()
+    dae = _dae(display="지적사항 없음")
+    dae["no_finding_rows"] = [_finding_row(recommendation=word)]
+    dae["f004_item_count"] = 0
+    payload = _payload([_firm("일반회계법인", "회계법인 현", dae=[dae])])
+    load_followup(_write(tmp_path, payload))
+    rendered = render_dae_block(payload["firms"], DAE, payload["labels"])
+    assert word not in rendered
