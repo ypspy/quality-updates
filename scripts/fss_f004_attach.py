@@ -413,7 +413,8 @@ def _insert_attach(page: str, data: dict, *, strict: bool) -> str:
             for index, att in by_key.get(key, {}).items()
             if id(att) not in seen
         }
-        reason = reasons.get(firm) if firm not in reason_firms else None
+        # 사유 법인은 모든 2025 패널에 같은 사유 줄 전체를 단다 (사용자 결정 2026-11-15 9:14 AM CT).
+        reason = reasons.get(firm)
         updated, got, missed = _fill_panel(panel["html"], indexed, reason, rows)
         for att in got:
             seen.add(id(att))
