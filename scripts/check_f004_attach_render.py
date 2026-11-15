@@ -36,8 +36,8 @@ PRIOR_YEAR_SHA = {
 }
 RENDERED = {
     "1c6df2500ba918054bd4b22b3a983af9ef3bdecdedc54908d4a54a04e1ea72e4": (
-        298639,
-        "44ca510b540c20c8cd4ea09ea208cf4e712c4c30f3122b0b4dacb4bc7c0eba78",
+        313703,
+        "ef266044ee0914a1f81aed7765d2b9771f2e05201e5cc0fd41574ed82850293e",
     ),
 }
 _INTERNAL_IDS = (
@@ -117,6 +117,22 @@ def _dongsung(html: str) -> int:
     return count
 
 
+def _reason_panels(html: str, firms: set[str]) -> tuple[int, int]:
+    """사유 법인의 2025 패널 수와, 사유 줄이 정확히 하나가 아닌 패널 수."""
+    soup = BeautifulSoup(html, "html.parser")
+    year = soup.select_one('div.fss-year[data-year="2025"]')
+    if year is None:
+        return 0, 0
+    panels = bad = 0
+    for panel in year.select("div.fss-original"):
+        if panel.get("data-names") not in firms:
+            continue
+        panels += 1
+        if len(panel.select("p.fss-f004-reason")) != 1:
+            bad += 1
+    return panels, bad
+
+
 def build_report(html: str, search_index: Path = SEARCH_INDEX) -> dict:
     errors: list[str] = []
     year_sha = _sha256(YEAR_2025_PATH)
@@ -142,6 +158,9 @@ def build_report(html: str, search_index: Path = SEARCH_INDEX) -> dict:
         "no_finding": 0,
         "dongsung": count_source["dongsung_blocks"],
     }
+    reason_firms = {reason["firm"] for reason in loaded["firm_reasons"]}
+    reason_panel_total, reason_panel_bad = _reason_panels(html, reason_firms)
+    expected_counts["same"] = reason_panel_total - len(reason_firms)
     if year_sha not in RENDERED:
         errors.append(f"year-2025.json sha를 알 수 없습니다: {year_sha}")
         rendered_size = 0
@@ -159,6 +178,7 @@ def build_report(html: str, search_index: Path = SEARCH_INDEX) -> dict:
     counts = {
         "attach": html.count('class="fss-f004-attach"'),
         "reason": html.count('class="fss-f004-reason"'),
+        "same": html.count('class="fss-f004-reason fss-f004-same"'),
         "no_date": phrases["no_date"],
         "no_action": phrases["no_action"],
         "note": phrases["note"],
@@ -166,6 +186,8 @@ def build_report(html: str, search_index: Path = SEARCH_INDEX) -> dict:
         "no_finding": phrases["no_finding"],
         "dongsung": _dongsung(html),
     }
+    if reason_panel_bad:
+        errors.append(f"사유 줄이 하나가 아닌 사유 법인 패널 {reason_panel_bad}개")
     page_ids = _internal_hits(html)
     if page_ids:
         errors.append(f"내부 id가 페이지에 {page_ids}건 있습니다.")
@@ -206,6 +228,7 @@ def render_text(report: dict) -> str:
         f"rendered sha256: {report['rendered_sha256']}",
         f"fss-f004-attach: {counts['attach']}",
         f"fss-f004-reason: {counts['reason']}",
+        f"fss-f004-reason 위와 같음: {counts['same']}",
         f"권고일 기재 없음: {counts['no_date']}",
         f"이행사항 기재 없음: {counts['no_action']}",
         f"한 행으로 공시: {counts['note']}",
