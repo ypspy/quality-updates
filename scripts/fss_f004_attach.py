@@ -162,6 +162,14 @@ def _validate(data: dict) -> None:
         raise ValueError("firm_reasons가 목록이 아닙니다.")
     if slots != len(attachments) or lines != len(reasons):
         raise ValueError("counts가 목록 길이와 다릅니다.")
+    blocks = counts.get("attach_blocks")
+    if blocks is not None:
+        if type(blocks) is not int or blocks != sum(len(att["f004"]) for att in attachments):
+            raise ValueError("counts가 목록 길이와 다릅니다.")
+    reason_panels = counts.get("firm_reason_panels")
+    if reason_panels is not None:
+        if type(reason_panels) is not int or reason_panels != len(reasons):
+            raise ValueError("counts가 목록 길이와 다릅니다.")
     if not isinstance(rows, dict):
         raise ValueError("f004_rows가 없습니다.")
     _reject_dart_url(data)
@@ -405,7 +413,7 @@ def _insert_attach(page: str, data: dict, *, strict: bool) -> str:
             for index, att in by_key.get(key, {}).items()
             if id(att) not in seen
         }
-        reason = reasons.get(firm)
+        reason = reasons.get(firm) if firm not in reason_firms else None
         updated, got, missed = _fill_panel(panel["html"], indexed, reason, rows)
         for att in got:
             seen.add(id(att))

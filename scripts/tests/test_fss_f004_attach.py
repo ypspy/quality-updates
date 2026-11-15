@@ -30,20 +30,16 @@ import check_f004_attach_render as check_mod  # noqa: E402
 import fss_f004_attach  # noqa: E402
 
 # sha256sum data/fss-review/f004-item-attach.json
-ATTACH_SHA = "e575e0c126487c42e635944cd6a6c05ed7ff4dcf13eeeb6dd70fbde75b0a49dc"
-ATTACH_BYTES = 240048
+ATTACH_SHA = "241b0edcd6eae831ef38a8d5a742be3f1bb09672cc1560fd93a54ddccc80e682"
+ATTACH_BYTES = 246423
 # render_year_2025_html(load_year_2025())에 부착한 2025 블록.
 RENDERED = {
-    "e8f7c3d54a44247ef1e7827970f90c55a5c6fb3f4a31257effa54ca0608470ab": (
-        305535,
-        "662c6a74f7c942c28e2690fa00875d738bc5c4fbfc6b33b7f47e4a33a780cedd",
-    ),
     "1c6df2500ba918054bd4b22b3a983af9ef3bdecdedc54908d4a54a04e1ea72e4": (
-        306273,
-        "831b364b707cad8e94273bf50c552b9523f3ec03ce9c07475e233820fa24d217",
+        298639,
+        "44ca510b540c20c8cd4ea09ea208cf4e712c4c30f3122b0b4dacb4bc7c0eba78",
     ),
 }
-_SUMMARY = "F004 부착: 자리 124/124, 이행사항 128, 법인 사유 41곳(136칸), 건너뜀 0"
+_SUMMARY = "F004 부착: 자리 143/143, 이행사항 151, 법인 사유 41곳(41칸), 건너뜀 0"
 
 
 def _banned() -> str:
@@ -92,7 +88,7 @@ def test_attach_file_matches_sha_and_manifest():
 
 def test_load_attach_counts_match_the_locked_table():
     data = load_attach()
-    assert len(data["attachments"]) == 124
+    assert len(data["attachments"]) == 143
     assert len(data["firm_reasons"]) == 41
     items = 0
     no_date = 0
@@ -110,16 +106,20 @@ def test_load_attach_counts_match_the_locked_table():
             note = item.get("note") or ""
             if "한 행으로 공시" in note:
                 notes += 1
-    assert items == 128
-    assert no_date == 7
-    assert no_action == 2
-    assert notes == 28
+    assert items == 151
+    assert no_date == 9
+    assert no_action == 14
+    assert notes == 35
     counts = data["counts"]
-    assert counts["attach_slots"] == 124
+    assert counts["attach_slots"] == 143
+    assert counts["attach_blocks"] == 151
     assert counts["firm_reason_lines"] == 41
-    assert counts["pending_review31"] == 20
-    assert counts["pending_dongsung"] == 14
-    assert counts["pending_f004_rows"] == 22
+    assert counts["firm_reason_panels"] == 41
+    assert counts["attached_f004_rows"] == 143
+    assert counts["unattached_f004_rows"] == 0
+    assert counts["unattached_qu_findings"] == 9
+    assert counts["dongsung_blocks"] == 10
+    assert "pending" not in data
 
 
 def test_rendered_2025_block_matches_the_locked_bytes():
@@ -135,8 +135,8 @@ def test_every_slot_resolves(caplog):
     with caplog.at_level(logging.INFO, logger="mkdocs.plugins.fss_f004_attach"):
         built = _injected()
     assert _SUMMARY in caplog.text
-    assert built.count('class="fss-f004-attach"') == 128
-    assert built.count('class="fss-f004-reason"') == 136
+    assert built.count('class="fss-f004-attach"') == 151
+    assert built.count('class="fss-f004-reason"') == 41
     assert "건너뜀 0" in caplog.text
 
 
@@ -150,13 +150,13 @@ def test_changed_paragraph_is_strict_or_skipped(caplog):
         inject_f004_attach(altered, data)
     with caplog.at_level(logging.INFO, logger="mkdocs.plugins.fss_f004_attach"):
         built = inject_f004_attach(altered, data, strict=False)
-    assert "자리 123/124" in caplog.text
+    assert "자리 142/143" in caplog.text
     assert "건너뜀 1" in caplog.text
-    assert built.count('class="fss-f004-attach"') == 127
+    assert built.count('class="fss-f004-attach"') == 150
     at = built.find(marker + "추가")
     end = built.find("</p>", at)
     assert not built.startswith('<div class="fss-f004-attach"', end + len("</p>"))
-    assert built.count('class="fss-f004-reason"') == 136
+    assert built.count('class="fss-f004-reason"') == 41
 
 
 def test_bad_file_keeps_the_materialized_page(tmp_path, monkeypatch, caplog):
@@ -277,39 +277,40 @@ def test_daeju_panels_link_the_disclosure_and_audit_teams_do_not():
     html = _injected()
     daeju = _panels_named(html, "대주회계법인")
     assert daeju
-    for panel in daeju:
-        assert panel.count('class="fss-f004-reason"') == 1
-        assert "20260630000869" in panel
-        assert 'href="https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000869"' in panel
+    assert daeju[0].count('class="fss-f004-reason"') == 1
+    assert "20260630000869" in daeju[0]
+    assert 'href="https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000869"' in daeju[0]
+    for panel in daeju[1:]:
+        assert 'class="fss-f004-reason"' not in panel
     audit_firms = [reason["firm"] for reason in data["firm_reasons"] if reason["reason"] == "audit_team"]
     assert len(audit_firms) == 19
     seen = 0
     for firm in audit_firms:
         panels = _panels_named(html, firm)
         assert panels
-        for panel in panels:
-            seen += 1
-            match = re.search(r'<p class="fss-f004-reason">.*?</p>', panel)
-            assert match
-            assert "<a " not in match.group(0)
-    assert seen > 0
+        seen += 1
+        match = re.search(r'<p class="fss-f004-reason">.*?</p>', panels[0])
+        assert match
+        assert "<a " not in match.group(0)
+        for panel in panels[1:]:
+            assert "fss-f004-reason" not in panel
+    assert seen == 19
 
 
-def test_dongsung_and_pending_paragraphs_have_no_f004():
+def test_dongsung_gets_ten_blocks_and_unattached_paragraphs_have_none():
     data = load_attach()
     html = _injected()
     dongsung = _panels_named(html, "동성회계법인")
     assert dongsung
-    for panel in dongsung:
-        assert "fss-f004-attach" not in panel
-        assert "fss-f004-reason" not in panel
-    pending = {}
-    for key in ("qu_review31", "qu_dongsung"):
-        for row in data["pending"][key]:
-            _, bundle, group_no, gun, firm, index = row["finding_id"].split("/")
-            ident = (bundle, group_no, None if gun == "-" else gun, firm, int(index))
-            pending[ident] = row["text_sha256"]
-    assert len(pending) == 34
+    assert sum(panel.count('class="fss-f004-attach"') for panel in dongsung) == 10
+    assert sum(panel.count("fss-f004-reason") for panel in dongsung) == 0
+    assert sum(panel.count("이행사항 기재 없음") for panel in dongsung) == 10
+    unattached = {}
+    for row in data["unattached"]["qu_findings"]:
+        _, bundle, group_no, gun, firm, index = row["finding_id"].split("/")
+        ident = (bundle, group_no, None if gun == "-" else gun, firm, int(index))
+        unattached[ident] = row["text_sha256"]
+    assert len(unattached) == 9
     hits = 0
     for panel in fss_f004_attach._iter_panels(html):
         name = fss_f004_attach._ORIGINAL_NAME.search(panel["html"])
@@ -318,12 +319,12 @@ def test_dongsung_and_pending_paragraphs_have_no_f004():
         group_no = panel["group"].split(" ", 1)[0]
         for index, match in enumerate(re.finditer(r'<p class="fss-finding">(.*?)</p>', panel["html"])):
             ident = (panel["bundle"], group_no, panel["gun"], firm, index)
-            if ident not in pending:
+            if ident not in unattached:
                 continue
             hits += 1
-            assert fss_f004_attach._finding_sha(match.group(1)) == pending[ident]
+            assert fss_f004_attach._finding_sha(match.group(1)) == unattached[ident]
             assert not panel["html"].startswith('<div class="fss-f004-attach"', match.end())
-    assert hits == 34
+    assert hits == 9
 
 
 def test_hidden_labels_are_absent():
@@ -409,8 +410,8 @@ def test_lookalikes_outside_2025_stay_in_place():
     assert _LOOKALIKE_ATTACH in built
     assert _LOOKALIKE_MENTION in built
     start, end = fss_f004_attach._year_span(built)
-    assert built[start:end].count('class="fss-f004-attach"') == 128
-    assert built.count('class="fss-f004-attach"') == 129
+    assert built[start:end].count('class="fss-f004-attach"') == 151
+    assert built.count('class="fss-f004-attach"') == 152
 
 
 def test_strip_ignores_pages_without_2025_and_outside_lookalikes():
@@ -551,7 +552,7 @@ def test_phrase_counts_only_inside_f004_elements():
     counts = check_mod._phrase_counts(outside)
     assert counts["no_finding"] == 0
     assert counts["mismatch"] == 0
-    assert counts["no_date"] == 7
+    assert counts["no_date"] == 9
     action = '<p class="fss-f004-action">'
     at = html.find(action)
     assert at >= 0
@@ -600,16 +601,131 @@ def test_consistent_new_counts_still_attach(tmp_path, monkeypatch, caplog):
     data = _copy_attach()
     removed = data["attachments"].pop()
     data["firm_reasons"].pop()
-    data["counts"]["attach_slots"] = 123
+    data["counts"]["attach_slots"] = 142
     data["counts"]["firm_reason_lines"] = 40
+    data["counts"]["attach_blocks"] = 151 - len(removed["f004"])
+    data["counts"]["firm_reason_panels"] = 40
     path = _dump_attach(tmp_path, data)
-    assert len(load_attach(path)["attachments"]) == 123
+    assert len(load_attach(path)["attachments"]) == 142
     source = PAGE.read_text(encoding="utf-8")
     plain = materialize_review_markdown(source)
     monkeypatch.setattr(fss_f004_attach, "ATTACH_PATH", path)
     built = _hook(source, caplog)
     assert built != plain
-    assert built.count('class="fss-f004-attach"') == 128 - len(removed["f004"])
-    assert built.count('class="fss-f004-reason"') < 136
-    assert "자리 123/123" in caplog.text
+    assert built.count('class="fss-f004-attach"') == 151 - len(removed["f004"])
+    assert built.count('class="fss-f004-reason"') == 40
+    assert "자리 142/142" in caplog.text
     assert "건너뜀 0" in caplog.text
+
+
+def _firm_group_panel(html: str, firm: str, group_prefix: str) -> str:
+    found = []
+    for panel in fss_f004_attach._iter_panels(html):
+        name = fss_f004_attach._ORIGINAL_NAME.search(panel["html"])
+        assert name
+        if html_lib.unescape(name.group(1)) != firm:
+            continue
+        if panel["group"].startswith(group_prefix):
+            found.append(panel["html"])
+    assert len(found) == 1
+    return found[0]
+
+
+def test_each_firm_reason_is_only_on_the_first_panel():
+    data = load_attach()
+    html = _injected()
+    assert html.count('class="fss-f004-reason"') == 41
+    for reason in data["firm_reasons"]:
+        panels = _panels_named(html, reason["firm"])
+        assert panels
+        assert panels[0].count('class="fss-f004-reason"') == 1
+        assert reason["text"] in panels[0]
+        for panel in panels[1:]:
+            assert "fss-f004-reason" not in panel
+
+
+def test_dongsung_11_and_52_follow_the_confirmed_rows():
+    data = load_attach()
+    html = _injected()
+    panel = _firm_group_panel(html, "동성회계법인", "1.1")
+    findings = list(re.finditer(r'<p class="fss-finding">.*?</p>', panel))
+    assert len(findings) == 6
+    assert panel.count('class="fss-f004-attach"') == 2
+    assert panel.startswith('<div class="fss-f004-attach"', findings[3].end())
+    assert "위 4개 문단을 F004 한 행으로 공시" in panel[findings[3].end() : findings[4].start()]
+    assert panel.startswith('<div class="fss-f004-attach"', findings[5].end())
+    assert "위 2개 문단을 F004 한 행으로 공시" in panel[findings[5].end() :]
+    assert panel.count("권고일 2026년 05월 13일") == 2
+    assert panel.count(">20260929000399</a>") == 2
+    later = _firm_group_panel(html, "동성회계법인", "5.2")
+    later_findings = list(re.finditer(r'<p class="fss-finding">.*?</p>', later))
+    assert len(later_findings) == 1
+    row_ids = ("20260929000399:0:10", "20260929000399:0:11")
+    blocks = []
+    for row_id in row_ids:
+        row = data["f004_rows"][row_id]
+        assert row["action_kind"] == "none"
+        blocks.append(
+            '<div class="fss-f004-attach"><p class="fss-f004-head">F004 개선권고 이행사항'
+            f' · 권고일 {row["recommend_date_raw"]} · '
+            f'<a href="{row["dart_url"]}" rel="noopener" target="_blank">{row["rcept_no"]}</a></p>'
+            '<p class="fss-f004-action">이행사항 기재 없음</p></div>'
+        )
+    assert later.startswith("".join(blocks), later_findings[0].end())
+
+
+def test_seonil_54_last_paragraph_has_the_shared_note():
+    html = _injected()
+    panel = _firm_group_panel(html, "선일회계법인", "5.4")
+    findings = list(re.finditer(r'<p class="fss-finding">.*?</p>', panel))
+    assert len(findings) == 5
+    assert panel.count('class="fss-f004-attach"') == 1
+    for finding in findings[:-1]:
+        assert not panel.startswith('<div class="fss-f004-attach"', finding.end())
+    assert panel.startswith('<div class="fss-f004-attach"', findings[-1].end())
+    assert "위 5개 문단을 F004 한 행으로 공시" in panel
+    assert "20261006000135" in panel
+
+
+def test_gonggam_41_and_sangnok_53_keep_row_order():
+    data = load_attach()
+    html = _injected()
+    gonggam = _firm_group_panel(html, "회계법인 공감", "4.1")
+    gonggam_actions = [
+        data["f004_rows"][row_id]["action"]
+        for row_id in ("20260630000442:0:9", "20260630000442:0:10")
+    ]
+    assert gonggam.find(gonggam_actions[0]) < gonggam.find(gonggam_actions[1])
+    assert gonggam.count('class="fss-f004-attach"') == 2
+    sangnok = _firm_group_panel(html, "상록회계법인", "5.3")
+    assert sangnok.count('class="fss-f004-attach"') == 2
+    assert sangnok.count("권고일 기재 없음") == 2
+    assert sangnok.count("이행사항 기재 없음") == 2
+    sangnok_actions = [
+        data["f004_rows"][row_id]["action"]
+        for row_id in ("20260630001078:0:1", "20260630001078:0:4")
+    ]
+    assert sangnok.find("이행사항 기재 없음") < sangnok.rfind("이행사항 기재 없음")
+    assert sangnok_actions == ["기재 없음", "기재 없음"]
+
+
+def test_short_action_marks_stay_verbatim():
+    html = _injected()
+    assert html.count('<p class="fss-f004-action">(*)</p>') == 9
+    assert html.count('<p class="fss-f004-action">상동</p>') == 3
+    assert html.count('<p class="fss-f004-action">3</p>') == 2
+    assert html.count('<p class="fss-f004-action">1</p>') == 1
+
+
+def test_block_count_mismatch_rejects_and_build_falls_back(tmp_path, monkeypatch, caplog):
+    source = PAGE.read_text(encoding="utf-8")
+    expected = materialize_review_markdown(source)
+    for name, key in (("blocks", "attach_blocks"), ("panels", "firm_reason_panels")):
+        data = _copy_attach()
+        data["counts"][key] = data["counts"][key] + 1
+        path = _dump_attach(tmp_path / name, data)
+        with pytest.raises(ValueError):
+            load_attach(path)
+        monkeypatch.setattr(fss_f004_attach, "ATTACH_PATH", path)
+        assert _hook(source, caplog) == expected
+        caplog.clear()

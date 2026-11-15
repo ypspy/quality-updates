@@ -1,10 +1,12 @@
 {
- "version": "item-attach-v1-2026-11-15",
- "status": "draft: 동성 재분류 PR과 9행 결정 뒤 v2로 다시 만듦",
+ "version": "item-attach-v2-2026-11-15",
+ "status": "v2: 동성 재분류 뒤 year-2025.json 기준. 사람 확인 20문단, 동성 14문단, F004 22행 결정 반영",
  "source": {
   "main_commit": "94f4882d6cb98a2bab6d20247f4b5c963eb9800f",
-  "year_2025_json_sha256": "e8f7c3d54a44247ef1e7827970f90c55a5c6fb3f4a31257effa54ca0608470ab",
+  "year_2025_json_sha256": "1c6df2500ba918054bd4b22b3a983af9ef3bdecdedc54908d4a54a04e1ea72e4",
+  "year_2025_json_note": "동성 재분류 PR 뒤 year-2025.json",
   "f004_followup_v4_sha256": "617ccf2d8dd778c7235c6f9809b3fe57ea0798226b25eabc407b2f47e9132798",
+  "item_attach_v1_sha256": "e575e0c126487c42e635944cd6a6c05ed7ff4dcf13eeeb6dd70fbde75b0a49dc",
   "proposal": "proposal-item-attach/proposal.md sha256 4f0d8843a21bb1e48910aa666fbbf19fdafec0d4519961a4579bf5b673c9d860"
  },
  "serialization": "json.dumps(ensure_ascii=False, indent=1), UTF-8, LF, 마지막 줄바꿈 없음. 키 순서는 이 파일 그대로.",
@@ -14,46 +16,72 @@
   "자동 부착은 높음과 중간만. 사람 확인 31개는 자동으로 붙이지 않음 (사용자 결정 2026-11-15 #1).",
   "F004 한 행이 같은 법인·같은 중분류의 문단 여러 개를 다루면 마지막 문단 아래에 한 번만 붙임 (사용자 결정 2026-11-15 #2).",
   "F004가 없는 법인은 법인당 사유 한 줄. 개별 문단의 연결 실패 문구는 화면에 내지 않음 (사용자 결정 2026-11-15 #3).",
-  "붙을 곳 없던 13행 중 같은 주제 4행은 그 법인 6.1 문단에 두 번째 이행사항으로 붙임. 9행은 검토 후 결정 (사용자 결정 2026-11-15 #4).",
-  "동성 지적은 사이트 분류 수정 PR 뒤에 다시 매칭. 그 전에는 동성 문단에 붙이지 않음 (사용자 결정 2026-11-15 #5).",
+  "붙을 곳 없던 13행 중 같은 주제 4행은 그 법인 6.1 문단에 두 번째 이행사항으로 붙임. 나머지 9행은 민트 추천대로 붙임 (사용자 결정 2026-11-15 #4, v2 #6).",
+  "동성 지적은 사이트 분류 수정(재분류) 뒤 경로로 붙임. 임차보증금·차량 문단은 1.1. 동성 F004 10행은 민트 수동 매핑 표대로. 이행사항이 모두 「-」여도 문단마다 붙임 (사용자 결정 2026-11-15 v2 #3·#4·#5).",
   "연결은 지적 문단 단위. 11/13의 법인 × 감리연도 × 대분류 링크 규칙을 대체 (사용자 결정 2026-11-15 #6).",
   "권고일 표기 불일치(date_mismatch)와 지적사항 없음(no_finding)은 데이터에만 두고 화면에 내지 않음 (사용자 결정 2026-11-15 #7).",
   "권고일이 없으면 머리줄에 권고일 기재 없음 (사용자 결정 2026-11-14 약 10:35 PM CT, 2026-11-15 유지).",
   "이력 표시는 보류, 개별 감사보고서 이행사항은 범위 밖, 1절 제재 표와 stale 행 제외 (2026-11-15 proposal 4절).",
-  "이행사항과 권고 문구는 원문 그대로. 우리 문구에는 금지어를 쓰지 않음 (사용자 결정 2026-11-14)."
+  "이행사항과 권고 문구는 원문 그대로. 우리 문구에는 금지어를 쓰지 않음 (사용자 결정 2026-11-14).",
+  "사람 확인 20문단은 F004 원문과 같은 권고일 때만 붙이고, 아니면 붙이지 않음(화면에 아무것도 내지 않음). 판정은 review20.csv (2026-11-15 v2).",
+  "법인 사유 줄은 그 법인의 2025 블록 첫 fss-original 패널(문서 순서)에만 한 번 (사용자 결정 2026-11-15 v2 #1).",
+  "짧은 표시(예지 「(*)」, 세아 「상동」, 태인 숫자)도 원문 그대로 보임 (사용자 결정 2026-11-15 v2 #2)."
  ],
  "display": {
   "head": "F004 개선권고 이행사항 · 권고일 {recommend_date_raw 또는 기재 없음} · {rcept_no 링크}",
   "action_none": "이행사항 기재 없음",
-  "reason_line": "firm_reasons[].text, disclosure가 있으면 뒤에 · 접수번호 링크. 법인의 모든 fss-original 패널 끝에 한 줄",
+  "reason_line": "firm_reasons[].text, disclosure가 있으면 뒤에 · 접수번호 링크. 그 법인의 2025 블록 첫 fss-original 패널(문서 순서) 끝에만 한 줄",
   "hidden_fields": [
    "date_mismatch",
    "year_basis",
    "match_level_v4",
    "f004_no_finding"
+  ],
+  "action_verbatim_kinds": [
+   "text",
+   "same_as_above_verbatim",
+   "footnote_mark_verbatim",
+   "count_only_verbatim"
   ]
  },
  "counts": {
   "qu_findings": 370,
-  "qu_findings_with_attach": 147,
-  "attach_slots": 124,
-  "attached_f004_rows": 121,
+  "qu_findings_with_attach": 178,
+  "attach_slots": 143,
+  "attach_blocks": 151,
+  "attached_f004_rows": 143,
+  "unattached_f004_rows": 0,
   "attachments_by_basis": {
-   "auto_medium": 76,
    "auto_high": 48,
+   "auto_medium": 76,
+   "dongsung_user_confirmed": 10,
+   "review20": 9,
+   "review20+review9_user_confirmed": 2,
+   "review9_user_confirmed": 2,
    "same_topic_second_row": 4
   },
-  "pending_review31": 20,
-  "pending_dongsung": 14,
-  "pending_f004_rows": 22,
   "firm_reason_lines": 41,
+  "firm_reason_panels": 41,
   "firm_reason_by_code": {
    "no_cycle_rows": 9,
    "table_empty": 13,
    "audit_team": 19
   },
-  "no_reason_and_no_attach": 6,
-  "qu_findings_under_reason_lines": 183
+  "qu_findings_under_reason_lines": 183,
+  "unattached_qu_findings": 9,
+  "unattached_by_reason": {
+   "review20_no_same_row": 7,
+   "no_candidate": 2
+  },
+  "notes": 35,
+  "no_date_blocks": 9,
+  "no_action_blocks": 14,
+  "dongsung_blocks": 10,
+  "verbatim_short_mark_blocks": {
+   "footnote_mark_verbatim": 9,
+   "count_only_verbatim": 3,
+   "same_as_above_verbatim": 3
+  }
  },
  "f004_rows": {
   "20260629000099:0:10": {
@@ -2397,6 +2425,29 @@
    ]
   },
   {
+   "finding_id": "2025/등록/1.2/라군/선일회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "1. 회계법인 내 품질에 대한 리더십 책임",
+    "group": "1.2 성과 연동 보상",
+    "gun": "라군",
+    "firm": "선일회계법인",
+    "index": 0
+   },
+   "text_sha256": "3309bc4e0d90c926b12d83dd4aeec7e02131debe27befa274d50bf825bb47f63",
+   "f004": [
+    {
+     "f004_row_id": "20261006000135:0:2",
+     "covers": [
+      "2025/등록/1.2/라군/선일회계법인/0"
+     ],
+     "basis": "review20",
+     "scores": null,
+     "note": null
+    }
+   ]
+  },
+  {
    "finding_id": "2025/등록/1.2/라군/예일회계법인/0",
    "path": {
     "bundle": "등록",
@@ -2442,6 +2493,54 @@
      "scores": {
       "2025/등록/2.1/가군/삼일회계법인/0": 0.967
      },
+     "note": "F004에서 2.1·2.2 지적을 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/등록/2.1/라군/선일회계법인/1",
+   "path": {
+    "bundle": "등록",
+    "section": "2. 관련 윤리적 요구사항",
+    "group": "2.1 독립성 정보 관리",
+    "gun": "라군",
+    "firm": "선일회계법인",
+    "index": 1
+   },
+   "text_sha256": "7e10cf58775e87e53c14ffb5d8549b96294003a131648f2adfedc80e21e3b7d5",
+   "f004": [
+    {
+     "f004_row_id": "20261006000135:0:4",
+     "covers": [
+      "2025/등록/2.1/라군/선일회계법인/0",
+      "2025/등록/2.1/라군/선일회계법인/1"
+     ],
+     "basis": "review20",
+     "scores": null,
+     "note": "위 2개 문단을 F004 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/등록/2.1/라군/선일회계법인/3",
+   "path": {
+    "bundle": "등록",
+    "section": "2. 관련 윤리적 요구사항",
+    "group": "2.1 독립성 정보 관리",
+    "gun": "라군",
+    "firm": "선일회계법인",
+    "index": 3
+   },
+   "text_sha256": "8549457880ca8c8f3a9b10b230f79263cff9dc04946910c3766e3cf79c9715ae",
+   "f004": [
+    {
+     "f004_row_id": "20261006000135:0:6",
+     "covers": [
+      "2025/등록/2.1/라군/선일회계법인/2",
+      "2025/등록/2.1/라군/선일회계법인/3"
+     ],
+     "basis": "review20",
+     "scores": null,
      "note": "F004에서 2.1·2.2 지적을 한 행으로 공시"
     }
    ]
@@ -2493,6 +2592,53 @@
       "2025/등록/2.2/가군/삼일회계법인/0": 0.736
      },
      "note": "F004에서 2.1·2.2 지적을 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/등록/2.2/라군/선일회계법인/1",
+   "path": {
+    "bundle": "등록",
+    "section": "2. 관련 윤리적 요구사항",
+    "group": "2.2 업무수임유지 단계 독립성 검토",
+    "gun": "라군",
+    "firm": "선일회계법인",
+    "index": 1
+   },
+   "text_sha256": "c307b4807c4283de2d887a66808d92381c807c73a841dd53e238b6482d4f1225",
+   "f004": [
+    {
+     "f004_row_id": "20261006000135:0:6",
+     "covers": [
+      "2025/등록/2.2/라군/선일회계법인/0",
+      "2025/등록/2.2/라군/선일회계법인/1"
+     ],
+     "basis": "review20",
+     "scores": null,
+     "note": "F004에서 2.1·2.2 지적을 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/등록/3.1/라군/선일회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+    "group": "3.1 위험평가 정보 관리",
+    "gun": "라군",
+    "firm": "선일회계법인",
+    "index": 0
+   },
+   "text_sha256": "abefa82ae9628f5541704db0eb21f2737017453e89e0db45648d6ecdaca4a37e",
+   "f004": [
+    {
+     "f004_row_id": "20261006000135:0:8",
+     "covers": [
+      "2025/등록/3.1/라군/선일회계법인/0"
+     ],
+     "basis": "review20",
+     "scores": null,
+     "note": null
     }
    ]
   },
@@ -2676,6 +2822,33 @@
    ]
   },
   {
+   "finding_id": "2025/등록/5.4/라군/선일회계법인/4",
+   "path": {
+    "bundle": "등록",
+    "section": "5. 업무의 수행",
+    "group": "5.4 일반 조서 문서화 미비 등",
+    "gun": "라군",
+    "firm": "선일회계법인",
+    "index": 4
+   },
+   "text_sha256": "701a1f3e48c7685f9349ab771ae13bcfca4f76269008205ba353a62d35cea8ac",
+   "f004": [
+    {
+     "f004_row_id": "20261006000135:0:15",
+     "covers": [
+      "2025/등록/5.4/라군/선일회계법인/0",
+      "2025/등록/5.4/라군/선일회계법인/1",
+      "2025/등록/5.4/라군/선일회계법인/2",
+      "2025/등록/5.4/라군/선일회계법인/3",
+      "2025/등록/5.4/라군/선일회계법인/4"
+     ],
+     "basis": "review20+review9_user_confirmed",
+     "scores": null,
+     "note": "위 5개 문단을 F004 한 행으로 공시"
+    }
+   ]
+  },
+  {
    "finding_id": "2025/등록/6.1/라군/선일회계법인/2",
    "path": {
     "bundle": "등록",
@@ -2701,6 +2874,56 @@
       "2025/등록/6.1/라군/선일회계법인/2": 0.282
      },
      "note": "위 3개 문단을 F004 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/1.1/-/동성회계법인/3",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "1. 회계법인 내 품질에 대한 리더십 책임",
+    "group": "1.1 지배구조",
+    "gun": null,
+    "firm": "동성회계법인",
+    "index": 3
+   },
+   "text_sha256": "25788cf93b9a3294f05f7a6dd2d395e30208c05c1de8778615a838139641cf7c",
+   "f004": [
+    {
+     "f004_row_id": "20260929000399:0:1",
+     "covers": [
+      "2025/일반회계법인/1.1/-/동성회계법인/0",
+      "2025/일반회계법인/1.1/-/동성회계법인/1",
+      "2025/일반회계법인/1.1/-/동성회계법인/2",
+      "2025/일반회계법인/1.1/-/동성회계법인/3"
+     ],
+     "basis": "dongsung_user_confirmed",
+     "scores": null,
+     "note": "위 4개 문단을 F004 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/1.1/-/동성회계법인/5",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "1. 회계법인 내 품질에 대한 리더십 책임",
+    "group": "1.1 지배구조",
+    "gun": null,
+    "firm": "동성회계법인",
+    "index": 5
+   },
+   "text_sha256": "a2ee78763a14bb8ac7c70150ef0ee98d7b58778ec372f681c55c333db9393e1e",
+   "f004": [
+    {
+     "f004_row_id": "20260929000399:0:2",
+     "covers": [
+      "2025/일반회계법인/1.1/-/동성회계법인/4",
+      "2025/일반회계법인/1.1/-/동성회계법인/5"
+     ],
+     "basis": "dongsung_user_confirmed",
+     "scores": null,
+     "note": "위 2개 문단을 F004 한 행으로 공시"
     }
    ]
   },
@@ -2800,6 +3023,29 @@
      "scores": {
       "2025/일반회계법인/1.1/-/태일회계법인/1": 1.1
      },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/1.2/-/동성회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "1. 회계법인 내 품질에 대한 리더십 책임",
+    "group": "1.2 성과 연동 보상",
+    "gun": null,
+    "firm": "동성회계법인",
+    "index": 0
+   },
+   "text_sha256": "073c7bffc0abf483a5fd587e5cdc3f19ca1543062e4d2706631a21a43edaef91",
+   "f004": [
+    {
+     "f004_row_id": "20260929000399:0:0",
+     "covers": [
+      "2025/일반회계법인/1.2/-/동성회계법인/0"
+     ],
+     "basis": "dongsung_user_confirmed",
+     "scores": null,
      "note": null
     }
    ]
@@ -2905,6 +3151,30 @@
    ]
   },
   {
+   "finding_id": "2025/일반회계법인/2.1/-/동성회계법인/1",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "2. 관련 윤리적 요구사항",
+    "group": "2.1 독립성 정보 관리",
+    "gun": null,
+    "firm": "동성회계법인",
+    "index": 1
+   },
+   "text_sha256": "9af0639c815fd0eae10e0c918d43ebaba32e64ed55aa862eb1d1136eac5d724b",
+   "f004": [
+    {
+     "f004_row_id": "20260929000399:0:3",
+     "covers": [
+      "2025/일반회계법인/2.1/-/동성회계법인/0",
+      "2025/일반회계법인/2.1/-/동성회계법인/1"
+     ],
+     "basis": "dongsung_user_confirmed",
+     "scores": null,
+     "note": "위 2개 문단을 F004 한 행으로 공시"
+    }
+   ]
+  },
+  {
    "finding_id": "2025/일반회계법인/2.1/-/태일회계법인/0",
    "path": {
     "bundle": "일반회계법인",
@@ -2982,6 +3252,29 @@
    ]
   },
   {
+   "finding_id": "2025/일반회계법인/3.1/-/동성회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+    "group": "3.1 위험평가 정보 관리",
+    "gun": null,
+    "firm": "동성회계법인",
+    "index": 0
+   },
+   "text_sha256": "bce55022db600c0fd1b7a01ca9283d666f1f6b5d7f48a3e74b8f3b66e775341e",
+   "f004": [
+    {
+     "f004_row_id": "20260929000399:0:5",
+     "covers": [
+      "2025/일반회계법인/3.1/-/동성회계법인/0"
+     ],
+     "basis": "dongsung_user_confirmed",
+     "scores": null,
+     "note": null
+    }
+   ]
+  },
+  {
    "finding_id": "2025/일반회계법인/3.1/-/예지회계법인/0",
    "path": {
     "bundle": "일반회계법인",
@@ -3027,6 +3320,29 @@
      "scores": {
       "2025/일반회계법인/3.1/-/태일회계법인/0": 1.1
      },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.1/-/동성회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": null,
+    "firm": "동성회계법인",
+    "index": 0
+   },
+   "text_sha256": "c02e2a330f47813c2ee09e3f521b8ea109b0dee8dc64c324af3ff61004726da4",
+   "f004": [
+    {
+     "f004_row_id": "20260929000399:0:8",
+     "covers": [
+      "2025/일반회계법인/4.1/-/동성회계법인/0"
+     ],
+     "basis": "dongsung_user_confirmed",
+     "scores": null,
      "note": null
     }
    ]
@@ -3228,6 +3544,15 @@
       "2025/일반회계법인/4.1/-/상록회계법인/0": 0.572
      },
      "note": null
+    },
+    {
+     "f004_row_id": "20260630001078:0:0",
+     "covers": [
+      "2025/일반회계법인/4.1/-/상록회계법인/0"
+     ],
+     "basis": "review9_user_confirmed",
+     "scores": null,
+     "note": null
     }
    ]
   },
@@ -3355,6 +3680,38 @@
       "2025/일반회계법인/4.1/-/신영회계법인/1": 0.252
      },
      "note": "위 2개 문단을 F004 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.1/-/회계법인 공감/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": null,
+    "firm": "회계법인 공감",
+    "index": 0
+   },
+   "text_sha256": "0b1bc7da5934260efca2e057fcf9c3bd16354b49e367790dcde31ecb8962fc4a",
+   "f004": [
+    {
+     "f004_row_id": "20260630000442:0:9",
+     "covers": [
+      "2025/일반회계법인/4.1/-/회계법인 공감/0"
+     ],
+     "basis": "review20+review9_user_confirmed",
+     "scores": null,
+     "note": null
+    },
+    {
+     "f004_row_id": "20260630000442:0:10",
+     "covers": [
+      "2025/일반회계법인/4.1/-/회계법인 공감/0"
+     ],
+     "basis": "review20",
+     "scores": null,
+     "note": null
     }
    ]
   },
@@ -3529,6 +3886,29 @@
      "scores": {
       "2025/일반회계법인/4.2/-/태일회계법인/0": 1.1
      },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/4.3/-/동성회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "4. 인적 자원",
+    "group": "4.3 교육 훈련",
+    "gun": null,
+    "firm": "동성회계법인",
+    "index": 0
+   },
+   "text_sha256": "9f2a1dc48f61a458f8959eb13cd7ccdd3383fc4462011c795fdab946cf4d0c47",
+   "f004": [
+    {
+     "f004_row_id": "20260929000399:0:7",
+     "covers": [
+      "2025/일반회계법인/4.3/-/동성회계법인/0"
+     ],
+     "basis": "dongsung_user_confirmed",
+     "scores": null,
      "note": null
     }
    ]
@@ -3711,6 +4091,38 @@
       "2025/일반회계법인/5.2/-/성문회계법인/1": 0.785
      },
      "note": "위 2개 문단을 F004 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.2/-/동성회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": null,
+    "firm": "동성회계법인",
+    "index": 0
+   },
+   "text_sha256": "35830cc850841968b45682336e945ec2e2ad2a2b94faeda716aa80c46e968c7b",
+   "f004": [
+    {
+     "f004_row_id": "20260929000399:0:10",
+     "covers": [
+      "2025/일반회계법인/5.2/-/동성회계법인/0"
+     ],
+     "basis": "dongsung_user_confirmed",
+     "scores": null,
+     "note": null
+    },
+    {
+     "f004_row_id": "20260929000399:0:11",
+     "covers": [
+      "2025/일반회계법인/5.2/-/동성회계법인/0"
+     ],
+     "basis": "dongsung_user_confirmed",
+     "scores": null,
+     "note": null
     }
    ]
   },
@@ -4310,6 +4722,38 @@
    ]
   },
   {
+   "finding_id": "2025/일반회계법인/5.3/-/상록회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "상록회계법인",
+    "index": 0
+   },
+   "text_sha256": "e85193d40a59b1a99ba4e90ad205629a97d4be207c9c626b8bb240d846c0afe5",
+   "f004": [
+    {
+     "f004_row_id": "20260630001078:0:1",
+     "covers": [
+      "2025/일반회계법인/5.3/-/상록회계법인/0"
+     ],
+     "basis": "review20",
+     "scores": null,
+     "note": null
+    },
+    {
+     "f004_row_id": "20260630001078:0:4",
+     "covers": [
+      "2025/일반회계법인/5.3/-/상록회계법인/0"
+     ],
+     "basis": "review9_user_confirmed",
+     "scores": null,
+     "note": null
+    }
+   ]
+  },
+  {
    "finding_id": "2025/일반회계법인/5.3/-/세정회계법인/0",
    "path": {
     "bundle": "일반회계법인",
@@ -4460,6 +4904,29 @@
    ]
   },
   {
+   "finding_id": "2025/일반회계법인/5.3/-/신영회계법인/1",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "신영회계법인",
+    "index": 1
+   },
+   "text_sha256": "df2ed20ac97ffae1b5a500c646d16565e0a9b099ed45f15b8c6d954e34dafde1",
+   "f004": [
+    {
+     "f004_row_id": "20260630000428:0:13",
+     "covers": [
+      "2025/일반회계법인/5.3/-/신영회계법인/1"
+     ],
+     "basis": "review20",
+     "scores": null,
+     "note": null
+    }
+   ]
+  },
+  {
    "finding_id": "2025/일반회계법인/5.3/-/신영회계법인/2",
    "path": {
     "bundle": "일반회계법인",
@@ -4480,6 +4947,29 @@
      "scores": {
       "2025/일반회계법인/5.3/-/신영회계법인/2": 0.525
      },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.3/-/세아회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": null,
+    "firm": "세아회계법인",
+    "index": 0
+   },
+   "text_sha256": "136a53033fa615ff6dbb1c25695ca1a20efc78d6de5643773e94be7bcb0ff51c",
+   "f004": [
+    {
+     "f004_row_id": "20260630000928:0:9",
+     "covers": [
+      "2025/일반회계법인/5.3/-/세아회계법인/0"
+     ],
+     "basis": "review20",
+     "scores": null,
      "note": null
     }
    ]
@@ -4739,6 +5229,29 @@
       "2025/일반회계법인/5.3/-/회계법인 현/1": 1.1
      },
      "note": "위 2개 문단을 F004 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2025/일반회계법인/5.4/-/동성회계법인/0",
+   "path": {
+    "bundle": "일반회계법인",
+    "section": "5. 업무의 수행",
+    "group": "5.4 일반 조서 문서화 미비 등",
+    "gun": null,
+    "firm": "동성회계법인",
+    "index": 0
+   },
+   "text_sha256": "b63838f0462070257e83c0cff5650ccc3e1870c55bdcca24e086a2cbacf9e0ad",
+   "f004": [
+    {
+     "f004_row_id": "20260929000399:0:9",
+     "covers": [
+      "2025/일반회계법인/5.4/-/동성회계법인/0"
+     ],
+     "basis": "dongsung_user_confirmed",
+     "scores": null,
+     "note": null
     }
    ]
   },
@@ -5947,371 +6460,79 @@
    "qu_findings": 5
   }
  ],
- "pending": {
-  "qu_review31": [
-   {
-    "finding_id": "2025/등록/1.2/라군/선일회계법인/0",
-    "text_sha256": "3309bc4e0d90c926b12d83dd4aeec7e02131debe27befa274d50bf825bb47f63",
-    "reason": "review31",
-    "candidate_f004_row_id": "20261006000135:0:2",
-    "tier": "review",
-    "score": 0.1
-   },
-   {
-    "finding_id": "2025/등록/2.1/라군/선일회계법인/0",
-    "text_sha256": "8fb06ebaa00a0a945f77a4582e1849844df7ca86a56784e5a3315fb265f69c5a",
-    "reason": "review31",
-    "candidate_f004_row_id": "20261006000135:0:6",
-    "tier": "review",
-    "score": 0.242
-   },
-   {
-    "finding_id": "2025/등록/2.1/라군/선일회계법인/1",
-    "text_sha256": "7e10cf58775e87e53c14ffb5d8549b96294003a131648f2adfedc80e21e3b7d5",
-    "reason": "review31",
-    "candidate_f004_row_id": "20261006000135:0:4",
-    "tier": "review",
-    "score": 0.221
-   },
-   {
-    "finding_id": "2025/등록/2.1/라군/선일회계법인/2",
-    "text_sha256": "baf52dd5695b2d99cb5220e0b9c68403eb1c586831b87a91d67fd8131bec3152",
-    "reason": "review31",
-    "candidate_f004_row_id": "20261006000135:0:4",
-    "tier": "review",
-    "score": 0.1
-   },
-   {
-    "finding_id": "2025/등록/2.1/라군/선일회계법인/3",
-    "text_sha256": "8549457880ca8c8f3a9b10b230f79263cff9dc04946910c3766e3cf79c9715ae",
-    "reason": "review31",
-    "candidate_f004_row_id": "20261006000135:0:4",
-    "tier": "review",
-    "score": 0.221
-   },
-   {
-    "finding_id": "2025/등록/2.2/라군/선일회계법인/0",
-    "text_sha256": "ba6152479c64f897e856ebf26ba5061ec3aec08bee4537b985d4b5b72d166504",
-    "reason": "review31",
-    "candidate_f004_row_id": "20261006000135:0:6",
-    "tier": "review",
-    "score": 0.383
-   },
-   {
-    "finding_id": "2025/등록/2.2/라군/선일회계법인/1",
-    "text_sha256": "c307b4807c4283de2d887a66808d92381c807c73a841dd53e238b6482d4f1225",
-    "reason": "review31",
-    "candidate_f004_row_id": "20261006000135:0:4",
-    "tier": "review",
-    "score": 0.161
-   },
-   {
-    "finding_id": "2025/등록/3.1/라군/선일회계법인/0",
-    "text_sha256": "abefa82ae9628f5541704db0eb21f2737017453e89e0db45648d6ecdaca4a37e",
-    "reason": "review31",
-    "candidate_f004_row_id": "20261006000135:0:8",
-    "tier": "review",
-    "score": 0.15
-   },
-   {
-    "finding_id": "2025/등록/5.4/라군/선일회계법인/0",
-    "text_sha256": "ac8338ea8edffafeb47fbac4be64f9ea9b28fa1bc654f007c38c3b00bd0a851f",
-    "reason": "review31",
-    "candidate_f004_row_id": "20261006000135:0:2",
-    "tier": "review",
-    "score": 0.155
-   },
+ "unattached": {
+  "qu_findings": [
    {
     "finding_id": "2025/일반회계법인/4.1/-/지안회계법인/0",
     "text_sha256": "13fa58bac28022b1e1436134159b2f2660e44098896483157303795d207147d8",
-    "reason": "review31",
-    "candidate_f004_row_id": "20260630000911:0:11",
-    "tier": "review",
-    "score": 0.36
+    "reason": "review20_no_same_row",
+    "note": "F004 지안 2행(조서관리대장, 사후심리)에 감사시간 권고 없음",
+    "v1_candidate_f004_row_id": "20260630000911:0:11",
+    "tier": "review"
    },
    {
     "finding_id": "2025/일반회계법인/4.1/-/선율회계법인/0",
     "text_sha256": "bc7588687f3b799b4b5fc962d3721c1eef89b53956ecceb23db2a77a50fcff27",
-    "reason": "review31",
-    "candidate_f004_row_id": "20260701000301:0:10",
-    "tier": "review",
-    "score": 0.425
+    "reason": "review20_no_same_row",
+    "note": "F004 선율 1행(사후심리)뿐, 감사시간 권고 없음",
+    "v1_candidate_f004_row_id": "20260701000301:0:10",
+    "tier": "review"
    },
    {
-    "finding_id": "2025/일반회계법인/4.1/-/회계법인 공감/0",
-    "text_sha256": "0b1bc7da5934260efca2e057fcf9c3bd16354b49e367790dcde31ecb8962fc4a",
-    "reason": "review31",
-    "candidate_f004_row_id": "20260630000442:0:10",
-    "tier": "review",
-    "score": 0.374
+    "finding_id": "2025/일반회계법인/4.1/-/태인회계법인/0",
+    "text_sha256": "07ee60dcf224e658fee5a10671d1695194fd30b78c6a11590521b2b73adf11d6",
+    "reason": "no_candidate",
+    "note": null,
+    "v1_candidate_f004_row_id": "20260930000167:0:8",
+    "tier": "none"
    },
    {
     "finding_id": "2025/일반회계법인/5.2/-/바름회계법인/0",
     "text_sha256": "14b07dcab7fd5d39f7ffc03f0853597c68c764241566264dc17dca3565f5915b",
-    "reason": "review31",
-    "candidate_f004_row_id": "20260630000862:0:8",
-    "tier": "review",
-    "score": 0.165
+    "reason": "review20_no_same_row",
+    "note": "F004 바름 2행(감사시간, 사후심리)에 사전심리 권고 없음",
+    "v1_candidate_f004_row_id": "20260630000862:0:8",
+    "tier": "review"
    },
    {
     "finding_id": "2025/일반회계법인/5.3/-/바름회계법인/0",
     "text_sha256": "aff78e7b9d7b7f9bb841d603c9de416c84b356d03cd0de7a0c6062785a56f0bc",
-    "reason": "review31",
-    "candidate_f004_row_id": "20260630000862:0:8",
-    "tier": "review",
-    "score": 0.274
+    "reason": "review20_no_same_row",
+    "note": "F004 바름 2행(감사시간, 사후심리)에 조서 취합·관리 권고 없음",
+    "v1_candidate_f004_row_id": "20260630000862:0:8",
+    "tier": "review"
    },
    {
     "finding_id": "2025/일반회계법인/5.3/-/미립회계법인/0",
     "text_sha256": "5d15d2f3120f5035a0fa6219b18169e3f7b3290e6d505c9c0ef45c3f74eb5bab",
-    "reason": "review31",
-    "candidate_f004_row_id": "20260630000197:0:8",
-    "tier": "review",
-    "score": 0.312
-   },
-   {
-    "finding_id": "2025/일반회계법인/5.3/-/상록회계법인/0",
-    "text_sha256": "e85193d40a59b1a99ba4e90ad205629a97d4be207c9c626b8bb240d846c0afe5",
-    "reason": "review31",
-    "candidate_f004_row_id": "20260630001078:0:1",
-    "tier": "review",
-    "score": 0.449
-   },
-   {
-    "finding_id": "2025/일반회계법인/5.3/-/신영회계법인/1",
-    "text_sha256": "df2ed20ac97ffae1b5a500c646d16565e0a9b099ed45f15b8c6d954e34dafde1",
-    "reason": "review31",
-    "candidate_f004_row_id": "20260630000428:0:13",
-    "tier": "review",
-    "score": 0.383
-   },
-   {
-    "finding_id": "2025/일반회계법인/5.3/-/세아회계법인/0",
-    "text_sha256": "136a53033fa615ff6dbb1c25695ca1a20efc78d6de5643773e94be7bcb0ff51c",
-    "reason": "review31",
-    "candidate_f004_row_id": "20260630000928:0:9",
-    "tier": "review",
-    "score": 0.343
+    "reason": "review20_no_same_row",
+    "note": "F004 미립 3행(감사시간, 사전심리, 사후심리)에 조서 보관 권고 없음",
+    "v1_candidate_f004_row_id": "20260630000197:0:8",
+    "tier": "review"
    },
    {
     "finding_id": "2025/일반회계법인/5.3/-/회계법인 동행/0",
     "text_sha256": "20b5e4316e587762ccdd757e908074b6b0bbfda514066cfa0c8f113af167af3f",
-    "reason": "review31",
-    "candidate_f004_row_id": "20260630000310:0:8",
-    "tier": "review",
-    "score": 0.185
+    "reason": "review20_no_same_row",
+    "note": "F004 동행 1행의 네 항목(감사시간, 업무품질관리검토, 감사보고서 작성관리, 모니터링)에 조서관리 없음",
+    "v1_candidate_f004_row_id": "20260630000310:0:8",
+    "tier": "review"
    },
    {
     "finding_id": "2025/일반회계법인/5.3/-/회계법인 동행/1",
     "text_sha256": "74cd15b8c258b0bfa52e36e6ebafb1b562457189ce61b75135f4e4905a3b2d38",
-    "reason": "review31",
-    "candidate_f004_row_id": "20260630000310:0:8",
-    "tier": "review",
-    "score": 0.136
-   }
-  ],
-  "qu_dongsung": [
-   {
-    "finding_id": "2025/일반회계법인/1.2/-/동성회계법인/0",
-    "text_sha256": "073c7bffc0abf483a5fd587e5cdc3f19ca1543062e4d2706631a21a43edaef91",
-    "reason": "dongsung_reclass",
-    "candidate_f004_row_id": "20260929000399:0:0",
-    "tier": "review",
-    "score": 0.1
+    "reason": "review20_no_same_row",
+    "note": "F004 동행 1행의 네 항목(감사시간, 업무품질관리검토, 감사보고서 작성관리, 모니터링)에 조서관리 없음",
+    "v1_candidate_f004_row_id": "20260630000310:0:8",
+    "tier": "review"
    },
    {
-    "finding_id": "2025/일반회계법인/1.2/-/동성회계법인/1",
-    "text_sha256": "0b4d7e0d4c7d9a1e29b06fff052e25170a7fc178b55b005c15601cbd21f0cf89",
-    "reason": "dongsung_reclass",
-    "candidate_f004_row_id": "20260929000399:0:0",
-    "tier": "review",
-    "score": 0.131
-   },
-   {
-    "finding_id": "2025/일반회계법인/1.2/-/동성회계법인/2",
-    "text_sha256": "2ee2224a81aa4cfa0cad0994b5b68f281adb7bd1bf64b3527091a05f993c5f5c",
-    "reason": "dongsung_reclass",
-    "candidate_f004_row_id": "20260929000399:0:0",
-    "tier": "review",
-    "score": 0.148
-   },
-   {
-    "finding_id": "2025/일반회계법인/1.2/-/동성회계법인/3",
-    "text_sha256": "64cee1ddad7c385b12b6e86e37e075f3b26c60fac84f88bdc721f5f1b3bbd615",
-    "reason": "dongsung_reclass",
-    "candidate_f004_row_id": "20260929000399:0:0",
-    "tier": "review",
-    "score": 0.1
-   },
-   {
-    "finding_id": "2025/일반회계법인/1.2/-/동성회계법인/4",
-    "text_sha256": "25788cf93b9a3294f05f7a6dd2d395e30208c05c1de8778615a838139641cf7c",
-    "reason": "dongsung_reclass",
-    "candidate_f004_row_id": "20260929000399:0:0",
-    "tier": "review",
-    "score": 0.1
-   },
-   {
-    "finding_id": "2025/일반회계법인/1.2/-/동성회계법인/5",
-    "text_sha256": "590cd98e8507904dd1e440b1db85c66064098dcce941bbf49cb1a9f714379302",
-    "reason": "dongsung_reclass",
-    "candidate_f004_row_id": "20260929000399:0:0",
-    "tier": "review",
-    "score": 0.131
-   },
-   {
-    "finding_id": "2025/일반회계법인/1.2/-/동성회계법인/6",
-    "text_sha256": "a2ee78763a14bb8ac7c70150ef0ee98d7b58778ec372f681c55c333db9393e1e",
-    "reason": "dongsung_reclass",
-    "candidate_f004_row_id": "20260929000399:0:0",
-    "tier": "review",
-    "score": 0.1
-   },
-   {
-    "finding_id": "2025/일반회계법인/2.1/-/동성회계법인/0",
-    "text_sha256": "2762147fad2e1d03f193ca0cf3747197fe6532e52f2f6b1905c73929061ffb35",
-    "reason": "dongsung_reclass",
-    "candidate_f004_row_id": "20260929000399:0:3",
-    "tier": "medium",
-    "score": 0.285
-   },
-   {
-    "finding_id": "2025/일반회계법인/2.1/-/동성회계법인/1",
-    "text_sha256": "9af0639c815fd0eae10e0c918d43ebaba32e64ed55aa862eb1d1136eac5d724b",
-    "reason": "dongsung_reclass",
-    "candidate_f004_row_id": "20260929000399:0:3",
-    "tier": "medium",
-    "score": 0.29
-   },
-   {
-    "finding_id": "2025/일반회계법인/3.1/-/동성회계법인/0",
-    "text_sha256": "bce55022db600c0fd1b7a01ca9283d666f1f6b5d7f48a3e74b8f3b66e775341e",
-    "reason": "dongsung_reclass",
-    "candidate_f004_row_id": "20260929000399:0:5",
-    "tier": "review",
-    "score": 0.134
-   },
-   {
-    "finding_id": "2025/일반회계법인/4.3/-/동성회계법인/0",
-    "text_sha256": "9f2a1dc48f61a458f8959eb13cd7ccdd3383fc4462011c795fdab946cf4d0c47",
-    "reason": "dongsung_reclass",
-    "candidate_f004_row_id": "20260929000399:0:8",
-    "tier": "none",
-    "score": 0.145
-   },
-   {
-    "finding_id": "2025/일반회계법인/4.3/-/동성회계법인/1",
-    "text_sha256": "c02e2a330f47813c2ee09e3f521b8ea109b0dee8dc64c324af3ff61004726da4",
-    "reason": "dongsung_reclass",
-    "candidate_f004_row_id": "20260929000399:0:8",
-    "tier": "review",
-    "score": 0.324
-   },
-   {
-    "finding_id": "2025/일반회계법인/5.2/-/동성회계법인/0",
-    "text_sha256": "b63838f0462070257e83c0cff5650ccc3e1870c55bdcca24e086a2cbacf9e0ad",
-    "reason": "dongsung_reclass",
-    "candidate_f004_row_id": "20260929000399:0:10",
-    "tier": "review",
-    "score": 0.145
-   },
-   {
-    "finding_id": "2025/일반회계법인/5.2/-/동성회계법인/1",
-    "text_sha256": "35830cc850841968b45682336e945ec2e2ad2a2b94faeda716aa80c46e968c7b",
-    "reason": "dongsung_reclass",
-    "candidate_f004_row_id": "20260929000399:0:10",
-    "tier": "review",
-    "score": 0.189
-   }
-  ],
-  "f004_rows": [
-   {
-    "f004_row_id": "20260630000428:0:13",
-    "reason": "review31_only"
-   },
-   {
-    "f004_row_id": "20260630000442:0:10",
-    "reason": "review31_only"
-   },
-   {
-    "f004_row_id": "20260630000442:0:9",
-    "reason": "orphan_review9"
-   },
-   {
-    "f004_row_id": "20260630000928:0:9",
-    "reason": "review31_only"
-   },
-   {
-    "f004_row_id": "20260630001078:0:0",
-    "reason": "orphan_review9"
-   },
-   {
-    "f004_row_id": "20260630001078:0:1",
-    "reason": "review31_only"
-   },
-   {
-    "f004_row_id": "20260630001078:0:4",
-    "reason": "orphan_review9"
-   },
-   {
-    "f004_row_id": "20260929000399:0:0",
-    "reason": "dongsung_reclass"
-   },
-   {
-    "f004_row_id": "20260929000399:0:1",
-    "reason": "orphan_review9"
-   },
-   {
-    "f004_row_id": "20260929000399:0:10",
-    "reason": "dongsung_reclass"
-   },
-   {
-    "f004_row_id": "20260929000399:0:11",
-    "reason": "orphan_review9"
-   },
-   {
-    "f004_row_id": "20260929000399:0:2",
-    "reason": "orphan_review9"
-   },
-   {
-    "f004_row_id": "20260929000399:0:3",
-    "reason": "dongsung_reclass"
-   },
-   {
-    "f004_row_id": "20260929000399:0:5",
-    "reason": "dongsung_reclass"
-   },
-   {
-    "f004_row_id": "20260929000399:0:7",
-    "reason": "orphan_review9"
-   },
-   {
-    "f004_row_id": "20260929000399:0:8",
-    "reason": "dongsung_reclass"
-   },
-   {
-    "f004_row_id": "20260929000399:0:9",
-    "reason": "orphan_review9"
-   },
-   {
-    "f004_row_id": "20261006000135:0:15",
-    "reason": "orphan_review9"
-   },
-   {
-    "f004_row_id": "20261006000135:0:2",
-    "reason": "review31_only"
-   },
-   {
-    "f004_row_id": "20261006000135:0:4",
-    "reason": "review31_only"
-   },
-   {
-    "f004_row_id": "20261006000135:0:6",
-    "reason": "review31_only"
-   },
-   {
-    "f004_row_id": "20261006000135:0:8",
-    "reason": "review31_only"
+    "finding_id": "2025/일반회계법인/6.1/-/회계법인 동행/0",
+    "text_sha256": "afa559c6981f4d82b63ad47c559bfee5948a2ed903fea0c43ca8c0911c857fa8",
+    "reason": "no_candidate",
+    "note": null,
+    "v1_candidate_f004_row_id": "20260630000310:0:8",
+    "tier": "none"
    }
   ]
  },

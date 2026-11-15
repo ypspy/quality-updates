@@ -22,8 +22,8 @@ from fss_review_cards import YEAR_2025_PATH, load_year_2025, render_year_2025_ht
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE_HTML = ROOT / "site" / "fss-review" / "index.html"
-ATTACH_SHA = "e575e0c126487c42e635944cd6a6c05ed7ff4dcf13eeeb6dd70fbde75b0a49dc"
-ATTACH_BYTES = 240048
+ATTACH_SHA = "241b0edcd6eae831ef38a8d5a742be3f1bb09672cc1560fd93a54ddccc80e682"
+ATTACH_BYTES = 246423
 # scripts/tests/test_fss_review_cards.py YEAR_SHA (main 94f4882).
 # 2025 블록은 F004가 붙으므로 여기서 비교하지 않는다.
 PRIOR_YEAR_SHA = {
@@ -35,24 +35,10 @@ PRIOR_YEAR_SHA = {
     "2019": "fb13f1d4d54aaf8126f97bf802feb37ef40b2fee7852694ca22c3215e607d098",
 }
 RENDERED = {
-    "e8f7c3d54a44247ef1e7827970f90c55a5c6fb3f4a31257effa54ca0608470ab": (
-        305535,
-        "662c6a74f7c942c28e2690fa00875d738bc5c4fbfc6b33b7f47e4a33a780cedd",
-    ),
     "1c6df2500ba918054bd4b22b3a983af9ef3bdecdedc54908d4a54a04e1ea72e4": (
-        306273,
-        "831b364b707cad8e94273bf50c552b9523f3ec03ce9c07475e233820fa24d217",
+        298639,
+        "44ca510b540c20c8cd4ea09ea208cf4e712c4c30f3122b0b4dacb4bc7c0eba78",
     ),
-}
-EXPECTED = {
-    "attach": 128,
-    "reason": 136,
-    "no_date": 7,
-    "no_action": 2,
-    "note": 28,
-    "mismatch": 0,
-    "no_finding": 0,
-    "dongsung": 0,
 }
 _INTERNAL_IDS = (
     "f004_row_id",
@@ -144,7 +130,18 @@ def build_report(html: str, search_index: Path = SEARCH_INDEX) -> dict:
         errors.append("manifest sha 또는 bytes가 첨부 파일과 다릅니다.")
     if manifest.get("file") != "f004-item-attach.json":
         errors.append("manifest file 이름이 다릅니다.")
-    load_attach(ATTACH_PATH)
+    loaded = load_attach(ATTACH_PATH)
+    count_source = loaded["counts"]
+    expected_counts = {
+        "attach": count_source["attach_blocks"],
+        "reason": count_source["firm_reason_panels"],
+        "no_date": count_source["no_date_blocks"],
+        "no_action": count_source["no_action_blocks"],
+        "note": count_source["notes"],
+        "mismatch": 0,
+        "no_finding": 0,
+        "dongsung": count_source["dongsung_blocks"],
+    }
     if year_sha not in RENDERED:
         errors.append(f"year-2025.json sha를 알 수 없습니다: {year_sha}")
         rendered_size = 0
@@ -174,7 +171,7 @@ def build_report(html: str, search_index: Path = SEARCH_INDEX) -> dict:
         errors.append(f"내부 id가 페이지에 {page_ids}건 있습니다.")
     search = _search_index_report(search_index)
     errors.extend(search["errors"])
-    for key, expected in EXPECTED.items():
+    for key, expected in expected_counts.items():
         if counts[key] != expected:
             errors.append(f"{key} 화면 {counts[key]} / 기대 {expected}")
     prior = _prior_year_hashes(html)
