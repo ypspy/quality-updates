@@ -32,10 +32,10 @@ from fss_review_cards import (  # noqa: E402
 )
 from mkdocs_fss_review_year import on_page_markdown  # noqa: E402
 
-TEXT_SHA = "1bcd9dfc6a4f96534765a756e936c5d066a999a069a2bc92317c70ab29d0431f"
-SEV_SHA = "c2133bc29c69c0404da2b8e8a93a77c639f9f10698fda75c910977c8abeebf99"
+TEXT_SHA = "f3cc9c262e5fe3777ec6a2558f593e2b7eecd173a212a38433b9ef1565f77cc7"
+SEV_SHA = "85ac5bbeb31f682bd707bb439315a74327818a4834099296249c8239faa26401"
 YEAR_SHA = {
-    "2025": "05eeae40046d772179a57ad3579ae822f52ba5494a1df36ab541571c887f92c6",
+    "2025": "f2c0b3f2f03e5423596c036f872a9024bff4cee13ed2c87a28a5a7db07d7b330",
     "2024": "dd252ed36a6f3debb59d9c5c831dfab643bb3dc51a4918b5f4649b0087f87763",
     "2023": "a04efa16f933d3aac44bb98434af3bc21160d028790e140c50d77a3f38416baf",
     "2022": "5cf332453ec91121dbbc37aec0c15f540842b5cf845cfde7df98708c839601dc",
@@ -376,12 +376,13 @@ def test_build_hook_inserts_the_2025_year_once():
     assert untouched == "본문"
 
 
-def test_year_2025_render_matches_the_pre_move_source_bytes():
+# main 94f4882d(재분류 전): 222790 B, 955cc59f1a8ad8119cc54f5ae18fb34a3861474bafd5759a875f1b3ce12e1355
+def test_year_2025_render_matches_the_dongsung_reclass_bytes():
     with YEAR_2025_PATH.open(encoding="utf-8") as handle:
         rendered = render_year_2025_html(json.load(handle)).encode("utf-8")
-    assert len(rendered) == 222790
+    assert len(rendered) == 223528
     assert hashlib.sha256(rendered).hexdigest() == (
-        "955cc59f1a8ad8119cc54f5ae18fb34a3861474bafd5759a875f1b3ce12e1355"
+        "93af2273d37457b845183bb3347e425ebd69f00ad4937d181076eef590902697"
     )
 
 
