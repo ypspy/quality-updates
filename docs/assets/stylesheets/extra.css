@@ -357,12 +357,16 @@ iframe {
 }
 
 /* 감리연도 2025 지적 문단 아래 F004 개선권고 이행사항
-   크기는 .md-typeset 기준 em으로 맞춘다(본문 0.8rem = 지적 문단과 같은 크기).
-   rem을 쓰면 html 기준(Material 125%)이라 본문보다 커진다. */
+   크기는 .md-typeset 기준 em으로 맞춘다(지적 문단 = 본문 0.8rem).
+   rem을 쓰면 html 기준(Material 125%)이라 본문보다 커진다.
+   권고 행이 없는 법인의 사유 줄도 같은 인용 상자(왼쪽 선)에 넣는다. */
+.md-typeset .fss-f004-attach,
+.md-typeset .fss-f004-reason {
+  padding: 0 0 0 0.6rem;
+  border-left: 0.1rem solid var(--md-default-fg-color--lightest);
+}
 .md-typeset .fss-f004-attach {
   margin: 0.5em 0 0;
-  padding: 0 0 0 0.75em;
-  border-left: 0.1rem solid var(--md-default-fg-color--lightest);
 }
 .md-typeset .fss-f004-head,
 .md-typeset .fss-f004-reason {
@@ -375,11 +379,11 @@ iframe {
 }
 .md-typeset .fss-f004-action {
   margin: 0;
-  font-size: 1em;
+  font-size: 0.9em;
   line-height: 1.6;
 }
 .md-typeset .fss-f004-reason {
-  margin: 0.75em 0 0;
+  margin: 0.625em 0 0;
 }
 .md-typeset .fss-f004-head a,
 .md-typeset .fss-f004-reason a {
