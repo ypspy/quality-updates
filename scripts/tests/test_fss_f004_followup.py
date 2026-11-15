@@ -685,7 +685,9 @@ def test_disclaimer_replaces_empty_memo_and_level_label(built_page):
     soup = BeautifulSoup(built, "html.parser")
     assert soup.select(".fss-f004-level") == []
     assert soup.select(".fss-f004-memo") == []
-    assert len(soup.select(".fss-f004-disclaimer")) == len(soup.select(".fss-f004-block, .fss-f004-individual"))
+    assert len(soup.select(".fss-f004-disclaimer")) == len(
+        soup.select(".fss-f004-block, .fss-f004-individual-group")
+    )
     assert all(node.get_text(strip=True) == _DISCLAIMER for node in soup.select(".fss-f004-disclaimer"))
 
 
@@ -824,3 +826,117 @@ def test_no_finding_source_banned_word_stays_in_data_only(tmp_path):
     load_followup(_write(tmp_path, payload))
     rendered = render_dae_block(payload["firms"], DAE, payload["labels"])
     assert word not in rendered
+
+
+def test_individual_disclaimer_matches_group_count():
+    def person(name: str, rcept: str) -> dict:
+        item = _item(
+            dae_standard=None,
+            match_level="individual_audit",
+            match_level_label="개별 감사보고서",
+            rcept_no=rcept,
+            dart_url=f"https://dart.fss.or.kr/dsaf001/main.do?rcpNo={rcept}",
+        )
+        return _firm("일반회계법인", name, individual=[item])
+
+    firms = [
+        person("회계법인 현", "20260630000021"),
+        person("다른 법인", "20260630000022"),
+    ]
+    built = inject_f004_followup(_page([("일반회계법인", [DAE])]), _payload(firms))
+    soup = BeautifulSoup(built, "html.parser")
+    blocks = soup.select(".fss-f004-block")
+    groups = soup.select(".fss-f004-individual-group")
+    assert len(groups) == 1
+    assert len(soup.select(".fss-f004-individual")) == 2
+    assert len(soup.select(".fss-f004-disclaimer")) == len(blocks) + len(groups)
+    for node in soup.select(".fss-f004-individual"):
+        assert node.select(".fss-f004-disclaimer") == []
+    counts = check_mod._html_counts(built)
+    assert counts["disclaimer"] == counts["block"] + counts["individual_group"]
+
+
+def test_dart_url_trailing_newline_is_rejected(tmp_path):
+    broken = DART + "\n"
+    item = _item(dart_url=broken)
+    history = _item(
+        rcept_no="20260630000031",
+        dart_url="https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000031",
+        history=[{
+            "rcept_no": "20260630000032",
+            "rcept_dt": "2026-06-30",
+            "correction_type": "기재정정",
+            "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000032" + "\n",
+            "action_text": "이전",
+            "action_changed": False,
+        }],
+    )
+    finding = _dae(display="지적사항 없음")
+    finding["no_finding_rows"] = [_finding_row(dart_url=broken)]
+    finding["f004_item_count"] = 0
+    disclosed = _firm("일반회계법인", "회계법인 현", dae=[_dae(display="기재 없음")])
+    disclosed["latest_2026_disclosure"] = {"rcept_no": "20260630000001", "dart_url": broken}
+    cases = (
+        _firm("일반회계법인", "회계법인 현", dae=[_dae(items=[item])]),
+        _firm("일반회계법인", "회계법인 현", dae=[_dae(items=[history])]),
+        _firm("일반회계법인", "회계법인 현", dae=[finding]),
+        disclosed,
+    )
+    for firm in cases:
+        with pytest.raises(ValueError):
+            load_followup(_write(tmp_path, _payload([firm])))
+
+
+def test_blank_action_renders_as_gisae_eopseum():
+    def numbered(index: int, **kwargs) -> dict:
+        number = f"2026063000004{index}"
+        return _item(
+            rcept_no=number,
+            dart_url=f"https://dart.fss.or.kr/dsaf001/main.do?rcpNo={number}",
+            **kwargs,
+        )
+
+    items = [
+        numbered(1, action=""),
+        numbered(2, action="-"),
+        numbered(3, action=None),
+        numbered(4, action="완료", history=[{
+            "rcept_no": "20260630000045",
+            "rcept_dt": "2026-06-30",
+            "correction_type": "기재정정",
+            "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260630000045",
+            "action_text": "-",
+            "action_changed": True,
+        }]),
+    ]
+    soup = BeautifulSoup(
+        render_dae_block([_firm("일반회계법인", "회계법인 현", dae=[_dae(items=items)])], DAE, _labels()),
+        "html.parser",
+    )
+    acts = [node.get_text() for node in soup.select(".fss-f004-act")]
+    assert [text for text in acts[:3]] == ["이행 내용기재 없음"] * 3 or all("기재 없음" in text for text in acts[:3])
+    assert all("기재 없음" in text for text in acts[:3])
+    assert "완료" in acts[3]
+    assert "기재 없음" in soup.select_one(".fss-f004-hist").get_text()
+
+
+def test_malformed_display_falls_back_to_the_page(tmp_path, monkeypatch, caplog):
+    dae = _dae(display="기재 없음")
+    dae["f004_display"] = []
+    payload = _payload([_firm("일반회계법인", "회계법인 현", dae=[dae])])
+    path = tmp_path / "f004-followup.json"
+    raw = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+    path.write_bytes(raw)
+    (tmp_path / "f004-followup.manifest.json").write_text(
+        json.dumps({
+            "file": "f004-followup.json",
+            "sha256": hashlib.sha256(raw).hexdigest(),
+            "bytes": len(raw),
+        }),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(fss_f004_followup, "FOLLOWUP_PATH", path)
+    source = PAGE.read_text(encoding="utf-8")
+    built = _hook(source, caplog)
+    assert built == materialize_review_markdown(source)
+    assert "ValueError:" in caplog.text

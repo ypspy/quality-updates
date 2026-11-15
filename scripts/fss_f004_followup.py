@@ -94,7 +94,7 @@ def _reject_dart_url(obj: object) -> None:
     if isinstance(obj, dict):
         for key, value in obj.items():
             if key == "dart_url":
-                if not isinstance(value, str) or not _DART_URL.match(value):
+                if not isinstance(value, str) or not _DART_URL.fullmatch(value):
                     raise ValueError("dart_url 형식이 아닙니다.")
             else:
                 _reject_dart_url(value)
@@ -109,12 +109,12 @@ def _validate_item(item: object, match_labels: dict, year_labels: dict, *, indiv
         raise ValueError("항목이 객체가 아닙니다.")
     level = item.get("match_level")
     basis = item.get("year_basis")
-    if level not in match_labels:
+    if not isinstance(level, str) or level not in match_labels:
         raise ValueError("match_level을 알 수 없습니다.")
-    if basis not in year_labels:
+    if not isinstance(basis, str) or basis not in year_labels:
         raise ValueError("year_basis를 알 수 없습니다.")
     url = item.get("dart_url")
-    if not isinstance(url, str) or not _DART_URL.match(url):
+    if not isinstance(url, str) or not _DART_URL.fullmatch(url):
         raise ValueError("dart_url 형식이 아닙니다.")
     standard = item.get("dae_standard")
     if individual:
@@ -125,6 +125,10 @@ def _validate_item(item: object, match_labels: dict, year_labels: dict, *, indiv
     flag = item.get("date_mismatch")
     if not isinstance(flag, bool) or flag != (basis == "recommend_date_mismatch_exception"):
         raise ValueError("date_mismatch가 year_basis와 맞지 않습니다.")
+    if "doc_notes" in item and item.get("doc_notes") is not None:
+        notes = item.get("doc_notes")
+        if not isinstance(notes, list) or any(not isinstance(note, str) for note in notes):
+            raise ValueError("doc_notes가 문자열 목록이 아닙니다.")
     history = item.get("history") or []
     if not isinstance(history, list):
         raise ValueError("history가 목록이 아닙니다.")
@@ -132,7 +136,7 @@ def _validate_item(item: object, match_labels: dict, year_labels: dict, *, indiv
         if not isinstance(row, dict):
             raise ValueError("history 항목이 객체가 아닙니다.")
         hist_url = row.get("dart_url")
-        if not isinstance(hist_url, str) or not _DART_URL.match(hist_url):
+        if not isinstance(hist_url, str) or not _DART_URL.fullmatch(hist_url):
             raise ValueError("dart_url 형식이 아닙니다.")
 
 
@@ -154,9 +158,15 @@ def _verify_manifest(path: Path) -> None:
         meta = json.loads(manifest.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
         raise ValueError("F004 manifest를 읽지 못했습니다.") from exc
+    if not isinstance(meta, dict):
+        raise ValueError("F004 manifest가 객체가 아닙니다.")
+    digest_value = meta.get("sha256")
+    size_value = meta.get("bytes")
+    if not isinstance(digest_value, str) or type(size_value) is not int:
+        raise ValueError("F004 manifest의 sha256 또는 bytes 형식이 아닙니다.")
     raw = path.read_bytes()
     digest = hashlib.sha256(raw).hexdigest()
-    if digest != meta.get("sha256") or len(raw) != meta.get("bytes"):
+    if digest != digest_value or len(raw) != size_value:
         raise ValueError("F004 sha256이 manifest와 다릅니다.")
 
 
@@ -176,6 +186,8 @@ def load_followup(path: Path = FOLLOWUP_PATH) -> dict:
     year_labels = labels.get("year_basis")
     if not isinstance(match_labels, dict) or not isinstance(year_labels, dict):
         raise ValueError("labels에 match_level 또는 year_basis가 없습니다.")
+    if "date_mismatch" not in match_labels:
+        raise ValueError("labels.match_level에 date_mismatch가 없습니다.")
     _reject_banned(data)
     _reject_dart_url(data)
     firms = data.get("firms")
@@ -184,15 +196,25 @@ def load_followup(path: Path = FOLLOWUP_PATH) -> dict:
     for firm in firms:
         if not isinstance(firm, dict):
             raise ValueError("법인 항목이 객체가 아닙니다.")
+        if not isinstance(firm.get("firm"), str) or not isinstance(firm.get("bundle"), str):
+            raise ValueError("법인 이름 또는 묶음이 문자열이 아닙니다.")
+        if "dae" in firm and not isinstance(firm.get("dae"), list):
+            raise ValueError("dae가 목록이 아닙니다.")
         for dae in firm.get("dae") or []:
             if not isinstance(dae, dict):
                 raise ValueError("dae 항목이 객체가 아닙니다.")
             if dae.get("dae_standard") not in _DAE_STANDARDS:
                 raise ValueError("dae_standard가 표준 여섯 값이 아닙니다.")
+            link_key = dae.get("link_key")
+            if not isinstance(link_key, str) or not link_key:
+                raise ValueError("link_key가 없습니다.")
             items = dae.get("items") or []
             if not isinstance(items, list):
                 raise ValueError("items가 목록이 아닙니다.")
-            if dae.get("f004_display", None) not in _DISPLAY_VALUES:
+            display = dae.get("f004_display", None)
+            if display is not None and not isinstance(display, str):
+                raise ValueError("f004_display 값을 알 수 없습니다.")
+            if display not in _DISPLAY_VALUES:
                 raise ValueError("f004_display 값을 알 수 없습니다.")
             finding_rows = dae.get("no_finding_rows")
             if finding_rows is not None:
@@ -202,7 +224,7 @@ def load_followup(path: Path = FOLLOWUP_PATH) -> dict:
                     if not isinstance(row, dict):
                         raise ValueError("no_finding_rows 행이 객체가 아닙니다.")
                     url = row.get("dart_url")
-                    if not isinstance(url, str) or not _DART_URL.match(url):
+                    if not isinstance(url, str) or not _DART_URL.fullmatch(url):
                         raise ValueError("dart_url 형식이 아닙니다.")
             if dae.get("f004_display") == _NO_FINDING and not finding_rows:
                 raise ValueError("지적사항 없음 칸에 행이 없습니다.")
@@ -273,6 +295,12 @@ def _labels_line(item: dict, labels: dict) -> str:
     return '<p class="fss-f004-labels">' + " ".join(spans) + "</p>"
 
 
+def _action_text(value: object) -> str:
+    if value is None or str(value).strip() in {"", "-"}:
+        return "기재 없음"
+    return _esc_text(value)
+
+
 def _history_block(item: dict) -> str:
     rows = item.get("history") or []
     if not rows:
@@ -286,7 +314,7 @@ def _history_block(item: dict) -> str:
         )
         parts.append(
             f'<p class="fss-f004-hist">{_esc_text(row.get("rcept_dt"))} {_esc_text(row.get("correction_type"))}'
-            f' · {link} · <span class="fss-f004-src">{_esc_text(row.get("action_text"))}</span>'
+            f' · {link} · <span class="fss-f004-src">{_action_text(row.get("action_text"))}</span>'
             f" ({changed})</p>"
         )
     parts.append("</div>")
@@ -304,7 +332,7 @@ def _render_item(item: dict, labels: dict) -> str:
         + '<p class="fss-f004-rec"><span class="fss-f004-k">개선권고</span> '
         + f'<span class="fss-f004-src">{_esc_text(item.get("recommendation"))}</span></p>'
         + '<p class="fss-f004-act"><span class="fss-f004-k">이행 내용</span> '
-        + f'<span class="fss-f004-src">{_esc_text(item.get("action"))}</span></p>'
+        + f'<span class="fss-f004-src">{_action_text(item.get("action"))}</span></p>'
         + "".join(notes)
         + _history_block(item)
         + "</div>"
@@ -326,7 +354,7 @@ def _disclosure_link(firm: dict) -> str:
         return ""
     url = latest.get("dart_url")
     number = latest.get("rcept_no")
-    if not isinstance(url, str) or not _DART_URL.match(url) or not number:
+    if not isinstance(url, str) or not _DART_URL.fullmatch(url) or not number:
         return ""
     return (
         f'<p class="fss-f004-latest"><a href="{_esc_attr(url)}" rel="noopener" target="_blank">'
@@ -345,7 +373,7 @@ def _no_finding_line(dae: dict) -> str:
             continue
         url = row.get("dart_url")
         number = row.get("rcept_no")
-        if not isinstance(url, str) or not _DART_URL.match(url) or not number:
+        if not isinstance(url, str) or not _DART_URL.fullmatch(url) or not number:
             continue
         if str(number) in seen:
             continue
@@ -614,13 +642,13 @@ def inject_f004_followup(page: str, data: dict | None = None, *, strict: bool | 
     if data is None:
         try:
             data = load_followup(FOLLOWUP_PATH)
-        except (OSError, ValueError) as exc:
-            _LOG.info("F004 이행내역을 붙이지 않습니다: %s", exc)
+        except Exception as exc:
+            _LOG.info("F004 이행내역을 붙이지 않습니다: %s: %s", type(exc).__name__, exc)
             return original
         try:
             return _insert_followup(cleaned, data, strict=False)
-        except ValueError as exc:
-            _LOG.info("F004 이행내역을 붙이지 않습니다: %s", exc)
+        except Exception as exc:
+            _LOG.info("F004 이행내역을 붙이지 않습니다: %s: %s", type(exc).__name__, exc)
             return original
     if strict is None:
         strict = True

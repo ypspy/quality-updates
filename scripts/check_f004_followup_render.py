@@ -172,6 +172,7 @@ def _html_counts(built: str) -> dict[str, object]:
     outside, inside = _banned_in_f004(built)
     blocks = len(soup.select(".fss-f004-block"))
     individual = len(soup.select(".fss-f004-individual"))
+    individual_group = len(soup.select(".fss-f004-individual-group"))
     return {
         "firm": len(soup.select(".fss-f004-firm")),
         "item": len(soup.select(".fss-f004-item")),
@@ -186,6 +187,7 @@ def _html_counts(built: str) -> dict[str, object]:
         ),
         "dash_date": sum(1 for node in soup.select(".fss-f004-meta") if "권고일 -" in node.get_text()),
         "individual": individual,
+        "individual_group": individual_group,
         "level": len(soup.select(".fss-f004-level")),
         "memo": len(soup.select(".fss-f004-memo")),
         "disclaimer": len(soup.select(".fss-f004-disclaimer")),
@@ -202,7 +204,7 @@ def _banned_in_f004(built: str) -> tuple[int, int]:
     soup = BeautifulSoup(built, "html.parser")
     inside = 0
     outside = 0
-    for region in soup.select("div.fss-f004-block, div.fss-f004-individual"):
+    for region in soup.select("div.fss-f004-block, div.fss-f004-individual-group, div.fss-f004-individual"):
         for span in region.select("span.fss-f004-src"):
             inside += span.get_text().count(_BANNED)
             span.decompose()
@@ -255,9 +257,9 @@ def build_report() -> dict:
         errors.append(f"fss-f004-level {html_counts['level']}")
     if html_counts["memo"] != 0:
         errors.append(f"fss-f004-memo {html_counts['memo']}")
-    if html_counts["disclaimer"] != html_counts["block"] + html_counts["individual"]:
+    if html_counts["disclaimer"] != html_counts["block"] + html_counts["individual_group"]:
         errors.append(
-            f"안내 문구 {html_counts['disclaimer']} / 블록 {html_counts['block'] + html_counts['individual']}"
+            f"안내 문구 {html_counts['disclaimer']} / 블록 {html_counts['block'] + html_counts['individual_group']}"
         )
     return {
         "year_2025_sha256": _sha256(YEAR_2025_PATH),
@@ -274,6 +276,7 @@ def build_report() -> dict:
         "fss_f004_nofinding": html_counts["nofinding"],
         "meta_no_date": html_counts["meta_no_date"],
         "fss_f004_individual": html_counts["individual"],
+        "fss_f004_individual_group": html_counts["individual_group"],
         "fss_f004_level": html_counts["level"],
         "fss_f004_memo": html_counts["memo"],
         "fss_f004_disclaimer": html_counts["disclaimer"],
@@ -305,6 +308,7 @@ def render_text(report: dict) -> str:
         f"fss-f004-nofinding: {report['fss_f004_nofinding']}",
         f"meta_no_date: {report['meta_no_date']}",
         f"fss-f004-individual: {report['fss_f004_individual']}",
+        f"fss-f004-individual-group: {report['fss_f004_individual_group']}",
         f"fss-f004-level: {report['fss_f004_level']}",
         f"fss-f004-memo: {report['fss_f004_memo']}",
         f"fss-f004-disclaimer: {report['fss_f004_disclaimer']}",
