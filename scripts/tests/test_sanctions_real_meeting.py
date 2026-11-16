@@ -304,3 +304,44 @@ def test_existing_correct_minutes_are_not_downloaded_again(tmp_path):
     site = Site([good])
     _run(site, downloads)
     assert site.downloaded == []
+
+
+def test_several_undated_names_in_one_post_are_split_one_by_one(tmp_path):
+    # 27599: 연도 없는 의사록 PDF 두 개. 하나는 회의일을 읽고, 하나는 못 읽는 경우.
+    downloads = tmp_path / "downloads"
+    case = BY_ID["cached-27599"]
+    site = Site([case])
+    unreadable = _payload(case, "제2차 금융위원회 의사록(홈).pdf")
+    site.texts[unreadable] = ""
+    summary = _run(site, downloads)
+    assert (downloads / "sanctions" / "2016-금융위-2차" / "minutes.pdf").is_file()
+    assert not (downloads / "sanctions" / "2017-금융위-2차").exists()
+    assert not (downloads / "sanctions" / "2008-금융위-2차").exists()
+    rows = _jsonl(downloads / "sanctions" / "_review-queue.jsonl")
+    assert [(row["filename"], row["reason"]) for row in rows] == [
+        ("제2차 금융위원회 의사록(홈).pdf", "undated-multi-year-bundle")
+    ]
+    assert summary["reviews"] == 1
+
+
+def test_non_minutes_attachments_keep_the_year_mismatch_filter(tmp_path):
+    # 계획 §3.3: 의사록이 아닌 첨부와 ZIP 안 파일은 회의 연도와 다르면 저장하지 않는다.
+    downloads = tmp_path / "downloads"
+    case = dict(BY_ID["late-december-2016-24"])
+    case["attachments"] = case["attachments"] + ["의결367 2027년도 금융기관 선정안(공개용).pdf"]
+    site = Site([case])
+    summary = _run(site, downloads)
+    assert any(line == "year-mismatch 의결367 2027년도 금융기관 선정안(공개용).pdf" for line in summary["report"])
+    assert not list((downloads / "sanctions").rglob("*선정안*"))
+    import io
+    import zipfile
+
+    from attach_sanction_minutes import _extract_kept
+
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as archive:
+        archive.writestr("2016-제24차 의사록.hwp", b"x")
+        archive.writestr("(공개용) 의결 1. 회계법인 감리결과.pdf", b"keep")
+    kept, _, notes = _extract_kept(buffer.getvalue(), 2015)
+    assert [name for _, name, _ in kept] == ["(공개용) 의결 1. 회계법인 감리결과.pdf"]
+    assert any("2016-제24차" in note for note in notes)
