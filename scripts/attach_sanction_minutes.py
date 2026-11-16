@@ -871,17 +871,26 @@ def is_multi_year_bundle(post_key: tuple[int, str, str, int], names: list[str]) 
     return len(primaries) > 1
 
 
+# 묶음이 아닌 글이라도 연초 이 일수 안에 올라온 글은 지난해 12월 회의일 수 있다(28073, 28123).
+# 그런 글에서 회의일을 못 읽은 의사록은 글 연도 폴더에 두지 않고 검토로 보낸다.
+EARLY_YEAR_REVIEW_DAYS = 90
+
+
 def resolve_minutes_key(
     post_key: tuple[int, str, str, int],
     filename: str,
     text: str,
     *,
     bundle: bool,
+    posted: date | None = None,
 ) -> tuple[tuple[int, str, str, int] | None, str, str]:
     """의사록 파일 하나의 실제 회의 키와 근거.
 
     1) PDF 본문 첫 쪽의 회의일(근거 pdf-text), 2) 파일명의 연도(filename),
-    3) 묶음이 아닌 글에서만 글의 키(post). 날짜를 못 읽은 여러 해 묶음은 (None, "review", ...)이다.
+    3) 묶음이 아닌 글에서만 글의 키(post, 근거 "undated-post-fallback").
+    날짜를 못 읽은 여러 해 묶음은 (None, "review", "undated-multi-year-bundle")이고,
+    묶음이 아니어도 글이 연초 EARLY_YEAR_REVIEW_DAYS일 안에 올라왔으면
+    (None, "review", "undated-early-year-post")이다.
     회의일을 읽었으면 연도는 회의일, 위원회·종류·회차는 제목 → 파일명 → 글 순으로 채운다.
     """
     name_key = minutes_key_from_filename(filename, post_key)
@@ -897,9 +906,11 @@ def resolve_minutes_key(
         return key, "pdf-text", identity["date"]
     if name_key is not None:
         return name_key, "filename", filename
-    if not bundle:
-        return post_key, "post", ""
-    return None, "review", "undated-multi-year-bundle"
+    if bundle:
+        return None, "review", "undated-multi-year-bundle"
+    if posted is not None and (posted - date(posted.year, 1, 1)).days < EARLY_YEAR_REVIEW_DAYS:
+        return None, "review", "undated-early-year-post"
+    return post_key, "post", "undated-post-fallback"
 
 
 def require_pdf_text_reader() -> None:
@@ -1855,7 +1866,9 @@ def run_backfill(
 
     의사록 PDF는 글 게시일이 아니라 PDF 첫 쪽의 회의일로 폴더를 정한다(없으면 파일명 연도,
     그다음 글). 여러 해 의사록을 묶은 옛 글에서 회의일을 못 읽은 파일은 글 날짜로 두지 않고
-    _review/와 _review-queue.jsonl로 보낸다. 같은 회의 폴더에 같은 파일이 있으면 받지 않은 것으로,
+    _review/와 _review-queue.jsonl로 보낸다. 묶음이 아닌 글도 연초 90일 안의 글이면 같다.
+    그 밖에 글 키로 둔 의사록은 보고에 undated-post-fallback으로 남긴다. 묶음 글이나 회의가
+    하나로 정해지지 않은 글의 ZIP은 풀지 않고 _review/로 보낸다. 같은 회의 폴더에 같은 파일이 있으면 받지 않은 것으로,
     다른 파일이 있으면 검토로 보낸다.
 
     비공개기간 경과 안건은 건너뛴다. PDF가 아닌 의사록은 대기 목록에만 적고
@@ -2031,11 +2044,14 @@ def run_backfill(
                         failed = True
                         continue
                     try:
-                        real, source, evidence = resolve_minutes_key(key, name, read_text(staging), bundle=bundle)
+                        real, source, evidence = resolve_minutes_key(
+                            key, name, read_text(staging), bundle=bundle, posted=posted
+                        )
                         review = dict(board=label, post_id=post_id, page_url=page_url, url=url, name=name)
                         if real is None:
+                            candidate = sanction_folder(key) if evidence == "undated-early-year-post" else ""
                             _queue_for_review(
-                                staging, sanctions, reason=evidence, evidence="", candidate="", **review
+                                staging, sanctions, reason=evidence, evidence="", candidate=candidate, **review
                             )
                             report.append(f"review {label} {post_id} {name}: {evidence}")
                             reviews += 1
@@ -2063,7 +2079,12 @@ def run_backfill(
                         os.replace(staging, dest)
                         placed_keys.append(real)
                         wrote = True
-                        if real != key:
+                        if source == "post":
+                            # 회의일·파일명 연도 없이 글 연도로 둔 것은 조용히 넘기지 않고 남긴다.
+                            report.append(
+                                f"undated-post-fallback {label} {post_id} {name} -> {sanction_folder(real)}/{filename}"
+                            )
+                        elif real != key:
                             report.append(f"minutes {source} {name} -> {sanction_folder(real)} ({evidence or 'post'})")
                     finally:
                         if staging.is_file():
@@ -2072,6 +2093,13 @@ def run_backfill(
                 if not bundle and len(set(placed_keys)) == 1:
                     zip_key = placed_keys[0]
                 folder = sanctions / sanction_folder(zip_key)
+                # 여러 해 묶음 글, 또는 의사록이 있었는데 한 회의로 정해지지 않은 글의 ZIP은
+                # 어느 회의 것인지 모르므로 풀지 않고 원본째 _review/{글번호}/로 보낸다.
+                zip_review = ""
+                if bundle:
+                    zip_review = "zip-in-multi-year-bundle"
+                elif minutes and len(set(placed_keys)) != 1:
+                    zip_review = "zip-without-single-meeting"
                 for name, url in zips:
                     if url in blocked:
                         failed = True
@@ -2089,6 +2117,27 @@ def run_backfill(
                         failures=failure_path,
                     ):
                         failed = True
+                        continue
+                    if zip_review:
+                        try:
+                            _queue_for_review(
+                                temporary,
+                                sanctions,
+                                board=label,
+                                post_id=post_id,
+                                page_url=page_url,
+                                url=url,
+                                name=name,
+                                reason=zip_review,
+                                evidence="",
+                                candidate="",
+                            )
+                        finally:
+                            if temporary.is_file():
+                                temporary.unlink()
+                        report.append(f"review {label} {post_id} {name}: {zip_review}")
+                        reviews += 1
+                        wrote = True
                         continue
                     try:
                         extracted, zip_whale, notes = _extract_kept(temporary.read_bytes(), zip_key[0])

@@ -67,11 +67,39 @@ def test_undated_bundle_is_never_filed_under_the_post_date():
     assert evidence == "undated-multi-year-bundle"
 
 
-def test_undated_single_post_falls_back_to_the_post():
+def test_undated_single_post_falls_back_to_the_post_and_says_so():
     case = BY_ID["late-december-2016-24"]
-    key, source, _ = asm.resolve_minutes_key(_post_key(case), "제24차 금융위원회 의사록.pdf", "", bundle=False)
+    key, source, evidence = asm.resolve_minutes_key(
+        _post_key(case), "제24차 금융위원회 의사록.pdf", "", bundle=False, posted=date(2016, 6, 13)
+    )
     assert key == (2016, "금융위", "정기", 24)
-    assert source == "post"
+    assert (source, evidence) == ("post", "undated-post-fallback")
+    # 게시일을 모르면(목록에 날짜 없음) 글 키로 두되 같은 표시를 남긴다.
+    key, source, evidence = asm.resolve_minutes_key(_post_key(case), "제24차 금융위원회 의사록.pdf", "", bundle=False)
+    assert (key, source, evidence) == ((2016, "금융위", "정기", 24), "post", "undated-post-fallback")
+
+
+@pytest.mark.parametrize("case_id", ["late-december-2016-24", "late-december-2017-23", "temporary-2016-1"])
+def test_undated_early_year_single_post_goes_to_review(case_id):
+    # M1: 연초(90일 안) 글은 지난해 12월 회의일 수 있다. 회의일을 못 읽으면 글 연도로 두지 않는다.
+    case = BY_ID[case_id]
+    posted = date.fromisoformat(case["posted"])
+    key, source, evidence = asm.resolve_minutes_key(
+        _post_key(case), case["attachments"][0], "", bundle=False, posted=posted
+    )
+    assert (key, source, evidence) == (None, "review", "undated-early-year-post")
+
+
+def test_early_year_window_edges():
+    post = (2016, "금융위", "정기", 24)
+    name = "제24차 금융위원회 의사록.pdf"
+    assert asm.resolve_minutes_key(post, name, "", bundle=False, posted=date(2016, 3, 30))[0] is None
+    assert asm.resolve_minutes_key(post, name, "", bundle=False, posted=date(2016, 3, 31))[0] == post
+    # 회의일을 읽었으면 연초 글이어도 회의일이 정한다.
+    text = _text(BY_ID["late-december-2016-24"], name)
+    key, source, _ = asm.resolve_minutes_key(post, name, text, bundle=False, posted=date(2016, 1, 13))
+    assert source == "pdf-text"
+    assert asm.sanction_folder(key) == BY_ID["late-december-2016-24"]["expected"][name]
 
 
 def test_filename_year_is_the_second_fallback():
@@ -127,9 +155,10 @@ def _payload(case: dict, name: str) -> bytes:
 
 
 class Site:
-    def __init__(self, cases: list[dict], *, dated: bool = True):
+    def __init__(self, cases: list[dict], *, dated: bool = True, zips: dict[str, bytes] | None = None):
         self.cases = cases
         self.dated = dated
+        self.zips = zips or {}
         self.urls: dict[str, tuple[dict, str]] = {}
         self.downloaded: list[str] = []
         self.texts: dict[bytes, str] = {}
@@ -162,6 +191,9 @@ class Site:
     def download(self, url: str, dest: Path) -> None:
         self.downloaded.append(url)
         case, name = self.urls[url]
+        if name in self.zips:
+            dest.write_bytes(self.zips[name])
+            return
         assert name.lower().endswith(".pdf"), name
         dest.write_bytes(_payload(case, name))
 
@@ -257,13 +289,35 @@ def test_undated_bundle_goes_to_the_review_queue(tmp_path):
     assert [row["post_id"] for row in state["posts"]] == ["27605"]
 
 
-def test_undated_single_post_still_uses_the_post(tmp_path):
+def test_undated_early_year_single_post_is_not_filed_under_the_post_year(tmp_path):
+    # M1: 28073처럼 1월에 올라온 지난해 12월 회의. 회의일을 못 읽으면 2016 폴더에 두지 않는다.
     downloads = tmp_path / "downloads"
     case = BY_ID["late-december-2016-24"]
     site = Site([case], dated=False)
     summary = _run(site, downloads)
+    assert summary["reviews"] == 1
+    assert not (downloads / "sanctions" / "2016-금융위-24차").exists()
+    rows = _jsonl(downloads / "sanctions" / "_review-queue.jsonl")
+    assert [(row["reason"], row["candidate_folder"], row["post_id"]) for row in rows] == [
+        ("undated-early-year-post", "2016-금융위-24차", case["post_id"])
+    ]
+    assert (downloads / "sanctions" / rows[0]["path"]).read_bytes() == _payload(case, case["attachments"][0])
+    assert not list((downloads / "sanctions").rglob("_staging/*"))
+
+
+def test_undated_mid_year_single_post_falls_back_and_is_logged(tmp_path):
+    downloads = tmp_path / "downloads"
+    case = dict(BY_ID["late-december-2016-24"])
+    case["posted"] = "2016-06-13"
+    site = Site([case], dated=False)
+    summary = _run(site, downloads)
     assert summary["reviews"] == 0
     assert (downloads / "sanctions" / "2016-금융위-24차" / "minutes.pdf").is_file()
+    assert (
+        f"undated-post-fallback 금융위 {case['post_id']} 제24차 금융위원회 의사록.pdf -> 2016-금융위-24차/minutes.pdf"
+        in summary["report"]
+    )
+    assert not (downloads / "sanctions" / "_review-queue.jsonl").exists()
 
 
 def test_different_file_already_in_the_real_folder_goes_to_review(tmp_path):
@@ -345,3 +399,72 @@ def test_non_minutes_attachments_keep_the_year_mismatch_filter(tmp_path):
     kept, _, notes = _extract_kept(buffer.getvalue(), 2015)
     assert [name for _, name, _ in kept] == ["(공개용) 의결 1. 회계법인 감리결과.pdf"]
     assert any("2016-제24차" in note for note in notes)
+
+
+def _zip_bytes(members: dict[str, bytes]) -> bytes:
+    import io
+    import zipfile
+
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as archive:
+        for name, payload in members.items():
+            archive.writestr(name, payload)
+    return buffer.getvalue()
+
+
+def test_zip_in_multi_year_bundle_is_quarantined_not_extracted(tmp_path):
+    # M2: 여러 해 묶음 글의 ZIP은 어느 회의 것인지 모른다. 풀지 않고 _review/{글번호}/에 원본째 둔다.
+    downloads = tmp_path / "downloads"
+    case = dict(BY_ID["bundle-2008-5"])
+    zip_name = "제5차 금융위 의안.zip"
+    case["attachments"] = case["attachments"] + [zip_name]
+    payload = _zip_bytes({"(공개용) 의결 1. 회계법인 감리결과.pdf": b"%PDF-1.4 agenda"})
+    site = Site([case], zips={zip_name: payload})
+    summary = _run(site, downloads)
+    sanctions = downloads / "sanctions"
+    # 의사록 PDF는 회의일대로 간다. ZIP 안 파일은 어느 회의 폴더에도 풀리지 않는다.
+    assert {path.split("/")[0] for path in _tree(downloads)} == {"2016-금융위-5차"}
+    assert not (sanctions / "2008-금융위-5차").exists()
+    assert not list(sanctions.rglob("*감리결과*"))
+    rows = _jsonl(sanctions / "_review-queue.jsonl")
+    assert [(row["filename"], row["reason"], row["candidate_folder"]) for row in rows] == [
+        (zip_name, "zip-in-multi-year-bundle", "")
+    ]
+    kept = sanctions / rows[0]["path"]
+    assert kept.parent == sanctions / "_review" / case["post_id"]
+    assert kept.read_bytes() == payload
+    assert rows[0]["sha256"] == __import__("hashlib").sha256(payload).hexdigest()
+    assert f"review 금융위 {case['post_id']} {zip_name}: zip-in-multi-year-bundle" in summary["report"]
+    assert summary["reviews"] == 1
+    assert not list(sanctions.glob("*.zip"))
+    assert not list(sanctions.rglob("_staging/*"))
+
+
+def test_zip_is_quarantined_when_the_single_post_minutes_went_to_review(tmp_path):
+    downloads = tmp_path / "downloads"
+    case = dict(BY_ID["late-december-2016-24"])
+    zip_name = "제24차 의안.zip"
+    case["attachments"] = case["attachments"] + [zip_name]
+    payload = _zip_bytes({"(공개용) 의결 1. 회계법인 감리결과.pdf": b"%PDF-1.4 agenda"})
+    site = Site([case], dated=False, zips={zip_name: payload})
+    summary = _run(site, downloads)
+    sanctions = downloads / "sanctions"
+    assert not (sanctions / "2016-금융위-24차").exists()
+    reasons = sorted(row["reason"] for row in _jsonl(sanctions / "_review-queue.jsonl"))
+    assert reasons == ["undated-early-year-post", "zip-without-single-meeting"]
+    assert summary["reviews"] == 2
+
+
+def test_zip_in_single_dated_post_is_still_extracted_into_the_meeting(tmp_path):
+    # 묶음이 아니고 의사록이 한 회의로 정해지면 ZIP은 예전처럼 그 회의 폴더에 푼다.
+    downloads = tmp_path / "downloads"
+    case = dict(BY_ID["late-december-2016-24"])
+    zip_name = "제24차 의안.zip"
+    case["attachments"] = case["attachments"] + [zip_name]
+    payload = _zip_bytes({"(공개용) 의결 1. 회계법인 감리결과.pdf": b"%PDF-1.4 agenda"})
+    site = Site([case], zips={zip_name: payload})
+    summary = _run(site, downloads)
+    real = case["expected"]["제24차 금융위원회 의사록.pdf"]
+    assert any("감리결과" in path for path in _tree(downloads) if path.startswith(real + "/"))
+    assert summary["reviews"] == 0
+    assert not (downloads / "sanctions" / "_review").exists()
