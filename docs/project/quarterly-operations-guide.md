@@ -309,7 +309,7 @@ python scripts/watch_fss_b0000291.py --init                              # 기�
 python scripts/watch_fss_b0000291.py                                     # 주간 실행
 ```
 
-`watch_fss_b0000291.py`는 탭 01(개선권고사항, `menuNo=200620`)과 02(개선권고 미이행사실, `menuNo=200621`)의 목록을 `pageUnit=300`으로 읽는다. 탭마다 최대 `--max-pages`(기본 2)쪽까지 읽는다. 새 글은 상태에 없는 `nttId`다. 상태는 `downloads/fss-review/B0000291/_list-state.json`에 두고 git에 넣지 않는다. #117 수집기의 `_state.json`(숨은 2022년 글 탐색)과는 다른 파일이다. 정상 실행일 때만 상태와 `_weekly/YYYY-MM-DD.json`을 쓴다. 구문 분석에 실패하면 받은 HTML을 `_weekly/YYYY-MM-DD-{탭}.html`에 남기고 상태는 바꾸지 않는다. 재시도는 #117 `fetch_bytes`와 같다(5xx·연결 오류 최대 5회, 403은 2회). 종료 코드는 0 새 글 없음, 10 새 글 또는 변경, 20 경고(사라짐·총건수 감소·건수 불일치), 2 접속 실패, 3 403, 4 구문 분석 실패, 5 상태 파일 오류다. 새 글의 첨부 입수(`crawl_fss_b0000291.py --seed`)와 정기 실행 일정 등록은 각각 따로 승인받는다.
+`watch_fss_b0000291.py`는 탭 01(개선권고사항, `menuNo=200620`)과 02(이행 여부 확인 탭, `menuNo=200621`)의 목록을 `pageUnit=300`으로 읽는다. 탭마다 최대 `--max-pages`(기본 2)쪽까지 읽는다. 새 글은 상태에 없는 `nttId`다. 상태는 `downloads/fss-review/B0000291/_list-state.json`에 두고 git에 넣지 않는다. #117 수집기의 `_state.json`(숨은 2022년 글 탐색)과는 다른 파일이다. 정상 실행일 때만 상태와 `_weekly/YYYY-MM-DD.json`을 쓴다. 구문 분석에 실패하면 받은 HTML을 `_weekly/YYYY-MM-DD-{탭}.html`에 남기고 상태는 바꾸지 않는다. 재시도는 #117 `fetch_bytes`와 같다(5xx·연결 오류 최대 5회, 403은 2회). 종료 코드는 0 새 글 없음, 10 새 글 또는 변경, 20 경고(사라짐·총건수 감소·건수 불일치), 2 접속 실패, 3 403, 4 구문 분석 실패, 5 상태 파일 오류다. 새 글의 첨부 입수(`crawl_fss_b0000291.py --seed`)와 정기 실행 일정 등록은 각각 따로 승인받는다.
 
 npm: `npm run crawl`, `npm run prepare:deploy`, `npm test`, `npm run build:strict`, `npm run lint:md`
 

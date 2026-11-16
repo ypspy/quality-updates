@@ -38,7 +38,7 @@ def parse_args(argv=None):
     parser.add_argument("--report", type=Path, default=None, help="JSON 보고를 이 경로에도 쓴다")
     parser.add_argument("--delay", type=float, default=fss_b0000291.DEFAULT_DELAY)
     parser.add_argument("--max-pages", type=int, default=2)
-    parser.add_argument("--tabs", default="01,02", help="감시할 탭 코드(쉼표). 01 개선권고사항, 02 미이행사실")
+    parser.add_argument("--tabs", default="01,02", help="감시할 탭 코드(쉼표). 01 개선권고사항, 02 이행 여부 확인 탭")
     args = parser.parse_args(argv)
     if args.dest is None:
         args.dest = fss_b0000291.default_dest()

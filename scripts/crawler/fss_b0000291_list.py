@@ -22,7 +22,7 @@ from crawler import fss_b0000291
 STATE_SCHEMA = "fss-b0000291-list-state/1"
 HISTORY_KEEP = 12
 DEFAULT_PAGE_UNIT = 300
-# 탭 코드 → menuNo. 01 개선권고사항, 02 개선권고 미이행사실.
+# 탭 코드 → menuNo. 01 개선권고사항, 02 이행 여부 확인 탭. TAB_NAMES 값은 게시판 원문 탭 이름이다.
 TABS = {"01": "200620", "02": "200621"}
 TAB_NAMES = {"01": "개선권고사항", "02": "개선권고 미이행사실"}
 _TOTAL = re.compile(r"전체\s*<em>\s*([\d,]+)\s*</em>\s*건")
