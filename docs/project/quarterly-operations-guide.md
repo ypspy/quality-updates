@@ -300,6 +300,17 @@ python scripts/reorder_chronological.py docs/quality-updates/2025/2025-01-01_to_
 
 `export_fss_replies_raw.py`는 `item.md`만 `{board}/{nttId}.md`로 복사한다. 기본 목적지는 `C:\dev\obsidian-vault\raw\fss-replies`이고, 대상이 있으면 건너뛴다. 첨부는 복사하지 않는다. `--update-pending`은 대상 `extract_status`가 `pending_whale`이고 소스 `extract_status`가 더 이상 `pending_whale`이 아닐 때만 덮어쓴다. 대상만 있는 파일은 지우지 않는다. `--sibling-rev`는 기존 `{nttId}.md` 대신 `{nttId}.{rev}.md`와 `manifest-{rev}.jsonl`을 쓰고, `--update-pending`과 함께 쓰면 오류다.
 
+### 품질관리감리 B0000291 주간 감지
+
+```bash
+# 목록(list.do)만 읽는다. 첨부와 view.do 본문은 받지 않는다.
+python scripts/watch_fss_b0000291.py --dry-run --report /tmp/b291.json   # 파일을 쓰지 않음(--report만)
+python scripts/watch_fss_b0000291.py --init                              # 기준선: 알리지 않고 known을 채움
+python scripts/watch_fss_b0000291.py                                     # 주간 실행
+```
+
+`watch_fss_b0000291.py`는 탭 01(개선권고사항, `menuNo=200620`)과 02(개선권고 미이행사실, `menuNo=200621`)의 목록을 `pageUnit=300`으로 읽는다. 탭마다 최대 `--max-pages`(기본 2)쪽까지 읽는다. 새 글은 상태에 없는 `nttId`다. 상태는 `downloads/fss-review/B0000291/_list-state.json`에 두고 git에 넣지 않는다. #117 수집기의 `_state.json`(숨은 2022년 글 탐색)과는 다른 파일이다. 정상 실행일 때만 상태와 `_weekly/YYYY-MM-DD.json`을 쓴다. 구문 분석에 실패하면 받은 HTML을 `_weekly/YYYY-MM-DD-{탭}.html`에 남기고 상태는 바꾸지 않는다. 재시도는 #117 `fetch_bytes`와 같다(5xx·연결 오류 최대 5회, 403은 2회). 종료 코드는 0 새 글 없음, 10 새 글 또는 변경, 20 경고(사라짐·총건수 감소·건수 불일치), 2 접속 실패, 3 403, 4 구문 분석 실패, 5 상태 파일 오류다. 새 글의 첨부 입수(`crawl_fss_b0000291.py --seed`)와 정기 실행 일정 등록은 각각 따로 승인받는다.
+
 npm: `npm run crawl`, `npm run prepare:deploy`, `npm test`, `npm run build:strict`, `npm run lint:md`
 
 ---
@@ -356,6 +367,7 @@ npm: `npm run crawl`, `npm run prepare:deploy`, `npm test`, `npm run build:stric
 
 | 날짜 | 내용 |
 |------|------|
+| 2026-11-16 | 6절에 품질관리감리 B0000291 주간 감지(`watch_fss_b0000291.py`) 추가 |
 | 2026-11-12 | 금감원 질의회신 `--extract-local`과 export `--update-pending`을 2절·6절에 추가 |
 | 2026-11-12 | KASB 질의회신 오프라인 HWP 파서, `--extract-local`, FSS/KASB export `--sibling-rev` |
 | 2026-11-07 | README에만 있던 첨부·제재 의결·질의회신·추출 명령을 해당 Phase와 6절로 옮김 |
