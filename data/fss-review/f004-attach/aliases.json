@@ -1,0 +1,13 @@
+{
+ "schema": "f004-attach-aliases/1",
+ "note": "F004(DART) 법인 이름을 그 감리연도 화면의 법인 이름(fss-original data-names)으로 바꾸는 표. 기준은 민트, 결정은 윤석님. 이름이 같으면 행이 필요 없음",
+ "fields": {
+  "canonical": "그 연도 화면 이름(data-names 그대로)",
+  "corp_code": "DART 고유번호 8자리, 모르면 null",
+  "aliases": "F004·보도자료 등에 나오는 다른 이름 목록",
+  "years": "이 대응이 맞는 감리연도 목록(2019–2025, 오름차순)",
+  "source": "근거(공시 접수번호, 파일, 보도자료)",
+  "decided_by": "민트 기준 문서 또는 윤석님 결정 번호(예: D10)"
+ },
+ "entries": []
+}

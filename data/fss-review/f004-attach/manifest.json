@@ -1,0 +1,15 @@
+{
+ "schema": "f004-attach-manifest/1",
+ "years": {
+  "2025": {
+   "file": "2025.json",
+   "sha256": "d5f7242862f26f2b9f4e5671dd2763e39079b84eeb029da151851eaec8512b4b",
+   "bytes": 246815
+  }
+ },
+ "aliases": {
+  "file": "aliases.json",
+  "sha256": "8f4f0f9d3a40e6eca7e67777f4a0705e2cdf27be43a7f3bfb51726b9df1e6e25",
+  "bytes": 703
+ }
+}
