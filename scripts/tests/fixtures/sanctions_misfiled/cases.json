@@ -1,0 +1,283 @@
+{
+ "about": "2026-11 금융위·증선위 백필에서 잘못 분류된 실제 사례. PDF 원본 대신 첫 쪽 텍스트(pypdf) 앞 8줄과 원본 sha256만 둔다.",
+ "cases": [
+  {
+   "id": "bundle-2008-5",
+   "board": "금융위",
+   "post_id": "27605",
+   "title": "제5차 금융위원회 의사록",
+   "posted": "2008-05-23",
+   "attachments": [
+    "2009-제5차 금융위 의사록(홈).hwp",
+    "2010-제5차 금융위 의사록(홈).hwp",
+    "2011-제5차 금융위 의사록(홈).hwp",
+    "2012-제5차 금융위 의사록(홈).hwp",
+    "2014-제5차 금융위 의사록(홈).hwp",
+    "2015-제5차 금융위 의사록(홈).hwp",
+    "제5차 금융위원회 의사록.pdf"
+   ],
+   "attachment_note": "HWP 이름은 job2-real.log의 year-mismatch 줄에서, PDF 이름은 관측되지 않아 일반형으로 둠",
+   "pdfs": {
+    "제5차 금융위원회 의사록.pdf": {
+     "source_pdf": "downloads/sanctions/2008-금융위-5차/minutes.pdf",
+     "source_sha256": "2caf520ef906824f3aed1c03b9045115f2da3920d70e97b4ca9df5e810443eb6",
+     "first_page_lines": [
+      "INSIDabcdef_:MS_0001MS_0001",
+      "INSIDabcdef_:MS_0001MS_0001",
+      "제5차 금융위원회 의사록",
+      "2016. 3. 15.",
+      "금 융 위 원 회",
+      "2081038  / 2016-05-11 14:58  문서보안을 생활화 합시다."
+     ]
+    }
+   },
+   "current_folder": "2008-금융위-5차",
+   "expected": {
+    "제5차 금융위원회 의사록.pdf": "2016-금융위-5차"
+   }
+  },
+  {
+   "id": "late-december-2016-24",
+   "board": "금융위",
+   "post_id": "28073",
+   "title": "제24차 금융위원회 의사록",
+   "posted": "2016-01-13",
+   "attachments": [
+    "제24차 금융위원회 의사록.pdf"
+   ],
+   "attachment_note": "PDF 이름은 관측되지 않아 일반형으로 둠",
+   "pdfs": {
+    "제24차 금융위원회 의사록.pdf": {
+     "source_pdf": "downloads/sanctions/2016-금융위-24차/minutes.pdf",
+     "source_sha256": "2ac60180acc14e0876a8beb30134306bd2d8473885fd11309f69cb226c1548a1",
+     "first_page_lines": [
+      "INSIDabcdef_:MS_0001MS_0001",
+      "INSIDabcdef_:MS_0001MS_0001",
+      "제24차 금융위원회 의사록",
+      "2015. 12. 30.",
+      "금 융 위 원 회",
+      "2080658  / 2016-01-13 17:42  문서보안을 생활화 합시다."
+     ]
+    }
+   },
+   "current_folder": "2016-금융위-24차",
+   "expected": {
+    "제24차 금융위원회 의사록.pdf": "2015-금융위-24차"
+   }
+  },
+  {
+   "id": "temporary-2016-1",
+   "board": "금융위",
+   "post_id": "28072",
+   "title": "제1차 임시 금융위원회 의사록",
+   "posted": "2016-01-05",
+   "attachments": [
+    "제1차 임시 금융위원회 의사록.pdf"
+   ],
+   "attachment_note": "PDF 이름은 관측되지 않아 일반형으로 둠",
+   "pdfs": {
+    "제1차 임시 금융위원회 의사록.pdf": {
+     "source_pdf": "downloads/sanctions/2016-금융위-임시-1차/minutes.pdf",
+     "source_sha256": "55cacc7419d4abab0cc43762d123a3fc450f936a7d02a7cdc1c66c3b81d4fae7",
+     "first_page_lines": [
+      "INSIDabcdef_:MS_0001MS_0001",
+      "INSIDabcdef_:MS_0001MS_0001",
+      "제1차 임시 금융위원회 의사록",
+      "2015. 11. 29.",
+      "금 융 위 원 회",
+      "2080658  / 2016-01-05 20:00  문서보안을 생활화 합시다."
+     ]
+    }
+   },
+   "current_folder": "2016-금융위-임시-1차",
+   "expected": {
+    "제1차 임시 금융위원회 의사록.pdf": "2015-금융위-임시-1차"
+   }
+  },
+  {
+   "id": "late-december-2017-23",
+   "board": "금융위",
+   "post_id": "28123",
+   "title": "제23차 금융위원회 의사록",
+   "posted": "2017-02-16",
+   "attachments": [
+    "제23차 금융위원회 의사록.pdf"
+   ],
+   "attachment_note": "PDF 이름은 관측되지 않아 일반형으로 둠",
+   "pdfs": {
+    "제23차 금융위원회 의사록.pdf": {
+     "source_pdf": "downloads/sanctions/2017-금융위-23차/minutes.pdf",
+     "source_sha256": "1fba0c80d6705cc187e890582a0862bff6940b16f9761d72608831f783f7f633",
+     "first_page_lines": [
+      "INSIDabcdef_:MS_0001MS_0001",
+      "INSIDabcdef_:MS_0001MS_0001",
+      "제23차 금융위원회 의사록",
+      "2016. 12.28.",
+      "금 융 위 원 회",
+      "2081038  / 2017-02-16 09:36  문서보안을 생활화 합시다."
+     ]
+    }
+   },
+   "current_folder": "2017-금융위-23차",
+   "expected": {
+    "제23차 금융위원회 의사록.pdf": "2016-금융위-23차"
+   }
+  },
+  {
+   "id": "written-2009-1",
+   "board": "금융위",
+   "post_id": "27659",
+   "title": "제1차 금융위원회 서면회의 의사록",
+   "posted": "2009-04-29",
+   "attachments": [
+    "제1차 금융위원회 서면회의 의사록.pdf"
+   ],
+   "attachment_note": "PDF 이름은 관측되지 않아 일반형으로 둠",
+   "pdfs": {
+    "제1차 금융위원회 서면회의 의사록.pdf": {
+     "source_pdf": "downloads/sanctions/2009-금융위-서면-1차/minutes.pdf",
+     "source_sha256": "5a1590afed708bd6e2ca6cfd6f7e9feca4c94bdb321b4cef08cf9712dd2659fb",
+     "first_page_lines": [
+      "제1차  금융위원회 서면회의 의사록",
+      "2017. 8. 22",
+      "금 융 위 원 회"
+     ]
+    }
+   },
+   "current_folder": "2009-금융위-서면-1차",
+   "expected": {
+    "제1차 금융위원회 서면회의 의사록.pdf": "2017-금융위-서면-1차"
+   }
+  },
+  {
+   "id": "sfc-2017-1-is-temporary",
+   "board": "증선위",
+   "post_id": "28986",
+   "title": "2017년 제1차 증권선물위원회 의사록",
+   "posted": "2017-03-16",
+   "attachments": [
+    "2017년 제1차 증권선물위원회 의사록.pdf"
+   ],
+   "attachment_note": "PDF 이름은 관측되지 않아 일반형으로 둠",
+   "pdfs": {
+    "2017년 제1차 증권선물위원회 의사록.pdf": {
+     "source_pdf": "downloads/sanctions/2017-증선위-1차/minutes.pdf",
+     "source_sha256": "d28f7692d0cd1c3a0fbc9f29b82d02311ea859fe404f4d019c27a43369ce6afc",
+     "first_page_lines": [
+      "INSIDabcdef_:MS_0001MS_0001",
+      "INSIDabcdef_:MS_0001MS_0001",
+      "제1차 임시증권선물위원회 의사록",
+      "2017. 2. 23.",
+      "증 권 선 물 위 원 회",
+      "2081038  / 2017-03-15 13:50  문서보안을 생활화 합시다."
+     ]
+    }
+   },
+   "current_folder": "2017-증선위-1차",
+   "expected": {
+    "2017년 제1차 증권선물위원회 의사록.pdf": "2017-증선위-임시-1차"
+   }
+  },
+  {
+   "id": "cached-27593",
+   "board": "금융위",
+   "post_id": "27593",
+   "title": "제1차 임시 금융위원회 의사록",
+   "posted": "2008-03-21",
+   "attachments": [
+    "제1차 임시금융위 의사록(홈).hwp",
+    "2010-제1차 임시 금융위 의사록(홈).hwp",
+    "2011-제1차 임시 금융위 의사록(홈).hwp",
+    "2012-제1차 임시 금융위 의사록(홈).hwp",
+    "2013-제1차 임시 금융위 의사록(홈).hwp",
+    "2014-제1차 임시 금융위 의사록(홈).hwp",
+    "제1차 임시 금융위 의사록_홈.hwp",
+    "제1차 임시 금융위 의사록_홈.pdf",
+    "제1차 임시 금융위원회 의사록.hwp",
+    "제1차 임시 금융위원회 의사록.pdf"
+   ],
+   "attachment_note": "첨부 목록은 HWP 다운로드 때 받은 글 캐시(sanctions-posts.jsonl)의 실제 값",
+   "pdfs": {
+    "제1차 임시 금융위 의사록_홈.pdf": {
+     "source_pdf": "downloads/sanctions/2016-금융위-임시-1차/minutes.pdf",
+     "source_sha256": "55cacc7419d4abab0cc43762d123a3fc450f936a7d02a7cdc1c66c3b81d4fae7",
+     "first_page_lines": [
+      "INSIDabcdef_:MS_0001MS_0001",
+      "INSIDabcdef_:MS_0001MS_0001",
+      "제1차 임시 금융위원회 의사록",
+      "2015. 11. 29.",
+      "금 융 위 원 회",
+      "2080658  / 2016-01-05 20:00  문서보안을 생활화 합시다."
+     ]
+    },
+    "제1차 임시 금융위원회 의사록.pdf": {
+     "source_pdf": "downloads/sanctions/2017-금융위-임시-1차/minutes.pdf",
+     "source_sha256": "d83593f2bcd45e91565d824c3996385081981e87006ceea8ed8ceb8cf6fd337a",
+     "first_page_lines": [
+      "제1차 임시 금융위원회 의사록",
+      "2017. 8. 2.",
+      "금 융 위 원 회"
+     ]
+    }
+   },
+   "current_folder": "",
+   "expected": {
+    "제1차 임시 금융위 의사록_홈.pdf": "2015-금융위-임시-1차",
+    "제1차 임시 금융위원회 의사록.pdf": "2017-금융위-임시-1차"
+   }
+  },
+  {
+   "id": "cached-27599",
+   "board": "금융위",
+   "post_id": "27599",
+   "title": "제2차 금융위원회 의사록",
+   "posted": "2008-04-14",
+   "attachments": [
+    "제2차 금융위 의사록(홈).hwp",
+    "2009-제2차 금융위 의사록(홈).hwp",
+    "2010-제2차 금융위 의사록(홈).hwp",
+    "2011-제2차 금융위 의사록(홈).hwp",
+    "2012-제2차 금융위 의사록(홈).hwp",
+    "2013-제2차 금융위 의사록(홈).hwp",
+    "2014-제2차 금융위 의사록(홈).hwp",
+    "2015-제2차 금융위 의사록(홈).hwp",
+    "제2차 금융위원회 의사록_홈.hwp",
+    "제2차 금융위원회 의사록(홈).hwp",
+    "제2차 금융위원회 의사록_홈.pdf",
+    "제2차 금융위원회 의사록(홈).pdf"
+   ],
+   "attachment_note": "첨부 목록은 HWP 다운로드 때 받은 글 캐시(sanctions-posts.jsonl)의 실제 값",
+   "pdfs": {
+    "제2차 금융위원회 의사록_홈.pdf": {
+     "source_pdf": "downloads/sanctions/2016-금융위-2차/minutes.pdf",
+     "source_sha256": "b30c058bb3ba5943f95f426a1a4e94d1ed125d65b2e6288be8f8bf93a245de4f",
+     "first_page_lines": [
+      "INSIDabcdef_:MS_0001MS_0001",
+      "INSIDabcdef_:MS_0001MS_0001",
+      "제2차 금융위원회 의사록",
+      "2016. 1. 27.",
+      "금 융 위 원 회",
+      "2080658  / 2016-02-17 17:15  문서보안을 생활화 합시다."
+     ]
+    },
+    "제2차 금융위원회 의사록(홈).pdf": {
+     "source_pdf": "downloads/sanctions/2017-금융위-2차/minutes.pdf",
+     "source_sha256": "a73e2b6c8854f881aa5bf859cadbdc6d204768a7ad38cbb22ca2da159f070b4f",
+     "first_page_lines": [
+      "INSIDabcdef_:MS_0001MS_0001",
+      "INSIDabcdef_:MS_0001MS_0001",
+      "제2차 금융위원회 의사록",
+      "2017. 2. 8.",
+      "금 융 위 원 회",
+      "2081038  / 2017-04-04 11:01  문서보안을 생활화 합시다."
+     ]
+    }
+   },
+   "current_folder": "",
+   "expected": {
+    "제2차 금융위원회 의사록_홈.pdf": "2016-금융위-2차",
+    "제2차 금융위원회 의사록(홈).pdf": "2017-금융위-2차"
+   }
+  }
+ ]
+}
