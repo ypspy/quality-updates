@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-"""품질관리감리 2025 지적 문단 바로 아래에 F004 개선권고 이행사항을 붙인다.
+"""품질관리감리 연도 블록의 지적 문단 바로 아래에 F004 개선권고 이행사항을 붙인다.
 
-연도 블록을 다시 그리지 않는다. 첨부 JSON이 정한 자리의 ``p.fss-finding`` 뒤에만 넣는다.
+연도 블록을 다시 그리지 않는다. ``data/fss-review/f004-attach/manifest.json``에 있는 연도마다
+그 연도 첨부 JSON이 정한 자리의 ``p.fss-finding`` 뒤에만 넣는다. 지금은 2025만 있다.
 """
 
 from __future__ import annotations
@@ -17,7 +18,11 @@ from pathlib import Path
 import fss_review_cards
 
 ROOT = Path(__file__).resolve().parent.parent
-ATTACH_PATH = ROOT / "data" / "fss-review" / "f004-item-attach.json"
+ATTACH_DIR = ROOT / "data" / "fss-review" / "f004-attach"
+MANIFEST_PATH = ATTACH_DIR / "manifest.json"
+ALIASES_PATH = ATTACH_DIR / "aliases.json"
+ATTACH_PATH = ATTACH_DIR / "2025.json"
+_YEARS = range(2019, 2026)
 _LOG = logging.getLogger("mkdocs.plugins.fss_f004_attach")
 _DART_URL = re.compile(r"^https://dart\.fss\.or\.kr/dsaf001/main\.do\?rcpNo=\d{14}$")
 _RCEPT_NO = re.compile(r"\d{14}")
@@ -47,34 +52,117 @@ def _one_line(fragment: str) -> str:
     return fragment
 
 
-def _manifest_path(path: Path) -> Path:
-    name = path.name
-    if name.endswith(".json"):
-        return path.with_name(name[: -len(".json")] + ".manifest.json")
-    return path.with_name(name + ".manifest.json")
-
-
-def _verify_manifest(path: Path) -> None:
-    """파일 바이트 sha256과 길이가 옆의 manifest와 같은지 확인한다."""
-    if not path.is_file():
-        raise FileNotFoundError("F004 파일이 없습니다.")
-    manifest = _manifest_path(path)
+def _read_manifest(manifest: Path = MANIFEST_PATH) -> dict:
     if not manifest.is_file():
         raise FileNotFoundError("F004 manifest가 없습니다.")
     try:
         meta = json.loads(manifest.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
         raise ValueError("F004 manifest를 읽지 못했습니다.") from exc
-    if not isinstance(meta, dict):
-        raise ValueError("F004 manifest가 객체가 아닙니다.")
-    digest_value = meta.get("sha256")
-    size_value = meta.get("bytes")
+    if not isinstance(meta, dict) or meta.get("schema") != "f004-attach-manifest/1":
+        raise ValueError("F004 manifest 형식이 아닙니다.")
+    years = meta.get("years")
+    if not isinstance(years, dict) or not years:
+        raise ValueError("F004 manifest years가 비어 있습니다.")
+    for year, entry in years.items():
+        if not isinstance(year, str) or not year.isdigit() or int(year) not in _YEARS:
+            raise ValueError("F004 manifest 연도 형식이 아닙니다.")
+        if not isinstance(entry, dict) or entry.get("file") != f"{year}.json":
+            raise ValueError("F004 manifest 파일 이름이 연도와 다릅니다.")
+    return meta
+
+
+def _check_entry(path: Path, entry: object) -> None:
+    if not path.is_file():
+        raise FileNotFoundError("F004 파일이 없습니다.")
+    if not isinstance(entry, dict):
+        raise ValueError("F004 manifest 항목이 객체가 아닙니다.")
+    digest_value = entry.get("sha256")
+    size_value = entry.get("bytes")
     if not isinstance(digest_value, str) or type(size_value) is not int:
         raise ValueError("F004 manifest의 sha256 또는 bytes 형식이 아닙니다.")
     raw = path.read_bytes()
-    digest = hashlib.sha256(raw).hexdigest()
-    if digest != digest_value or len(raw) != size_value:
+    if hashlib.sha256(raw).hexdigest() != digest_value or len(raw) != size_value:
         raise ValueError("F004 sha256이 manifest와 다릅니다.")
+
+
+def _verify_manifest(path: Path) -> None:
+    """연도 파일 바이트 sha256과 길이가 manifest.json의 그 연도 항목과 같은지 확인한다."""
+    meta = _read_manifest(path.parent / "manifest.json")
+    entry = meta["years"].get(path.stem)
+    if entry is None:
+        raise ValueError("manifest에 없는 연도 파일입니다.")
+    _check_entry(path, entry)
+
+
+def manifest_years(manifest: Path | None = None) -> list[str]:
+    """manifest에 적힌 연도(오름차순). 읽지 못하면 2025만(strip 기본값용)."""
+    if manifest is None:
+        manifest = Path(ATTACH_DIR) / "manifest.json"
+    try:
+        return sorted(_read_manifest(Path(manifest))["years"])
+    except Exception:
+        return ["2025"]
+
+
+def load_aliases(path: Path | None = None) -> dict[tuple[str, int], str]:
+    """별칭표를 읽어 (다른 이름, 감리연도) → 화면 이름 사전을 돌려준다.
+
+    옆에 manifest.json이 있으면 그 ``aliases`` 항목의 sha256·bytes를 먼저 확인한다.
+    """
+    path = Path(ATTACH_DIR) / "aliases.json" if path is None else Path(path)
+    manifest = path.parent / "manifest.json"
+    if manifest.is_file() or path.parent.resolve() == Path(ATTACH_DIR).resolve():
+        _check_entry(path, _read_manifest(manifest).get("aliases"))
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError("별칭표를 읽지 못했습니다.") from exc
+    if not isinstance(data, dict) or data.get("schema") != "f004-attach-aliases/1":
+        raise ValueError("별칭표 형식이 아닙니다.")
+    entries = data.get("entries")
+    if not isinstance(entries, list):
+        raise ValueError("별칭표 entries가 목록이 아닙니다.")
+    table: dict[tuple[str, int], str] = {}
+    canon_years: set[tuple[str, int]] = set()
+    for entry in entries:
+        if not isinstance(entry, dict):
+            raise ValueError("별칭표 항목이 객체가 아닙니다.")
+        canonical = entry.get("canonical")
+        names = entry.get("aliases")
+        years = entry.get("years")
+        if not isinstance(canonical, str) or not canonical:
+            raise ValueError("별칭표 canonical이 없습니다.")
+        code = entry.get("corp_code")
+        if code is not None and (not isinstance(code, str) or re.fullmatch(r"\d{8}", code) is None):
+            raise ValueError("별칭표 corp_code 형식이 아닙니다.")
+        if not isinstance(names, list) or not names or not all(isinstance(n, str) and n for n in names):
+            raise ValueError("별칭표 aliases 형식이 아닙니다.")
+        if canonical in names or len(set(names)) != len(names):
+            raise ValueError("별칭표 aliases에 canonical이나 중복이 있습니다.")
+        if (
+            not isinstance(years, list)
+            or not years
+            or any(type(y) is not int or y not in _YEARS for y in years)
+            or years != sorted(set(years))
+        ):
+            raise ValueError("별칭표 years 형식이 아닙니다.")
+        for key in ("source", "decided_by"):
+            value = entry.get(key)
+            if not isinstance(value, str) or not value.strip():
+                raise ValueError(f"별칭표 {key}가 없습니다.")
+            if _BANNED in value:
+                raise ValueError("원문 필드 밖에 금지어가 있습니다.")
+        for year in years:
+            canon_years.add((canonical, year))
+            for name in names:
+                if (name, year) in table:
+                    raise ValueError("같은 연도에 한 이름이 두 법인을 가리킵니다.")
+                table[(name, year)] = canonical
+    for name, year in table:
+        if (name, year) in canon_years:
+            raise ValueError("별칭이 같은 연도의 다른 canonical과 겹칩니다.")
+    return table
 
 
 def _reject_dart_url(obj: object) -> None:
@@ -145,7 +233,10 @@ def _path_key(path: dict) -> tuple:
     return (bundle, section, group, gun, firm, index)
 
 
-def _validate(data: dict) -> None:
+def _validate(data: dict, aliases: dict | None = None) -> None:
+    year = data.get("year")
+    if not isinstance(year, str) or not year.isdigit() or int(year) not in _YEARS:
+        raise ValueError("year 형식이 아닙니다.")
     attachments = data.get("attachments")
     reasons = data.get("firm_reasons")
     rows = data.get("f004_rows")
@@ -164,8 +255,8 @@ def _validate(data: dict) -> None:
         raise ValueError("counts가 목록 길이와 다릅니다.")
     reason_panels = counts.get("firm_reason_panels")
     if reason_panels is not None:
-        if type(reason_panels) is not int or reason_panels != len(reasons):
-            raise ValueError("counts가 목록 길이와 다릅니다.")
+        if type(reason_panels) is not int or reason_panels < len(reasons):
+            raise ValueError("counts.firm_reason_panels가 사유 법인 수보다 작습니다.")
     if not isinstance(rows, dict):
         raise ValueError("f004_rows가 없습니다.")
     _reject_dart_url(data)
@@ -191,6 +282,9 @@ def _validate(data: dict) -> None:
             row_id = item.get("f004_row_id")
             if not isinstance(row_id, str) or row_id not in rows:
                 raise ValueError("f004_row_id가 f004_rows에 없습니다.")
+            row_firm = rows[row_id]["firm"]
+            if row_firm != path["firm"] and (aliases or {}).get((row_firm, int(year))) != path["firm"]:
+                raise ValueError("F004 법인 이름이 화면 이름과 다르고 별칭표에도 없습니다.")
             note = item.get("note")
             if note is not None and not isinstance(note, str):
                 raise ValueError("note 형식이 아닙니다.")
@@ -222,10 +316,15 @@ def _validate(data: dict) -> None:
             _require_rcept_pair(disclosure.get("rcept_no"), disclosure.get("dart_url"))
 
 
-def load_attach(path: Path = ATTACH_PATH) -> dict:
-    """manifest를 확인한 뒤 UTF-8 JSON을 읽고 부착 제약을 확인한다."""
-    path = Path(path)
-    if path.resolve() == Path(ATTACH_PATH).resolve():
+def load_attach(path: Path | None = None) -> dict:
+    """manifest를 확인한 뒤 UTF-8 JSON을 읽고 부착 제약을 확인한다.
+
+    기본은 ``ATTACH_DIR/2025.json``. 옆에 manifest.json이 있거나 ``ATTACH_DIR`` 안이면
+    manifest의 그 연도 항목과 sha256·bytes를 비교한다. 옆에 aliases.json이 있으면 별칭표로 쓴다.
+    """
+    path = Path(ATTACH_DIR) / "2025.json" if path is None else Path(path)
+    in_dir = path.parent.resolve() == Path(ATTACH_DIR).resolve()
+    if in_dir or (path.parent / "manifest.json").is_file():
         _verify_manifest(path)
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -233,8 +332,19 @@ def load_attach(path: Path = ATTACH_PATH) -> dict:
         raise ValueError("F004 JSON을 읽지 못했습니다.") from exc
     if not isinstance(data, dict):
         raise ValueError("F004 JSON이 객체가 아닙니다.")
-    _validate(data)
+    if (in_dir or (path.parent / "manifest.json").is_file()) and data.get("year") != path.stem:
+        raise ValueError("연도 파일 이름과 year가 다릅니다.")
+    aliases_path = path.parent / "aliases.json"
+    aliases = load_aliases(aliases_path) if in_dir or aliases_path.is_file() else {}
+    _validate(data, aliases)
     return data
+
+
+def load_all(directory: Path | None = None) -> dict[str, dict]:
+    """manifest의 모든 연도 파일을 읽는다. manifest를 읽지 못하면 오류."""
+    directory = Path(ATTACH_DIR) if directory is None else Path(directory)
+    years = sorted(_read_manifest(directory / "manifest.json")["years"])
+    return {year: load_attach(directory / f"{year}.json") for year in years}
 
 
 def _finding_plain(inner: str) -> str:
@@ -282,7 +392,7 @@ def _render_reason(reason: dict) -> str:
 
 
 def _iter_panels(block: str):
-    """2025 블록 안 ``div.fss-original``을 문서 순서대로 연다."""
+    """연도 블록 안 ``div.fss-original``을 문서 순서대로 연다."""
     for bundle_start, bundle_end in fss_review_cards._regions(block, '<div class="fss-bundle">'):
         bundle_html = block[bundle_start:bundle_end]
         bundle_match = _BUNDLE_NAME.search(bundle_html)
@@ -376,21 +486,22 @@ def _fill_panel(panel: str, indexed: dict[int, dict], reason: dict | None, rows:
     return _one_line("".join(parts)), resolved, skipped
 
 
-def _year_span(page: str) -> tuple[int, int]:
+def _year_span(page: str, year: str = "2025") -> tuple[int, int]:
     found: list[tuple[int, int]] = []
     for start, end in fss_review_cards._year_regions(page):
         head_end = page.find(">", start)
         if head_end < 0 or head_end > end:
             raise ValueError("감리연도 태그가 닫히지 않았습니다.")
-        if 'data-year="2025"' in page[start : head_end + 1]:
+        if f'data-year="{year}"' in page[start : head_end + 1]:
             found.append((start, end))
     if len(found) != 1:
-        raise ValueError("감리연도 2025 블록이 하나가 아닙니다.")
+        raise ValueError(f"감리연도 {year} 블록이 하나가 아닙니다.")
     return found[0]
 
 
 def _insert_attach(page: str, data: dict, *, strict: bool) -> str:
-    start, end = _year_span(page)
+    year = data["year"]
+    start, end = _year_span(page, year)
     block = page[start:end]
     by_key = _index_attachments(data)
     reasons = {reason["firm"]: reason for reason in data["firm_reasons"]}
@@ -413,7 +524,7 @@ def _insert_attach(page: str, data: dict, *, strict: bool) -> str:
             for index, att in by_key.get(key, {}).items()
             if id(att) not in seen
         }
-        # 사유 법인은 모든 2025 패널에 같은 사유 줄 전체를 단다 (사용자 결정 2026-11-15 9:14 AM CT).
+        # 사유 법인은 그 연도의 모든 패널에 같은 사유 줄 전체를 단다 (사용자 결정 2026-11-15 9:14 AM CT).
         reason = reasons.get(firm)
         updated, got, missed = _fill_panel(panel["html"], indexed, reason, rows)
         for att in got:
@@ -438,7 +549,7 @@ def _insert_attach(page: str, data: dict, *, strict: bool) -> str:
     ):
         raise ValueError("F004 출력에 줄바꿈이 있습니다.")
     summary = (
-        f"F004 부착: 자리 {len(resolved)}/{len(data['attachments'])}, "
+        f"F004 부착 {year}: 자리 {len(resolved)}/{len(data['attachments'])}, "
         f"이행사항 {sum(len(att['f004']) for att in resolved)}, "
         f"법인 사유 {len(reason_firms)}곳({reason_panels}칸), 건너뜀 {len(skipped)}"
     )
@@ -449,26 +560,29 @@ def _insert_attach(page: str, data: dict, *, strict: bool) -> str:
 
 
 def inject_f004_attach(page: str, data: dict | None = None, *, strict: bool | None = None) -> str:
-    """2025 연도 블록의 지적 문단 바로 뒤에 이행사항을 붙인다. 블록 밖은 그대로 둔다.
+    """연도 블록의 지적 문단 바로 뒤에 이행사항을 붙인다. 블록 밖은 그대로 둔다.
 
-    파일을 직접 읽는 빌드 경로는 실패 대신 입력 페이지를 그대로 돌려준다.
-    ``data``를 넘기면 기본은 엄격하다. ``strict=False``면 못 찾은 자리만 건너뛴다.
+    ``data``가 없으면 manifest의 모든 연도를 읽고, 실패하면 입력 페이지를 그대로 돌려준다.
+    ``data``(한 연도)를 넘기면 기본은 엄격하다. ``strict=False``면 못 찾은 자리만 건너뛴다.
     """
     original = page
     if data is None:
         try:
-            data = load_attach(ATTACH_PATH)
+            datasets = load_all()
         except Exception as exc:
             _LOG.info("F004 부착을 하지 않습니다: %s: %s", type(exc).__name__, exc)
             return original
         try:
-            return _insert_attach(strip_f004_attach(page), data, strict=False)
+            out = strip_f004_attach(page, list(datasets))
+            for year in sorted(datasets):
+                out = _insert_attach(out, datasets[year], strict=False)
+            return out
         except Exception as exc:
             _LOG.info("F004 부착을 하지 않습니다: %s: %s", type(exc).__name__, exc)
             return original
     if strict is None:
         strict = True
-    return _insert_attach(strip_f004_attach(page), data, strict=strict)
+    return _insert_attach(strip_f004_attach(page, [data["year"]]), data, strict=strict)
 
 
 def _merge_spans(spans: list[tuple[int, int]]) -> list[tuple[int, int]]:
@@ -484,15 +598,17 @@ def _merge_spans(spans: list[tuple[int, int]]) -> list[tuple[int, int]]:
     return [(start, end) for start, end in merged]
 
 
-def strip_f004_attach(page: str) -> str:
-    """2025 블록 안에 붙인 이행사항과 법인 사유만 지운다."""
-    try:
-        start, end = _year_span(page)
-    except ValueError:
-        return page
-    block = page[start:end]
-    spans = list(fss_review_cards._regions(block, '<div class="fss-f004-attach"'))
-    spans.extend((match.start(), match.end()) for match in _REASON_P.finditer(block))
-    for rel_start, rel_end in reversed(_merge_spans(spans)):
-        block = block[:rel_start] + block[rel_end:]
-    return page[:start] + block + page[end:]
+def strip_f004_attach(page: str, years: list[str] | None = None) -> str:
+    """부착 연도 블록 안에 붙인 이행사항과 법인 사유만 지운다. 다른 연도는 그대로 둔다."""
+    for year in years if years is not None else manifest_years():
+        try:
+            start, end = _year_span(page, year)
+        except ValueError:
+            continue
+        block = page[start:end]
+        spans = list(fss_review_cards._regions(block, '<div class="fss-f004-attach"'))
+        spans.extend((match.start(), match.end()) for match in _REASON_P.finditer(block))
+        for rel_start, rel_end in reversed(_merge_spans(spans)):
+            block = block[:rel_start] + block[rel_end:]
+        page = page[:start] + block + page[end:]
+    return page

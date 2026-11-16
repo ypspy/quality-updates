@@ -2,7 +2,7 @@
 """F004 부착 결과를 빌드된 감리 페이지에서 센다.
 
 ``mkdocs build --strict`` 뒤 ``site/fss-review/index.html``의 5절 값,
-2019~2024 블록 sha, 첨부 JSON·manifest sha가 하나라도 다르면 0이 아닌 코드로 끝난다.
+2019~2024 블록 sha, 연도 첨부 JSON·manifest·별칭표 sha가 하나라도 다르면 0이 아닌 코드로 끝난다.
 """
 
 from __future__ import annotations
@@ -18,13 +18,21 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 
-from fss_f004_attach import ATTACH_PATH, inject_f004_attach, load_attach
+from fss_f004_attach import (
+    ALIASES_PATH,
+    ATTACH_PATH,
+    MANIFEST_PATH,
+    inject_f004_attach,
+    load_aliases,
+    load_attach,
+)
 from fss_review_cards import YEAR_2025_PATH, load_year_2025, render_year_2025_html
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE_HTML = ROOT / "site" / "fss-review" / "index.html"
-ATTACH_SHA = "241b0edcd6eae831ef38a8d5a742be3f1bb09672cc1560fd93a54ddccc80e682"
-ATTACH_BYTES = 246423
+# data/fss-review/f004-attach/2025.json (PR-A 이전 뒤. 옛 f004-item-attach.json 241b0edc…e682에서 메타만 정리)
+ATTACH_SHA = "d5f7242862f26f2b9f4e5671dd2763e39079b84eeb029da151851eaec8512b4b"
+ATTACH_BYTES = 246815
 # scripts/tests/test_fss_review_cards.py YEAR_SHA (main 94f4882).
 # 2025 블록은 F004가 붙으므로 여기서 비교하지 않는다.
 PRIOR_YEAR_SHA = {
@@ -58,10 +66,6 @@ SEARCH_INDEX = ROOT / "site" / "search" / "search_index.json"
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
-def _manifest_path(path: Path) -> Path:
-    return path.with_name("f004-item-attach.manifest.json")
 
 
 def _prior_year_hashes(html: str) -> dict[str, str]:
@@ -186,14 +190,17 @@ def build_report(html: str, search_index: Path = SEARCH_INDEX) -> dict:
     year_sha = _sha256(YEAR_2025_PATH)
     attach_raw = ATTACH_PATH.read_bytes()
     attach_sha = hashlib.sha256(attach_raw).hexdigest()
-    manifest_file = _manifest_path(ATTACH_PATH)
-    manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
+    manifest_raw = MANIFEST_PATH.read_bytes()
+    manifest = json.loads(manifest_raw.decode("utf-8"))
+    entry = (manifest.get("years") or {}).get("2025") or {}
     if attach_sha != ATTACH_SHA or len(attach_raw) != ATTACH_BYTES:
-        errors.append(f"f004-item-attach.json sha {attach_sha} bytes {len(attach_raw)}")
-    if manifest.get("sha256") != ATTACH_SHA or manifest.get("bytes") != ATTACH_BYTES:
-        errors.append("manifest sha 또는 bytes가 첨부 파일과 다릅니다.")
-    if manifest.get("file") != "f004-item-attach.json":
-        errors.append("manifest file 이름이 다릅니다.")
+        errors.append(f"f004-attach/2025.json sha {attach_sha} bytes {len(attach_raw)}")
+    if entry.get("sha256") != ATTACH_SHA or entry.get("bytes") != ATTACH_BYTES:
+        errors.append("manifest 2025 sha 또는 bytes가 첨부 파일과 다릅니다.")
+    if entry.get("file") != "2025.json":
+        errors.append("manifest 2025 file 이름이 다릅니다.")
+    aliases_sha = _sha256(ALIASES_PATH)
+    alias_count = len(load_aliases(ALIASES_PATH))
     loaded = load_attach(ATTACH_PATH)
     count_source = loaded["counts"]
     expected_counts = {
@@ -222,10 +229,13 @@ def build_report(html: str, search_index: Path = SEARCH_INDEX) -> dict:
             f"2025 패널 화면 {page_total}(사유 법인 {page_reason})"
             f" / 기대 {source_total}(사유 법인 {source_reason})"
         )
-    # 사유 줄이 있는 법인 수는 counts.firm_reason_panels(= firm_reasons 수, load_attach가 확인)와 같아야 한다.
+    # 사유 줄이 있는 법인 수는 counts.firm_reason_lines(= firm_reasons 수, load_attach가 확인)와 같아야 한다.
+    # 사유 줄이 붙은 패널 수는 counts.firm_reason_panels(2025는 136)와 같아야 한다.
     present, wrong = _reason_content(html, loaded["firm_reasons"])
-    if present != count_source["firm_reason_panels"]:
-        errors.append(f"사유 줄이 있는 사유 법인 화면 {present} / 기대 {count_source['firm_reason_panels']}")
+    if present != count_source["firm_reason_lines"]:
+        errors.append(f"사유 줄이 있는 사유 법인 화면 {present} / 기대 {count_source['firm_reason_lines']}")
+    if page_reason != count_source["firm_reason_panels"]:
+        errors.append(f"사유 법인 패널 화면 {page_reason} / 기대 {count_source['firm_reason_panels']}")
     if wrong:
         errors.append(f"사유 줄 글·링크가 데이터와 다른 사유 법인 {wrong}곳")
     if year_sha not in RENDERED:
@@ -275,7 +285,10 @@ def build_report(html: str, search_index: Path = SEARCH_INDEX) -> dict:
         "year_2025_sha256": year_sha,
         "attach_sha256": attach_sha,
         "attach_bytes": len(attach_raw),
-        "manifest_sha256": manifest.get("sha256"),
+        "manifest_sha256": hashlib.sha256(manifest_raw).hexdigest(),
+        "manifest_2025_sha256": entry.get("sha256"),
+        "aliases_sha256": aliases_sha,
+        "alias_names": alias_count,
         "rendered_bytes": rendered_size,
         "rendered_sha256": rendered_sha,
         "counts": counts,
@@ -290,9 +303,12 @@ def render_text(report: dict) -> str:
     counts = report["counts"]
     lines = [
         f"year-2025.json sha256: {report['year_2025_sha256']}",
-        f"f004-item-attach.json sha256: {report['attach_sha256']}",
-        f"f004-item-attach.json bytes: {report['attach_bytes']}",
-        f"manifest sha256: {report['manifest_sha256']}",
+        f"f004-attach/2025.json sha256: {report['attach_sha256']}",
+        f"f004-attach/2025.json bytes: {report['attach_bytes']}",
+        f"manifest.json sha256: {report['manifest_sha256']}",
+        f"manifest 2025 sha256: {report['manifest_2025_sha256']}",
+        f"aliases.json sha256: {report['aliases_sha256']}",
+        f"alias names: {report['alias_names']}",
         f"rendered bytes: {report['rendered_bytes']}",
         f"rendered sha256: {report['rendered_sha256']}",
         f"fss-f004-attach: {counts['attach']}",

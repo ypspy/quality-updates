@@ -29,9 +29,13 @@ from tests.test_fss_review_cards import _Page  # noqa: E402
 import check_f004_attach_render as check_mod  # noqa: E402
 import fss_f004_attach  # noqa: E402
 
-# sha256sum data/fss-review/f004-item-attach.json
-ATTACH_SHA = "241b0edcd6eae831ef38a8d5a742be3f1bb09672cc1560fd93a54ddccc80e682"
-ATTACH_BYTES = 246423
+# sha256sum data/fss-review/f004-attach/2025.json (PR-A 이전 뒤. 옛 f004-item-attach.json 241b0edc…e682)
+ATTACH_SHA = "d5f7242862f26f2b9f4e5671dd2763e39079b84eeb029da151851eaec8512b4b"
+ATTACH_BYTES = 246815
+ALIASES_SHA = "8f4f0f9d3a40e6eca7e67777f4a0705e2cdf27be43a7f3bfb51726b9df1e6e25"
+ALIASES_BYTES = 703
+MANIFEST_SHA = "fe361a75986961108dce86b0c1d30b75e724f02f32b6c938581198e80a161acd"
+MANIFEST_BYTES = 334
 # render_year_2025_html(load_year_2025())에 부착한 2025 블록.
 RENDERED = {
     "1c6df2500ba918054bd4b22b3a983af9ef3bdecdedc54908d4a54a04e1ea72e4": (
@@ -39,7 +43,7 @@ RENDERED = {
         "c250624d21907095667438d0326c1e7765464575da6655d3a119db3dc7e774cc",
     ),
 }
-_SUMMARY = "F004 부착: 자리 143/143, 이행사항 151, 법인 사유 41곳(136칸), 건너뜀 0"
+_SUMMARY = "F004 부착 2025: 자리 143/143, 이행사항 151, 법인 사유 41곳(136칸), 건너뜀 0"
 _REASON = 'class="fss-f004-reason"'
 
 
@@ -83,8 +87,17 @@ def test_attach_file_matches_sha_and_manifest():
     raw = ATTACH_PATH.read_bytes()
     assert len(raw) == ATTACH_BYTES
     assert hashlib.sha256(raw).hexdigest() == ATTACH_SHA
-    manifest = json.loads((ATTACH_PATH.parent / "f004-item-attach.manifest.json").read_text(encoding="utf-8"))
-    assert manifest == {"file": "f004-item-attach.json", "sha256": ATTACH_SHA, "bytes": ATTACH_BYTES}
+    aliases = (ATTACH_PATH.parent / "aliases.json").read_bytes()
+    assert (len(aliases), hashlib.sha256(aliases).hexdigest()) == (ALIASES_BYTES, ALIASES_SHA)
+    manifest_raw = (ATTACH_PATH.parent / "manifest.json").read_bytes()
+    assert (len(manifest_raw), hashlib.sha256(manifest_raw).hexdigest()) == (MANIFEST_BYTES, MANIFEST_SHA)
+    assert json.loads(manifest_raw.decode("utf-8")) == {
+        "schema": "f004-attach-manifest/1",
+        "years": {"2025": {"file": "2025.json", "sha256": ATTACH_SHA, "bytes": ATTACH_BYTES}},
+        "aliases": {"file": "aliases.json", "sha256": ALIASES_SHA, "bytes": ALIASES_BYTES},
+    }
+    assert sorted(p.name for p in ATTACH_PATH.parent.iterdir()) == ["2025.json", "aliases.json", "manifest.json"]
+    assert not (ATTACH_PATH.parent.parent / "f004-item-attach.json").exists()
 
 
 def test_load_attach_counts_match_the_locked_table():
@@ -115,7 +128,7 @@ def test_load_attach_counts_match_the_locked_table():
     assert counts["attach_slots"] == 143
     assert counts["attach_blocks"] == 151
     assert counts["firm_reason_lines"] == 41
-    assert counts["firm_reason_panels"] == 41
+    assert counts["firm_reason_panels"] == 136
     assert counts["attached_f004_rows"] == 143
     assert counts["unattached_f004_rows"] == 0
     assert counts["unattached_qu_findings"] == 9
@@ -166,39 +179,29 @@ def test_changed_paragraph_is_strict_or_skipped(caplog):
 def test_bad_file_keeps_the_materialized_page(tmp_path, monkeypatch, caplog):
     source = PAGE.read_text(encoding="utf-8")
     expected = materialize_review_markdown(source)
-    monkeypatch.setattr(fss_f004_attach, "ATTACH_PATH", Path("/tmp/f004-item-attach-missing.json"))
+    monkeypatch.setattr(fss_f004_attach, "ATTACH_DIR", tmp_path / "missing")
     assert _hook(source, caplog) == expected
     assert "F004 부착을 하지 않습니다" in caplog.text
 
     caplog.clear()
     raw = bytearray(ATTACH_PATH.read_bytes())
     raw[20] ^= 0x01
-    path = tmp_path / "f004-item-attach.json"
-    path.write_bytes(raw)
-    (tmp_path / "f004-item-attach.manifest.json").write_text(
-        json.dumps({"file": "f004-item-attach.json", "sha256": ATTACH_SHA, "bytes": ATTACH_BYTES}),
-        encoding="utf-8",
-    )
-    monkeypatch.setattr(fss_f004_attach, "ATTACH_PATH", path)
+    flipped = tmp_path / "flipped"
+    flipped.mkdir()
+    (flipped / "2025.json").write_bytes(raw)
+    (flipped / "aliases.json").write_bytes((ATTACH_PATH.parent / "aliases.json").read_bytes())
+    (flipped / "manifest.json").write_bytes((ATTACH_PATH.parent / "manifest.json").read_bytes())
+    monkeypatch.setattr(fss_f004_attach, "ATTACH_DIR", flipped)
     assert _hook(source, caplog) == expected
     assert "sha256" in caplog.text
 
     caplog.clear()
     payload = b"{"
-    broken = tmp_path / "broken" / "f004-item-attach.json"
+    broken = tmp_path / "broken" / "2025.json"
     broken.parent.mkdir()
     broken.write_bytes(payload)
-    (broken.parent / "f004-item-attach.manifest.json").write_text(
-        json.dumps(
-            {
-                "file": "f004-item-attach.json",
-                "sha256": hashlib.sha256(payload).hexdigest(),
-                "bytes": len(payload),
-            }
-        ),
-        encoding="utf-8",
-    )
-    monkeypatch.setattr(fss_f004_attach, "ATTACH_PATH", broken)
+    _write_manifest(broken.parent, {"2025": payload})
+    monkeypatch.setattr(fss_f004_attach, "ATTACH_DIR", broken.parent)
     assert _hook(source, caplog) == expected
     assert "F004 부착을 하지 않습니다" in caplog.text
 
@@ -385,23 +388,34 @@ _INTERNAL_IDS = (
 
 
 def _copy_attach() -> dict:
-    return json.loads(json.dumps(load_attach()))
+    # ATTACH_DIR를 tmp로 바꾼 뒤에도 저장소의 2025 파일을 읽는다.
+    return json.loads(json.dumps(load_attach(ATTACH_PATH)))
 
 
-def _dump_attach(directory: Path, data: dict) -> Path:
+def _entry(payload: bytes, name: str) -> dict:
+    return {"file": name, "sha256": hashlib.sha256(payload).hexdigest(), "bytes": len(payload)}
+
+
+def _write_manifest(directory: Path, years: dict[str, bytes], aliases: bytes | None = None) -> None:
+    """연도 파일 바이트와 별칭표로 새 배치의 manifest.json(과 aliases.json)을 쓴다."""
+    if aliases is None:
+        aliases = (ATTACH_PATH.parent / "aliases.json").read_bytes()
+    (directory / "aliases.json").write_bytes(aliases)
+    manifest = {
+        "schema": "f004-attach-manifest/1",
+        "years": {year: _entry(payload, f"{year}.json") for year, payload in years.items()},
+        "aliases": _entry(aliases, "aliases.json"),
+    }
+    (directory / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False), encoding="utf-8")
+
+
+def _dump_attach(directory: Path, data: dict, aliases: dict | None = None) -> Path:
     payload = json.dumps(data, ensure_ascii=False).encode("utf-8")
     directory.mkdir(parents=True, exist_ok=True)
-    path = directory / "f004-item-attach.json"
+    path = directory / f"{data.get('year', '2025')}.json"
     path.write_bytes(payload)
-    manifest = {
-        "file": "f004-item-attach.json",
-        "sha256": hashlib.sha256(payload).hexdigest(),
-        "bytes": len(payload),
-    }
-    (directory / "f004-item-attach.manifest.json").write_text(
-        json.dumps(manifest, ensure_ascii=False),
-        encoding="utf-8",
-    )
+    alias_bytes = None if aliases is None else json.dumps(aliases, ensure_ascii=False).encode("utf-8")
+    _write_manifest(directory, {path.stem: payload}, alias_bytes)
     return path
 
 
@@ -445,7 +459,7 @@ def test_counts_mismatch_rejects_and_build_falls_back(tmp_path, monkeypatch, cap
         path = _dump_attach(tmp_path / name, data)
         with pytest.raises(ValueError):
             load_attach(path)
-        monkeypatch.setattr(fss_f004_attach, "ATTACH_PATH", path)
+        monkeypatch.setattr(fss_f004_attach, "ATTACH_DIR", path.parent)
         assert _hook(source, caplog) == expected
         caplog.clear()
 
@@ -490,7 +504,7 @@ def test_f004_row_shape_rejects_and_build_falls_back(tmp_path, monkeypatch, capl
         path = _dump_attach(tmp_path / str(index), data)
         with pytest.raises(ValueError):
             load_attach(path)
-        monkeypatch.setattr(fss_f004_attach, "ATTACH_PATH", path)
+        monkeypatch.setattr(fss_f004_attach, "ATTACH_DIR", path.parent)
         assert _hook(source, caplog) == expected
         caplog.clear()
 
@@ -615,12 +629,12 @@ def test_consistent_new_counts_still_attach(tmp_path, monkeypatch, caplog):
     data["counts"]["attach_slots"] = 142
     data["counts"]["firm_reason_lines"] = 40
     data["counts"]["attach_blocks"] = 151 - len(removed["f004"])
-    data["counts"]["firm_reason_panels"] = 40
+    data["counts"]["firm_reason_panels"] = 132
     path = _dump_attach(tmp_path, data)
     assert len(load_attach(path)["attachments"]) == 142
     source = PAGE.read_text(encoding="utf-8")
     plain = materialize_review_markdown(source)
-    monkeypatch.setattr(fss_f004_attach, "ATTACH_PATH", path)
+    monkeypatch.setattr(fss_f004_attach, "ATTACH_DIR", path.parent)
     built = _hook(source, caplog)
     assert built != plain
     assert built.count('class="fss-f004-attach"') == 151 - len(removed["f004"])
@@ -757,13 +771,14 @@ def test_short_action_marks_stay_verbatim():
 def test_block_count_mismatch_rejects_and_build_falls_back(tmp_path, monkeypatch, caplog):
     source = PAGE.read_text(encoding="utf-8")
     expected = materialize_review_markdown(source)
-    for name, key in (("blocks", "attach_blocks"), ("panels", "firm_reason_panels")):
+    for name, key, delta in (("blocks", "attach_blocks", 1), ("panels", "firm_reason_panels", -96)):
         data = _copy_attach()
-        data["counts"][key] = data["counts"][key] + 1
+        # 사유 칸 수(136)는 사유 법인 수(41)보다 작으면 안 된다: 136 - 96 = 40.
+        data["counts"][key] = data["counts"][key] + delta
         path = _dump_attach(tmp_path / name, data)
         with pytest.raises(ValueError):
             load_attach(path)
-        monkeypatch.setattr(fss_f004_attach, "ATTACH_PATH", path)
+        monkeypatch.setattr(fss_f004_attach, "ATTACH_DIR", path.parent)
         assert _hook(source, caplog) == expected
         caplog.clear()
 
@@ -788,6 +803,209 @@ def test_malformed_attachment_raises_value_error_before_block_sum(tmp_path, monk
     null_item["attachments"][0] = None
     with pytest.raises(ValueError):
         load_attach(_dump_attach(tmp_path / "item", null_item))
-    monkeypatch.setattr(fss_f004_attach, "ATTACH_PATH", missing_path)
+    monkeypatch.setattr(fss_f004_attach, "ATTACH_DIR", missing_path.parent)
     assert _hook(source, caplog) == expected
     assert "ValueError" in caplog.text
+
+
+# --- PR-A: 연도별 배치, manifest, 별칭표 ---
+
+
+def _alias_table(entries: list) -> dict:
+    return {"schema": "f004-attach-aliases/1", "entries": entries}
+
+
+def _alias(**over) -> dict:
+    entry = {
+        "canonical": "선일회계법인",
+        "corp_code": None,
+        "aliases": ["선일회계법인(구명)"],
+        "years": [2025],
+        "source": "시험",
+        "decided_by": "시험",
+    }
+    entry.update(over)
+    return entry
+
+
+def test_manifest_shape_errors_fall_back_and_strict_raises(tmp_path, monkeypatch, caplog):
+    source = PAGE.read_text(encoding="utf-8")
+    expected = materialize_review_markdown(source)
+    payload = ATTACH_PATH.read_bytes()
+    good = {
+        "schema": "f004-attach-manifest/1",
+        "years": {"2025": _entry(payload, "2025.json")},
+        "aliases": _entry((ATTACH_PATH.parent / "aliases.json").read_bytes(), "aliases.json"),
+    }
+    bad_cases = {
+        "schema": dict(good, schema="other"),
+        "year_key": dict(good, years={"25": _entry(payload, "2025.json")}),
+        "year_range": dict(good, years={"2030": _entry(payload, "2030.json")}),
+        "file_name": dict(good, years={"2025": _entry(payload, "2024.json")}),
+        "empty": dict(good, years={}),
+        "sha": dict(good, years={"2025": dict(_entry(payload, "2025.json"), sha256="0" * 64)}),
+        "bytes": dict(good, years={"2025": dict(_entry(payload, "2025.json"), bytes=1)}),
+    }
+    for name, manifest in bad_cases.items():
+        directory = tmp_path / name
+        directory.mkdir()
+        (directory / "2025.json").write_bytes(payload)
+        (directory / "aliases.json").write_bytes((ATTACH_PATH.parent / "aliases.json").read_bytes())
+        (directory / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+        with pytest.raises(ValueError):
+            load_attach(directory / "2025.json")
+        monkeypatch.setattr(fss_f004_attach, "ATTACH_DIR", directory)
+        assert _hook(source, caplog) == expected, name
+        assert "F004 부착을 하지 않습니다" in caplog.text
+        caplog.clear()
+
+
+def test_year_field_must_match_the_file_name(tmp_path):
+    data = _copy_attach()
+    path = _dump_attach(tmp_path, data)
+    renamed = path.with_name("2024.json")
+    path.rename(renamed)
+    _write_manifest(tmp_path, {"2024": renamed.read_bytes()})
+    with pytest.raises(ValueError):
+        load_attach(renamed)
+    bad = _copy_attach()
+    bad["year"] = "2018"
+    with pytest.raises(ValueError):
+        load_attach(_dump_attach(tmp_path / "range", bad))
+
+
+@pytest.mark.parametrize(
+    "entries",
+    [
+        [_alias(), _alias(canonical="다른회계법인")],  # 같은 해 한 이름이 두 법인
+        [_alias(), _alias(canonical="선일회계법인(구명)", aliases=["또다른"])],  # 별칭이 다른 canonical
+        [_alias(aliases=["선일회계법인"])],  # canonical이 자기 별칭
+        [_alias(aliases=["가", "가"])],  # 별칭 중복
+        [_alias(aliases=[])],
+        [_alias(years=[2018])],
+        [_alias(years=[2025, 2021])],
+        [_alias(years=[2025, 2025])],
+        [_alias(years=["2025"])],
+        [_alias(source="")],
+        [_alias(decided_by="  ")],
+        [_alias(decided_by="민트 " + "미" + "이행")],
+        [_alias(corp_code="123")],
+        [_alias(canonical="")],
+        ["x"],
+    ],
+)
+def test_alias_table_rejects_bad_entries(tmp_path, entries):
+    path = tmp_path / "aliases.json"
+    path.write_text(json.dumps(_alias_table(entries), ensure_ascii=False), encoding="utf-8")
+    with pytest.raises(ValueError):
+        fss_f004_attach.load_aliases(path)
+
+
+def test_alias_table_accepts_a_valid_entry_and_the_repo_table_is_empty(tmp_path):
+    path = tmp_path / "aliases.json"
+    path.write_text(
+        json.dumps(_alias_table([_alias(corp_code="00123456", years=[2024, 2025])]), ensure_ascii=False),
+        encoding="utf-8",
+    )
+    table = fss_f004_attach.load_aliases(path)
+    assert table == {("선일회계법인(구명)", 2024): "선일회계법인", ("선일회계법인(구명)", 2025): "선일회계법인"}
+    assert fss_f004_attach.load_aliases() == {}
+
+
+def test_alias_file_sha_is_checked_against_the_manifest(tmp_path):
+    data = _copy_attach()
+    path = _dump_attach(tmp_path, data)
+    (tmp_path / "aliases.json").write_text(json.dumps(_alias_table([])), encoding="utf-8")
+    with pytest.raises(ValueError):
+        load_attach(path)
+
+
+def test_firm_name_must_match_or_resolve_through_the_alias_table(tmp_path):
+    data = _copy_attach()
+    att = data["attachments"][0]
+    row_id = att["f004"][0]["f004_row_id"]
+    firm = att["path"]["firm"]
+    data["f004_rows"][row_id]["firm"] = firm + "(구명)"
+    with pytest.raises(ValueError, match="별칭표"):
+        load_attach(_dump_attach(tmp_path / "no-alias", data))
+    wrong_year = _alias_table([_alias(canonical=firm, aliases=[firm + "(구명)"], years=[2024])])
+    with pytest.raises(ValueError, match="별칭표"):
+        load_attach(_dump_attach(tmp_path / "wrong-year", data, wrong_year))
+    table = _alias_table([_alias(canonical=firm, aliases=[firm + "(구명)"], years=[2025])])
+    loaded = load_attach(_dump_attach(tmp_path / "alias", data, table))
+    assert loaded["f004_rows"][row_id]["firm"] == firm + "(구명)"
+    page = _year_block()
+    assert inject_f004_attach(page, loaded) == _injected()
+
+
+def test_strip_only_touches_years_in_the_manifest():
+    page = _with_2024_lookalikes(materialize_review_markdown(PAGE.read_text(encoding="utf-8")))
+    assert fss_f004_attach.manifest_years() == ["2025"]
+    assert strip_f004_attach(page) == strip_f004_attach(page, ["2025"])
+    assert _LOOKALIKE_ATTACH in strip_f004_attach(page)
+    stripped_2024 = strip_f004_attach(page, ["2024"])
+    assert _LOOKALIKE_ATTACH not in stripped_2024
+    assert _LOOKALIKE_REASON not in stripped_2024
+
+
+def _one_2021_attachment(page: str) -> dict:
+    """2021 블록의 첫 지적 문단에 F004 한 행을 붙이는 합성 데이터."""
+    start, end = fss_f004_attach._year_span(page, "2021")
+    panel = next(fss_f004_attach._iter_panels(page[start:end]))
+    firm = html_lib.unescape(fss_f004_attach._ORIGINAL_NAME.search(panel["html"]).group(1))
+    first = fss_f004_attach._FINDING.search(panel["html"])
+    base = _copy_attach()
+    row_id, row = next(iter(base["f004_rows"].items()))
+    row = dict(row, firm=firm)
+    return {
+        "schema": "f004-attach-year/1",
+        "year": "2021",
+        "counts": {"attach_slots": 1, "firm_reason_lines": 0, "attach_blocks": 1},
+        "f004_rows": {row_id: row},
+        "attachments": [
+            {
+                "finding_id": "2021/test",
+                "path": {
+                    "bundle": panel["bundle"],
+                    "section": panel["section"],
+                    "group": panel["group"],
+                    "gun": panel["gun"],
+                    "firm": firm,
+                    "index": 0,
+                },
+                "text_sha256": fss_f004_attach._finding_sha(first.group(1)),
+                "f004": [{"f004_row_id": row_id}],
+            }
+        ],
+        "firm_reasons": [],
+    }
+
+
+def test_a_2021_dataset_attaches_only_inside_the_2021_block(tmp_path):
+    page = materialize_review_markdown(PAGE.read_text(encoding="utf-8"))
+    data = _one_2021_attachment(page)
+    path = _dump_attach(tmp_path, data)
+    loaded = load_attach(path)
+    built = inject_f004_attach(page, loaded)
+    start, end = fss_f004_attach._year_span(built, "2021")
+    assert built[start:end].count('class="fss-f004-attach"') == 1
+    assert built.count('class="fss-f004-attach"') == 1
+    assert strip_f004_attach(built, ["2021"]) == page
+    assert built[:start] == page[:start]
+
+
+def test_build_reads_every_manifest_year(tmp_path, monkeypatch, caplog):
+    source = PAGE.read_text(encoding="utf-8")
+    page = materialize_review_markdown(source)
+    data_2021 = _one_2021_attachment(page)
+    p2021 = json.dumps(data_2021, ensure_ascii=False).encode("utf-8")
+    p2025 = ATTACH_PATH.read_bytes()
+    (tmp_path / "2021.json").write_bytes(p2021)
+    (tmp_path / "2025.json").write_bytes(p2025)
+    _write_manifest(tmp_path, {"2021": p2021, "2025": p2025})
+    monkeypatch.setattr(fss_f004_attach, "ATTACH_DIR", tmp_path)
+    built = _hook(source, caplog)
+    assert built.count('class="fss-f004-attach"') == 152
+    assert "F004 부착 2021: 자리 1/1" in caplog.text
+    assert _SUMMARY in caplog.text
+    assert strip_f004_attach(built, ["2021", "2025"]) == page
