@@ -705,6 +705,7 @@ _SESSION_DATE_RE = re.compile(
     r"일\s*시[^\n]{0,40}?(\d{4})\s*년\s*(\d{1,2})\s*월\s*(\d{1,2})\s*일"
 )
 _FRONT_LINES = 60
+_PAREN_LINE_RE = re.compile(r"\(.*\)")
 
 
 def _iso_date(year: str, month: str, day: str) -> str | None:
@@ -753,6 +754,9 @@ def meeting_date_from_minutes_text(text: str) -> str:
         for follow in lines[index + 1 : index + 8]:
             if not follow or _PUBLICATION_RE.search(follow):
                 continue
+            # 제목 밑 (의결안건 제148호 관련) 같은 괄호 한 줄은 날짜가 아니므로 건너뛴다.
+            if _PAREN_LINE_RE.fullmatch(follow):
+                continue
             matched = _STANDALONE_DOTTED_RE.fullmatch(follow)
             if matched:
                 parsed = _iso_date(*matched.groups()[:3])
@@ -779,6 +783,131 @@ def read_minutes_pdf_text(path: Path) -> str:
         return reader.pages[0].extract_text() or ""
     except Exception:
         return ""
+
+
+def minutes_identity_from_text(text: str) -> dict | None:
+    """의사록 첫 쪽에서 읽은 회의일·위원회·종류·회차. 회의일이 없으면 None.
+
+    위원회·종류·회차는 의사록 제목 줄(「제N차 임시 금융위원회 의사록」 등)에서만 읽고,
+    제목에 없으면 None으로 둔다. 연도는 회의일의 연도다.
+    """
+    day = meeting_date_from_minutes_text(text)
+    if day == "없음":
+        return None
+    committee: str | None = None
+    kind: str | None = None
+    number: int | None = None
+    for line in text.splitlines()[:_FRONT_LINES]:
+        cleaned = _clean_minutes_line(line)
+        if "의사록" not in cleaned:
+            continue
+        head = re.sub(r"\s+", "", cleaned).split("의사록", 1)[0]
+        matched = re.search(r"제(\d+)차", head)
+        if matched:
+            number = int(matched.group(1))
+        if re.search(r"증권선물|증선위", head):
+            committee = "증선위"
+        elif "금융위" in head:
+            committee = "금융위"
+        if "서면" in head:
+            kind = "서면"
+        elif "임시" in head:
+            kind = "임시"
+        elif matched:
+            kind = "정기"
+        break
+    return {"date": day, "year": int(day[:4]), "committee": committee, "kind": kind, "number": number}
+
+
+def _first_filename_year(name: str) -> int | None:
+    for matched in _FOUR_YEAR.finditer(name):
+        return _year_token(matched)
+    for matched in _TWO_YEAR.finditer(name):
+        return 2000 + _year_token(matched)
+    return None
+
+
+def minutes_key_from_filename(
+    name: str,
+    post_key: tuple[int, str, str, int],
+) -> tuple[int, str, str, int] | None:
+    """파일명에 연도가 있으면 그 연도의 회의 키. 연도가 없으면 None.
+
+    파일명에 제N차가 있으면 회차·종류(임시·서면, 없으면 정기)도 파일명에서 읽고,
+    없으면 글의 회차·종류를 쓴다. 위원회도 파일명에 없으면 글을 따른다.
+    """
+    year = _first_filename_year(name)
+    if year is None:
+        return None
+    compact = re.sub(r"\s+", "", name)
+    committee = post_key[1]
+    if re.search(r"증권선물|증선위", compact):
+        committee = "증선위"
+    elif "금융위" in compact:
+        committee = "금융위"
+    matched = re.search(r"제(\d+)차", compact)
+    if matched is None:
+        return year, committee, post_key[2], post_key[3]
+    if "서면" in compact:
+        kind = "서면"
+    elif "임시" in compact:
+        kind = "임시"
+    else:
+        kind = "정기"
+    return year, committee, kind, int(matched.group(1))
+
+
+def is_multi_year_bundle(post_key: tuple[int, str, str, int], names: list[str]) -> bool:
+    """여러 해의 같은 회차 의사록을 한 글에 묶었는지.
+
+    의사록 파일명 중 하나라도 글 연도와 다른 연도가 있거나, 추가분이 아닌 의사록 PDF가 둘 이상이면 묶음이다.
+    """
+    minutes = [name for name in names if "의사록" in name]
+    if any(filename_year_conflict(name, post_key[0]) for name in minutes):
+        return True
+    primaries = [
+        name for name in minutes if name.lower().endswith(".pdf") and "추가" not in name
+    ]
+    return len(primaries) > 1
+
+
+def resolve_minutes_key(
+    post_key: tuple[int, str, str, int],
+    filename: str,
+    text: str,
+    *,
+    bundle: bool,
+) -> tuple[tuple[int, str, str, int] | None, str, str]:
+    """의사록 파일 하나의 실제 회의 키와 근거.
+
+    1) PDF 본문 첫 쪽의 회의일(근거 pdf-text), 2) 파일명의 연도(filename),
+    3) 묶음이 아닌 글에서만 글의 키(post). 날짜를 못 읽은 여러 해 묶음은 (None, "review", ...)이다.
+    회의일을 읽었으면 연도는 회의일, 위원회·종류·회차는 제목 → 파일명 → 글 순으로 채운다.
+    """
+    name_key = minutes_key_from_filename(filename, post_key)
+    identity = minutes_identity_from_text(text) if text else None
+    if identity is not None:
+        fallback = name_key or post_key
+        key = (
+            identity["year"],
+            identity["committee"] or fallback[1],
+            identity["kind"] or fallback[2],
+            identity["number"] or fallback[3],
+        )
+        return key, "pdf-text", identity["date"]
+    if name_key is not None:
+        return name_key, "filename", filename
+    if not bundle:
+        return post_key, "post", ""
+    return None, "review", "undated-multi-year-bundle"
+
+
+def require_pdf_text_reader() -> None:
+    """백필이 의사록 회의일을 읽으려면 pypdf가 있어야 한다. 없으면 조용히 글 날짜로 떨어지지 않게 멈춘다."""
+    import importlib.util
+
+    if importlib.util.find_spec("pypdf") is None:
+        raise RuntimeError("pypdf가 없어 의사록 회의일을 읽을 수 없습니다. requirements.txt를 설치하세요.")
 
 
 def resolve_meeting_day(
@@ -1615,19 +1744,99 @@ def _download_or_record(
     return True
 
 
-def _choose_minutes(
-    title: str,
-    key: tuple[int, str, str, int],
-    minutes: list[tuple[str, str]],
-    report: list[str],
-) -> list[tuple[str, str]]:
-    if is_additional_minutes(title):
-        return minutes
-    primaries = minutes
-    if len(primaries) > 1:
-        report.append(f"ambiguous {key[0]} {key[1]} {key[2]} {key[3]}")
-        return []
-    return primaries
+def _file_sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _staging_name(url: str) -> str:
+    digest = hashlib.sha256(url.encode()).hexdigest()[:16]
+    return f"_staging/{digest}.pdf"
+
+
+def _existing_minutes_match(
+    existing: Path,
+    provisional: tuple[int, str, str, int],
+    read_text,
+) -> bool:
+    """이미 있는 의사록이 그 폴더의 회의가 맞는지. 회의일을 못 읽는 파일은 예전처럼 그대로 둔다."""
+    text = read_text(existing)
+    if minutes_identity_from_text(text) is None:
+        return True
+    real, _, _ = resolve_minutes_key(provisional, existing.name, text, bundle=False)
+    return real == provisional
+
+
+def _pending_row(
+    *,
+    board: str,
+    name: str,
+    url: str,
+    page_url: str,
+    post_id: str,
+    post_key: tuple[int, str, str, int],
+    bundle: bool,
+) -> dict:
+    """대기 행. 파일명에 연도가 있으면 그 회의 폴더를, 연도 없는 묶음 파일은 빈 값(검토)을 적는다."""
+    name_key = minutes_key_from_filename(name, post_key)
+    if name_key is not None:
+        meeting_folder, source = sanction_folder(name_key), "filename"
+    elif bundle:
+        meeting_folder, source = "", "review"
+    else:
+        meeting_folder, source = sanction_folder(post_key), "post"
+    return {
+        "board": board,
+        "bundle": bundle,
+        "filename": name,
+        "key_source": source,
+        "meeting_folder": meeting_folder,
+        "page_url": page_url,
+        "post_id": post_id,
+        "reason": "not-pdf",
+        "ts": _now_iso(),
+        "url": url,
+    }
+
+
+def _pdf_stems(names: list[str]) -> set[str]:
+    return {name.rsplit(".", 1)[0] for name in names if name.lower().endswith(".pdf")}
+
+
+def _queue_for_review(
+    staging: Path,
+    sanctions: Path,
+    *,
+    board: str,
+    post_id: str,
+    page_url: str,
+    url: str,
+    name: str,
+    reason: str,
+    evidence: str,
+    candidate: str,
+) -> Path:
+    """회의를 정할 수 없거나 같은 회의에 다른 파일이 이미 있으면 _review/에 두고 검토 목록에 적는다."""
+    digest = _file_sha256(staging)
+    target = sanctions / "_review" / (post_id or "unknown") / f"{digest[:12]}-{_safe_filename(name)}"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    os.replace(staging, target)
+    record_failure(
+        sanctions / "_review-queue.jsonl",
+        {
+            "board": board,
+            "candidate_folder": candidate,
+            "evidence": evidence,
+            "filename": name,
+            "page_url": page_url,
+            "path": str(target.relative_to(sanctions)),
+            "post_id": post_id,
+            "reason": reason,
+            "sha256": digest,
+            "ts": _now_iso(),
+            "url": url,
+        },
+    )
+    return target
 
 
 def run_backfill(
@@ -1640,8 +1849,14 @@ def run_backfill(
     dry_run: bool = False,
     resume: bool = False,
     retry_failed: bool = False,
+    read_text=None,
 ) -> dict:
     """목록 게시일 구간의 금융위·증선위 회차를 받는다. 분기 마크다운은 고치지 않는다.
+
+    의사록 PDF는 글 게시일이 아니라 PDF 첫 쪽의 회의일로 폴더를 정한다(없으면 파일명 연도,
+    그다음 글). 여러 해 의사록을 묶은 옛 글에서 회의일을 못 읽은 파일은 글 날짜로 두지 않고
+    _review/와 _review-queue.jsonl로 보낸다. 같은 회의 폴더에 같은 파일이 있으면 받지 않은 것으로,
+    다른 파일이 있으면 검토로 보낸다.
 
     비공개기간 경과 안건은 건너뛴다. PDF가 아닌 의사록은 대기 목록에만 적고
     회차 폴더에 두지 않는다. 남길 PDF가 없으면 폴더를 만들지 않는다.
@@ -1651,6 +1866,10 @@ def run_backfill(
     state_path = downloads / "sanctions" / "_backfill-state.json"
     failure_path = downloads / "sanctions" / "_failed-downloads.jsonl"
     pending_path = downloads / "sanctions" / "_pending-conversion.jsonl"
+    if read_text is None:
+        if not dry_run:
+            require_pdf_text_reader()
+        read_text = read_minutes_pdf_text
     state = load_backfill_state(state_path)
     done = _done_ids(state) if resume else set()
     blocked = forbidden_urls(failure_path) if resume and not retry_failed else set()
@@ -1658,6 +1877,7 @@ def run_backfill(
     folders = 0
     files = 0
     skipped = 0
+    reviews = 0
     import requests
 
     fetch_errors = (FetchFailed, requests.exceptions.RequestException)
@@ -1721,77 +1941,86 @@ def run_backfill(
                         url=page_url,
                     )
                     continue
+                attachments = detail_attachments(detail)
+                bundle = is_multi_year_bundle(key, [name for name, _ in attachments])
                 minutes: list[tuple[str, str]] = []
                 zips: list[tuple[str, str]] = []
                 pendings: list[tuple[str, str]] = []
-                for name, url in detail_attachments(detail):
-                    if filename_year_conflict(name, key[0]):
+                for name, url in attachments:
+                    lowered = name.lower()
+                    is_minutes_pdf = "의사록" in name and lowered.endswith(".pdf")
+                    pending = is_pending_minutes(name)
+                    # 의사록은 연도가 달라도 버리지 않는다. 회의일·파일명 연도로 제 폴더를 찾는다.
+                    if not (is_minutes_pdf or pending) and filename_year_conflict(name, key[0]):
                         report.append(f"year-mismatch {name}")
                         continue
-                    lowered = name.lower()
-                    if "의사록" in name and lowered.endswith(".pdf"):
+                    if is_minutes_pdf:
                         minutes.append((name, url))
-                    elif is_pending_minutes(name):
+                    elif pending:
                         pendings.append((name, url))
                     elif lowered.endswith(".zip"):
                         zips.append((name, url))
-                chosen = _choose_minutes(title, key, minutes, report)
-                if not chosen and not zips:
+                pdf_stems = _pdf_stems([name for name, _ in minutes])
+                if bundle:
+                    # 묶음 글의 HWP는 같은 이름의 PDF가 없으면 다른 회의일 수 있으니 모두 대기에 적는다.
+                    pending_rows = [(name, url) for name, url in pendings if name.rsplit(".", 1)[0] not in pdf_stems]
+                else:
+                    pending_rows = pendings if not minutes else []
+
+                def write_pendings() -> None:
+                    for name, url in pending_rows:
+                        record_pending(
+                            pending_path,
+                            _pending_row(
+                                board=label,
+                                name=name,
+                                url=url,
+                                page_url=page_url,
+                                post_id=post_id,
+                                post_key=key,
+                                bundle=bundle,
+                            ),
+                        )
+
+                if not minutes and not zips:
                     skipped += 1
                     if not dry_run:
-                        for name, url in pendings:
-                            record_pending(
-                                pending_path,
-                                {
-                                    "board": label,
-                                    "filename": name,
-                                    "page_url": page_url,
-                                    "post_id": post_id,
-                                    "reason": "not-pdf",
-                                    "ts": _now_iso(),
-                                    "url": url,
-                                },
-                            )
+                        write_pendings()
                         _mark_done(state, post_id, page, label, page_url)
                         state["pages"][label] = last_page
                         save_backfill_state(state_path, state)
                         done.add(post_id)
                     continue
                 folders += 1
-                files += len(chosen) + len(zips)
+                files += len(minutes) + len(zips)
                 if dry_run:
+                    if bundle:
+                        report.append(f"bundle {label} {post_id} 의사록 PDF {len(minutes)}개는 회의일을 읽어 나눈다")
                     continue
-                folder = downloads / "sanctions" / sanction_folder(key)
                 failed = False
                 wrote = False
-                if not chosen:
-                    for name, url in pendings:
-                        record_pending(
-                            pending_path,
-                            {
-                                "board": label,
-                                "filename": name,
-                                "page_url": page_url,
-                                "post_id": post_id,
-                                "reason": "not-pdf",
-                                "ts": _now_iso(),
-                                "url": url,
-                            },
-                        )
-                for name, url in chosen:
+                write_pendings()
+                sanctions = downloads / "sanctions"
+                placed_keys: list[tuple[int, str, str, int]] = []
+                for name, url in minutes:
                     filename = _minutes_filename(url, key, title)
-                    dest = folder / filename
-                    if dest.is_file():
-                        wrote = True
-                        clear_failure(failure_path, url)
-                        continue
+                    name_key = minutes_key_from_filename(name, key)
+                    provisional = name_key or (None if bundle else key)
+                    if provisional is not None:
+                        existing = sanctions / sanction_folder(provisional) / filename
+                        if existing.is_file() and _existing_minutes_match(existing, provisional, read_text):
+                            wrote = True
+                            placed_keys.append(provisional)
+                            clear_failure(failure_path, url)
+                            continue
                     if url in blocked:
                         failed = True
                         continue
-                    dest.parent.mkdir(parents=True, exist_ok=True)
-                    if _download_or_record(
+                    staging = sanctions / _staging_name(url)
+                    staging.parent.mkdir(parents=True, exist_ok=True)
+                    if not _download_or_record(
                         download,
-                        dest,
+                        staging,
                         board=label,
                         post_id=post_id,
                         page_url=page_url,
@@ -1799,9 +2028,50 @@ def run_backfill(
                         filename=filename,
                         failures=failure_path,
                     ):
-                        wrote = True
-                    else:
                         failed = True
+                        continue
+                    try:
+                        real, source, evidence = resolve_minutes_key(key, name, read_text(staging), bundle=bundle)
+                        review = dict(board=label, post_id=post_id, page_url=page_url, url=url, name=name)
+                        if real is None:
+                            _queue_for_review(
+                                staging, sanctions, reason=evidence, evidence="", candidate="", **review
+                            )
+                            report.append(f"review {label} {post_id} {name}: {evidence}")
+                            reviews += 1
+                            wrote = True
+                            continue
+                        dest = sanctions / sanction_folder(real) / filename
+                        if dest.is_file():
+                            if _file_sha256(dest) == _file_sha256(staging):
+                                report.append(f"duplicate {name} -> {sanction_folder(real)}/{filename}")
+                                placed_keys.append(real)
+                            else:
+                                _queue_for_review(
+                                    staging,
+                                    sanctions,
+                                    reason="collision",
+                                    evidence=f"{source}:{evidence}",
+                                    candidate=sanction_folder(real),
+                                    **review,
+                                )
+                                report.append(f"review {label} {post_id} {name}: collision {sanction_folder(real)}")
+                                reviews += 1
+                            wrote = True
+                            continue
+                        dest.parent.mkdir(parents=True, exist_ok=True)
+                        os.replace(staging, dest)
+                        placed_keys.append(real)
+                        wrote = True
+                        if real != key:
+                            report.append(f"minutes {source} {name} -> {sanction_folder(real)} ({evidence or 'post'})")
+                    finally:
+                        if staging.is_file():
+                            staging.unlink()
+                zip_key = key
+                if not bundle and len(set(placed_keys)) == 1:
+                    zip_key = placed_keys[0]
+                folder = sanctions / sanction_folder(zip_key)
                 for name, url in zips:
                     if url in blocked:
                         failed = True
@@ -1821,7 +2091,7 @@ def run_backfill(
                         failed = True
                         continue
                     try:
-                        extracted, zip_whale, notes = _extract_kept(temporary.read_bytes(), key[0])
+                        extracted, zip_whale, notes = _extract_kept(temporary.read_bytes(), zip_key[0])
                     except zipfile.BadZipFile:
                         report.append(f"zip-invalid {key[0]} {key[1]} {key[2]} {key[3]}")
                         extracted, zip_whale, notes = [], [], []
@@ -1851,7 +2121,7 @@ def run_backfill(
         if last_page and not dry_run:
             state["pages"][label] = last_page
             save_backfill_state(state_path, state)
-    return {"folders": folders, "files": files, "skipped": skipped, "report": report}
+    return {"folders": folders, "files": files, "skipped": skipped, "reviews": reviews, "report": report}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -1917,6 +2187,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"만들 폴더: {summary['folders']}")
         print(f"받을 파일: {summary['files']}")
         print(f"건너뛸 글: {summary['skipped']}")
+        print(f"검토 대기: {summary['reviews']}")
         for line in summary["report"]:
             print(line)
         return 0

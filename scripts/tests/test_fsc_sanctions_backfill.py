@@ -1015,3 +1015,6 @@ def test_readme_is_tracked_and_originals_stay_ignored():
     assert ignored("downloads/sanctions/_backfill-state.json")
     assert ignored("downloads/sanctions/_pending-conversion.jsonl")
     assert ignored("downloads/sanctions/2008-증선위-14차/minutes.pdf")
+    assert ignored("downloads/sanctions/_review-queue.jsonl")
+    assert ignored("downloads/sanctions/_review/27605/abc-의사록.pdf")
+    assert ignored("downloads/sanctions/_staging/abc.pdf")
