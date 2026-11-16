@@ -158,7 +158,7 @@ def test_quiet_week(tmp_path):
     args = _baseline(tmp_path)
     code, result = cli.run(args, Fetcher({"01": LIST, "02": EMPTY}), now=NEXT_MON, sleeper=lambda s: None)
     assert code == cli.EXIT_OK
-    assert cli.summary_line(result) == "total=3 new=0 changed=0 missing=0 status=ok"
+    assert cli.summary_line(result) == "total=3 new=0 changed=0 missing=0 status=ok notify=no"
     assert result["missed_week"] is False
 
 
@@ -296,6 +296,52 @@ def test_missed_week_and_over_probe_flags(tmp_path):
     assert result["over_probe"] is True
 
 
+def _run_log(args) -> list[dict]:
+    path = args.dest / "_weekly" / "runs.jsonl"
+    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+
+
+def test_quiet_week_is_logged_locally_without_notify(tmp_path):
+    args = _baseline(tmp_path)
+    _, result = cli.run(args, Fetcher({"01": LIST, "02": EMPTY}), now=NEXT_MON, sleeper=lambda s: None)
+    assert result["notify"] is False and result["exit_code"] == cli.EXIT_OK
+    log = _run_log(args)
+    assert [entry["mode"] for entry in log] == ["init", "watch"]
+    assert [entry["notify"] for entry in log] == [False, False]
+    assert log[-1]["summary"].endswith("status=ok notify=no")
+    assert log[-1]["date_ct"] == "2026-11-30T07:30:00-06:00"
+
+
+def test_new_posts_warnings_and_failures_notify(tmp_path):
+    args = _baseline(tmp_path)
+    page = _with_rows(LIST, [_extra_row(220001, 253, "새회계법인")], 4)
+    _, new = cli.run(args, Fetcher({"01": page, "02": EMPTY}), now=NEXT_MON, sleeper=lambda s: None)
+    assert new["notify"] is True
+    error = fss_b0000291.FetchError("HTTP 500", http_status=500, attempts=5, url="u")
+    code, failed = cli.run(args, Fetcher({"01": error, "02": EMPTY}), now=NEXT_MON, sleeper=lambda s: None)
+    assert code == cli.EXIT_FETCH and failed["notify"] is True
+    log = _run_log(args)
+    assert [entry["status"] for entry in log] == ["ok", "new", "fetch-error"]
+    assert log[-1]["error"] == "HTTP 500" and log[-1]["exit_code"] == cli.EXIT_FETCH
+    mismatch = page.replace("전체 <em>4</em>건", "전체 <em>5</em>건")
+    _, warn = cli.run(args, Fetcher({"01": mismatch, "02": EMPTY}), now=NEXT_MON, sleeper=lambda s: None)
+    assert warn["status"] == "warn" and warn["notify"] is True
+
+
+def test_missed_week_alone_notifies(tmp_path):
+    args = _baseline(tmp_path)
+    later = datetime(2026, 12, 14, 7, 30, tzinfo=CT)
+    code, result = cli.run(args, Fetcher({"01": LIST, "02": EMPTY}), now=later, sleeper=lambda s: None)
+    assert code == cli.EXIT_OK and result["missed_week"] is True and result["notify"] is True
+
+
+def test_dry_run_does_not_append_the_run_log(tmp_path):
+    args = _args(tmp_path, "--dry-run")
+    _, result = cli.run(args, Fetcher({"01": LIST, "02": EMPTY}), now=MON, sleeper=lambda s: None)
+    assert "notify" in result
+    assert not (args.dest / "_weekly" / "runs.jsonl").exists()
+
+
 def test_history_keeps_twelve_runs(tmp_path):
     args = _baseline(tmp_path)
     for week in range(14):
@@ -372,7 +418,7 @@ def test_main_prints_summary_and_writes_report(tmp_path, capsys):
     )
     assert code == 0
     lines = capsys.readouterr().out.strip().splitlines()
-    assert lines[-1] == "total=3 new=0 changed=0 missing=0 status=ok"
+    assert lines[-1] == "total=3 new=0 changed=0 missing=0 status=ok notify=no"
     assert json.loads(report.read_text(encoding="utf-8"))["mode"] == "init"
 
 

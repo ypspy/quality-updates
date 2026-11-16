@@ -3,6 +3,10 @@
 
 종료 코드: 0 정상·새 글 없음, 10 새 글 또는 변경, 20 경고(사라짐·총건수 감소·건수 불일치),
 2 접속 실패, 3 403·차단, 4 목록 구문 분석 실패, 5 상태 파일 오류.
+
+알림(D19): 결과의 `notify`는 새 글·변경, 경고(사라짐·총건수 감소·건수 불일치·8일 넘은 공백),
+실패일 때만 참이다. 조용한 주는 `notify=false`이고 로컬 기록만 남는다.
+dry-run이 아니면 실행마다(실패 포함) `<dest>/_weekly/runs.jsonl`에 한 줄을 덧붙인다.
 """
 from __future__ import annotations
 
@@ -83,6 +87,41 @@ def _read_tab(tab: str, fetch_text, *, max_pages: int, pause) -> tuple[list, int
 
 
 def run(args, fetch_text, *, now=None, sleeper=time.sleep) -> tuple[int, dict]:
+    code, result = _run(args, fetch_text, now=now, sleeper=sleeper)
+    result["exit_code"] = code
+    result["notify"] = needs_notify(code, result)
+    if not args.dry_run:
+        append_run_log(args.dest / "_weekly" / "runs.jsonl", result)
+    return code, result
+
+
+def needs_notify(code: int, result: dict) -> bool:
+    """D19: 새 글·변경·경고·실패만 알린다. 조용한 주와 기준선 성공은 로컬 기록만."""
+    if code in (EXIT_FETCH, EXIT_FORBIDDEN, EXIT_PARSE, EXIT_STATE, EXIT_WARN):
+        return True
+    if result.get("missed_week") or result.get("warnings"):
+        return True
+    return code == EXIT_NEW
+
+
+def append_run_log(path: Path, result: dict) -> None:
+    """실행 한 줄을 JSON Lines로 덧붙인다(로컬 전용, git 밖)."""
+    entry = {
+        "date_ct": result.get("date_ct"),
+        "mode": result.get("mode"),
+        "status": result.get("status"),
+        "exit_code": result.get("exit_code"),
+        "notify": result.get("notify"),
+        "summary": summary_line(result),
+    }
+    if result.get("error"):
+        entry["error"] = result["error"]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8", newline="\n") as handle:
+        handle.write(json.dumps(entry, ensure_ascii=False, sort_keys=True) + "\n")
+
+
+def _run(args, fetch_text, *, now=None, sleeper=time.sleep) -> tuple[int, dict]:
     stamp = _now_ct(now)
     now_ct = stamp.isoformat(timespec="seconds")
     day = stamp.strftime("%Y-%m-%d")
@@ -163,7 +202,11 @@ def summary_line(result: dict) -> str:
     new = sum(len(item["new"]) for item in tabs)
     changed = sum(len(item["changed"]) for item in tabs)
     missing = sum(len(item["missing"]) for item in tabs)
-    return f"total={total} new={new} changed={changed} missing={missing} status={result.get('status')}"
+    notify = "yes" if result.get("notify") else "no"
+    return (
+        f"total={total} new={new} changed={changed} missing={missing} "
+        f"status={result.get('status')} notify={notify}"
+    )
 
 
 def main(argv=None, *, fetch_text=None, now=None, sleeper=time.sleep) -> int:
