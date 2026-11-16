@@ -19,15 +19,19 @@ from fss_review_cards import (  # noqa: E402
     PAGE,
     YEAR_2025_MARK,
     YEAR_2025_PATH,
+    YEAR_FILES,
     _inherit_severity,
     arrange_by_year,
     audit_review_html,
     collapse_document,
     commit_parked_year_2025,
+    commit_parked_years,
     load_year_2025,
     materialize_review_markdown,
+    parse_year_html,
     place_labels,
     render_year_2025_html,
+    render_year_html,
     repair_severity_gap,
 )
 from mkdocs_fss_review_year import on_page_markdown  # noqa: E402
@@ -465,4 +469,80 @@ def test_commit_parked_year_writes_nothing_when_render_mismatches(tmp_path, monk
     with pytest.raises(ValueError, match="보존할 수 없습니다"):
         commit_parked_year_2025(block, "\n")
     assert json_path.read_text(encoding="utf-8") == "sentinel-json"
+    assert page_path.read_bytes() == b"sentinel-page"
+
+
+YEAR_2021_JSON_SHA = "54a36602c3abe8513683f050eb7cf178e433ec1e5ea438e58eb5ef1c59be5a07"
+YEAR_2021_HTML_SHA = "84243017636e7447a266889531042e26f163cb3b2c17afb2b7658a7cd5b8d566"
+YEAR_2021_MARK = '<!-- fss-review-year data-year="2021" -->'
+
+
+def test_year_2021_file_renders_the_hidden_block():
+    raw = YEAR_FILES["2021"].read_bytes()
+    assert len(raw) == 121484
+    assert hashlib.sha256(raw).hexdigest() == YEAR_2021_JSON_SHA
+    data = json.loads(raw)
+    rendered = render_year_html(data)
+    encoded = rendered.encode("utf-8")
+    assert len(encoded) == 94121
+    assert hashlib.sha256(encoded).hexdigest() == YEAR_2021_HTML_SHA
+    parsed = parse_year_html(rendered, "2021")
+    assert parsed == data
+    assert list(parsed.keys()) == ["year", "hidden", "title", "bundles"]
+
+    source = PAGE.read_text(encoding="utf-8")
+    assert source.count(YEAR_2021_MARK) == 1
+    assert source.count('<div class="fss-year" data-year="2021"') == 0
+    page = _review_page()
+    assert page.count('<div class="fss-year" data-year="2021"') == 1
+    assert YEAR_2021_MARK not in page
+    assert rendered in page
+    div = BeautifulSoup(page, "html.parser").select_one('div.fss-year[data-year="2021"]')
+    assert div is not None and div.has_attr("hidden")
+
+
+def test_commit_parked_years_parks_both_years_or_writes_nothing(tmp_path, monkeypatch):
+    firm = {
+        "name": "법인A",
+        "findings": [_finding("문장입니다", severity="일부미흡", badge=True)],
+    }
+    data_2025 = _year_with(_bundle("등록", [firm]))
+    data_2021 = {
+        "year": "2021",
+        "hidden": True,
+        "title": "2021년",
+        "bundles": [_bundle("등록", [firm])],
+    }
+    text = render_year_html(data_2025) + render_year_html(data_2021)
+    path_2025 = tmp_path / "year-2025.json"
+    path_2021 = tmp_path / "year-2021.json"
+    page_path = tmp_path / "index.md"
+    monkeypatch.setattr(fss_review_cards, "YEAR_2025_PATH", path_2025)
+    monkeypatch.setattr(fss_review_cards, "YEAR_FILES", {"2025": path_2025, "2021": path_2021})
+    monkeypatch.setattr(fss_review_cards, "PAGE", page_path)
+
+    commit_parked_years(text, "\n")
+    assert json.loads(path_2025.read_text(encoding="utf-8")) == data_2025
+    assert json.loads(path_2021.read_text(encoding="utf-8")) == data_2021
+    written = page_path.read_text(encoding="utf-8")
+    assert written.count(YEAR_2025_MARK) == 1
+    assert written.count(YEAR_2021_MARK) == 1
+    assert '<div class="fss-year"' not in written
+
+    path_2025.write_text("sentinel-2025", encoding="utf-8")
+    path_2021.write_text("sentinel-2021", encoding="utf-8")
+    page_path.write_bytes(b"sentinel-page")
+    real_render = fss_review_cards.render_year_html
+
+    def break_2021(data):
+        rendered = real_render(data)
+        if data.get("year") == "2021":
+            return rendered + "x"
+        return rendered
+
+    monkeypatch.setattr(fss_review_cards, "render_year_html", break_2021)
+    with pytest.raises(ValueError, match="보존할 수 없습니다"):
+        commit_parked_years(text, "\n")
+    assert path_2025.read_text(encoding="utf-8") == "sentinel-2025"
+    assert path_2021.read_text(encoding="utf-8") == "sentinel-2021"
     assert page_path.read_bytes() == b"sentinel-page"

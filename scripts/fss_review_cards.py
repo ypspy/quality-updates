@@ -20,8 +20,18 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PAGE = ROOT / "docs" / "fss-review" / "index.md"
-YEAR_2025_PATH = ROOT / "data" / "fss-review" / "year-2025.json"
-YEAR_2025_MARK = '<!-- fss-review-year data-year="2025" -->'
+YEAR_FILES = {
+    "2025": ROOT / "data" / "fss-review" / "year-2025.json",
+    "2021": ROOT / "data" / "fss-review" / "year-2021.json",
+}
+YEAR_2025_PATH = YEAR_FILES["2025"]
+
+
+def year_mark(year: str) -> str:
+    return f'<!-- fss-review-year data-year="{year}" -->'
+
+
+YEAR_2025_MARK = year_mark("2025")
 
 BOILERPLATE = "같은 규칙으로 묶은 지적입니다."
 
@@ -890,20 +900,36 @@ def _inherit_severity(data: dict) -> None:
             finding["severity"] = last
 
 
-def parse_year_2025_html(year_html: str) -> dict:
-    """감리연도 2025 블록을 데이터로 읽는다. 문장과 뱃지 위치는 그대로 둔다."""
+def parse_year_html(year_html: str, year: str) -> dict:
+    """감리연도 블록을 데이터로 읽는다. 문장과 뱃지 위치는 그대로 둔다."""
+    end = year_html.find(">")
+    if end < 0:
+        raise ValueError("div 태그가 닫히지 않았습니다.")
+    open_tag = year_html[: end + 1]
+    expected = f'<div class="fss-year" data-year="{year}"'
+    if not open_tag.startswith(expected) or not open_tag.endswith(">"):
+        raise ValueError(f"예상한 표식이 없습니다: {expected}>")
+    hidden = " hidden" in open_tag
     cursor = _Cursor(year_html)
-    cursor.take('<div class="fss-year" data-year="2025"><h2>')
+    cursor.take(open_tag + "<h2>")
     title = cursor.until("</h2>")
     bundles = []
     while cursor.start('<div class="fss-bundle">'):
         bundles.append(_parse_bundle(cursor))
     cursor.take("</div>")
     if cursor.i != len(year_html):
-        raise ValueError("2025 블록 뒤에 남은 HTML이 있습니다.")
-    data = {"year": "2025", "title": title, "bundles": bundles}
+        raise ValueError(f"{year} 블록 뒤에 남은 HTML이 있습니다.")
+    if hidden:
+        data = {"year": year, "hidden": True, "title": title, "bundles": bundles}
+    else:
+        data = {"year": year, "title": title, "bundles": bundles}
     _inherit_severity(data)
     return data
+
+
+def parse_year_2025_html(year_html: str) -> dict:
+    """감리연도 2025 블록을 데이터로 읽는다. 문장과 뱃지 위치는 그대로 둔다."""
+    return parse_year_html(year_html, "2025")
 
 
 def iter_year_findings(data: dict):
@@ -951,10 +977,11 @@ def _render_block(block: dict) -> str:
     )
 
 
-def render_year_2025_html(data: dict) -> str:
-    """데이터 파일을 발행 페이지의 2025 연도 블록으로 다시 만든다."""
+def render_year_html(data: dict) -> str:
+    """데이터 파일을 발행 페이지의 연도 블록으로 다시 만든다."""
+    hidden = " hidden" if data.get("hidden") is True else ""
     parts = [
-        f'<div class="fss-year" data-year="{_esc_attr(data["year"])}">'
+        f'<div class="fss-year" data-year="{_esc_attr(data["year"])}"{hidden}>'
         f'<h2>{_esc_text(data["title"])}</h2>'
     ]
     for bundle in data["bundles"]:
@@ -981,57 +1008,109 @@ def render_year_2025_html(data: dict) -> str:
     return "".join(parts)
 
 
+def render_year_2025_html(data: dict) -> str:
+    """데이터 파일을 발행 페이지의 2025 연도 블록으로 다시 만든다."""
+    return render_year_html(data)
+
+
+def _year_path(year: str) -> Path:
+    # 2025 쓰기는 YEAR_2025_PATH 이름을 따른다.
+    if year == "2025":
+        return YEAR_2025_PATH
+    return YEAR_FILES[year]
+
+
+def load_year(year: str) -> dict:
+    return json.loads(_year_path(year).read_text(encoding="utf-8"))
+
+
 def load_year_2025() -> dict:
-    return json.loads(YEAR_2025_PATH.read_text(encoding="utf-8"))
+    return load_year("2025")
 
 
-def _year_2025_payload(data: dict) -> str:
+def _year_payload(data: dict) -> str:
     return json.dumps(data, ensure_ascii=False, indent=2) + "\n"
 
 
-def _write_year_2025_payload(payload: str) -> None:
-    YEAR_2025_PATH.parent.mkdir(parents=True, exist_ok=True)
-    YEAR_2025_PATH.write_text(payload, encoding="utf-8")
+def _write_year_payload(year: str, payload: str) -> None:
+    path = _year_path(year)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(payload, encoding="utf-8")
 
 
 def materialize_review_markdown(text: str) -> str:
-    """2025 훅을 데이터에서 렌더한 연도 블록으로 바꾼다. 훅이 없으면 그대로 둔다."""
-    if YEAR_2025_MARK not in text:
-        return text
-    if text.count(YEAR_2025_MARK) != 1:
-        raise ValueError("감리연도 2025 훅이 하나가 아닙니다.")
-    return text.replace(YEAR_2025_MARK, render_year_2025_html(load_year_2025()), 1)
+    """연도 훅을 데이터에서 렌더한 블록으로 바꾼다. 훅이 없으면 그 연도는 건너뛴다."""
+    for year in YEAR_FILES:
+        mark = year_mark(year)
+        count = text.count(mark)
+        if count == 0:
+            continue
+        if count != 1:
+            raise ValueError(f"감리연도 {year} 훅이 하나가 아닙니다.")
+        text = text.replace(mark, render_year_html(load_year(year)), 1)
+    return text
 
 
-def _year_2025_span(text: str) -> tuple[int, int]:
+def _year_span(text: str, year: str) -> tuple[int, int] | None:
     found: list[tuple[int, int]] = []
     for start, end in _year_regions(text):
         head = text[start : text.find(">", start) + 1]
-        if 'data-year="2025"' in head:
+        if f'data-year="{year}"' in head:
             found.append((start, end))
+    if not found:
+        return None
     if len(found) != 1:
-        raise ValueError("감리연도 2025 블록이 하나가 아닙니다.")
+        raise ValueError(f"감리연도 {year} 블록이 하나가 아닙니다.")
     return found[0]
+
+
+def _render_parsed_year(year: str, data: dict) -> str:
+    if year == "2025":
+        return render_year_2025_html(data)
+    return render_year_html(data)
+
+
+def park_years(text: str) -> tuple[str, dict[str, str]]:
+    """표에 있는 연도의 JSON과 훅 페이지를 메모리에서 만든다. 렌더가 원문과 다르면 예외를 낸다."""
+    parked: list[tuple[int, int, str, str]] = []
+    for year in YEAR_FILES:
+        span = _year_span(text, year)
+        if span is None:
+            continue
+        start, end = span
+        block = text[start:end]
+        data = parse_year_html(block, year)
+        if _render_parsed_year(year, data) != block:
+            raise ValueError(f"감리연도 {year} 블록을 같은 HTML로 보존할 수 없습니다.")
+        parked.append((start, end, year, _year_payload(data)))
+    page = text
+    payloads: dict[str, str] = {}
+    for start, end, year, payload in sorted(parked, key=lambda item: item[0], reverse=True):
+        page = page[:start] + year_mark(year) + page[end:]
+        payloads[year] = payload
+    return page, payloads
 
 
 def park_year_2025(text: str) -> tuple[str, str]:
     """JSON payload와 훅 페이지를 메모리에서 만든다. 렌더가 원문과 같기 전에는 쓰지 않는다."""
-    start, end = _year_2025_span(text)
-    block = text[start:end]
-    data = parse_year_2025_html(block)
-    if render_year_2025_html(data) != block:
-        raise ValueError("감리연도 2025 블록을 같은 HTML로 보존할 수 없습니다.")
-    payload = _year_2025_payload(data)
-    page = text[:start] + YEAR_2025_MARK + text[end:]
-    return page, payload
+    page, payloads = park_years(text)
+    if "2025" not in payloads:
+        raise ValueError("감리연도 2025 블록이 하나가 아닙니다.")
+    return page, payloads["2025"]
+
+
+def commit_parked_years(text: str, newline: str) -> None:
+    """검증된 payload와 페이지 바이트를 연달아 쓴다. 검증에 실패하면 아무 파일도 쓰지 않는다."""
+    page, payloads = park_years(text)
+    page_bytes = page.replace("\r\n", "\n").replace("\n", newline).encode("utf-8")
+    for year, payload in payloads.items():
+        _write_year_payload(year, payload)
+    PAGE.write_bytes(page_bytes)
 
 
 def commit_parked_year_2025(text: str, newline: str) -> None:
     """검증된 payload와 페이지 바이트를 연달아 쓴다. 검증에 실패하면 아무 파일도 쓰지 않는다."""
-    page, payload = park_year_2025(text)
-    page_bytes = page.replace("\r\n", "\n").replace("\n", newline).encode("utf-8")
-    _write_year_2025_payload(payload)
-    PAGE.write_bytes(page_bytes)
+    commit_parked_years(text, newline)
 
 
 def _newline_of(raw: bytes) -> str:
@@ -1052,7 +1131,7 @@ def main(argv: list[str] | None = None) -> int:
     rewritten = arrange_by_year(place_labels(collapse_document(text))) if args.write else text
     errors = audit_review_html(rewritten)
     if args.write:
-        commit_parked_year_2025(rewritten, _newline_of(raw))
+        commit_parked_years(rewritten, _newline_of(raw))
         after = len(_ARTICLE.findall(rewritten))
         print(f"cards {before} -> {after}")
     for message in errors:
