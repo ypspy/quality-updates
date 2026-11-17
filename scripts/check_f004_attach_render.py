@@ -33,8 +33,8 @@ SITE_HTML = ROOT / "site" / "fss-review" / "index.html"
 # 2025 화면 수치는 이 표의 잠금과 부착 JSON counts로만 만든다.
 ATTACH_YEARS = {
     "2025": {
-        "sha": "241b0edcd6eae831ef38a8d5a742be3f1bb09672cc1560fd93a54ddccc80e682",
-        "bytes": 246423,
+        "sha": "2d8820567ad80dd4a6484cdd88a2e9891573e6ad250b931e6ebee8b53c6e93f9",
+        "bytes": 246646,
         "rendered": {
             "1c6df2500ba918054bd4b22b3a983af9ef3bdecdedc54908d4a54a04e1ea72e4": (
                 317065,

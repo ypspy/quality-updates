@@ -32,8 +32,8 @@ import check_f004_attach_render as check_mod  # noqa: E402
 import fss_f004_attach  # noqa: E402
 
 # sha256sum data/fss-review/f004-item-attach.json
-ATTACH_SHA = "241b0edcd6eae831ef38a8d5a742be3f1bb09672cc1560fd93a54ddccc80e682"
-ATTACH_BYTES = 246423
+ATTACH_SHA = "2d8820567ad80dd4a6484cdd88a2e9891573e6ad250b931e6ebee8b53c6e93f9"
+ATTACH_BYTES = 246646
 # render_year_2025_html(load_year_2025())에 부착한 2025 블록.
 RENDERED = {
     "1c6df2500ba918054bd4b22b3a983af9ef3bdecdedc54908d4a54a04e1ea72e4": (
