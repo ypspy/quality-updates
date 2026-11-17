@@ -54,6 +54,17 @@ ATTACH_YEARS = {
         },
         "site_div_sha": "7928d4b8a973ec66f7ddbf2a6bfb29f3190a55f44eeb66c2f528f8868120b5e7",
     },
+    "2019": {
+        "sha": "36493a0b48433b5cf3fcc39416f9d0c3112c512c535c7f375754912270043b62",
+        "bytes": 128666,
+        "rendered": {
+            "4438ab7f1555c0260e2534cfdb863fbec08349821d9e38554bfe90d8098a79a0": (
+                75280,
+                "be6d53fd6f04f28617b18311268ccd6834c0932fe403b23f7c67b8ca6a3055b7",
+            ),
+        },
+        "site_div_sha": "83ab5cebfeef2b16cebd1972ff5c7d3fc67554675ba004fb3e58d12495c4116b",
+    },
 }
 # scripts/tests/test_fss_review_cards.py YEAR_SHA (main 94f4882).
 # 부착 연도는 ATTACH_YEARS.site_div_sha로 비교한다.
@@ -62,7 +73,6 @@ PRIOR_YEAR_SHA = {
     "2023": "a04efa16f933d3aac44bb98434af3bc21160d028790e140c50d77a3f38416baf",
     "2022": "5cf332453ec91121dbbc37aec0c15f540842b5cf845cfde7df98708c839601dc",
     "2020": "24375fe9c10e2a0fa0513dea5831fc4141471cca9be2e0c1ea9414c01465ce92",
-    "2019": "fb13f1d4d54aaf8126f97bf802feb37ef40b2fee7852694ca22c3215e607d098",
 }
 _INTERNAL_IDS = (
     "f004_row_id",

@@ -1015,3 +1015,50 @@ def test_year_finding_ids_must_start_with_that_year(tmp_path):
     data["attachments"][0]["finding_id"] = "2025/등록/1.2/가군/삼일회계법인/0"
     with pytest.raises(ValueError, match="finding_id"):
         load_attach(_dump_attach(tmp_path, data))
+
+
+# PR-D: 2019·2020·2022·2023·2024 F004 부착 잠금. 연도마다 커밋 하나로 한 칸씩 더한다.
+# 연도: (부착 JSON sha256, bytes, 부착 뒤 연도 블록 sha256, bytes, 빌드 로그 줄)
+_ATTACH_YEAR_LOCK = {
+    "2019": (
+        "36493a0b48433b5cf3fcc39416f9d0c3112c512c535c7f375754912270043b62",
+        128666,
+        "be6d53fd6f04f28617b18311268ccd6834c0932fe403b23f7c67b8ca6a3055b7",
+        75280,
+        "F004 부착 2019: 자리 71/71, 이행사항 73, 법인 사유 0곳(0칸), 건너뜀 0",
+    ),
+}
+
+
+def _injected_year(year: str) -> str:
+    return inject_f004_attach(render_year_html(load_year(year)))
+
+
+@pytest.mark.parametrize("year", list(_ATTACH_YEAR_LOCK))
+def test_year_attach_file_matches_sha_manifest_and_serialization(year):
+    attach_sha, attach_bytes, _render_sha, _render_bytes, _summary = _ATTACH_YEAR_LOCK[year]
+    path = fss_f004_attach.ATTACH_PATHS[year]
+    assert path.name == f"f004-item-attach-{year}.json"
+    raw = path.read_bytes()
+    assert len(raw) == attach_bytes
+    assert hashlib.sha256(raw).hexdigest() == attach_sha
+    assert raw.decode("utf-8") == json.dumps(json.loads(raw), ensure_ascii=False, indent=1)
+    manifest = json.loads(path.with_name(f"f004-item-attach-{year}.manifest.json").read_text(encoding="utf-8"))
+    assert manifest == {"file": path.name, "sha256": attach_sha, "bytes": attach_bytes}
+
+
+@pytest.mark.parametrize("year", list(_ATTACH_YEAR_LOCK))
+def test_year_every_slot_resolves_and_matches_locked_bytes(year, caplog):
+    _attach_sha, _attach_bytes, render_sha, render_bytes, summary = _ATTACH_YEAR_LOCK[year]
+    counts = load_attach(fss_f004_attach.ATTACH_PATHS[year])["counts"]
+    with caplog.at_level(logging.INFO, logger="mkdocs.plugins.fss_f004_attach"):
+        built = _injected_year(year)
+    assert summary in caplog.text
+    assert built.count('class="fss-f004-attach"') == counts["attach_blocks"]
+    assert built.count(_REASON) == counts["firm_reason_panels_on_screen"]
+    raw = built.encode("utf-8")
+    assert len(raw) == render_bytes
+    assert hashlib.sha256(raw).hexdigest() == render_sha
+    assert _banned() not in built
+    for token in _INTERNAL_IDS + ("history_row_ids",):
+        assert token not in built

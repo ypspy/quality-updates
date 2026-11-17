@@ -21,6 +21,7 @@ ATTACH_PATH = ROOT / "data" / "fss-review" / "f004-item-attach.json"
 ATTACH_PATHS = {
     "2025": ATTACH_PATH,
     "2021": ROOT / "data" / "fss-review" / "f004-item-attach-2021.json",
+    "2019": ROOT / "data" / "fss-review" / "f004-item-attach-2019.json",
 }
 _LOG = logging.getLogger("mkdocs.plugins.fss_f004_attach")
 _DART_URL = re.compile(r"^https://dart\.fss\.or\.kr/dsaf001/main\.do\?rcpNo=\d{14}$")

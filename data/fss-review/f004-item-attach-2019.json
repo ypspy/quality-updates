@@ -1,0 +1,3511 @@
+{
+ "version": "item-attach-2019-draft-2026-11-17",
+ "status": "초안(proposed). 민트 분류·검토. 사용자 확인 전. 화면 반영은 Cabbage 부착 PR에서",
+ "year": "2019",
+ "source": {
+  "main_commit": "01603cc5fffd141a4cce0602595f222480976c8c",
+  "year_json_sha256": "4438ab7f1555c0260e2534cfdb863fbec08349821d9e38554bfe90d8098a79a0",
+  "year_json_note": "data/fss-review/year-2019.json (PR-A5 #131이 옮긴 연도 데이터 파일, main 913d4382부터 이 sha)",
+  "f004_snapshot": "target.db (v_f004_vi_findings, parser f004-remediation-0.2) sha256 6edbd8f92e702ec70e1c42363babb55111ada47fe58aa70aa0436b6a9193b0a8",
+  "classification": "classification-2019.md"
+ },
+ "serialization": "json.dumps(ensure_ascii=False, indent=1), UTF-8, LF, 마지막 줄바꿈 없음. 키 순서는 이 파일 그대로.",
+ "finding_id_format": "2019/{bundle}/{중분류 번호}/{gun 또는 -}/{firm}/{firm.findings 안 0부터 순번}. text_sha256은 NFC 문단 텍스트의 sha256",
+ "rules": [
+  "감리 주기 필터(D8, 사용자 확인): 2019·2020 무리는 F004 권고일이 모두 2021-11~12라 화면 법인 소속으로 나눔. 2019 화면 법인의 권고일 2021 행만 후보.",
+  "권고일 없는 행·오기 날짜 행은 같은 법인의 후보 묶음과 문구가 같을 때만 그 묶음 history로 둠.",
+  "반복 공시: 같은 권고가 여러 해 공시에 실리면 그 권고가 실린 가장 최신 공시(rcept_dt, rcept_no)의 행 하나를 보이고 나머지는 history_row_ids에만 둠.",
+  "같은 권고 판단: 같은 법인에서 같은 대분류·문구 유사도 0.6 이상, 또는 대분류가 달라도 0.85 이상, 또는 같은 대분류·같은 행 번호·같은 권고일 원문.",
+  "연결은 지적 문단 단위. 법인 × 대분류 안에서 문단 수와 권고 수가 같으면 1:1 최적 배정, 문단이 많으면 여러 문단 → 한 행, 행이 많으면 1:1 뒤 남는 행은 점수 0.45 이상일 때 그 문단의 두 번째 행.",
+  "F004 한 행이 같은 법인·같은 중분류의 문단 여러 개를 다루면 마지막 문단 아래에 한 번만 붙임.",
+  "자동 부착은 auto_high·auto_medium(와 사용자 확인 배치)만. 점수가 낮거나 바꿔 짝지어도 차이가 작은 짝은 붙이지 않고 review CSV로 올림(2025 결정 #1 그대로). mint_review·mint_override는 민트가 확인한 짝.",
+  "개별 감사보고서 관련 표·「-」 행·stale 행·지적사항 없음 행 제외.",
+  "이행사항과 권고 문구는 원문 그대로.",
+  "법인 사유 줄은 L4-1 그대로: 사유 법인의 모든 패널에 전체 사유 줄. 감사반 줄은 링크 없음."
+ ],
+ "display": {
+  "head": "F004 개선권고 이행사항 · 권고일 {recommend_date_raw 또는 기재 없음} · {rcept_no 링크}",
+  "action_none": "이행사항 기재 없음",
+  "reason_line": "firm_reasons[].text, disclosure가 있으면 뒤에 · 접수번호 링크. 사유 법인의 모든 패널에 전체 사유 줄(L4-1). 감사반·F004 없음 줄은 링크 없음",
+  "hidden_fields": [
+   "date_mismatch",
+   "year_basis",
+   "match_level_v4",
+   "history_row_ids",
+   "exception",
+   "merged_firm_source"
+  ],
+  "action_verbatim_kinds": [
+   "text",
+   "same_as_above_verbatim",
+   "footnote_mark_verbatim",
+   "count_only_verbatim"
+  ]
+ },
+ "counts": {
+  "qu_findings": 76,
+  "qu_panels": 40,
+  "qu_firms": 7,
+  "qu_findings_with_attach": 76,
+  "attach_slots": 71,
+  "attach_blocks": 73,
+  "attached_f004_rows": 73,
+  "unattached_f004_rows": 1,
+  "attachments_by_basis": {
+   "auto_extra_row": 2,
+   "auto_high": 62,
+   "auto_high+auto_medium": 1,
+   "auto_medium": 6,
+   "mint_review": 2
+  },
+  "firm_reason_lines": 0,
+  "firm_reason_panels": 0,
+  "firm_reason_panels_on_screen": 0,
+  "firm_reason_by_code": {},
+  "qu_findings_under_reason_lines": 0,
+  "unattached_qu_findings": 0,
+  "unattached_by_reason": {},
+  "notes": 3,
+  "no_date_blocks": 3,
+  "no_action_blocks": 0,
+  "verbatim_short_mark_blocks": {},
+  "f004_source_rows": 298,
+  "history_rows": 224,
+  "date_mismatch_rows": 74,
+  "filings": 33
+ },
+ "f004_rows": {
+  "20220930000076:0:10": {
+   "firm": "한영회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사조서 취합기한 준수 관련통제 강화 필요",
+   "action": "*감사조서 취합 관련 사전 및 사후 모니터링 강화",
+   "action_kind": "text",
+   "recommend_date_raw": "2021.12.01",
+   "recommend_date_iso": "2021-12-01",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20220930000076",
+   "rcept_dt": "2022-09-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20220930000076",
+   "match_level_v4": null,
+   "history_row_ids": []
+  },
+  "20240628000213:0:0": {
+   "firm": "대성삼경회계법인",
+   "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
+   "category_raw": "회계법인내 품질에 대한 리더십 책임",
+   "recommendation": "- 사업본부장의 감사업무 배정 등 결정, 외부징계의 내부징계 등 미흡",
+   "action": "- 감사업체 배정과 관련하여 품질관리실의 심의기능을 추가하고, 감사인지정업체 배정시 품질관리요소를 반영 -윤리위원회를 개최하여 외부징계내용 및 내부모니터링결과에 대하여 내부조치를 부과하도록 개선보완",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240628000213",
+   "rcept_dt": "2024-06-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240628000213",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000545:0:0"
+   ]
+  },
+  "20240628000213:0:1": {
+   "firm": "대성삼경회계법인",
+   "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
+   "category_raw": "회계법인내 품질에 대한 리더십 책임",
+   "recommendation": "- 대표이사 및 품질관리업무담당이사의 책임 및 권한 등 미흡",
+   "action": "- 대표이사가 품질관리시스템에 대한 궁극적인 책임을 지도록 정관과 내규를 개정보완 -품질관리실장 및 경영지원실장의 선임권도 대표이사에게 부여하도록 내규를 개정보완 - 내규상 운영 위원회의 과다한 권한은 삭제하고 자문기구로서의 역할을 수행하도록 규정을 개선보완",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240628000213",
+   "rcept_dt": "2024-06-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240628000213",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000545:0:1"
+   ]
+  },
+  "20240628000213:0:10": {
+   "firm": "대성삼경회계법인",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "- 직급변동 및 성과배분 관련 규정 등 미흡",
+   "action": "- 직급변동에 대한 인사급여규정 개정 - 구성원 및 이사 성과평가규정세칙에 세부 평가기준 반영 - 성과배분방법을 포함한 이사성과배분규정 및 구성원 성과배분규정 개정",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240628000213",
+   "rcept_dt": "2024-06-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240628000213",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000545:0:10"
+   ]
+  },
+  "20240628000213:0:11": {
+   "firm": "대성삼경회계법인",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "- 감사시간 및 비감사업무 투입시간 관리 미흡",
+   "action": "-타임시트의 수정에 대한 품질관리실의 승인 절차 및 비감사업무에 대한 타입시트 입력을 개선함 -감사와 비감사업무의 타입시트 관련 ERP 시스템 개선함",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240628000213",
+   "rcept_dt": "2024-06-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240628000213",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000545:0:11",
+    "20221205000344:0:6",
+    "20220630000725:0:6"
+   ]
+  },
+  "20240628000213:0:12": {
+   "firm": "대성삼경회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "- 감사정보의 비밀유지 통제절차 미흡",
+   "action": "-법인 도메인 이메일을 도입하였으며, 감사참여자에 대해 감사정보유출방지에 대한 서약서를 ERP내에 개발함 - 전체 회계사에게 연 1회 고객 및 감사정보 파기확인서를 서명하도록 하고 모니터링을 강화함",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240628000213",
+   "rcept_dt": "2024-06-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240628000213",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000545:0:12"
+   ]
+  },
+  "20240628000213:0:13": {
+   "firm": "대성삼경회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "- 감사조서의 완전성, 수정, 임의 변형 관련 절차 등 미흡",
+   "action": "-감사보고서일로부터 60일내 조서취합완료여부에 대해 추가 모니터링를 강화하고, 위변조방지Tape를 부착하는 등 감사조서의 취합이후 감사조서를 임의로 수정, 변형할 수 없도록 절차를 보완함",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240628000213",
+   "rcept_dt": "2024-06-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240628000213",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000545:0:13"
+   ]
+  },
+  "20240628000213:0:14": {
+   "firm": "대성삼경회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "- 업무품질관리검토 관련 절차 미흡",
+   "action": "-업무품질관리검토자가 사전심리대상회사에 감사계획심리를 수행하여 감사보고서 발행 전 주요 이슈사항을 파악할 수 있도록 하는 등 절차를 개선함",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240628000213",
+   "rcept_dt": "2024-06-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240628000213",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000545:0:14"
+   ]
+  },
+  "20240628000213:0:15": {
+   "firm": "대성삼경회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "- 표준감사프로그램 관리 미흡",
+   "action": "-법인의 감사조서서식을 내부공지하였으며, 감사계획심리 등 사전심리 및 사후심리시 최근 업데이트 된 감사조서서식의 사용여부에 모니터링 절차를 보완함",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240628000213",
+   "rcept_dt": "2024-06-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240628000213",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000545:0:15",
+    "20221205000344:0:8",
+    "20220630000725:0:8"
+   ]
+  },
+  "20240628000213:0:16": {
+   "firm": "대성삼경회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "- 품질관리시스템전반 모니터링, 사후심리시 업무전반품질관리절차 등 미흡",
+   "action": "- 감사위원회가 품질관리전반을 검토하고 품질관리검토표를 작성하도록 개선함 - 사후심리평가표에 업무팀원의 배정 및 투입시간의 적정성 등 감사업무 전반에 걸쳐 품질관리 절차를 반영함",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240628000213",
+   "rcept_dt": "2024-06-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240628000213",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000545:0:16"
+   ]
+  },
+  "20240628000213:0:17": {
+   "firm": "대성삼경회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "- 의뢰인 및 제 3자 등의 고충 진정 절차 미흡",
+   "action": "- 고충 및 진정처리를 품질관리규정에 반영하고, 윤리준법신고센터 이메일 등 홈페이지에 해당 내용을 게시 및 내부공지 절차를 보완하였으며 업무상시유의사항공지시 윤리준법신고센타존재여부에 대해 상시공지함",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240628000213",
+   "rcept_dt": "2024-06-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240628000213",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000545:0:17"
+   ]
+  },
+  "20240628000213:0:18": {
+   "firm": "대성삼경회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "- 내부징계 관련 규정 및 절차 미흡",
+   "action": "- 품질관리규정 내규 위반사항에 대해 조치를 취할 수 있도록 상벌규정을 개정하고 징계수준도 품질관리규정 위반분담금을 신설하는 등 절차를 개선함",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240628000213",
+   "rcept_dt": "2024-06-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240628000213",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000545:0:18"
+   ]
+  },
+  "20240628000213:0:19": {
+   "firm": "대성삼경회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "- 사후심리 관련 이행점검절차 등 미흡",
+   "action": "- 사후심리평가표에 감사절차 및 품질관리 감리 지적사항등 반영하여 사전공지하도록 개선함 - 보완필요사항에 대한 이행점검 절차를 보완하였으며, 사후심리결과에 대해 운영위원회에 보고 및 성과평가 반영을 완료하고, 재발방지를 위한 교육(공지)를 하도록 개선함",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240628000213",
+   "rcept_dt": "2024-06-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240628000213",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000545:0:19",
+    "20221205000344:0:10",
+    "20220630000725:0:10"
+   ]
+  },
+  "20240628000213:0:2": {
+   "firm": "대성삼경회계법인",
+   "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
+   "category_raw": "회계법인내 품질에 대한 리더십 책임",
+   "recommendation": "- 윤리규정, 윤리위원회, 감사위원회 등의 운영 미흡",
+   "action": "-윤리규정에 법령 등 준수사항을 구체적으로 명시하고, 상벌규정에 내규 위반에 대해 징계조치를 취할 수 있도록 개정보완 -감사위원회가 품질관리업무전반에 대한 모니터링을 수행하도록 규정을 개정보완하였으며, 수행함",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240628000213",
+   "rcept_dt": "2024-06-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240628000213",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000545:0:2"
+   ]
+  },
+  "20240628000213:0:3": {
+   "firm": "대성삼경회계법인",
+   "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
+   "category_raw": "회계법인내 품질에 대한 리더십 책임",
+   "recommendation": "- 품질관리 및 조직운영 등의 규정 등에 대한 전파 등 미흡",
+   "action": "-내부규정집을 법인 그룹웨어에 게시하였으며, 업무수행시 상시주의사항 및 품질관리 관련 주요사항을 주기적으로 그룹웨어 게시판에 공지하여 구성원이 숙지할 수 있게 개선보완",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240628000213",
+   "rcept_dt": "2024-06-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240628000213",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000545:0:3",
+    "20221205000344:0:0",
+    "20220630000725:0:0"
+   ]
+  },
+  "20240628000213:0:4": {
+   "firm": "대성삼경회계법인",
+   "dae_standard": "2. 관련 윤리적 요구사항",
+   "category_raw": "윤리적 요구사항",
+   "recommendation": "- 비감사업무 수임 관련 독립성 확인절차 등 미흡",
+   "action": "-비감사업무 계약 관련하여 계약서초안, 독립성준수확인서, 감사의 동의서(혹은 협의서)를 품질관리실에서 미리 확인 및 계약 승인후 계약하도록 프로세스 개선",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240628000213",
+   "rcept_dt": "2024-06-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240628000213",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000545:0:4"
+   ]
+  },
+  "20240628000213:0:5": {
+   "firm": "대성삼경회계법인",
+   "dae_standard": "2. 관련 윤리적 요구사항",
+   "category_raw": "윤리적 요구사항",
+   "recommendation": "-감사계약 관련 독립성 확인절차 등 미흡",
+   "action": "-계약전 독립성 위배여부를 확인하는 절차를 마련하고, 감사계약, 착수, 종결시점의 각 단계에서 감사 참여자의 독립성준수여부를 확인하도록 개선 보완 -품질관리담당자의 감사업무에 대한 독립성점검을 위해 매분기별 독립성준수확인서에 서명하도록 개선보완",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240628000213",
+   "rcept_dt": "2024-06-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240628000213",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000545:0:5",
+    "20221205000344:0:2",
+    "20220630000725:0:2"
+   ]
+  },
+  "20240628000213:0:6": {
+   "firm": "대성삼경회계법인",
+   "dae_standard": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+   "category_raw": "업무의 수용과 유지",
+   "recommendation": "-감사계약전 위험수준 결정을 위한 세부 평가기준 및 평가결과 위험이 높은 회사에 대한 관리 미흡",
+   "action": "-계약전 위험평가 기준을 ERP 시스템에 반영하여 세부기준에 따라 계약전 위험평가표의 위험평가결과가 자동 산출되도록 개선하였으며, 감사위험이 높은 감사대상회사의 목록을 관리하도록 개선하였음 -감사위험관리현황에 대해 내부보고절차를 수행",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240628000213",
+   "rcept_dt": "2024-06-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240628000213",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000545:0:6"
+   ]
+  },
+  "20240628000213:0:7": {
+   "firm": "대성삼경회계법인",
+   "dae_standard": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+   "category_raw": "업무의 수용과 유지",
+   "recommendation": "-감사계약전 위험평가 관련 위험평가서 작성 누락, 업무담당이사 서명 누락, 형식적 작성, 위험과소평가, 독립성 확인 누락 등 사례",
+   "action": "-ERP 시스템 개발을 통해 계약전 감사업무 독립성준수확인서->계약전 위험평가표->계약생성-> 계약심사 단계로 진행하며, 각 단계별 최종 승인권자의 승인없이 계약생성이 불가능하도록 시스템 설계함 -사후심리과정에서 계약전위험평가에 따라 위험평가 및 관련조서가 작성되었는지 검토하고 발견 내용에 대한 교육 실시",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240628000213",
+   "rcept_dt": "2024-06-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240628000213",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000545:0:7"
+   ]
+  },
+  "20240628000213:0:8": {
+   "firm": "대성삼경회계법인",
+   "dae_standard": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+   "category_raw": "업무의 수용과 유지",
+   "recommendation": "-감사업무의 수용 및 유지 승인과정에서 업무를 수행할 적격성과 역량 및 인력 보유여부 미고려",
+   "action": "-각 사업본부별 감사인력 역량점검을 실시하여 인력부족여부를 확인하도록 개선보완하고 감사참여자의 전문성 증진을 위해 산업별전문화 교육을 수행하도록 함",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240628000213",
+   "rcept_dt": "2024-06-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240628000213",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000545:0:8",
+    "20221205000344:0:4",
+    "20220630000725:0:4"
+   ]
+  },
+  "20240628000213:0:9": {
+   "firm": "대성삼경회계법인",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "- 업무배정, 자유수임 및 지정감사 배정 관련 절차 미흡",
+   "action": "-감사업무배정시 감사실적, 연수이수실적, 예상투입시간등 역량점검을 하도록 하며, 내부자원투입 및 감사품질확보계획서를 작성하여 감사계약 승인시 담당이사가 법인의 적격성 준수요건 충족여부를 점검함 - 감사 배정시 품질관리요소를 반영할 수 있도록 규정세칙을 개선함",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240628000213",
+   "rcept_dt": "2024-06-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240628000213",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000545:0:9"
+   ]
+  },
+  "20240701000107:0:10": {
+   "firm": "도원회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "내부징계절차 운영미흡",
+   "action": "이행함",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000107",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000107",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000571:0:10"
+   ]
+  },
+  "20240701000107:0:8": {
+   "firm": "도원회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사정보 유출방지 통제절차 미비",
+   "action": "이행함",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000107",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000107",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000571:0:8"
+   ]
+  },
+  "20240701000247:0:0": {
+   "firm": "다산회계법인",
+   "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
+   "category_raw": "회계법인내 품질에 대한 리더십 책임",
+   "recommendation": "품질관리업무 담당이사의 책임에 합당한 권한 부여 미흡",
+   "action": "운영위원회 위원으로 품질관리실장을포함하여 운영하고 있음",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000247",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000247",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20240628000493:0:0",
+    "20231228000590:0:0",
+    "20230630000255:0:0",
+    "20221025000354:0:0",
+    "20220629000640:0:0"
+   ]
+  },
+  "20240701000247:0:10": {
+   "firm": "다산회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사보고서 발행에 대한 통제절차 미흡",
+   "action": "감사보고서의 인쇄 및 발행이 품질관리실의 승인하에 이루어질 수 있도록 하는 절차를 구축",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000247",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000247",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20240628000493:0:10",
+    "20231228000590:0:10",
+    "20230630000255:0:10",
+    "20221025000354:0:10",
+    "20220629000640:0:10"
+   ]
+  },
+  "20240701000247:0:11": {
+   "firm": "다산회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "사후심리 점검결과에 대한 대응절차 운영 미흡",
+   "action": "사후심리 점검결과 사후심리자가 감사조서 수정 및 보완이 필요한 경우, 조서보완요청하고, 수정 및 보완된 조서를 확인 후 사후심리를 종결함으로써 사후관리 운영방법을 개선",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000247",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000247",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20240628000493:0:11",
+    "20231228000590:0:11",
+    "20230630000255:0:11",
+    "20221025000354:0:11",
+    "20220629000640:0:11"
+   ]
+  },
+  "20240701000247:0:2": {
+   "firm": "다산회계법인",
+   "dae_standard": "2. 관련 윤리적 요구사항",
+   "category_raw": "윤리적 요구사항",
+   "recommendation": "독립성확인서 관련 사후관리절차 미흡",
+   "action": "독립성확인서 제출 후 마감기한 이후에는 작성자가 수정할 수 없도록 ERP를 개선하여 시행함",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000247",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000247",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20240628000493:0:2",
+    "20231228000590:0:2",
+    "20230630000255:0:2",
+    "20221025000354:0:2",
+    "20220629000640:0:2"
+   ]
+  },
+  "20240701000247:0:3": {
+   "firm": "다산회계법인",
+   "dae_standard": "2. 관련 윤리적 요구사항",
+   "category_raw": "윤리적 요구사항",
+   "recommendation": "비감사업무 수임 관련 통제절차 운영 미흡",
+   "action": "감사 등의 동의 절차와 같은 독립성 준수 확인 절차가 적절히 수행되고 문서화되었는지 확인하고 있음",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000247",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000247",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20240628000493:0:3",
+    "20231228000590:0:3",
+    "20230630000255:0:3",
+    "20221025000354:0:3",
+    "20220629000640:0:3"
+   ]
+  },
+  "20240701000247:0:4": {
+   "firm": "다산회계법인",
+   "dae_standard": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+   "category_raw": "업무의 수용과 유지",
+   "recommendation": "계약전 위험평가절차 운영 미흡",
+   "action": "계약체결 전 위험평가서의 주요정보 미기재 또는 잘못기재 사유에 대하여 규정을 개정, 불이익을 부과할 수 있도록 함",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000247",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000247",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20240628000493:0:4",
+    "20231228000590:0:4",
+    "20230630000255:0:4",
+    "20221025000354:0:4",
+    "20220629000640:0:4"
+   ]
+  },
+  "20240701000247:0:6": {
+   "firm": "다산회계법인",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "구성원의 교육 기록 등 구축 및 관리 미흡",
+   "action": "ERP상에 구성원별로 교육 및 연수 이력사항을 구축하여 운영하고 있음",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000247",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000247",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20240628000493:0:6",
+    "20231228000590:0:6",
+    "20230630000255:0:6",
+    "20221025000354:0:6",
+    "20220629000640:0:6"
+   ]
+  },
+  "20240701000247:0:7": {
+   "firm": "다산회계법인",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "감사시간 적시 집계 미흡",
+   "action": "규정을 개정하여 7일 단위로 업무시간 입력시한을 두고 운영하고 있음",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000247",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000247",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20240628000493:0:7",
+    "20231228000590:0:7",
+    "20230630000255:0:7",
+    "20221025000354:0:7",
+    "20220629000640:0:7"
+   ]
+  },
+  "20240701000247:0:8": {
+   "firm": "다산회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사조서 취합 보관 및 관리 미흡",
+   "action": "제 조서수량과 관리대장상의 조서 수량 일치여부를 모니터링하고 있음",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000247",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000247",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20240628000493:0:8",
+    "20231228000590:0:8",
+    "20230630000255:0:8",
+    "20221025000354:0:8",
+    "20220629000640:0:8"
+   ]
+  },
+  "20240701000247:0:9": {
+   "firm": "다산회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사보고서일자가 업무품질관리검토 완료 이후가 되도록 내규를 보완하는 등 사전 품질관리검토에 대한 통제절차를 강화할 필요",
+   "action": "감사보고서일자가 업무품질관리검토 완료 이후가 되도록규정 개정",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000247",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000247",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20240628000493:0:9",
+    "20231228000590:0:9",
+    "20230630000255:0:9",
+    "20221025000354:0:9",
+    "20220629000640:0:9"
+   ]
+  },
+  "20240701000259:0:0": {
+   "firm": "회계법인리안",
+   "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
+   "category_raw": "회계법인내 품질에 대한 리더십 책임",
+   "recommendation": "법인 차원의 일관된 품질관리를 위해 업무 전문성, 특정팀의 업무 집중도, 충분한 감사인력 투입의 가능여부 등을 고려하여 업무가 배정되어야 함.",
+   "action": "감사업무 배정에 관한 지침을 마련하여, 감사업무의 배정 시, 상장사, K-IFRS, 업종 등의 업무경험과 징계여부, 업무투입가능 시간등을 고려하도록 함.",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 01일",
+   "recommend_date_iso": "2021-12-01",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000259",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000259",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230629000210:0:0",
+    "20221130002006:0:0",
+    "20220630000853:0:0",
+    "20220629000422:0:0"
+   ]
+  },
+  "20240701000259:0:10": {
+   "firm": "회계법인리안",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "품질관리제도 전체에 대하여 전반적 정책과 절차가 목적적합하고 충분하여 효과적으로 운영 및 준수되고 있는지에 대한 모니터링을 수행하지 않음",
+   "action": "적절한 모니터링을 위하여 객관적이고 독립된 한국공인회계사회로부터 품질관리제도 전반에 대하여 컨설팅을 받음.",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 01일",
+   "recommend_date_iso": "2021-12-01",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000259",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000259",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230629000210:0:10",
+    "20221130002006:0:10",
+    "20220630000853:0:10",
+    "20220629000422:0:10"
+   ]
+  },
+  "20240701000259:0:11": {
+   "firm": "회계법인리안",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "구성원, 의뢰인, 제3자 등이 제기하는 고충,진정 등을 접수할 수 있는 경로를 구축하지않음",
+   "action": "관련 규정과 지침을 개정함에 따라, 법인 홈페이지에서 누구나 직접 고충 및 진정 등을 접수할 수 있는 경로를 구축함.",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 01일",
+   "recommend_date_iso": "2021-12-01",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000259",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000259",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230629000210:0:11",
+    "20221130002006:0:11",
+    "20220630000853:0:11",
+    "20220629000422:0:11"
+   ]
+  },
+  "20240701000259:0:2": {
+   "firm": "회계법인리안",
+   "dae_standard": "2. 관련 윤리적 요구사항",
+   "category_raw": "윤리적 요구사항",
+   "recommendation": "비감사용역 수임에 대한 사전 보고 및 승인절차 마련 및 독립성 준수 여부에 대한 검토 절차 보완",
+   "action": "내부윤리규정 및 윤리 및 독립성 확인절차 지침을 개정하여, 수행하고자 하는 비감사용역의 회사명, 특수관계자, 용역의 내용 등을 기재하여 전 구성원을 대상으로 독립성 확인 회람을 하며, 적시에 관련 시스템에 계약내역을 등록하여 독립성대상준수리스트에 포함되도록 함.",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 01일",
+   "recommend_date_iso": "2021-12-01",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000259",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000259",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230629000210:0:2",
+    "20221130002006:0:2",
+    "20220630000853:0:2",
+    "20220629000422:0:2"
+   ]
+  },
+  "20240701000259:0:3": {
+   "firm": "회계법인리안",
+   "dae_standard": "2. 관련 윤리적 요구사항",
+   "category_raw": "윤리적 요구사항",
+   "recommendation": "주식거래 신고내역 점검시 일부 구성원의 배우자에 대한 점검이 누락되고, 관련 증빙에 대한 본인확인 절차가 미흡 독립성 준수 확인서에 감사업무 수행전과 종결시 서명일자를 부적절하게 기재한 사례가 발견되는 등 독립성 준수 확인절차가 미흡",
+   "action": "2020년 독립성 준수여부 확인시부터 배우자를 포함하고, 본인확인에 대한 증빙을 보완하여 이행함. 품질관리 전산시스템을 도입하여 해당 시스템상에서 독립성확인서에 전자서명을 징구하고, 품질관리실에서 서명을 확인하는 것으로 절차를 보완함.",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 01일",
+   "recommend_date_iso": "2021-12-01",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000259",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000259",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230629000210:0:3",
+    "20221130002006:0:3",
+    "20220630000853:0:3",
+    "20220629000422:0:3"
+   ]
+  },
+  "20240701000259:0:4": {
+   "firm": "회계법인리안",
+   "dae_standard": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+   "category_raw": "업무의 수용과 유지",
+   "recommendation": "감사업무 수임 관련 위험평가 수행에 대한 문서화 및 관련 승인절차가 정형화되지 않아 최종 승인 전 감사계약을 체결하는 등 체계적인 관리가 미흡",
+   "action": "품질관리규정 및 관련 지침 개정을 통하여 모든 감사업무는 계약 체결전에 위험평가내역을 전산조서로 작성하고, 품질관리실의 승인을 득하도록 함. 따라서, 계약전 위험평가가 충분하게 수행되지 않거나, 감사위험이 매우 높다고 판단되는 경우에는 품질관리실 및 대표이사의 승인을 득하지 못하여 감사계약을 체결할 수 없도록 절차를 보완함.",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 01일",
+   "recommend_date_iso": "2021-12-01",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000259",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000259",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230629000210:0:4",
+    "20221130002006:0:4",
+    "20220630000853:0:4",
+    "20220629000422:0:4"
+   ]
+  },
+  "20240701000259:0:6": {
+   "firm": "회계법인리안",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "일부 성과평가지표의 평가등급을 명확한 기준 없이 정하고 있으며, 성과평가 결과의활용에 대한 세부적인 지침이 마련되어 있지 않음",
+   "action": "전문직과 업무수행이사를 구분하여 성과평가 규정을 마련하여 운영하고 있으며, 각 지표의 평가등급을 명확하게 기술하고 있음.",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 01일",
+   "recommend_date_iso": "2021-12-01",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000259",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000259",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230629000210:0:6",
+    "20221130002006:0:6",
+    "20220630000853:0:6",
+    "20220629000422:0:6"
+   ]
+  },
+  "20240701000259:0:7": {
+   "firm": "회계법인리안",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "입사 필수 제출서류로 규정한 징계사실 확인원을 입사 예정자로부터 제출받지 않는 등 해당 직원의 징계 여부에 대한 확인절차가 미흡함",
+   "action": "입사 예정자로부터 징계사실확인원을 징구하여 입사자의 과거 징계 이력을 객관적으로 확인한 후 입사를 승인함.",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 01일",
+   "recommend_date_iso": "2021-12-01",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000259",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000259",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230629000210:0:7",
+    "20221130002006:0:7",
+    "20220630000853:0:7",
+    "20220629000422:0:7"
+   ]
+  },
+  "20240701000259:0:8": {
+   "firm": "회계법인리안",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사정보 유출 방지를 위한 구체적인 정책과 절차를 마련하지 않음",
+   "action": "품질관리규정 규정 및 관련 지침을 개정을 통하여, 전자조서시스템을 도입하고 감사정보 유출과 관련된 실질적인 통제(권한 관리, 조서취합 등)를 수행함. 특히, 서면조서의 경우 전산시스템으로 조서 입출고 요청 및 승인을 품질관리실에서 수행하여 엄격하게 관리하고 있으며, 당 법인 이외의 회계 법인에서 전기조서 열람을 요청하는 경우, 전자조서는 품질관리실에서 관리하는 컴퓨터(인 터넷불가, 편집불가, USB등 외부저장장치금지 등)로만 열람이 가능하게 함. 또한, 입사서류 및 퇴사서류에서도 정보와 관련하여 강화된 서약서를 징구하여 감사정보 유출을 방지하고 있음.",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 01일",
+   "recommend_date_iso": "2021-12-01",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000259",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000259",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230629000210:0:8",
+    "20221130002006:0:8",
+    "20220630000853:0:8",
+    "20220629000422:0:8"
+   ]
+  },
+  "20240701000259:0:9": {
+   "firm": "회계법인리안",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "회계감사기준에 따른 필수감사 절차에 대한 일부 조서가 필수조서 지정에 누락되었으며, 계정별 감사 절차에 대해서는 표준조서 사용을 의무화하지 않음 서면조서가 입고 및 출고시 승인절차 관련 통제절차 미흡 자문 정책 및 절차 미비 업무수행이사 등에 의한 감독 및 검토 책임과 업무품질관리검토자가 참여 및 점검해야 할 사항 등에 대한 구체적인 정책과 절차 미비",
+   "action": "전자조서시스템을 도입하여 감사조서의 통일성을 강화하였으며, 한국공인회계사회가 매년 개정하여 배포하는 감사조서서식을 필수조서목록으로 지정하여 사용하도록 강제하고 있음. 품질관리규정 규정 및 관련 지침을 개정하여, 전자조서시스템을 도입하고 감사정보 유출과 관련된 실질적인 통제(권한 관리, 조서취합 등)를 수행하고 있고, 특히, 서면조서의 경우 전산시스템으로 조서 입출고 요청 및 승인을 품질관리실에서 수행하여 엄격하게 관리하고 있음. 품질관리규정 규정 및 지침을 개정함에 따라, 회계감사기준, 회계처리기준 등 회계감사와 관련된 전반적인 내용에 대하여 감사팀 질의에 대한 자문업무를 수행하고 있으며, 중요한 질의의 경우, 회의록을 작성하고 있음. 품질관리규정 규정 및 지침을 개정함에 따라, 감사업무 수임시점, 감사계획시점, 사전심리 및 사후심리 시점에 업무수행이사의 감사업무에 대한 감독 및 검토 업무를 수행하고 있으며, 실질적인 운영을 위해 수행이사의 업무수행이사의 성과평가에 반영하고 있음.",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 01일",
+   "recommend_date_iso": "2021-12-01",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000259",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000259",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230629000210:0:9",
+    "20221130002006:0:9",
+    "20220630000853:0:9",
+    "20220629000422:0:9"
+   ]
+  },
+  "20240701000352:0:0": {
+   "firm": "이정회계법인",
+   "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
+   "category_raw": "회계법인내 품질에 대한 리더십 책임",
+   "recommendation": "품질관리업무 담당이사 지정 권한이 대표이사가 아닌 사원총회에 부여되어 있고, 품질관리검토자 지정이 법인의 운영을 담당하는 기관인 운영위원회 소관 업무로 되어 있는 등 품질관리와 관련된 권한 부여가 적절하게 이루어지지 않음",
+   "action": "대표이사가 품질관리실장을 임명하도록 하고 품질관리실에서 품질관리검토자를 임명하도록 규정을 2021년 12월에 개정하였음",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000352",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000352",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000558:0:0",
+    "20220706000202:0:0",
+    "20220630000904:0:0"
+   ]
+  },
+  "20240701000352:0:10": {
+   "firm": "이정회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "사후 품질관리검토 결과 식별된 미비점이 보고서에 미치는 영향에 대한 평가를 수행하지 않고, 조서 보완 등 후속조치 필요 여부도 검토하지 않아 사후 품질관리검토가 실효성 있게 운영되지 않음",
+   "action": "규정을 개정하여 사후심리절차 운영을 개선하고, 사후심리 대응절차의 이행의 실효성을 확보할 수 있도록 운영하고 있음",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000352",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000352",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000558:0:10",
+    "20220706000202:0:10",
+    "20220630000904:0:10"
+   ]
+  },
+  "20240701000352:0:2": {
+   "firm": "이정회계법인",
+   "dae_standard": "2. 관련 윤리적 요구사항",
+   "category_raw": "윤리적 요구사항",
+   "recommendation": "구성원이 신고한 주식 보유내역 점검시 이사 중에서만 표본을 추출함으로써 이사외 구성원에 대한 점검 미흡",
+   "action": "주식보유 내역 점검시 이사 중에서만 표본을 추출하지 않고 이사와 일반 공인회계사 모두에 대해서 표본을 추출하여 주식보유 내역을 점검하는 것으로 절차를 변경하였음",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000352",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000352",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000558:0:2",
+    "20220706000202:0:2",
+    "20220630000904:0:2"
+   ]
+  },
+  "20240701000352:0:3": {
+   "firm": "이정회계법인",
+   "dae_standard": "2. 관련 윤리적 요구사항",
+   "category_raw": "윤리적 요구사항",
+   "recommendation": "감사대상회사에 대한 비감사업무 수임시, 독립성 검토 완료 이전에 계약이 체결되거나 감사등과의 협의사항을 문서화하지 않는 사례가 있음",
+   "action": "감사대상회사에게 비인증업무를 제공하는 경우 감사와 수행한 협의절차 등에 대해 수임승인문서의 특정 부분에 문서화하도록 안내하였고 품질관리실장은 동 기재내용을 확인하고 비감사업무 수임승인을 하고 있음",
+   "action_kind": "text",
+   "recommend_date_raw": "-",
+   "recommend_date_iso": null,
+   "year_basis": "continuation_row_inherited_date",
+   "date_mismatch": true,
+   "rcept_no": "20240701000352",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000352",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000558:0:3",
+    "20220706000202:0:3",
+    "20220630000904:0:3"
+   ]
+  },
+  "20240701000352:0:4": {
+   "firm": "이정회계법인",
+   "dae_standard": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+   "category_raw": "업무의 수용과 유지",
+   "recommendation": "감사수임 위험평가시 주요 정보를 위험평가서에 기재하지 않거나, 위험평가서 최종 승인 전에 감사계약을 체결한 사례가 있음",
+   "action": "대부분의 감사계약이 체결되는 2월 중순이전에 내부공지를 통해 적절한 위험평가를 수행하도록 구성원에게 안내하고 있으며 품질관리실장은 위험평가문서를 검토한 후 수임승인을 하고 있음. 감사계약 이후 감사의견 제한 등 감사위험과 관련된 새로운 정보를 반영하여 감사위험을 재평가하기 위해 위험평가서 양식을 개선하였음",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000352",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000352",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000558:0:4",
+    "20220706000202:0:4",
+    "20220630000904:0:4"
+   ]
+  },
+  "20240701000352:0:6": {
+   "firm": "이정회계법인",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "채용대상자에 대한 외부징계 사실 확인시 불완전한 증빙자료를 징구하는 등 관련 절차 운영 미흡",
+   "action": "채용 승인시 한국공인회계사회 징계 확인증 날인본을 징구하고 있음",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000352",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000352",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000558:0:6",
+    "20220706000202:0:6",
+    "20220630000904:0:6"
+   ]
+  },
+  "20240701000352:0:7": {
+   "firm": "이정회계법인",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "내규에서 정한 감사시간 입력 기한 및 승인 기한을 초과하여 입력 및 승인한 사례가 있음",
+   "action": "1. 감사업무 품질관리규정에 따른 감사시간 입력 및 승인 일자를 점검하고 내규에 따른 벌점을 부과하고 있음 2. 2022년 1월부터는 타임리포트 입력주기를 주간 단위로 단축하여 운영하고 있으며, 2023년 4월부터 IB센터 품질관리시스템을 도입함",
+   "action_kind": "text",
+   "recommend_date_raw": "-",
+   "recommend_date_iso": null,
+   "year_basis": "continuation_row_inherited_date",
+   "date_mismatch": true,
+   "rcept_no": "20240701000352",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000352",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000558:0:7",
+    "20220706000202:0:7",
+    "20220630000904:0:7"
+   ]
+  },
+  "20240701000352:0:8": {
+   "firm": "이정회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "일부 감사조서가 감사보고서일로부터 60일을 초과하여 취합됨",
+   "action": "감사업무 품질관리규정에 따른 감사조서 취합기한 준수 여부를 점검하고 내규에 따른 벌점을 부과하고 있음",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240701000352",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000352",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000558:0:8",
+    "20220706000202:0:8",
+    "20220630000904:0:8"
+   ]
+  },
+  "20240701000352:0:9": {
+   "firm": "이정회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사업무에 대한 품질관리검토가 ‘감사보고서일’ 보다 늦은 ‘감사보고서 발행일’ 전에 완료되도록 하여 품질관리기준보다 지연된 기준을 적용하고 있고, 실제 감사보고서일 후 사전심리가 완료된 사례가 있음",
+   "action": "현재 사전심리가 완료된 것을 확인하고 감사보고서를 발행하고 있으며, FY2020 사업년도 이후 현재까지 감사보고서일 이후 사전심리가 완료된 사례가 없었음",
+   "action_kind": "text",
+   "recommend_date_raw": "-",
+   "recommend_date_iso": null,
+   "year_basis": "continuation_row_inherited_date",
+   "date_mismatch": true,
+   "rcept_no": "20240701000352",
+   "rcept_dt": "2024-07-01",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240701000352",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230630000558:0:9",
+    "20220706000202:0:9",
+    "20220630000904:0:9"
+   ]
+  },
+  "20240930000232:0:10": {
+   "firm": "삼일회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "업무팀이 실물 감사조서를 창고에서 출고한 후 재입고시, 품질관리실이 수정 내용을 확인한 이후 업무팀이 직접 조서창고에 반납하고 있어, 업무팀에 의한 임의 수정 가능성에 대한 통제가 미흡",
+   "action": "품질관리실 담당자가 수정 내용을 확인한 후 직접 조서창고에 반납하도록 관련 규정 및 절차를 변경함",
+   "action_kind": "text",
+   "recommend_date_raw": "2021.12.17",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240930000232",
+   "rcept_dt": "2024-09-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240930000232",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230927000481:0:10",
+    "20220930000262:0:10"
+   ]
+  },
+  "20240930000232:0:11": {
+   "firm": "삼일회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "수습회계사에게 매출 또는 매출원가와 같은 주요 계정을 배정하고, 담당이사 등이 수습회계사가 수행한 업무에 대해 등록회계사와 동일한 수준으로 검토하여 업무에 대한 품질관리 미흡",
+   "action": "수습회계사에게 매출 또는 매출원가와 같은 주요 계정을 배정하는 경우, 담당이사 또는 2단계 공인회계사의 리뷰를 받도록 리뷰절차를 강화함",
+   "action_kind": "text",
+   "recommend_date_raw": "2021.12.17",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240930000232",
+   "rcept_dt": "2024-09-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240930000232",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230927000481:0:11",
+    "20220930000262:0:11"
+   ]
+  },
+  "20240930000232:0:4": {
+   "firm": "삼일회계법인",
+   "dae_standard": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+   "category_raw": "업무의 수용과 유지",
+   "recommendation": "업무수임위험평가서 작성시, 평가 당시 입수 가능한 전기 감사의견 변형사실 등 일부 항목의 기재를 누락하거나, 감사계약체결일 이후 위험평가를 완료한 사례가 발견됨",
+   "action": "업무수임위험평가서 작성시 정확히 기재하도록 교육 및 공지 등을 통해 지속적으로 안내하고, 모니터링 절차를 강화함. 또한, 업무수임위험평가 검토의 적시성과 관련하여 감사계약서 날인 전에 승인 여부를 확인하도록 하는 강화된 통제절차를 운영하고 모니터링함",
+   "action_kind": "text",
+   "recommend_date_raw": "2021.12.17",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240930000232",
+   "rcept_dt": "2024-09-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240930000232",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230927000481:0:4",
+    "20220930000262:0:4"
+   ]
+  },
+  "20240930000232:0:6": {
+   "firm": "삼일회계법인",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "내규상 감사업무 투입시간을 익일까지 입력하도록 하고 있으나, 입력이 지연되는 데에 대한 통제가 미흡하고, 적시에 적절한 검토를 거쳐 승인되도록 하는 통제도 미흡",
+   "action": "감사시간을 적시에 기재하도록 교육 및 공지 등을 통해 지속적으로 강조하고 작성된 시간이 적절하게 상위권자에 의해 승인되도록 절차를 변경함",
+   "action_kind": "text",
+   "recommend_date_raw": "2021.12.17",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240930000232",
+   "rcept_dt": "2024-09-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240930000232",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230927000481:0:6",
+    "20220930000262:0:6"
+   ]
+  },
+  "20240930000232:0:8": {
+   "firm": "삼일회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "업무품질관리검토자가 검토할 사항 등을 열거한 표준화된 감사조서에 검토자가 서명만 하면 절차가 완료되도록 운영하여 동 업무의 적절성에 대한 충분한 증거를 제공하지 못함",
+   "action": "품질관리검토자에게 중요한 검토내역에 대해 조서에 기재하도록 교육 및 공지 등을 통해 안내하였으며 표준 조서양식을 개정하여 품질감리검토자가 심리 중 발견한 중요한 사항을 기재하도록 함",
+   "action_kind": "text",
+   "recommend_date_raw": "2021.12.17",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240930000232",
+   "rcept_dt": "2024-09-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240930000232",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230927000481:0:8",
+    "20220930000262:0:8"
+   ]
+  },
+  "20240930000232:0:9": {
+   "firm": "삼일회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사보고서일로부터 60일을 초과하여 감사조서가 취합된 사례가 일부 있고, 그 중 장기간 미취합된 사례도 존재함",
+   "action": "감사조서 취합기한을 준수하도록 교육 및 공지 등을 통해 지속적으로 강조하고, 적시성있는 조서 취합을 위한 통제 절차를 추가함",
+   "action_kind": "text",
+   "recommend_date_raw": "2021.12.17",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20240930000232",
+   "rcept_dt": "2024-09-30",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240930000232",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20230927000481:0:9",
+    "20220930000262:0:9"
+   ]
+  },
+  "20241227000169:0:0": {
+   "firm": "도원회계법인",
+   "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
+   "category_raw": "회계법인내 품질에 대한 리더십 책임",
+   "recommendation": "감사품질 우선의 정책과 절차수립 미흡",
+   "action": "ㆍ사업본부장에게 소속 본부 품질관리 책임을 부여하는 내규명문화 ㆍ외부징계 시 사업본부장에게 품질관리 책임을 물을수 있는 내부징계규정 명문화 ㆍ구성원들 성과급 지급 시, 감사품질 성과지표에 따라 지급하도록 하여, 감사품질 우선의 정책과 절차 수립",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20241227000169",
+   "rcept_dt": "2024-12-27",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20241227000169",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20240701000107:0:0",
+    "20240110000732:0:0",
+    "20230630000571:0:0",
+    "20220630000456:0:0"
+   ]
+  },
+  "20241227000169:0:1": {
+   "firm": "도원회계법인",
+   "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
+   "category_raw": "회계법인내 품질에 대한 리더십 책임",
+   "recommendation": "품질관리에 대한 책임 및 권한정비 미흡",
+   "action": "ㆍ대표이사가 품질관리 최종 책임을 지도록 내규로 명확화함 ㆍ품질관리책임자에게 그 책임을 맡기에 충분한 권한 부여",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20241227000169",
+   "rcept_dt": "2024-12-27",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20241227000169",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20240701000107:0:1",
+    "20240110000732:0:1",
+    "20230630000571:0:1",
+    "20220630000456:0:1"
+   ]
+  },
+  "20241227000169:0:10": {
+   "firm": "도원회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사조서의 취합 및 보관관련 내부통제절차 미흡",
+   "action": "ㆍ2020년 전자조서 시스템 도입ㆍ전자조서 관리에 대한 정책과 절차 내규로 명문화하여 전자조서 적시취합(아카이빙), 보관의 무결성 운영 ㆍ서면조서 적시취합, 무결성을 위한 규정 재정비 및 운영",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20241227000169",
+   "rcept_dt": "2024-12-27",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20241227000169",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20240110000732:0:9",
+    "20220630000456:0:9"
+   ]
+  },
+  "20241227000169:0:11": {
+   "firm": "도원회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "최종감사파일의 취합, 변형,추가 관련 내부통제절차 미흡",
+   "action": "ㆍ최종취합조서의 변형이 불가하도록 수정방지 Tag사전부착. ㆍ내규로 다음사항 명문화 -최종취합조서 이외 조서추가 사유를 제한적으로 한정 -조서 추가시 별도 조서철로 새로 생성 ㆍ품질관리실에서 조서 재입고 시 기존 조서와 새로 생성된 조서 확인",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20241227000169",
+   "rcept_dt": "2024-12-27",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20241227000169",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20240110000732:0:10",
+    "20220630000456:0:10"
+   ]
+  },
+  "20241227000169:0:12": {
+   "firm": "도원회계법인",
+   "dae_standard": "6. 모니터링",
+   "category_raw": "모니터링",
+   "recommendation": "징계절차의 실질적 운영미비",
+   "action": "내부징계절차를 실질적으로 운영되도록 설계, 운영",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20241227000169",
+   "rcept_dt": "2024-12-27",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20241227000169",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20240110000732:0:12",
+    "20220630000456:0:12"
+   ]
+  },
+  "20241227000169:0:2": {
+   "firm": "도원회계법인",
+   "dae_standard": "2. 관련 윤리적 요구사항",
+   "category_raw": "윤리적 요구사항",
+   "recommendation": "독립성 통제에 필요한 제반정보의 확인절차 미흡",
+   "action": "ㆍ재무적 이해관계, 고용관계 전산입력 시스템 운영 ㆍ매년말 구성원및배우자의 독립성유지확인서 전자서명 입수 ㆍ연2회 구성원및배우자의 주식보유 모니터링",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20241227000169",
+   "rcept_dt": "2024-12-27",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20241227000169",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20240701000107:0:2",
+    "20240110000732:0:2",
+    "20230630000571:0:2",
+    "20220630000456:0:2"
+   ]
+  },
+  "20241227000169:0:4": {
+   "firm": "도원회계법인",
+   "dae_standard": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+   "category_raw": "업무의 수용과 유지",
+   "recommendation": "계약전 위험평가절차 미흡",
+   "action": "감사계약 체결 전 수임승인여부 검토을 위해 품질관리실로 제출하는 조서에 저가수임 판단지표를 구체적으로 명시하여 저가수임의 임의적 판단 배제",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20241227000169",
+   "rcept_dt": "2024-12-27",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20241227000169",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20240701000107:0:4",
+    "20240110000732:0:4",
+    "20230630000571:0:4",
+    "20220630000456:0:4"
+   ]
+  },
+  "20241227000169:0:6": {
+   "firm": "도원회계법인",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "업무 배정시 업무수행이사 등의 가용시간 고려 미흡",
+   "action": "품질관리실장은 본부별/이사별 감사가능 잉여시간을 관리하고 있으며, 감사업무 배정 시 동 가용시간을 고려하여 업무배정하고 있음",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20241227000169",
+   "rcept_dt": "2024-12-27",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20241227000169",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20240110000732:0:6",
+    "20220630000456:0:6"
+   ]
+  },
+  "20241227000169:0:7": {
+   "firm": "도원회계법인",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "품질관리 중심의 승진 및 보상에 대한 규정화 미흡",
+   "action": "임직원에 대하여 품질관리 수준을 반영한 성과급지급 급여규정을 제정함",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20241227000169",
+   "rcept_dt": "2024-12-27",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20241227000169",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20240701000107:0:7",
+    "20240110000732:0:7",
+    "20230630000571:0:7",
+    "20220630000456:0:7"
+   ]
+  },
+  "20241227000169:0:8": {
+   "firm": "도원회계법인",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "감사업무 투입시간 기록 및 관리 미흡",
+   "action": "ㆍ구성원들에게 적시성있는 투입시간 기록문화 정착을 위해 시간기록 우수자에게 상품권 지급, 주기적 공지 및 정기연수 교육 실시. ㆍ투입시간 주기적 모니터링으로 미준수자에게 내부징계. ㆍ보고서발행 control 부서에서, 모든 보고서발행 전 투입시간 입력여부 체크하여 미입력시 보고서 발행 불가능하도록 내부절차 마련.",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20241227000169",
+   "rcept_dt": "2024-12-27",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20241227000169",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20240701000107:0:6",
+    "20240110000732:0:8",
+    "20230630000571:0:6",
+    "20220630000456:0:8"
+   ]
+  },
+  "20241227000169:0:9": {
+   "firm": "도원회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사정보의 유출방지를 위한 시스템 마련 미비",
+   "action": "ㆍ회사계정 이메일 도입하여 업무용 메일만 사용하도록 함 ㆍ중앙부서의 회계계정 이메일/전자조서 시스템 관리로, 퇴사자의 회사계정 이메일/전자조서 접근 차단 ㆍ타감사인 전자조서열람 시, 열람용 아이디로 로그인하여 열람(다운로드 불가)",
+   "action_kind": "text",
+   "recommend_date_raw": "2021년 12월 17일",
+   "recommend_date_iso": "2021-12-17",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20241227000169",
+   "rcept_dt": "2024-12-27",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20241227000169",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20240701000107:0:9",
+    "20240110000732:0:11",
+    "20230630000571:0:9",
+    "20220630000456:0:11"
+   ]
+  },
+  "20250328002225:0:10": {
+   "firm": "한영회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "감사조서 상 업무수행이사 및 심리이사의 서명 관리 검토 통제 강화",
+   "action": "*업무수행이사 및 심리이사의 서명 관리에 대한 교육 실시 및 품질 점수 반영",
+   "action_kind": "text",
+   "recommend_date_raw": "2021.12.01",
+   "recommend_date_iso": "2021-12-01",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20250328002225",
+   "rcept_dt": "2025-03-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250328002225",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20241115000312:0:10",
+    "20240930000038:0:10",
+    "20230927000058:0:10",
+    "20221129000538:0:10",
+    "20220930000076:0:11"
+   ]
+  },
+  "20250328002225:0:2": {
+   "firm": "한영회계법인",
+   "dae_standard": "2. 관련 윤리적 요구사항",
+   "category_raw": "윤리적 요구사항",
+   "recommendation": "개별감사업무에 대한 독립성 준수 확인절차 개선 필요",
+   "action": "*감사참여자는 독립성 확인서 제출 후 감사조서에 접속 가능하도록 시스템 통제 변경 *감사업무시간 최초 입력시 자동으로 독립성 확인서 제출하도록 하는 시스템 통제 병행 *감사 종료단계에서 업무수행이사가 감사참여자의 독립성 준수 여부 확인",
+   "action_kind": "text",
+   "recommend_date_raw": "2021.12.01",
+   "recommend_date_iso": "2021-12-01",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20250328002225",
+   "rcept_dt": "2025-03-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250328002225",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20241115000312:0:2",
+    "20240930000038:0:2",
+    "20230927000058:0:2",
+    "20221129000538:0:2",
+    "20220930000076:0:2"
+   ]
+  },
+  "20250328002225:0:4": {
+   "firm": "한영회계법인",
+   "dae_standard": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+   "category_raw": "업무의 수용과 유지",
+   "recommendation": "업무의 수용 및 유지관련 위험평가절차 강화 필요",
+   "action": "*업무의 수용 및 유지 관련 위험평가절차 부실기재에 대한 감사인 감리결과 교육 수행 *위험평가절차 수행 시 유의사항 교육 수행 *매년 위험평가절차 항목 변경/추가에 관한 사항 교육 수행",
+   "action_kind": "text",
+   "recommend_date_raw": "2021.12.01",
+   "recommend_date_iso": "2021-12-01",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20250328002225",
+   "rcept_dt": "2025-03-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250328002225",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20241115000312:0:4",
+    "20240930000038:0:4",
+    "20230927000058:0:4",
+    "20221129000538:0:4",
+    "20220930000076:0:4"
+   ]
+  },
+  "20250328002225:0:6": {
+   "firm": "한영회계법인",
+   "dae_standard": "4. 인적 자원",
+   "category_raw": "인적자원",
+   "recommendation": "구성원 채용 시 외부징계 이력 확인절차 강화 필요",
+   "action": "*신규 파트너 영입 시 징계사실을 확인할 수 있는 서류 제출 받아 확인하는 절차 마련 *내부구성원의 징계사실을 입사 이후에도 지속적으로 확인하는 절차 마련",
+   "action_kind": "text",
+   "recommend_date_raw": "2021.12.01",
+   "recommend_date_iso": "2021-12-01",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20250328002225",
+   "rcept_dt": "2025-03-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250328002225",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20241115000312:0:6",
+    "20240930000038:0:6",
+    "20230927000058:0:6",
+    "20221129000538:0:6",
+    "20220930000076:0:6"
+   ]
+  },
+  "20250328002225:0:9": {
+   "firm": "한영회계법인",
+   "dae_standard": "5. 업무의 수행",
+   "category_raw": "업무의 수행",
+   "recommendation": "사전품질관리검토자 선정절차 운영 현황에 대한 점검 강화 필요",
+   "action": "*심리이사 신규 배정 또는 변경 시, 심리배정담당자는 상호교차심리가 발생하지 않도록 하는 등 배정절차 개선",
+   "action_kind": "text",
+   "recommend_date_raw": "2021.12.01",
+   "recommend_date_iso": "2021-12-01",
+   "year_basis": "recommend_date_D8_screen_firm",
+   "date_mismatch": true,
+   "rcept_no": "20250328002225",
+   "rcept_dt": "2025-03-28",
+   "dart_url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250328002225",
+   "match_level_v4": null,
+   "history_row_ids": [
+    "20241115000312:0:9",
+    "20240930000038:0:9",
+    "20230927000058:0:9",
+    "20221129000538:0:9",
+    "20220930000076:0:9"
+   ]
+  }
+ },
+ "attachments": [
+  {
+   "finding_id": "2019/등록/1.1/다군/다산회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "1. 회계법인 내 품질에 대한 리더십 책임",
+    "group": "1.1 지배구조",
+    "gun": "다군",
+    "firm": "다산회계법인",
+    "index": 0
+   },
+   "text_sha256": "718991035299f013a110a515c59dcf43db8d96c28fb9708752d70770e798ca8f",
+   "f004": [
+    {
+     "f004_row_id": "20240701000247:0:0",
+     "covers": [
+      "2019/등록/1.1/다군/다산회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/1.1/다군/다산회계법인/0": 0.981
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/1.1/다군/이정회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "1. 회계법인 내 품질에 대한 리더십 책임",
+    "group": "1.1 지배구조",
+    "gun": "다군",
+    "firm": "이정회계법인",
+    "index": 0
+   },
+   "text_sha256": "42f2fb08efeb59dc62e6cd03c2881b05b269017dab88f5164b5cfd237312088c",
+   "f004": [
+    {
+     "f004_row_id": "20240701000352:0:0",
+     "covers": [
+      "2019/등록/1.1/다군/이정회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/1.1/다군/이정회계법인/0": 1.427
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/1.1/라군/회계법인리안/0",
+   "path": {
+    "bundle": "등록",
+    "section": "1. 회계법인 내 품질에 대한 리더십 책임",
+    "group": "1.1 지배구조",
+    "gun": "라군",
+    "firm": "회계법인리안",
+    "index": 0
+   },
+   "text_sha256": "90b7183f9a2e7e9f71c1b25bc24acb6ae079292847e776f05389250101c9367f",
+   "f004": [
+    {
+     "f004_row_id": "20240701000259:0:0",
+     "covers": [
+      "2019/등록/1.1/라군/회계법인리안/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/1.1/라군/회계법인리안/0": 0.774
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/1.2/다군/대성삼경회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "1. 회계법인 내 품질에 대한 리더십 책임",
+    "group": "1.2 성과 연동 보상",
+    "gun": "다군",
+    "firm": "대성삼경회계법인",
+    "index": 0
+   },
+   "text_sha256": "80b0b5338a27afcee6fb52a160c71ccbef7c2907c59d4842c643d35818efff35",
+   "f004": [
+    {
+     "f004_row_id": "20240628000213:0:0",
+     "covers": [
+      "2019/등록/1.2/다군/대성삼경회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/1.2/다군/대성삼경회계법인/0": 1.0
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/1.2/다군/대성삼경회계법인/1",
+   "path": {
+    "bundle": "등록",
+    "section": "1. 회계법인 내 품질에 대한 리더십 책임",
+    "group": "1.2 성과 연동 보상",
+    "gun": "다군",
+    "firm": "대성삼경회계법인",
+    "index": 1
+   },
+   "text_sha256": "052036c9f9bd6969d3d7db852762e9742014d9be3e6eebab82d9b9d17da9bd4d",
+   "f004": [
+    {
+     "f004_row_id": "20240628000213:0:1",
+     "covers": [
+      "2019/등록/1.2/다군/대성삼경회계법인/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/1.2/다군/대성삼경회계법인/1": 1.148
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/1.2/다군/대성삼경회계법인/2",
+   "path": {
+    "bundle": "등록",
+    "section": "1. 회계법인 내 품질에 대한 리더십 책임",
+    "group": "1.2 성과 연동 보상",
+    "gun": "다군",
+    "firm": "대성삼경회계법인",
+    "index": 2
+   },
+   "text_sha256": "23f33cd7de312380e0daaa3124a63d66109f2d456406fb579f4e5ba45a7cbfc8",
+   "f004": [
+    {
+     "f004_row_id": "20240628000213:0:2",
+     "covers": [
+      "2019/등록/1.2/다군/대성삼경회계법인/2"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/1.2/다군/대성삼경회계법인/2": 0.573
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/1.2/다군/대성삼경회계법인/3",
+   "path": {
+    "bundle": "등록",
+    "section": "1. 회계법인 내 품질에 대한 리더십 책임",
+    "group": "1.2 성과 연동 보상",
+    "gun": "다군",
+    "firm": "대성삼경회계법인",
+    "index": 3
+   },
+   "text_sha256": "315657588af5583b4f6328241e9b92b44c5b29957491ea45e13cc5651bbdf9b2",
+   "f004": [
+    {
+     "f004_row_id": "20240628000213:0:3",
+     "covers": [
+      "2019/등록/1.2/다군/대성삼경회계법인/3"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/1.2/다군/대성삼경회계법인/3": 0.622
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/1.2/다군/도원회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "1. 회계법인 내 품질에 대한 리더십 책임",
+    "group": "1.2 성과 연동 보상",
+    "gun": "다군",
+    "firm": "도원회계법인",
+    "index": 0
+   },
+   "text_sha256": "17ea8c7cf920405fe94901982a1e342599eedcf53c31200cca4e5172195b43af",
+   "f004": [
+    {
+     "f004_row_id": "20241227000169:0:0",
+     "covers": [
+      "2019/등록/1.2/다군/도원회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/1.2/다군/도원회계법인/0": 0.467
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/1.2/다군/도원회계법인/1",
+   "path": {
+    "bundle": "등록",
+    "section": "1. 회계법인 내 품질에 대한 리더십 책임",
+    "group": "1.2 성과 연동 보상",
+    "gun": "다군",
+    "firm": "도원회계법인",
+    "index": 1
+   },
+   "text_sha256": "0fec8c6da1f77b1352db39066ebef1cfb24988970306e951425b587cb89891e4",
+   "f004": [
+    {
+     "f004_row_id": "20241227000169:0:1",
+     "covers": [
+      "2019/등록/1.2/다군/도원회계법인/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/1.2/다군/도원회계법인/1": 0.856
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/2.1/가군/한영회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "2. 관련 윤리적 요구사항",
+    "group": "2.1 독립성 정보 관리",
+    "gun": "가군",
+    "firm": "한영회계법인",
+    "index": 0
+   },
+   "text_sha256": "da5969e8006add6038798eb2344d4e532a9b2197cba7770cdfa54eca26dd4860",
+   "f004": [
+    {
+     "f004_row_id": "20250328002225:0:2",
+     "covers": [
+      "2019/등록/2.1/가군/한영회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/2.1/가군/한영회계법인/0": 0.778
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/2.2/다군/다산회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "2. 관련 윤리적 요구사항",
+    "group": "2.2 업무수임유지 단계 독립성 검토",
+    "gun": "다군",
+    "firm": "다산회계법인",
+    "index": 0
+   },
+   "text_sha256": "bda3513feb15edb7413f5ff793b0cc7eeff669d562a7ca0901fd73620f8bc5d4",
+   "f004": [
+    {
+     "f004_row_id": "20240701000247:0:2",
+     "covers": [
+      "2019/등록/2.2/다군/다산회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/2.2/다군/다산회계법인/0": 0.706
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/2.2/다군/다산회계법인/1",
+   "path": {
+    "bundle": "등록",
+    "section": "2. 관련 윤리적 요구사항",
+    "group": "2.2 업무수임유지 단계 독립성 검토",
+    "gun": "다군",
+    "firm": "다산회계법인",
+    "index": 1
+   },
+   "text_sha256": "ae1331bf8b80d2d74c966e9e90560b45605bf1463016298a8b43591839cb7ebb",
+   "f004": [
+    {
+     "f004_row_id": "20240701000247:0:3",
+     "covers": [
+      "2019/등록/2.2/다군/다산회계법인/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/2.2/다군/다산회계법인/1": 0.719
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/2.2/다군/대성삼경회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "2. 관련 윤리적 요구사항",
+    "group": "2.2 업무수임유지 단계 독립성 검토",
+    "gun": "다군",
+    "firm": "대성삼경회계법인",
+    "index": 0
+   },
+   "text_sha256": "9122f10e810863912d8156d2c5d842903176eb9d086818e79dc32760dcdc7833",
+   "f004": [
+    {
+     "f004_row_id": "20240628000213:0:4",
+     "covers": [
+      "2019/등록/2.2/다군/대성삼경회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/2.2/다군/대성삼경회계법인/0": 0.815
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/2.2/다군/대성삼경회계법인/1",
+   "path": {
+    "bundle": "등록",
+    "section": "2. 관련 윤리적 요구사항",
+    "group": "2.2 업무수임유지 단계 독립성 검토",
+    "gun": "다군",
+    "firm": "대성삼경회계법인",
+    "index": 1
+   },
+   "text_sha256": "da37aa8590572037814ff8283caa7773884722624412563182a1ef4383f0f1ef",
+   "f004": [
+    {
+     "f004_row_id": "20240628000213:0:5",
+     "covers": [
+      "2019/등록/2.2/다군/대성삼경회계법인/1"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2019/등록/2.2/다군/대성삼경회계법인/1": 0.68
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/2.2/다군/도원회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "2. 관련 윤리적 요구사항",
+    "group": "2.2 업무수임유지 단계 독립성 검토",
+    "gun": "다군",
+    "firm": "도원회계법인",
+    "index": 0
+   },
+   "text_sha256": "1a6d2e5110e9b911e8a4f2605fbfb85bf2966e2bf7ace9a83445ee362a2c1113",
+   "f004": [
+    {
+     "f004_row_id": "20241227000169:0:2",
+     "covers": [
+      "2019/등록/2.2/다군/도원회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/2.2/다군/도원회계법인/0": 0.922
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/2.2/다군/이정회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "2. 관련 윤리적 요구사항",
+    "group": "2.2 업무수임유지 단계 독립성 검토",
+    "gun": "다군",
+    "firm": "이정회계법인",
+    "index": 0
+   },
+   "text_sha256": "8fa87e5621c4ad6aa9fafc9f963b76587eeade35196e5c2c6425cda54a22a3ac",
+   "f004": [
+    {
+     "f004_row_id": "20240701000352:0:2",
+     "covers": [
+      "2019/등록/2.2/다군/이정회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/2.2/다군/이정회계법인/0": 1.435
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/2.2/다군/이정회계법인/1",
+   "path": {
+    "bundle": "등록",
+    "section": "2. 관련 윤리적 요구사항",
+    "group": "2.2 업무수임유지 단계 독립성 검토",
+    "gun": "다군",
+    "firm": "이정회계법인",
+    "index": 1
+   },
+   "text_sha256": "b3b005dfe3346c089cdd451ec8648b65b99f72ff3425d10f24477b3247d35808",
+   "f004": [
+    {
+     "f004_row_id": "20240701000352:0:3",
+     "covers": [
+      "2019/등록/2.2/다군/이정회계법인/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/2.2/다군/이정회계법인/1": 1.405
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/2.2/라군/회계법인리안/0",
+   "path": {
+    "bundle": "등록",
+    "section": "2. 관련 윤리적 요구사항",
+    "group": "2.2 업무수임유지 단계 독립성 검토",
+    "gun": "라군",
+    "firm": "회계법인리안",
+    "index": 0
+   },
+   "text_sha256": "3bed7e77dde678d1ae4dfd8133d552ca4162683e3278481d32ebc8b5c5506d87",
+   "f004": [
+    {
+     "f004_row_id": "20240701000259:0:2",
+     "covers": [
+      "2019/등록/2.2/라군/회계법인리안/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/2.2/라군/회계법인리안/0": 1.115
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/2.2/라군/회계법인리안/2",
+   "path": {
+    "bundle": "등록",
+    "section": "2. 관련 윤리적 요구사항",
+    "group": "2.2 업무수임유지 단계 독립성 검토",
+    "gun": "라군",
+    "firm": "회계법인리안",
+    "index": 2
+   },
+   "text_sha256": "289391380f39819112af0b25b6f20e02c0d4f524c38a31380af1c30714584a8d",
+   "f004": [
+    {
+     "f004_row_id": "20240701000259:0:3",
+     "covers": [
+      "2019/등록/2.2/라군/회계법인리안/1",
+      "2019/등록/2.2/라군/회계법인리안/2"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/2.2/라군/회계법인리안/1": 1.175,
+      "2019/등록/2.2/라군/회계법인리안/2": 1.188
+     },
+     "note": "위 2개 문단을 F004 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/3.1/가군/삼일회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+    "group": "3.1 위험평가 정보 관리",
+    "gun": "가군",
+    "firm": "삼일회계법인",
+    "index": 0
+   },
+   "text_sha256": "980b2e10f5055b30da54ee33e980b56836b11f148ca19219b15447cff3e9f6c8",
+   "f004": [
+    {
+     "f004_row_id": "20240930000232:0:4",
+     "covers": [
+      "2019/등록/3.1/가군/삼일회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/3.1/가군/삼일회계법인/0": 1.392
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/3.1/가군/한영회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+    "group": "3.1 위험평가 정보 관리",
+    "gun": "가군",
+    "firm": "한영회계법인",
+    "index": 0
+   },
+   "text_sha256": "95ef6a0a0453751635f6a641d65326b1ee340870c4d61f9143ab67eb57b93d4d",
+   "f004": [
+    {
+     "f004_row_id": "20250328002225:0:4",
+     "covers": [
+      "2019/등록/3.1/가군/한영회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/3.1/가군/한영회계법인/0": 1.117
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/3.1/다군/다산회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+    "group": "3.1 위험평가 정보 관리",
+    "gun": "다군",
+    "firm": "다산회계법인",
+    "index": 0
+   },
+   "text_sha256": "8539b521a6acad9a1c9363e01814472eb04977439a060f7c7a11c42a0f474c79",
+   "f004": [
+    {
+     "f004_row_id": "20240701000247:0:4",
+     "covers": [
+      "2019/등록/3.1/다군/다산회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/3.1/다군/다산회계법인/0": 0.715
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/3.1/다군/이정회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+    "group": "3.1 위험평가 정보 관리",
+    "gun": "다군",
+    "firm": "이정회계법인",
+    "index": 0
+   },
+   "text_sha256": "361eb1eb4e63c546b7ec4c243c2e478bcc91563fc9987245c035c75de148b876",
+   "f004": [
+    {
+     "f004_row_id": "20240701000352:0:4",
+     "covers": [
+      "2019/등록/3.1/다군/이정회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/3.1/다군/이정회계법인/0": 1.389
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/3.1/다군/대성삼경회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+    "group": "3.1 위험평가 정보 관리",
+    "gun": "다군",
+    "firm": "대성삼경회계법인",
+    "index": 0
+   },
+   "text_sha256": "3accb3b13cf1c1afb7d040a4ff04475f376764560270b322c461ec0ee6cc3a1e",
+   "f004": [
+    {
+     "f004_row_id": "20240628000213:0:6",
+     "covers": [
+      "2019/등록/3.1/다군/대성삼경회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/3.1/다군/대성삼경회계법인/0": 1.321
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/3.1/다군/대성삼경회계법인/1",
+   "path": {
+    "bundle": "등록",
+    "section": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+    "group": "3.1 위험평가 정보 관리",
+    "gun": "다군",
+    "firm": "대성삼경회계법인",
+    "index": 1
+   },
+   "text_sha256": "43e7e6eb51df69fb27cd4a32de024476a4ae1b413ece9e508be7b76234b24e9c",
+   "f004": [
+    {
+     "f004_row_id": "20240628000213:0:7",
+     "covers": [
+      "2019/등록/3.1/다군/대성삼경회계법인/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/3.1/다군/대성삼경회계법인/1": 1.258
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/3.1/다군/대성삼경회계법인/2",
+   "path": {
+    "bundle": "등록",
+    "section": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+    "group": "3.1 위험평가 정보 관리",
+    "gun": "다군",
+    "firm": "대성삼경회계법인",
+    "index": 2
+   },
+   "text_sha256": "bef0675950ae81e3e453483cca4bb8399b971f85f258b9b35846788b1c071f9b",
+   "f004": [
+    {
+     "f004_row_id": "20240628000213:0:8",
+     "covers": [
+      "2019/등록/3.1/다군/대성삼경회계법인/2"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2019/등록/3.1/다군/대성삼경회계법인/2": 0.823
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/3.1/다군/도원회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+    "group": "3.1 위험평가 정보 관리",
+    "gun": "다군",
+    "firm": "도원회계법인",
+    "index": 0
+   },
+   "text_sha256": "9653a651a33ec01cb795e2cf9a8706bb572c67c0adcb22097900cdf7ea822e0d",
+   "f004": [
+    {
+     "f004_row_id": "20241227000169:0:4",
+     "covers": [
+      "2019/등록/3.1/다군/도원회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/3.1/다군/도원회계법인/0": 0.967
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/3.1/라군/회계법인리안/0",
+   "path": {
+    "bundle": "등록",
+    "section": "3. 의뢰인 관계 및 특정 업무의 수용과 유지",
+    "group": "3.1 위험평가 정보 관리",
+    "gun": "라군",
+    "firm": "회계법인리안",
+    "index": 0
+   },
+   "text_sha256": "9f5098912c312510cbf3bfee9da5e91679e065b0f777d7bf9ccca96acff777a1",
+   "f004": [
+    {
+     "f004_row_id": "20240701000259:0:4",
+     "covers": [
+      "2019/등록/3.1/라군/회계법인리안/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/3.1/라군/회계법인리안/0": 1.099
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/4.1/가군/삼일회계법인/1",
+   "path": {
+    "bundle": "등록",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": "가군",
+    "firm": "삼일회계법인",
+    "index": 1
+   },
+   "text_sha256": "b7f737ab7a8275d5c9da7e352ef1dac32ffc9e7062f114233405eb4004f7a386",
+   "f004": [
+    {
+     "f004_row_id": "20240930000232:0:6",
+     "covers": [
+      "2019/등록/4.1/가군/삼일회계법인/0",
+      "2019/등록/4.1/가군/삼일회계법인/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/4.1/가군/삼일회계법인/0": 1.376,
+      "2019/등록/4.1/가군/삼일회계법인/1": 1.03
+     },
+     "note": "위 2개 문단을 F004 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/4.1/가군/한영회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": "가군",
+    "firm": "한영회계법인",
+    "index": 0
+   },
+   "text_sha256": "2c5d6399e92c4fdc04c41280bf2c89742126961a765cf602f2a61afe2712ddfa",
+   "f004": [
+    {
+     "f004_row_id": "20250328002225:0:6",
+     "covers": [
+      "2019/등록/4.1/가군/한영회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/4.1/가군/한영회계법인/0": 0.483
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/4.1/라군/회계법인리안/0",
+   "path": {
+    "bundle": "등록",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": "라군",
+    "firm": "회계법인리안",
+    "index": 0
+   },
+   "text_sha256": "680be9cfa879d462a55e97c25f26ba20a326e7ae19c5be0ab33680996999ee63",
+   "f004": [
+    {
+     "f004_row_id": "20240701000259:0:6",
+     "covers": [
+      "2019/등록/4.1/라군/회계법인리안/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/4.1/라군/회계법인리안/0": 1.433
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/4.1/라군/회계법인리안/1",
+   "path": {
+    "bundle": "등록",
+    "section": "4. 인적 자원",
+    "group": "4.1 감사업무 시간 관리",
+    "gun": "라군",
+    "firm": "회계법인리안",
+    "index": 1
+   },
+   "text_sha256": "e96f72d9664502a433e4fce185232fab4222992d68b3b00ffaab7cd0bd390d51",
+   "f004": [
+    {
+     "f004_row_id": "20240701000259:0:7",
+     "covers": [
+      "2019/등록/4.1/라군/회계법인리안/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/4.1/라군/회계법인리안/1": 1.094
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/4.2/다군/도원회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "4. 인적 자원",
+    "group": "4.2 업무수행이사 배정 관리",
+    "gun": "다군",
+    "firm": "도원회계법인",
+    "index": 0
+   },
+   "text_sha256": "65fe00753fe413aa31b295c4cc9fb058131eff952199836aa4d06cd31dcae1af",
+   "f004": [
+    {
+     "f004_row_id": "20241227000169:0:6",
+     "covers": [
+      "2019/등록/4.2/다군/도원회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/4.2/다군/도원회계법인/0": 1.044
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/4.2/다군/도원회계법인/1",
+   "path": {
+    "bundle": "등록",
+    "section": "4. 인적 자원",
+    "group": "4.2 업무수행이사 배정 관리",
+    "gun": "다군",
+    "firm": "도원회계법인",
+    "index": 1
+   },
+   "text_sha256": "ec8f2a6a54646aa9ba8aeea7bf113331b6a5bee68193e22c6506494a90d90d5e",
+   "f004": [
+    {
+     "f004_row_id": "20241227000169:0:7",
+     "covers": [
+      "2019/등록/4.2/다군/도원회계법인/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/4.2/다군/도원회계법인/1": 1.011
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/4.2/다군/도원회계법인/2",
+   "path": {
+    "bundle": "등록",
+    "section": "4. 인적 자원",
+    "group": "4.2 업무수행이사 배정 관리",
+    "gun": "다군",
+    "firm": "도원회계법인",
+    "index": 2
+   },
+   "text_sha256": "ddc561a1e72b2ed56e1f0ae1b36b78d3b0501798fd517119eb8a02b19a6d1159",
+   "f004": [
+    {
+     "f004_row_id": "20241227000169:0:8",
+     "covers": [
+      "2019/등록/4.2/다군/도원회계법인/2"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2019/등록/4.2/다군/도원회계법인/2": 0.624
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/4.3/다군/다산회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "4. 인적 자원",
+    "group": "4.3 교육 훈련",
+    "gun": "다군",
+    "firm": "다산회계법인",
+    "index": 0
+   },
+   "text_sha256": "9ca1fd7b4d7844a4c7c580a4484bc272304c5258309a51168e97435ed624f7c7",
+   "f004": [
+    {
+     "f004_row_id": "20240701000247:0:6",
+     "covers": [
+      "2019/등록/4.3/다군/다산회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/4.3/다군/다산회계법인/0": 0.745
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/4.3/다군/다산회계법인/1",
+   "path": {
+    "bundle": "등록",
+    "section": "4. 인적 자원",
+    "group": "4.3 교육 훈련",
+    "gun": "다군",
+    "firm": "다산회계법인",
+    "index": 1
+   },
+   "text_sha256": "312708d3bab9d9f3af6a83677ee47c9e449e78ad865751895128e3c5e92d1fe0",
+   "f004": [
+    {
+     "f004_row_id": "20240701000247:0:7",
+     "covers": [
+      "2019/등록/4.3/다군/다산회계법인/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/4.3/다군/다산회계법인/1": 0.584
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/4.3/다군/대성삼경회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "4. 인적 자원",
+    "group": "4.3 교육 훈련",
+    "gun": "다군",
+    "firm": "대성삼경회계법인",
+    "index": 0
+   },
+   "text_sha256": "cdffd3f5934e50dd6cc4905ed47181e190e6d3e77b5c18d019dd3582185846ff",
+   "f004": [
+    {
+     "f004_row_id": "20240628000213:0:9",
+     "covers": [
+      "2019/등록/4.3/다군/대성삼경회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/4.3/다군/대성삼경회계법인/0": 0.905
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/4.3/다군/대성삼경회계법인/1",
+   "path": {
+    "bundle": "등록",
+    "section": "4. 인적 자원",
+    "group": "4.3 교육 훈련",
+    "gun": "다군",
+    "firm": "대성삼경회계법인",
+    "index": 1
+   },
+   "text_sha256": "2f0208165f8b53800e98f07c6a91b6b10d46f0e8984c362372d063e7afa66715",
+   "f004": [
+    {
+     "f004_row_id": "20240628000213:0:10",
+     "covers": [
+      "2019/등록/4.3/다군/대성삼경회계법인/1"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2019/등록/4.3/다군/대성삼경회계법인/1": 0.403
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/4.3/다군/대성삼경회계법인/2",
+   "path": {
+    "bundle": "등록",
+    "section": "4. 인적 자원",
+    "group": "4.3 교육 훈련",
+    "gun": "다군",
+    "firm": "대성삼경회계법인",
+    "index": 2
+   },
+   "text_sha256": "db8ee150931e7cd14eb455acf6e4b56e078f742d25adcd249cfbe5fb7a8fbd26",
+   "f004": [
+    {
+     "f004_row_id": "20240628000213:0:11",
+     "covers": [
+      "2019/등록/4.3/다군/대성삼경회계법인/2"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/4.3/다군/대성삼경회계법인/2": 0.773
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/4.3/다군/이정회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "4. 인적 자원",
+    "group": "4.3 교육 훈련",
+    "gun": "다군",
+    "firm": "이정회계법인",
+    "index": 0
+   },
+   "text_sha256": "58cb0f5d1201e60e37e613f6d89ef1bfdfbdc10734ee5a0339036ecc872d99f3",
+   "f004": [
+    {
+     "f004_row_id": "20240701000352:0:6",
+     "covers": [
+      "2019/등록/4.3/다군/이정회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/4.3/다군/이정회계법인/0": 1.415
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/4.3/다군/이정회계법인/1",
+   "path": {
+    "bundle": "등록",
+    "section": "4. 인적 자원",
+    "group": "4.3 교육 훈련",
+    "gun": "다군",
+    "firm": "이정회계법인",
+    "index": 1
+   },
+   "text_sha256": "a4a39ce504f1031b372df98a5745925786cbd32c4c9147dc54da003dfcfa87be",
+   "f004": [
+    {
+     "f004_row_id": "20240701000352:0:7",
+     "covers": [
+      "2019/등록/4.3/다군/이정회계법인/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/4.3/다군/이정회계법인/1": 1.384
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/5.2/가군/삼일회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": "가군",
+    "firm": "삼일회계법인",
+    "index": 0
+   },
+   "text_sha256": "f6d448d4ffe2bbba96eea78565f3e311221673c51e4422497aa18c9887ef1263",
+   "f004": [
+    {
+     "f004_row_id": "20240930000232:0:8",
+     "covers": [
+      "2019/등록/5.2/가군/삼일회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/5.2/가군/삼일회계법인/0": 1.408
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/5.2/가군/삼일회계법인/1",
+   "path": {
+    "bundle": "등록",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": "가군",
+    "firm": "삼일회계법인",
+    "index": 1
+   },
+   "text_sha256": "ce68f496372d0d1e41c09ed7012296cac4c53ebf7a2ff00c6e4350efd2f3b0f0",
+   "f004": [
+    {
+     "f004_row_id": "20240930000232:0:9",
+     "covers": [
+      "2019/등록/5.2/가군/삼일회계법인/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/5.2/가군/삼일회계법인/1": 1.375
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/5.2/가군/삼일회계법인/2",
+   "path": {
+    "bundle": "등록",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": "가군",
+    "firm": "삼일회계법인",
+    "index": 2
+   },
+   "text_sha256": "f73ae0e4805a3108767bb7d49d93298f78cd690dca5b875f1eef669b2511eed2",
+   "f004": [
+    {
+     "f004_row_id": "20240930000232:0:10",
+     "covers": [
+      "2019/등록/5.2/가군/삼일회계법인/2"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/5.2/가군/삼일회계법인/2": 1.481
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/5.2/가군/삼일회계법인/3",
+   "path": {
+    "bundle": "등록",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": "가군",
+    "firm": "삼일회계법인",
+    "index": 3
+   },
+   "text_sha256": "16b1729b0ecb447d64a98a456acedd30cfc555fd509fcf1e89c60082649da43c",
+   "f004": [
+    {
+     "f004_row_id": "20240930000232:0:11",
+     "covers": [
+      "2019/등록/5.2/가군/삼일회계법인/3"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/5.2/가군/삼일회계법인/3": 1.482
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/5.2/가군/한영회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": "가군",
+    "firm": "한영회계법인",
+    "index": 0
+   },
+   "text_sha256": "f28244da7e5e24301a256f1ce4d09e03927739b775f9a8e1289ceade1b7fc56b",
+   "f004": [
+    {
+     "f004_row_id": "20250328002225:0:9",
+     "covers": [
+      "2019/등록/5.2/가군/한영회계법인/0"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2019/등록/5.2/가군/한영회계법인/0": 0.443
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/5.2/가군/한영회계법인/1",
+   "path": {
+    "bundle": "등록",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": "가군",
+    "firm": "한영회계법인",
+    "index": 1
+   },
+   "text_sha256": "feadf06ca9a9c3e66a8e9eda23b019161ec68aa6f5f33807887bee3d145749b4",
+   "f004": [
+    {
+     "f004_row_id": "20250328002225:0:10",
+     "covers": [
+      "2019/등록/5.2/가군/한영회계법인/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/5.2/가군/한영회계법인/1": 0.82
+     },
+     "note": null
+    },
+    {
+     "f004_row_id": "20220930000076:0:10",
+     "covers": [
+      "2019/등록/5.2/가군/한영회계법인/1"
+     ],
+     "basis": "auto_extra_row",
+     "scores": {
+      "2019/등록/5.2/가군/한영회계법인/1": 0.82
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/5.2/다군/다산회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": "다군",
+    "firm": "다산회계법인",
+    "index": 0
+   },
+   "text_sha256": "bebe96e0f84cdaa958f622fbfe94caba944c51d349dbd338ceea1f1616e47e6c",
+   "f004": [
+    {
+     "f004_row_id": "20240701000247:0:8",
+     "covers": [
+      "2019/등록/5.2/다군/다산회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/5.2/다군/다산회계법인/0": 1.042
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/5.2/다군/다산회계법인/1",
+   "path": {
+    "bundle": "등록",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": "다군",
+    "firm": "다산회계법인",
+    "index": 1
+   },
+   "text_sha256": "4dcac4f887066013f246c73717ddd8088b07488b8920e66fa13f224e65f37336",
+   "f004": [
+    {
+     "f004_row_id": "20240701000247:0:9",
+     "covers": [
+      "2019/등록/5.2/다군/다산회계법인/1"
+     ],
+     "basis": "mint_review",
+     "scores": null,
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/5.2/다군/다산회계법인/2",
+   "path": {
+    "bundle": "등록",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": "다군",
+    "firm": "다산회계법인",
+    "index": 2
+   },
+   "text_sha256": "b66df78b485f0d074631ad1330810b9c3bc7d4e443164a944027df45d5b1aeec",
+   "f004": [
+    {
+     "f004_row_id": "20240701000247:0:10",
+     "covers": [
+      "2019/등록/5.2/다군/다산회계법인/2"
+     ],
+     "basis": "mint_review",
+     "scores": null,
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/5.2/다군/대성삼경회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": "다군",
+    "firm": "대성삼경회계법인",
+    "index": 0
+   },
+   "text_sha256": "18c56d97e6c90613b003dc5304797536db93ceaf8acf4b22896d49f6c7d93e21",
+   "f004": [
+    {
+     "f004_row_id": "20240628000213:0:13",
+     "covers": [
+      "2019/등록/5.2/다군/대성삼경회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/5.2/다군/대성삼경회계법인/0": 0.946
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/5.2/다군/대성삼경회계법인/1",
+   "path": {
+    "bundle": "등록",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": "다군",
+    "firm": "대성삼경회계법인",
+    "index": 1
+   },
+   "text_sha256": "fdc3a6a2576e761a50056c7a960e9f2a6feca1e68cdaf984cf65827d68f064de",
+   "f004": [
+    {
+     "f004_row_id": "20240628000213:0:14",
+     "covers": [
+      "2019/등록/5.2/다군/대성삼경회계법인/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/5.2/다군/대성삼경회계법인/1": 0.891
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/5.2/다군/대성삼경회계법인/2",
+   "path": {
+    "bundle": "등록",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": "다군",
+    "firm": "대성삼경회계법인",
+    "index": 2
+   },
+   "text_sha256": "a155bdc4580037495039bb5bdb17744b6f78eb5d256f29a3c5658112f203c9d7",
+   "f004": [
+    {
+     "f004_row_id": "20240628000213:0:15",
+     "covers": [
+      "2019/등록/5.2/다군/대성삼경회계법인/2"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/5.2/다군/대성삼경회계법인/2": 0.681
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/5.2/다군/이정회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": "다군",
+    "firm": "이정회계법인",
+    "index": 0
+   },
+   "text_sha256": "58a0d072a1227cab8a02b49277b013a58ace79095f5a4e245d99a99e6f454655",
+   "f004": [
+    {
+     "f004_row_id": "20240701000352:0:8",
+     "covers": [
+      "2019/등록/5.2/다군/이정회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/5.2/다군/이정회계법인/0": 1.385
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/5.2/다군/이정회계법인/1",
+   "path": {
+    "bundle": "등록",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": "다군",
+    "firm": "이정회계법인",
+    "index": 1
+   },
+   "text_sha256": "6692e81f829f94aea3cb589281025b866862ab724b3ce3a8daf92b8240b0e9e0",
+   "f004": [
+    {
+     "f004_row_id": "20240701000352:0:9",
+     "covers": [
+      "2019/등록/5.2/다군/이정회계법인/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/5.2/다군/이정회계법인/1": 1.445
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/5.2/라군/회계법인리안/3",
+   "path": {
+    "bundle": "등록",
+    "section": "5. 업무의 수행",
+    "group": "5.2 사전심리",
+    "gun": "라군",
+    "firm": "회계법인리안",
+    "index": 3
+   },
+   "text_sha256": "e7ab4e320c91f118956bc633953c2070f57c7f22ada22319a60f6b43b105a284",
+   "f004": [
+    {
+     "f004_row_id": "20240701000259:0:9",
+     "covers": [
+      "2019/등록/5.2/라군/회계법인리안/0",
+      "2019/등록/5.2/라군/회계법인리안/1",
+      "2019/등록/5.2/라군/회계법인리안/2",
+      "2019/등록/5.2/라군/회계법인리안/3"
+     ],
+     "basis": "auto_high+auto_medium",
+     "scores": {
+      "2019/등록/5.2/라군/회계법인리안/0": 0.801,
+      "2019/등록/5.2/라군/회계법인리안/1": 0.42,
+      "2019/등록/5.2/라군/회계법인리안/2": 0.408,
+      "2019/등록/5.2/라군/회계법인리안/3": 0.842
+     },
+     "note": "위 4개 문단을 F004 한 행으로 공시"
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/5.3/다군/도원회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": "다군",
+    "firm": "도원회계법인",
+    "index": 0
+   },
+   "text_sha256": "6694b49aacdc9ada25437dccc223dc5e671eb8c520ba6cea300d4bcd9b52d7bd",
+   "f004": [
+    {
+     "f004_row_id": "20241227000169:0:10",
+     "covers": [
+      "2019/등록/5.3/다군/도원회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/5.3/다군/도원회계법인/0": 0.528
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/5.3/다군/도원회계법인/1",
+   "path": {
+    "bundle": "등록",
+    "section": "5. 업무의 수행",
+    "group": "5.3 조서입고",
+    "gun": "다군",
+    "firm": "도원회계법인",
+    "index": 1
+   },
+   "text_sha256": "32118355cfc3359611c1044601ad56196b0847ff2d05d118dbcad09dcb787361",
+   "f004": [
+    {
+     "f004_row_id": "20241227000169:0:11",
+     "covers": [
+      "2019/등록/5.3/다군/도원회계법인/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/5.3/다군/도원회계법인/1": 0.539
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/5.4/다군/대성삼경회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "5. 업무의 수행",
+    "group": "5.4 일반 조서 문서화 미비 등",
+    "gun": "다군",
+    "firm": "대성삼경회계법인",
+    "index": 0
+   },
+   "text_sha256": "50d255bfa90fec56c1967dfcabeaf3edd7e9a37611bfec32764710dc8dba7e62",
+   "f004": [
+    {
+     "f004_row_id": "20240628000213:0:12",
+     "covers": [
+      "2019/등록/5.4/다군/대성삼경회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/5.4/다군/대성삼경회계법인/0": 1.063
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/5.4/다군/도원회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "5. 업무의 수행",
+    "group": "5.4 일반 조서 문서화 미비 등",
+    "gun": "다군",
+    "firm": "도원회계법인",
+    "index": 0
+   },
+   "text_sha256": "56f234aea3e206cfbf61157b4f663cdedffa35fa472e887e26195f5e757e2da3",
+   "f004": [
+    {
+     "f004_row_id": "20240701000107:0:8",
+     "covers": [
+      "2019/등록/5.4/다군/도원회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/5.4/다군/도원회계법인/0": 1.069
+     },
+     "note": null
+    },
+    {
+     "f004_row_id": "20241227000169:0:9",
+     "covers": [
+      "2019/등록/5.4/다군/도원회계법인/0"
+     ],
+     "basis": "auto_extra_row",
+     "scores": {
+      "2019/등록/5.4/다군/도원회계법인/0": 1.069
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/5.4/라군/회계법인리안/0",
+   "path": {
+    "bundle": "등록",
+    "section": "5. 업무의 수행",
+    "group": "5.4 일반 조서 문서화 미비 등",
+    "gun": "라군",
+    "firm": "회계법인리안",
+    "index": 0
+   },
+   "text_sha256": "2ac21c6876eef899df7e277cdba2b28d520e0b8ae96459f74dda6d98b34e312c",
+   "f004": [
+    {
+     "f004_row_id": "20240701000259:0:8",
+     "covers": [
+      "2019/등록/5.4/라군/회계법인리안/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/5.4/라군/회계법인리안/0": 1.359
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/6.1/다군/다산회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": "다군",
+    "firm": "다산회계법인",
+    "index": 0
+   },
+   "text_sha256": "0e20cf8a6676224a7accf5821b447e56a7bd6518b136ba5cb1159b1db2188ed5",
+   "f004": [
+    {
+     "f004_row_id": "20240701000247:0:11",
+     "covers": [
+      "2019/등록/6.1/다군/다산회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/6.1/다군/다산회계법인/0": 0.738
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/6.1/다군/대성삼경회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": "다군",
+    "firm": "대성삼경회계법인",
+    "index": 0
+   },
+   "text_sha256": "838bd76e3940899ff57174f2f362d53467fe4564756cf15508ffb33b01c32168",
+   "f004": [
+    {
+     "f004_row_id": "20240628000213:0:16",
+     "covers": [
+      "2019/등록/6.1/다군/대성삼경회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/6.1/다군/대성삼경회계법인/0": 1.058
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/6.1/다군/대성삼경회계법인/1",
+   "path": {
+    "bundle": "등록",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": "다군",
+    "firm": "대성삼경회계법인",
+    "index": 1
+   },
+   "text_sha256": "97e16b2eb160acd586008156cb217ad53601be29c9d7cd9ff710341ad202691e",
+   "f004": [
+    {
+     "f004_row_id": "20240628000213:0:17",
+     "covers": [
+      "2019/등록/6.1/다군/대성삼경회계법인/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/6.1/다군/대성삼경회계법인/1": 0.887
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/6.1/다군/대성삼경회계법인/2",
+   "path": {
+    "bundle": "등록",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": "다군",
+    "firm": "대성삼경회계법인",
+    "index": 2
+   },
+   "text_sha256": "f9761e328976082b1b1b08545e2e2adcbb48564029021bc6c59b1676c08f6ffc",
+   "f004": [
+    {
+     "f004_row_id": "20240628000213:0:18",
+     "covers": [
+      "2019/등록/6.1/다군/대성삼경회계법인/2"
+     ],
+     "basis": "auto_medium",
+     "scores": {
+      "2019/등록/6.1/다군/대성삼경회계법인/2": 0.383
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/6.1/다군/대성삼경회계법인/3",
+   "path": {
+    "bundle": "등록",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": "다군",
+    "firm": "대성삼경회계법인",
+    "index": 3
+   },
+   "text_sha256": "5d2cca1fddccdc87221484b2ec246fb7c9f91164a74fa3d99d151d1f6f00511a",
+   "f004": [
+    {
+     "f004_row_id": "20240628000213:0:19",
+     "covers": [
+      "2019/등록/6.1/다군/대성삼경회계법인/3"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/6.1/다군/대성삼경회계법인/3": 0.731
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/6.1/다군/도원회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": "다군",
+    "firm": "도원회계법인",
+    "index": 0
+   },
+   "text_sha256": "4d723232c2750adb914cdf0f5cdeec42ebcedb45fd7d4ef5fa1a1d3c2ce0d0c1",
+   "f004": [
+    {
+     "f004_row_id": "20240701000107:0:10",
+     "covers": [
+      "2019/등록/6.1/다군/도원회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/6.1/다군/도원회계법인/0": 0.567
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/6.1/다군/이정회계법인/0",
+   "path": {
+    "bundle": "등록",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": "다군",
+    "firm": "이정회계법인",
+    "index": 0
+   },
+   "text_sha256": "79028ccc4702e2d98f9056dab46c1e32633bd06460e22822be7b0e7737ab3940",
+   "f004": [
+    {
+     "f004_row_id": "20240701000352:0:10",
+     "covers": [
+      "2019/등록/6.1/다군/이정회계법인/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/6.1/다군/이정회계법인/0": 1.376
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/6.1/라군/회계법인리안/0",
+   "path": {
+    "bundle": "등록",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": "라군",
+    "firm": "회계법인리안",
+    "index": 0
+   },
+   "text_sha256": "49d534d65ac3cf62c95e456c325595d0802154304f3e17be6b9bafdef8e23322",
+   "f004": [
+    {
+     "f004_row_id": "20240701000259:0:10",
+     "covers": [
+      "2019/등록/6.1/라군/회계법인리안/0"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/6.1/라군/회계법인리안/0": 1.435
+     },
+     "note": null
+    }
+   ]
+  },
+  {
+   "finding_id": "2019/등록/6.1/라군/회계법인리안/1",
+   "path": {
+    "bundle": "등록",
+    "section": "6. 모니터링",
+    "group": "6.1 사후심리 절차 관리",
+    "gun": "라군",
+    "firm": "회계법인리안",
+    "index": 1
+   },
+   "text_sha256": "3ed7cba2f42d71193b00a9c2bad8a5289569e45cc8695e4745c758b01acb5d67",
+   "f004": [
+    {
+     "f004_row_id": "20240701000259:0:11",
+     "covers": [
+      "2019/등록/6.1/라군/회계법인리안/1"
+     ],
+     "basis": "auto_high",
+     "scores": {
+      "2019/등록/6.1/라군/회계법인리안/1": 1.433
+     },
+     "note": null
+    }
+   ]
+  }
+ ],
+ "firm_reasons": [],
+ "unattached": {
+  "qu_findings": [],
+  "f004_rows": [
+   {
+    "row_id": "20241227000169:0:12",
+    "firm": "도원회계법인",
+    "dae_standard": "6. 모니터링",
+    "reason": "no_paragraph",
+    "note": null
+   }
+  ],
+  "f004_superseded": []
+ },
+ "f004_no_finding": [
+  {
+   "firm": "대성삼경회계법인",
+   "row_id": "20250630000777:0:4",
+   "rcept_no": "20250630000777",
+   "recommend_date_raw": "2024년 07월 23일",
+   "recommendation": "지적사항없음",
+   "action_raw": "-"
+  },
+  {
+   "firm": "대성삼경회계법인",
+   "row_id": "20250630000777:0:12",
+   "rcept_no": "20250630000777",
+   "recommend_date_raw": "2024년 07월 23일",
+   "recommendation": "지적사항없음",
+   "action_raw": "-"
+  },
+  {
+   "firm": "대성삼경회계법인",
+   "row_id": "20260630000234:0:4",
+   "rcept_no": "20260630000234",
+   "recommend_date_raw": "2024년 07월 23일",
+   "recommendation": "지적사항없음",
+   "action_raw": "-"
+  },
+  {
+   "firm": "대성삼경회계법인",
+   "row_id": "20260630000234:0:12",
+   "rcept_no": "20260630000234",
+   "recommend_date_raw": "2024년 07월 23일",
+   "recommendation": "지적사항없음",
+   "action_raw": "-"
+  },
+  {
+   "firm": "삼일회계법인",
+   "row_id": "20260930000134:0:5",
+   "rcept_no": "20260930000134",
+   "recommend_date_raw": "2026.05.12",
+   "recommendation": "지적사항 없음",
+   "action_raw": "해당사항 없음"
+  },
+  {
+   "firm": "삼일회계법인",
+   "row_id": "20260930000134:0:6",
+   "rcept_no": "20260930000134",
+   "recommend_date_raw": "2024.07.23",
+   "recommendation": "지적사항 없음",
+   "action_raw": "해당사항 없음"
+  },
+  {
+   "firm": "삼일회계법인",
+   "row_id": "20260930000134:0:11",
+   "rcept_no": "20260930000134",
+   "recommend_date_raw": "2026.05.12",
+   "recommendation": "지적사항 없음",
+   "action_raw": "해당사항 없음"
+  }
+ ]
+}
