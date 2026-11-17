@@ -1044,11 +1044,11 @@ _ATTACH_YEAR_LOCK = {
         "F004 부착 2023: 자리 216/216, 이행사항 226, 법인 사유 35곳(81칸), 건너뜀 0",
     ),
     "2022": (
-        "582254f684a9075133e591c742bb1e2cff8a1a622743f4c9eff125d53e818531",
-        425324,
-        "254539dcfcc5c5577d01c22d41e39c79c0a0b9aa5f3c33243b471b69a48cb7ed",
-        393128,
-        "F004 부착 2022: 자리 221/221, 이행사항 224, 법인 사유 35곳(107칸), 건너뜀 0",
+        "ff9f3dae3f1ffdbdf4cbc267c02e4d3028aca71845d9a87cd063727ea838b45a",
+        425807,
+        "77491dd403f43958e35ecda3dc40f8481580de78cf85c97db1baf1a518b87b9b",
+        396355,
+        "F004 부착 2022: 자리 221/221, 이행사항 224, 법인 사유 36곳(110칸), 건너뜀 0",
     ),
     "2020": (
         "ea6545c7d2fbbcdd57efa7397705749ae4ff2b2f899a61b98f9971cfc31afb1c",
@@ -1262,3 +1262,68 @@ def test_standard_quote_tokens_stay_off_every_year_block(year):
     assert len(boxed) == 1
     assert start_text in boxed[0] and marker in boxed[0]
     assert boxed[0].count("□") == html.count("□") == count
+
+
+# PR-F(사용자 결정 D9·N13): 2022 감사반에 아람공인회계사감사반(제262호) 문단 4개를 더했다.
+# 문구는 FSS 게시판 nttId 127983 첨부 hwpx 띄어쓰기 그대로, 권고일은 게시판 값 2022-03-15 그대로(D9).
+_ARAM = "아람공인회계사감사반(제262호)"
+_ARAM_TEXT_SHA = {
+    "4.1": [
+        "64d16527cc2789c2587c7ee421b9d28d205aa2c127f756a6da7a117cbcfb5b66",
+        "b6fdb9e3e7c41fbe8bf45079e8b4dd288928f8a20b2df80594cb139bf6d9a90c",
+    ],
+    "5.3": ["320bdd2ec1c83558b3d58a9752c8885470e2d357e600b98ebc0989db8cc98925"],
+    "5.4": ["1e25bf0dccbdde314782763e856f64b72b774c39704c14246637942daf4e5158"],
+}
+
+
+def test_2022_aram_audit_team_added_with_hwpx_spacing():
+    year = load_year("2022")
+    bundle = [b for b in year["bundles"] if b["name"] == "감사반"][0]
+    found = {}
+    for section in bundle["sections"]:
+        for group in section["groups"]:
+            for block in group["blocks"]:
+                names = [firm["name"] for firm in block.get("firms", [])]
+                if _ARAM in names:
+                    at = names.index(_ARAM)
+                    assert names[at - 1 : at + 2] == [
+                        "세신공인회계사감사반(제199호)",
+                        _ARAM,
+                        "연지공인회계사감사반(제410호)",
+                    ]
+                    found[group["heading"].split(" ", 1)[0]] = block["firms"][at]["findings"]
+    assert sorted(found) == ["4.1", "5.3", "5.4"]
+    for num, shas in _ARAM_TEXT_SHA.items():
+        findings = found[num]
+        assert [hashlib.sha256(f["text"].encode("utf-8")).hexdigest() for f in findings] == shas
+        assert [f["severity"] for f in findings] == ["일부미흡"] * len(shas)
+        assert [f["badge"] for f in findings] == [True] + [False] * (len(shas) - 1)
+        for f in findings:
+            for spaced in ("외부 감사", "감사 시간", "기록 \u2024 집계", "업무품질 관리검토"):
+                assert spaced not in f["text"]
+    assert "20개 감사반" in bundle["report"]
+    assert len({firm["name"] for s in bundle["sections"] for g in s["groups"] for b in g["blocks"]
+                for firm in b.get("firms", [])}) == 20
+
+    data = load_attach(fss_f004_attach.ATTACH_PATHS["2022"])
+    reasons = [r for r in data["firm_reasons"] if r["firm"] == _ARAM]
+    assert reasons == [{
+        "firm": _ARAM,
+        "bundle": "감사반",
+        "reason": "audit_team",
+        "text": "F004 이행사항: 감사반은 회계법인 사업보고서(F004)를 내지 않음",
+        "disclosure": None,
+        "qu_findings": 4,
+    }]
+    assert _ARAM not in json.dumps(data["attachments"], ensure_ascii=False)
+    assert _ARAM not in json.dumps(data["unattached"], ensure_ascii=False)
+    assert "PR-E #138(main e2c8ecc1)" in data["status"]
+
+    html = _injected_year("2022")
+    names = [html_lib.unescape(m.group(1)) for m in fss_f004_attach._ORIGINAL_NAME.finditer(html)]
+    assert names.count(_ARAM) == 3
+
+    seed = Path(__file__).parent / "fixtures" / "b0000291" / "2022-seed.csv"
+    rows = [line.split(",") for line in seed.read_text(encoding="utf-8").splitlines() if line.startswith("127983,")]
+    assert [(r[1], r[3]) for r in rows] == [("2022-03-15", _ARAM)]
