@@ -265,13 +265,152 @@ def test_second_tab_failure_does_not_apply_the_first_tab(tmp_path):
 
 
 def test_dry_run_writes_nothing(tmp_path):
+    _baseline(tmp_path)
+    before = {name: (tmp_path / "dest" / name).read_bytes() for name in _files(tmp_path / "dest")
+              if (tmp_path / "dest" / name).is_file()}
     args = _args(tmp_path, "--dry-run")
-    code, result = cli.run(args, Fetcher({"01": LIST, "02": EMPTY}), now=MON, sleeper=lambda s: None)
+    page = _with_rows(LIST, [_extra_row(220001, 253, "새회계법인")], 4)
+    code, result = cli.run(args, Fetcher({"01": page, "02": EMPTY}), now=NEXT_MON, sleeper=lambda s: None)
     assert code == cli.EXIT_NEW and result["dry_run"] is True
-    assert _files(tmp_path) == []
-    broken, _ = cli.run(args, Fetcher({"01": "<html></html>", "02": EMPTY}), now=MON, sleeper=lambda s: None)
+    broken, _ = cli.run(args, Fetcher({"01": "<html></html>", "02": EMPTY}), now=NEXT_MON, sleeper=lambda s: None)
     assert broken == cli.EXIT_PARSE
+    after = {name: (tmp_path / "dest" / name).read_bytes() for name in _files(tmp_path / "dest")
+             if (tmp_path / "dest" / name).is_file()}
+    assert after == before
+
+
+def test_init_dry_run_previews_baseline_without_writing(tmp_path):
+    args = _args(tmp_path, "--init", "--dry-run")
+    code, result = cli.run(args, Fetcher({"01": LIST, "02": EMPTY}), now=MON, sleeper=lambda s: None)
+    assert code == cli.EXIT_OK and result["notify"] is False
+    assert [item["baseline"] for item in result["tabs"]] == [3, 0]
     assert _files(tmp_path) == []
+
+
+# --- 기준선 없음(Medium 2) ---
+
+
+@pytest.mark.parametrize("extra", [(), ("--dry-run",)])
+def test_first_run_without_init_is_refused(tmp_path, extra):
+    args = _args(tmp_path, *extra)
+    fetch = Fetcher({"01": LIST, "02": EMPTY})
+    code, result = cli.run(args, fetch, now=MON, sleeper=lambda s: None)
+    assert code == cli.EXIT_BASELINE != 0
+    assert result["status"] == "no-baseline" and result["notify"] is True
+    assert "--init" in result["error"]
+    assert fetch.calls == []  # 목록을 읽기 전에 멈춤
+    assert "tabs" not in result  # 새 글 목록을 만들지 않음
+    assert not args.state.exists()
+    if extra:
+        assert _files(tmp_path) == []
+    else:
+        log = _run_log(args)
+        assert [entry["status"] for entry in log] == ["no-baseline"]
+
+
+def test_main_without_baseline_exits_nonzero_with_message(tmp_path, capsys):
+    code = cli.main(
+        ["--dest", str(tmp_path / "dest")],
+        fetch_text=Fetcher({"01": LIST, "02": EMPTY}),
+        now=MON,
+        sleeper=lambda s: None,
+    )
+    assert code == cli.EXIT_BASELINE
+    out = capsys.readouterr().out
+    assert "기준선이 없습니다" in out and "--init" in out
+    assert out.strip().splitlines()[-1] == "total=0 new=0 changed=0 missing=0 status=no-baseline notify=yes"
+
+
+def test_missing_tab_in_baseline_is_refused(tmp_path):
+    cli.run(_args(tmp_path, "--init", "--tabs", "01"), Fetcher({"01": LIST}), now=MON, sleeper=lambda s: None)
+    args = _args(tmp_path)
+    before = args.state.read_bytes()
+    fetch = Fetcher({"01": LIST, "02": EMPTY})
+    code, result = cli.run(args, fetch, now=NEXT_MON, sleeper=lambda s: None)
+    assert code == cli.EXIT_BASELINE and "02" in result["error"]
+    assert fetch.calls == [] and args.state.read_bytes() == before
+
+
+def test_init_over_existing_baseline_needs_force(tmp_path):
+    _baseline(tmp_path)
+    args = _args(tmp_path, "--init")
+    before = args.state.read_bytes()
+    page = _with_rows(LIST, [_extra_row(220001, 253, "새회계법인")], 4)
+    fetch = Fetcher({"01": page, "02": EMPTY})
+    code, result = cli.run(args, fetch, now=NEXT_MON, sleeper=lambda s: None)
+    assert code == cli.EXIT_BASELINE and result["status"] == "baseline-exists"
+    assert "--force" in result["error"] and fetch.calls == []
+    assert args.state.read_bytes() == before
+    forced, _ = cli.run(_args(tmp_path, "--init", "--force"), fetch, now=NEXT_MON, sleeper=lambda s: None)
+    assert forced == cli.EXIT_OK
+    assert "220001" in json.loads(args.state.read_text(encoding="utf-8"))["tabs"]["01"]["known"]
+
+
+def test_force_requires_init(tmp_path):
+    with pytest.raises(SystemExit):
+        cli.parse_args(["--dest", str(tmp_path), "--force"])
+
+
+# --- 쓰기 순서: 보고 먼저, 상태 마지막(Medium 1) ---
+
+
+def _failing_write(monkeypatch, predicate):
+    real = watch.atomic_write
+    order = []
+
+    def fake(path, text):
+        order.append(Path(path).name)
+        if predicate(Path(path)):
+            raise OSError("disk full")
+        real(path, text)
+
+    monkeypatch.setattr(watch, "atomic_write", fake)
+    return order
+
+
+def test_state_is_written_last(tmp_path, monkeypatch):
+    args = _baseline(tmp_path)
+    args.report = tmp_path / "out" / "report.json"
+    order = _failing_write(monkeypatch, lambda p: False)
+    code, _ = cli.run(args, Fetcher({"01": LIST, "02": EMPTY}), now=NEXT_MON, sleeper=lambda s: None)
+    assert code == cli.EXIT_OK
+    assert order == ["report.json", "2026-11-30.json", "_list-state.json"]
+
+
+@pytest.mark.parametrize("target", ["2026-11-30.json", "report.json", "runs.jsonl", "_list-state.json"])
+def test_failed_report_or_state_write_keeps_state_and_redetects(tmp_path, monkeypatch, target):
+    args = _baseline(tmp_path)
+    args.report = tmp_path / "out" / "report.json"
+    before = args.state.read_bytes()
+    page = _with_rows(LIST, [_extra_row(220001, 253, "새회계법인")], 4)
+    if target == "runs.jsonl":
+        real_append = cli.append_run_log
+
+        def broken_append(path, result):
+            if result.get("status") == "new":
+                raise OSError("disk full")
+            real_append(path, result)
+
+        monkeypatch.setattr(cli, "append_run_log", broken_append)
+    else:
+        _failing_write(monkeypatch, lambda p: p.name == target)
+    code, result = cli.run(args, Fetcher({"01": page, "02": EMPTY}), now=NEXT_MON, sleeper=lambda s: None)
+    assert code == cli.EXIT_WRITE and result["status"] == "write-error"
+    assert result["notify"] is True and "disk full" in result["error"]
+    assert args.state.read_bytes() == before
+    monkeypatch.undo()
+    _no_network_again(monkeypatch)
+    again, retry = cli.run(_args(tmp_path), Fetcher({"01": page, "02": EMPTY}), now=NEXT_MON, sleeper=lambda s: None)
+    assert again == cli.EXIT_NEW
+    assert [item["nttId"] for item in retry["tabs"][0]["new"]] == [220001]
+
+
+def _no_network_again(monkeypatch):
+    def refuse(*args, **kwargs):
+        raise AssertionError("테스트에서 네트워크를 쓰면 안 됩니다.")
+
+    monkeypatch.setattr(socket, "socket", refuse)
+    monkeypatch.setattr(socket, "create_connection", refuse)
 
 
 def test_bad_state_file_stops_before_fetching(tmp_path):

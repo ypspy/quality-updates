@@ -2,7 +2,12 @@
 """B0000291 공개 목록에서 새 글을 감지한다(주간 감지기). 첨부는 받지 않는다.
 
 종료 코드: 0 정상·새 글 없음, 10 새 글 또는 변경, 20 경고(사라짐·총건수 감소·건수 불일치),
-2 접속 실패, 3 403·차단, 4 목록 구문 분석 실패, 5 상태 파일 오류.
+2 접속 실패, 3 403·차단, 4 목록 구문 분석 실패, 5 상태 파일 오류,
+6 기준선 없음(먼저 --init) 또는 기준선이 있는데 --force 없이 --init,
+7 보고·상태 쓰기 실패(상태는 바뀌지 않음).
+
+쓰기 순서: --report → `_weekly/YYYY-MM-DD.json` → `runs.jsonl` → 상태 파일(마지막).
+보고 쓰기가 실패하면 상태를 바꾸지 않으므로 다음 실행이 같은 새 글을 다시 잡는다.
 
 알림(D19): 결과의 `notify`는 새 글·변경, 경고(사라짐·총건수 감소·건수 불일치·8일 넘은 공백),
 실패일 때만 참이다. 조용한 주는 `notify=false`이고 로컬 기록만 남는다.
@@ -31,6 +36,8 @@ EXIT_FETCH = 2
 EXIT_FORBIDDEN = 3
 EXIT_PARSE = 4
 EXIT_STATE = 5
+EXIT_BASELINE = 6
+EXIT_WRITE = 7
 
 
 def parse_args(argv=None):
@@ -38,6 +45,9 @@ def parse_args(argv=None):
     parser.add_argument("--dest", type=Path, default=None, help="기본 downloads/fss-review/B0000291")
     parser.add_argument("--state", type=Path, default=None, help="기본 <dest>/_list-state.json")
     parser.add_argument("--init", action="store_true", help="기준선: 새 글을 알리지 않고 known을 채운다")
+    parser.add_argument(
+        "--force", action="store_true", help="기준선이 이미 있어도 --init으로 덮어쓴다(새 글을 알리지 않고 흡수함)"
+    )
     parser.add_argument("--dry-run", action="store_true", help="상태·주간 보고·HTML을 쓰지 않는다(--report만 씀)")
     parser.add_argument("--report", type=Path, default=None, help="JSON 보고를 이 경로에도 쓴다")
     parser.add_argument("--delay", type=float, default=fss_b0000291.DEFAULT_DELAY)
@@ -54,6 +64,8 @@ def parse_args(argv=None):
             parser.error(f"unknown tab {tab}")
     if args.max_pages < 1:
         parser.error("--max-pages must be >= 1")
+    if args.force and not args.init:
+        parser.error("--force is only valid with --init")
     return args
 
 
@@ -86,18 +98,49 @@ def _read_tab(tab: str, fetch_text, *, max_pages: int, pause) -> tuple[list, int
     return rows, total, text
 
 
+def _report_text(result: dict) -> str:
+    return json.dumps(result, ensure_ascii=False, indent=1) + "\n"
+
+
 def run(args, fetch_text, *, now=None, sleeper=time.sleep) -> tuple[int, dict]:
-    code, result = _run(args, fetch_text, now=now, sleeper=sleeper)
+    """감지 1회. 보고를 모두 쓴 뒤에만 상태를 저장한다(실패한 실행은 다음에 다시 잡힘)."""
+    code, result, new_state = _run(args, fetch_text, now=now, sleeper=sleeper)
     result["exit_code"] = code
     result["notify"] = needs_notify(code, result)
-    if not args.dry_run:
-        append_run_log(args.dest / "_weekly" / "runs.jsonl", result)
+    run_log = args.dest / "_weekly" / "runs.jsonl"
+    logged = False
+    try:
+        if args.report is not None:
+            watch.atomic_write(args.report, _report_text(result))
+        if not args.dry_run:
+            if new_state is not None:
+                day = result["date_ct"][:10]
+                watch.atomic_write(args.dest / "_weekly" / f"{day}.json", _report_text(result))
+            append_run_log(run_log, result)
+            logged = True
+            if new_state is not None:
+                watch.atomic_write(args.state, watch.state_text(new_state))
+    except OSError as exc:
+        code = EXIT_WRITE
+        result.update(status="write-error", error=f"보고·상태 쓰기 실패(상태는 바뀌지 않음): {exc}")
+        result["exit_code"] = code
+        result["notify"] = needs_notify(code, result)
+        if not args.dry_run and not logged:
+            try:
+                append_run_log(run_log, result)
+            except OSError:
+                pass
+        if args.report is not None:
+            try:
+                watch.atomic_write(args.report, _report_text(result))
+            except OSError:
+                pass
     return code, result
 
 
 def needs_notify(code: int, result: dict) -> bool:
     """D19: 새 글·변경·경고·실패만 알린다. 조용한 주와 기준선 성공은 로컬 기록만."""
-    if code in (EXIT_FETCH, EXIT_FORBIDDEN, EXIT_PARSE, EXIT_STATE, EXIT_WARN):
+    if code in (EXIT_FETCH, EXIT_FORBIDDEN, EXIT_PARSE, EXIT_STATE, EXIT_BASELINE, EXIT_WRITE, EXIT_WARN):
         return True
     if result.get("missed_week") or result.get("warnings"):
         return True
@@ -121,7 +164,35 @@ def append_run_log(path: Path, result: dict) -> None:
         handle.write(json.dumps(entry, ensure_ascii=False, sort_keys=True) + "\n")
 
 
-def _run(args, fetch_text, *, now=None, sleeper=time.sleep) -> tuple[int, dict]:
+def _baseline_problem(args, state: dict) -> str | None:
+    """기준선 규칙. 문제가 있으면 사람이 읽을 이유를, 없으면 None."""
+    has_baseline = bool(state.get("last_ok_ct"))
+    missing_tabs = [tab for tab in args.tabs if tab not in state["tabs"]]
+    if args.init:
+        if has_baseline and not args.force:
+            return (
+                f"기준선이 이미 있습니다({args.state}, last_ok_ct={state.get('last_ok_ct')}). "
+                "--init은 새 글을 알리지 않고 흡수하므로 정말 다시 만들려면 --init --force를 쓰세요."
+            )
+        return None
+    if not has_baseline:
+        return (
+            f"기준선이 없습니다({args.state}). 첫 실행은 모든 글을 새 글로 알리므로 거부합니다. "
+            "먼저 --init으로 기준선을 만드세요(미리 보기는 --init --dry-run)."
+        )
+    if missing_tabs:
+        return (
+            f"기준선에 탭 {','.join(missing_tabs)}이(가) 없습니다({args.state}). "
+            "--init --force로 기준선을 다시 만들거나 --tabs에서 빼세요."
+        )
+    return None
+
+
+def _run(args, fetch_text, *, now=None, sleeper=time.sleep) -> tuple[int, dict, dict | None]:
+    """목록을 읽고 판정한다. 파일은 쓰지 않고, 저장할 새 상태를 돌려준다(실패·dry-run이면 None).
+
+    예외: 구문 분석 실패 때 받은 HTML 사본(`_weekly/YYYY-MM-DD-{탭}.html`)은 여기서 쓴다(실패해도 무시).
+    """
     stamp = _now_ct(now)
     now_ct = stamp.isoformat(timespec="seconds")
     day = stamp.strftime("%Y-%m-%d")
@@ -129,9 +200,13 @@ def _run(args, fetch_text, *, now=None, sleeper=time.sleep) -> tuple[int, dict]:
     result: dict = {"date_ct": now_ct, "mode": "init" if args.init else "watch", "dry_run": args.dry_run}
     try:
         state = watch.load_state(args.state)
-    except ValueError as exc:
+    except (ValueError, OSError) as exc:
         result.update(status="state-error", error=str(exc))
-        return EXIT_STATE, result
+        return EXIT_STATE, result, None
+    problem = _baseline_problem(args, state)
+    if problem is not None:
+        result.update(status="no-baseline" if not args.init else "baseline-exists", error=problem)
+        return EXIT_BASELINE, result, None
     previous_ok = state.get("last_ok_ct")
     if previous_ok:
         gap = stamp - datetime.fromisoformat(previous_ok)
@@ -149,9 +224,12 @@ def _run(args, fetch_text, *, now=None, sleeper=time.sleep) -> tuple[int, dict]:
             result.update(status="parse-error", tab=tab, error=str(exc))
             if not args.dry_run:
                 saved = weekly / f"{day}-{tab}.html"
-                watch.atomic_write(saved, getattr(exc, "html", ""))
-                result["saved_html"] = str(saved)
-            return EXIT_PARSE, result
+                try:
+                    watch.atomic_write(saved, getattr(exc, "html", ""))
+                    result["saved_html"] = str(saved)
+                except OSError as write_exc:
+                    result["saved_html_error"] = str(write_exc)
+            return EXIT_PARSE, result, None
         except fss_b0000291.FetchError as exc:
             forbidden = exc.http_status == 403
             result.update(
@@ -162,7 +240,7 @@ def _run(args, fetch_text, *, now=None, sleeper=time.sleep) -> tuple[int, dict]:
                 attempts=exc.attempts,
                 certificate=fss_b0000291._certificate_failure(exc.__cause__ or exc),
             )
-            return (EXIT_FORBIDDEN if forbidden else EXIT_FETCH), result
+            return (EXIT_FORBIDDEN if forbidden else EXIT_FETCH), result, None
         fetched[tab] = (rows, total)
         reports.append(watch.diff_tab(state["tabs"].get(tab), tab, rows, total))
     result["tabs"] = [report.to_dict() for report in reports]
@@ -185,15 +263,14 @@ def _run(args, fetch_text, *, now=None, sleeper=time.sleep) -> tuple[int, dict]:
     if code == EXIT_NEW and any(r.missing or r.total_drop or r.count_mismatch for r in reports):
         result["warnings"] = True
     result["status"] = {EXIT_OK: "ok", EXIT_NEW: "new", EXIT_WARN: "warn"}[code]
-    if not args.dry_run:
-        for tab, (rows, total) in fetched.items():
-            watch.apply_tab(state, tab, rows, total, now_ct)
-        state["last_run_ct"] = now_ct
-        state["last_ok_ct"] = now_ct
-        watch.push_history(state, now_ct, reports)
-        watch.atomic_write(args.state, watch.state_text(state))
-        watch.atomic_write(weekly / f"{day}.json", json.dumps(result, ensure_ascii=False, indent=1) + "\n")
-    return code, result
+    if args.dry_run:
+        return code, result, None
+    for tab, (rows, total) in fetched.items():
+        watch.apply_tab(state, tab, rows, total, now_ct)
+    state["last_run_ct"] = now_ct
+    state["last_ok_ct"] = now_ct
+    watch.push_history(state, now_ct, reports)
+    return code, result, state
 
 
 def summary_line(result: dict) -> str:
@@ -221,9 +298,6 @@ def main(argv=None, *, fetch_text=None, now=None, sleeper=time.sleep) -> int:
                 raise fss_b0000291.FetchError(str(exc), http_status=None, attempts=1, url=url) from exc
 
     code, result = run(args, fetch_text, now=now, sleeper=sleeper)
-    if args.report is not None:
-        args.report.parent.mkdir(parents=True, exist_ok=True)
-        args.report.write_text(json.dumps(result, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(json.dumps(result, ensure_ascii=False, indent=1))
     print(summary_line(result))
     return code
