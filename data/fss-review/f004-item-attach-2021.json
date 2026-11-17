@@ -1,6 +1,6 @@
 {
  "version": "item-attach-2021-draft-2026-11-16",
- "status": "초안(proposed). 민트 분류·검토. 사용자 확인 전. 화면 반영은 Cabbage PR (c)에서",
+ "status": "민트 분류·검토. 사용자 확인: review-2021.csv 민트 판정 25행 모두 받아들임(D21, 2026-11-17 5:06 AM CT 사용자 직접 확인). 화면 반영: PR-C #130(main a0640c48), M2 #133(main 7e765974). 사용자 결정 반영: M2(2026-11-16 9:18 PM CT, 정인회계법인 품질관리기준 인용 27문단 삭제)",
  "year": "2021",
  "source": {
   "main_commit": "9ed657c3833b3eaecd16d6f6941b00c80cfec5bb",

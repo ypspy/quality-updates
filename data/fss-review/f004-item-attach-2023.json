@@ -1,6 +1,6 @@
 {
  "version": "item-attach-2023-draft-2026-11-17",
- "status": "초안(proposed). 민트 분류·검토. 사용자 확인 전. 화면 반영은 Cabbage 부착 PR에서",
+ "status": "초안(proposed). 민트 분류·검토. 화면 반영: PR-D #134(main 7546d6ff). 사용자 결정 반영: D10(윤솔·한경 2023 배치), D11(서율 7행 2023 배치), N7(2026-11-16 9:48 PM CT, 대성삼경 별칭 받아들임), N11(2026-11-16 9:48 PM CT, 4문단 붙이지 않음). 그 밖의 매핑(mint_review·mint_override, N11 4행 말고): 민트 판정, 2026-11-17 5:51 AM CT 권고대로 일괄 승인(N10, 행마다 직접 확인한 것은 아님)",
  "year": "2023",
  "source": {
   "main_commit": "01603cc5fffd141a4cce0602595f222480976c8c",
