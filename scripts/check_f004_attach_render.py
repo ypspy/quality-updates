@@ -44,15 +44,15 @@ ATTACH_YEARS = {
         "site_div_sha": "b01f968c1990426aeee6959e251ef6bcf2b2c68a7115fd1acb215890c0c26b10",
     },
     "2021": {
-        "sha": "b3271fe94f1829919e6ca6b811f88886a518b6efc594e90b048c64984a3c2220",
-        "bytes": 300987,
+        "sha": "04423aac698c95a7b246ec3c23d9e3d2f9bc14c0a9a43c57b3ef34bab357568e",
+        "bytes": 291537,
         "rendered": {
-            "54a36602c3abe8513683f050eb7cf178e433ec1e5ea438e58eb5ef1c59be5a07": (
-                174291,
-                "a7422c3075df7a8813228991887733b565bf2c469e58371b98226360f12df955",
+            "dd8805af68f14beb9d222da9019d10e5337f06aff48fc0bc66cf66f79b1a6410": (
+                164196,
+                "ae6c6f4eb2433ab8e5fd898f82aa693b9e44726641303ec0d59338a7892ec1d7",
             ),
         },
-        "site_div_sha": "41ce89619cc5b8a980b304d3bfe8058ddd22d1c7623f1a377e4c66b444b05c72",
+        "site_div_sha": "7928d4b8a973ec66f7ddbf2a6bfb29f3190a55f44eeb66c2f528f8868120b5e7",
     },
 }
 # scripts/tests/test_fss_review_cards.py YEAR_SHA (main 94f4882).

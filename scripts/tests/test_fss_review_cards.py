@@ -44,7 +44,7 @@ YEAR_SHA = {
     "2024": "dd252ed36a6f3debb59d9c5c831dfab643bb3dc51a4918b5f4649b0087f87763",
     "2023": "a04efa16f933d3aac44bb98434af3bc21160d028790e140c50d77a3f38416baf",
     "2022": "5cf332453ec91121dbbc37aec0c15f540842b5cf845cfde7df98708c839601dc",
-    "2021": "9b278810dd0ff9a0e19300d5d8c1f67cb5ef34db2a07b8bcc437eed11ea2b821",
+    "2021": "42f72494b69082746ea8ef063835a8c9343140b3310b75fb269bffbc4b66a414",
     "2020": "24375fe9c10e2a0fa0513dea5831fc4141471cca9be2e0c1ea9414c01465ce92",
     "2019": "fb13f1d4d54aaf8126f97bf802feb37ef40b2fee7852694ca22c3215e607d098",
 }
@@ -549,19 +549,19 @@ def test_commit_parked_year_writes_nothing_when_render_mismatches(tmp_path, monk
     assert page_path.read_bytes() == b"sentinel-page"
 
 
-YEAR_2021_JSON_SHA = "54a36602c3abe8513683f050eb7cf178e433ec1e5ea438e58eb5ef1c59be5a07"
-YEAR_2021_HTML_SHA = "84243017636e7447a266889531042e26f163cb3b2c17afb2b7658a7cd5b8d566"
+YEAR_2021_JSON_SHA = "dd8805af68f14beb9d222da9019d10e5337f06aff48fc0bc66cf66f79b1a6410"
+YEAR_2021_HTML_SHA = "9b22321fc3438f6a2fad26821c9da54d93a983ad84eb2c14b45af12b6d34bf27"
 YEAR_2021_MARK = '<!-- fss-review-year data-year="2021" -->'
 
 
 def test_year_2021_file_renders_the_hidden_block():
     raw = YEAR_FILES["2021"].read_bytes()
-    assert len(raw) == 121484
+    assert len(raw) == 107142
     assert hashlib.sha256(raw).hexdigest() == YEAR_2021_JSON_SHA
     data = json.loads(raw)
     rendered = render_year_html(data)
     encoded = rendered.encode("utf-8")
-    assert len(encoded) == 94121
+    assert len(encoded) == 84026
     assert hashlib.sha256(encoded).hexdigest() == YEAR_2021_HTML_SHA
     parsed = parse_year_html(rendered, "2021")
     assert parsed == data

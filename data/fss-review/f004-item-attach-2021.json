@@ -3,9 +3,9 @@
  "status": "초안(proposed). 민트 분류·검토. 사용자 확인 전. 화면 반영은 Cabbage PR (c)에서",
  "year": "2021",
  "source": {
-  "main_commit": "a1214cf1b1b7a3dd900fcb8c7ed60f304d0b7f21",
-  "year_2021_json_sha256": "54a36602c3abe8513683f050eb7cf178e433ec1e5ea438e58eb5ef1c59be5a07",
-  "year_2021_json_note": "(a) 이전 PR이 만들 data/fss-review/year-2021.json 후보(box: backfill-2021/year-2021.candidate.json)",
+  "main_commit": "9ed657c3833b3eaecd16d6f6941b00c80cfec5bb",
+  "year_2021_json_sha256": "dd8805af68f14beb9d222da9019d10e5337f06aff48fc0bc66cf66f79b1a6410",
+  "year_2021_json_note": "main 9ed657c3의 data/fss-review/year-2021.json에서 정인회계법인 품질관리기준 인용 27문단(참고2·참고3 표 글 포함)을 빼고 빈 1.1 라군을 「분류된 지적 없음」으로 바꾼 값 (M2, 사용자 결정 2026-11-16 9:18 PM CT)",
   "f004_snapshot": "target.db (v_f004_vi_findings, parser f004-remediation-0.2) sha256 6edbd8f92e702ec70e1c42363babb55111ada47fe58aa70aa0436b6a9193b0a8",
   "classification": "classification-2021.md"
  },
@@ -19,7 +19,7 @@
   "F004 한 행이 같은 법인·같은 중분류의 문단 여러 개를 다루면 마지막 문단 아래에 한 번만 붙임 (2025 결정 #2 그대로).",
   "개별 감사보고서 관련 표·「-」 행·stale 행 제외 (2025 proposal 4절 그대로).",
   "이행사항과 권고 문구는 원문 그대로. 짧은 표시(광교 「상동」)도 원문 그대로 (2025 v2 결정 #2 그대로).",
-  "정인 화면의 품질관리기준 인용 27문단은 지적이 아니라 붙이지 않음(화면 표시 없음). 콘텐츠 정정은 별도 제안.",
+  "정인 화면에 섞여 있던 품질관리기준 인용 27문단은 지적이 아니라 year-2021.json에서 뺌 (M2, 사용자 결정 2026-11-16 9:18 PM CT). 남은 정인 지적 16문단은 모두 부착.",
   "2021 화면 13곳은 모두 F004가 있어 법인 사유 줄 없음 (L4-1 규칙은 적용 대상 0곳).",
   "basis: auto_high·auto_medium = 자동 점수, mint_review = 점수가 낮거나 바꿔 짝지어도 차이가 작아 민트가 확인한 짝, mint_override = 민트가 자동 짝을 바꾼 짝. mint_* 는 사용자 확인 대상(review-2021.csv)."
  ],
@@ -41,8 +41,8 @@
   ]
  },
  "counts": {
-  "qu_findings": 208,
-  "qu_panels": 80,
+  "qu_findings": 181,
+  "qu_panels": 79,
   "qu_firms": 13,
   "qu_findings_with_attach": 181,
   "attach_slots": 180,
@@ -60,10 +60,8 @@
   "firm_reason_panels_on_screen": 0,
   "firm_reason_by_code": {},
   "qu_findings_under_reason_lines": 0,
-  "unattached_qu_findings": 27,
-  "unattached_by_reason": {
-   "standard_quote_not_finding": 27
-  },
+  "unattached_qu_findings": 0,
+  "unattached_by_reason": {},
   "notes": 1,
   "no_date_blocks": 0,
   "no_action_blocks": 0,
@@ -8563,197 +8561,7 @@
  ],
  "firm_reasons": [],
  "unattached": {
-  "qu_findings": [
-   {
-    "finding_id": "2021/등록/1.1/라군/정인회계법인/0",
-    "text_sha256": "8ec72a8f46d34e573c6707c67b5249b177809bff1f8e64fabe94b3dcea87e2c8",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/1.1/라군/정인회계법인/1",
-    "text_sha256": "8ab9dbebf78b8142d01ee4a7c0da57e4c053138b483ddabf3a01869f49ac6497",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/1.1/라군/정인회계법인/2",
-    "text_sha256": "994799d2547664d7d10798b66b5a40a407fecd58755fd6eda528eda3f16936cc",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/1.1/라군/정인회계법인/3",
-    "text_sha256": "39f9ee7a8e279c527380be8718ef6ea041e8b96d6776c18712647f1547183d58",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/1.1/라군/정인회계법인/4",
-    "text_sha256": "c3c488264ed48eb613933114c5a7b9489effc0b49151d95cd3122acdb2348146",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/2.2/라군/정인회계법인/2",
-    "text_sha256": "80504de78e4daad3f80635e12efdbd70d5f675c06d42a4e14cba280d54a30940",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/2.2/라군/정인회계법인/3",
-    "text_sha256": "cc3c95bb37bdc1797a5f7a7443707214632d40f9c17ded136fe7527e565cb2e2",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/2.2/라군/정인회계법인/4",
-    "text_sha256": "7523c1fe8940781e77a913f648b57ec5315e54e4fa1e06ec963e148bcc1af6e7",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/2.2/라군/정인회계법인/5",
-    "text_sha256": "43b4c6cc667a67a013aa48f9305a691bb0badad639d8590147ebd444c99b9bdc",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/2.2/라군/정인회계법인/6",
-    "text_sha256": "b2dfdecdcf792adbd9b4bfcd19fd755c26ea07a5f5fbb83a097b11590f90aa30",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/2.2/라군/정인회계법인/7",
-    "text_sha256": "a668e609463e0904237b736275aa01aee09883b9f78b43f9c77d90bad83f03a4",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/2.2/라군/정인회계법인/8",
-    "text_sha256": "a353418034ff5f1afdea1680ecfb6cedf9c3f30bbc8640e4829180efe5eb6b2c",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/2.2/라군/정인회계법인/9",
-    "text_sha256": "4947b59c0ec56f208f9ef85466926f15bad6b8d0695f8111352f7ec11ab208e0",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/5.2/라군/정인회계법인/4",
-    "text_sha256": "939c619c732fe6d703668c6a10ea64c30d10b07319f681e3472ef1da30ae708d",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/5.2/라군/정인회계법인/5",
-    "text_sha256": "578513b1971d725f4f57f014a0c9cd8a5fdc627e69f5c8b84352a8fb8ffc3f53",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/5.2/라군/정인회계법인/6",
-    "text_sha256": "3aa7a05b7c1377a50cda9e57049b2f7665c5f1e39245440e6960416c9e52f782",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/5.2/라군/정인회계법인/7",
-    "text_sha256": "bb2afafffaa2b14af67a530f86c73236a5624162c4fd777d4fe6e1547487eca5",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/5.2/라군/정인회계법인/8",
-    "text_sha256": "4dbdbc8eeac1ab6ac3ce513d3d673f1d1a295cbb28eef54e43b433e853cc66f7",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/5.2/라군/정인회계법인/9",
-    "text_sha256": "1c22a73515e5381cccdb4c801df3cb3e4e5cf33140b3934cb70bc4b940d8dd25",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/5.2/라군/정인회계법인/10",
-    "text_sha256": "990beb3fa43024c4f3ca75537bcef8223302fb5ecf275c34a4d68c980577e537",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/5.2/라군/정인회계법인/11",
-    "text_sha256": "54f81408c9eece7110ba39cb38217da1ae7c91c3e90d6c02ebe463407f88242b",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/5.2/라군/정인회계법인/12",
-    "text_sha256": "0d0604cbf8866a11e0ecff8ebabb7e87b69895394d913dfcf03f70db33ad12f3",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/5.2/라군/정인회계법인/13",
-    "text_sha256": "97be3f5a05e8369bad1e1595493a07b0a5cbc8de38c5868070a96d05afcafdba",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/5.2/라군/정인회계법인/14",
-    "text_sha256": "eb8b95f4b29e9146f7b59d8c82d5c0a4a45c382367de11f3d17b88cd58d05fbf",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/5.2/라군/정인회계법인/15",
-    "text_sha256": "475846d6c0379b928085fcbbf1c12b4178e69f4f464022da041163d434989739",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/5.2/라군/정인회계법인/16",
-    "text_sha256": "48b6c8a16123f911b48a1cacb5ca59588cf86fb17aa335f01926082be416a513",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   },
-   {
-    "finding_id": "2021/등록/5.2/라군/정인회계법인/17",
-    "text_sha256": "6e4229ccad3278e6f278f3579a3774eb84db418a1adf50b378fda3c33e94f8c6",
-    "reason": "standard_quote_not_finding",
-    "note": "정인 2021 화면에 섞인 품질관리기준 인용 문단(지적 아님). 화면에 아무것도 내지 않음",
-    "tier": "none"
-   }
-  ],
+  "qu_findings": [],
   "f004_superseded": [
    {
     "row_id": "20240701000270:0:6",
