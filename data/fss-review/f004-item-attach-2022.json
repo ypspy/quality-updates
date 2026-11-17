@@ -3,9 +3,9 @@
  "status": "초안(proposed). 민트 분류·검토. 사용자 확인 전. 화면 반영은 Cabbage 부착 PR에서",
  "year": "2022",
  "source": {
-  "main_commit": "01603cc5fffd141a4cce0602595f222480976c8c",
-  "year_json_sha256": "70e2b22a7a21d9ec61ba52cf9532fc023348f3722ca8dac5eb9f8984c36bbe45",
-  "year_json_note": "data/fss-review/year-2022.json (PR-A5 #131이 옮긴 연도 데이터 파일, main 913d4382부터 이 sha)",
+  "main_commit": "5e2120bb5174a9d2acedf9327f64fab4729a43f0",
+  "year_json_sha256": "1facf3839e1f903ff2ca2abbc249ef728f0bdd04ed630c0702c8b30514cc997f",
+  "year_json_note": "main 5e2120bb의 data/fss-review/year-2022.json에서 일반회계법인 5.2·5.3 법인 이름의 첨부 파일명 꼬리 「 개선권고사항 (1)」을 빼 게시판 감사인 이름 「회계법인 조은」으로 바꾼 값 (PR-E, 사용자 결정 D10)",
   "f004_snapshot": "target.db (v_f004_vi_findings, parser f004-remediation-0.2) sha256 6edbd8f92e702ec70e1c42363babb55111ada47fe58aa70aa0436b6a9193b0a8",
   "classification": "classification-2022.md"
  },
@@ -256,7 +256,7 @@
    "history_row_ids": []
   },
   "20230630000846:0:0": {
-   "firm": "회계법인 조은 개선권고사항 (1)",
+   "firm": "회계법인 조은",
    "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
    "category_raw": "회계법인내 품질에 대한 리더십 책임",
    "recommendation": "감사조서의 작성 및 관리절차의 운영 미흡 외",
@@ -273,7 +273,7 @@
    "history_row_ids": []
   },
   "20230630000846:0:1": {
-   "firm": "회계법인 조은 개선권고사항 (1)",
+   "firm": "회계법인 조은",
    "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
    "category_raw": "회계법인내 품질에 대한 리더십 책임",
    "recommendation": "업무품질관리검토(사전심리)절차의 설계 및 운영상 미흡 외",
@@ -290,7 +290,7 @@
    "history_row_ids": []
   },
   "20230630000846:0:8": {
-   "firm": "회계법인 조은 개선권고사항 (1)",
+   "firm": "회계법인 조은",
    "dae_standard": "5. 업무의 수행",
    "category_raw": "업무의 수행",
    "recommendation": "감사계획의 수립절차 미흡 외",
@@ -307,7 +307,7 @@
    "history_row_ids": []
   },
   "20230630000846:0:9": {
-   "firm": "회계법인 조은 개선권고사항 (1)",
+   "firm": "회계법인 조은",
    "dae_standard": "5. 업무의 수행",
    "category_raw": "업무의 수행",
    "recommendation": "지배기구와의 커뮤니케이션절차 미흡 외",
@@ -8642,13 +8642,13 @@
    ]
   },
   {
-   "finding_id": "2022/일반회계법인/5.2/-/회계법인 조은 개선권고사항 (1)/0",
+   "finding_id": "2022/일반회계법인/5.2/-/회계법인 조은/0",
    "path": {
     "bundle": "일반회계법인",
     "section": "5. 업무의 수행",
     "group": "5.2 사전심리",
     "gun": null,
-    "firm": "회계법인 조은 개선권고사항 (1)",
+    "firm": "회계법인 조은",
     "index": 0
    },
    "text_sha256": "06b2d1ab8d0256f59f31a380c03b20deb801521791c7e6982ece39973aa091a5",
@@ -8656,11 +8656,11 @@
     {
      "f004_row_id": "20230630000846:0:8",
      "covers": [
-      "2022/일반회계법인/5.2/-/회계법인 조은 개선권고사항 (1)/0"
+      "2022/일반회계법인/5.2/-/회계법인 조은/0"
      ],
      "basis": "auto_medium",
      "scores": {
-      "2022/일반회계법인/5.2/-/회계법인 조은 개선권고사항 (1)/0": 0.422
+      "2022/일반회계법인/5.2/-/회계법인 조은/0": 0.422
      },
      "note": null
     }
@@ -10891,7 +10891,7 @@
     "tier": "review"
    },
    {
-    "finding_id": "2022/일반회계법인/5.2/-/회계법인 조은 개선권고사항 (1)/1",
+    "finding_id": "2022/일반회계법인/5.2/-/회계법인 조은/1",
     "text_sha256": "2517e3a3f69d27a3944ca2f722d7190f27f2c256f4a49bda5b9ebe38c471cb44",
     "reason": "mint_no_same_row",
     "note": "같은 대분류 F004 행 문구·주제가 문단과 다름(예: 사전심리·발행 문단 ↔ 조서 관리 행, 개별감사 항목 행). 민트 확인 결과 같은 권고 행 없음. 붙이지 않음",
@@ -10899,7 +10899,7 @@
     "tier": "review"
    },
    {
-    "finding_id": "2022/일반회계법인/5.2/-/회계법인 조은 개선권고사항 (1)/2",
+    "finding_id": "2022/일반회계법인/5.2/-/회계법인 조은/2",
     "text_sha256": "16a20039b64d80de55daffa20c05b46837389a4c11a157ce372afd44a8b3f957",
     "reason": "mint_no_same_row",
     "note": "같은 대분류 F004 행 문구·주제가 문단과 다름(예: 사전심리·발행 문단 ↔ 조서 관리 행, 개별감사 항목 행). 민트 확인 결과 같은 권고 행 없음. 붙이지 않음",
@@ -11035,7 +11035,7 @@
     "tier": "review"
    },
    {
-    "finding_id": "2022/일반회계법인/5.3/-/회계법인 조은 개선권고사항 (1)/0",
+    "finding_id": "2022/일반회계법인/5.3/-/회계법인 조은/0",
     "text_sha256": "df1406edd886952d50dd6ccb24ebcdaeed0db5b5f0afab8fe4184a3ab9feeb5b",
     "reason": "mint_no_same_row",
     "note": "같은 대분류 F004 행 문구·주제가 문단과 다름(예: 사전심리·발행 문단 ↔ 조서 관리 행, 개별감사 항목 행). 민트 확인 결과 같은 권고 행 없음. 붙이지 않음",
@@ -11043,7 +11043,7 @@
     "tier": "review"
    },
    {
-    "finding_id": "2022/일반회계법인/5.3/-/회계법인 조은 개선권고사항 (1)/1",
+    "finding_id": "2022/일반회계법인/5.3/-/회계법인 조은/1",
     "text_sha256": "5db701fa4d2a677a9c7d60c358d17f038bf60c9f5236a5571827feb91e0c2d8c",
     "reason": "mint_no_same_row",
     "note": "같은 대분류 F004 행 문구·주제가 문단과 다름(예: 사전심리·발행 문단 ↔ 조서 관리 행, 개별감사 항목 행). 민트 확인 결과 같은 권고 행 없음. 붙이지 않음",
@@ -11051,7 +11051,7 @@
     "tier": "review"
    },
    {
-    "finding_id": "2022/일반회계법인/5.3/-/회계법인 조은 개선권고사항 (1)/2",
+    "finding_id": "2022/일반회계법인/5.3/-/회계법인 조은/2",
     "text_sha256": "504505d5d21b0a06df253cea57490e9906b61c64a70eb613d36b605f8ea088e4",
     "reason": "mint_no_same_row",
     "note": "같은 대분류 F004 행 문구·주제가 문단과 다름(예: 사전심리·발행 문단 ↔ 조서 관리 행, 개별감사 항목 행). 민트 확인 결과 같은 권고 행 없음. 붙이지 않음",
@@ -11099,21 +11099,21 @@
    },
    {
     "row_id": "20230630000846:0:0",
-    "firm": "회계법인 조은 개선권고사항 (1)",
+    "firm": "회계법인 조은",
     "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
     "reason": "no_paragraph",
     "note": null
    },
    {
     "row_id": "20230630000846:0:1",
-    "firm": "회계법인 조은 개선권고사항 (1)",
+    "firm": "회계법인 조은",
     "dae_standard": "1. 회계법인 내 품질에 대한 리더십 책임",
     "reason": "no_paragraph",
     "note": null
    },
    {
     "row_id": "20230630000846:0:9",
-    "firm": "회계법인 조은 개선권고사항 (1)",
+    "firm": "회계법인 조은",
     "dae_standard": "5. 업무의 수행",
     "reason": "no_paragraph",
     "note": null

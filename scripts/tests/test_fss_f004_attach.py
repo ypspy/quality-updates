@@ -1046,10 +1046,10 @@ _ATTACH_YEAR_LOCK = {
         "F004 부착 2023: 자리 216/216, 이행사항 226, 법인 사유 35곳(81칸), 건너뜀 0",
     ),
     "2022": (
-        "be4346280732b70de2a9dc6accd64a66bd5022a0dd609c7da36b000b4e224978",
-        425305,
-        "41569935b6fed1565fdd6d72be992b4d73458dcf54056be85c1e4680a2823046",
-        393312,
+        "8b43f046bd2582f2fee80f53d3a7f381dd8b34c90d8107a63075b362be2567c9",
+        425089,
+        "254539dcfcc5c5577d01c22d41e39c79c0a0b9aa5f3c33243b471b69a48cb7ed",
+        393128,
         "F004 부착 2022: 자리 221/221, 이행사항 224, 법인 사유 35곳(107칸), 건너뜀 0",
     ),
     "2020": (
@@ -1197,3 +1197,49 @@ def test_jeongdong_quote_paragraphs_are_removed_from_2020():
     assert kept == _JEONGDONG_KEPT
     for token in ("(참고2)", "(참고3)", "□"):
         assert token not in html
+
+
+# PR-E(사용자 결정 D10): 2022 일반회계법인 「회계법인 조은」 이름에서 첨부 파일명 꼬리를 뺐다.
+_JOEUN = "회계법인 조은"
+_JOEUN_FILE_SUFFIX = " 개선권고사항 (1)"
+
+
+def test_2022_joeun_name_has_no_attachment_file_suffix():
+    old = _JOEUN + _JOEUN_FILE_SUFFIX
+    year = load_year("2022")
+    assert old not in json.dumps(year, ensure_ascii=False)
+    found = []
+    for bundle in year["bundles"]:
+        for section in bundle["sections"]:
+            for group in section["groups"]:
+                for block in group["blocks"]:
+                    for firm in block.get("firms", []):
+                        if firm["name"] == _JOEUN:
+                            found.append((bundle["name"], group["heading"].split(" ", 1)[0], len(firm["findings"])))
+    assert found == [("일반회계법인", "5.2", 3), ("일반회계법인", "5.3", 3)]
+
+    path = fss_f004_attach.ATTACH_PATHS["2022"]
+    assert old not in path.read_text(encoding="utf-8")
+    data = load_attach(path)
+    prefix = f"2022/일반회계법인/{{}}/-/{_JOEUN}/"
+    assert [att["finding_id"] for att in data["attachments"] if _JOEUN in att["finding_id"]] == [
+        prefix.format("5.2") + "0"
+    ]
+    assert [row["finding_id"] for row in data["unattached"]["qu_findings"] if _JOEUN in row["finding_id"]] == [
+        prefix.format("5.2") + "1",
+        prefix.format("5.2") + "2",
+        prefix.format("5.3") + "0",
+        prefix.format("5.3") + "1",
+        prefix.format("5.3") + "2",
+    ]
+    assert sorted(key for key, row in data["f004_rows"].items() if row["firm"] == _JOEUN) == [
+        "20230630000846:0:0",
+        "20230630000846:0:1",
+        "20230630000846:0:8",
+        "20230630000846:0:9",
+    ]
+
+    html = _injected_year("2022")
+    names = [html_lib.unescape(m.group(1)) for m in fss_f004_attach._ORIGINAL_NAME.finditer(html)]
+    assert names.count(_JOEUN) == 2
+    assert _JOEUN_FILE_SUFFIX not in html
