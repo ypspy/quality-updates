@@ -711,6 +711,9 @@ _SESSION_DATE_RE = re.compile(
 )
 _FRONT_LINES = 60
 _PAREN_LINE_RE = re.compile(r"\(.*\)")
+_PAREN_DOTTED_DATE_RE = re.compile(
+    r"\(\s*(\d{4})\s*\.\s*(\d{1,2})\s*\.\s*(\d{1,2})\s*\.?\s*\)"
+)
 
 
 def _iso_date(year: str, month: str, day: str) -> str | None:
@@ -723,6 +726,21 @@ def _iso_date(year: str, month: str, day: str) -> str | None:
 
 def _clean_minutes_line(line: str) -> str:
     return line.replace("\ufeff", "").strip()
+
+
+def _paren_dotted_meeting_date(text: str, *, entire_line: bool) -> str | None:
+    """괄호로 감싼 네 자리 연도 점 날짜. 전각 점·괄호는 이 판정에서만 ASCII로 바꾼다."""
+    normalized = text.replace("．", ".").replace("（", "(").replace("）", ")")
+    if entire_line:
+        matched = _PAREN_DOTTED_DATE_RE.fullmatch(normalized)
+    else:
+        matched = None
+        for candidate in _PAREN_DOTTED_DATE_RE.finditer(normalized):
+            if candidate.end() == len(normalized):
+                matched = candidate
+    if matched is None:
+        return None
+    return _iso_date(*matched.groups())
 
 
 def _calendar_date(text: str) -> str:
@@ -756,9 +774,15 @@ def meeting_date_from_minutes_text(text: str) -> str:
             parsed = _iso_date(*trailed.groups())
             if parsed:
                 return parsed
+        parsed = _paren_dotted_meeting_date(stripped, entire_line=False)
+        if parsed:
+            return parsed
         for follow in lines[index + 1 : index + 8]:
             if not follow or _PUBLICATION_RE.search(follow):
                 continue
+            parsed = _paren_dotted_meeting_date(follow, entire_line=True)
+            if parsed:
+                return parsed
             # 제목 밑 (의결안건 제148호 관련) 같은 괄호 한 줄은 날짜가 아니므로 건너뛴다.
             if _PAREN_LINE_RE.fullmatch(follow):
                 continue
