@@ -19,7 +19,7 @@ KEY_RE = re.compile(
     rf"[^()\n]{{0,30}}?"
     rf"\(\s*[{_YEAR_QUOTES}]\s*(\d{{2}})"
 )
-_COMMITTEE_RE = "금융감독위원회|금융위원회|증권선물의원회|증권선물위원회|증선위"
+_COMMITTEE_RE = "금융감독위원회|금융위원회|증권선물의원회|증권선물위원회|증선위|물위원회"
 _DECISION_WITH_CHA = re.compile(
     rf"(?:(?P<year>\d{{4}})\s*년\s*도?\s*)?"
     rf"제\s*(?P<number>\d+)\s*차\s*"
@@ -41,7 +41,7 @@ _FOUR_YEAR = re.compile(
 )
 # 두 자리는 시작·하이픈·밑줄·점 뒤의 09년·02년만 연도다. '최근 10년'은 빼다.
 _TWO_YEAR = re.compile(r"(?:^|[-._])(\d{2})년")
-POST_TITLE_WORDS = ("의사록", "안건", "의결서")
+POST_TITLE_WORDS = ("의사록", "안건", "의결서", "회의록")
 # www 없는 호스트가 TLS에 더 안정적이다. 정규 경로와 백필이 같은 출처를 쓴다.
 FSC_ORIGIN = "https://fsc.go.kr"
 BOARD_URLS = {

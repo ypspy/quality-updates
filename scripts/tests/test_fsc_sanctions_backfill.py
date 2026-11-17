@@ -1064,3 +1064,112 @@ def test_readme_is_tracked_and_originals_stay_ignored():
     assert ignored("downloads/sanctions/_review-queue.jsonl")
     assert ignored("downloads/sanctions/_review/27605/abc-의사록.pdf")
     assert ignored("downloads/sanctions/_staging/abc.pdf")
+
+
+def test_decision_key_accepts_hoeuirok_title():
+    """게시판 27677은 의사록 대신 회의록이다. 회차 키는 그대로다."""
+    from attach_sanction_minutes import _meeting_material
+
+    assert decision_key("제15차 금융위원회 회의록", date(2009, 8, 26)) == (
+        2009,
+        "금융위",
+        "정기",
+        15,
+    )
+    assert _meeting_material("제15차 금융위원회 회의록") is True
+
+
+def test_decision_key_reads_mul_committee_as_sfc():
+    """「물위원회」는 증권선물위원회 앞부분이 빠진 오타다."""
+    from attach_sanction_minutes import _meeting_material
+
+    assert decision_key("2012년 제2차 임시 물위원회 의사록", date(2012, 9, 10)) == (
+        2012,
+        "증선위",
+        "임시",
+        2,
+    )
+    assert _meeting_material("2012년 제2차 임시 물위원회 의사록") is True
+
+
+def test_title_gates_still_skip_results_and_other_bodies():
+    from attach_sanction_minutes import _DECISION_WITH_CHA, _meeting_material
+
+    assert _meeting_material("2026년도 제19차 금융위원회 회의결과") is False
+    assert _meeting_material("2026년 제20차 증권선물위원회 회의결과") is False
+    assert decision_key("제1호 2025년 제13회 회계기준위원회 회의록(보고후공개)") is None
+    assert decision_key("2026년 제2차 증권선물위원회 임시회의 회의결과") == (
+        2026,
+        "증선위",
+        "임시",
+        2,
+    )
+    matched = _DECISION_WITH_CHA.search("2026년 제2차 증권선물위원회 임시회의 회의결과")
+    assert matched is not None
+    assert matched.group("committee") == "증권선물위원회"
+    assert decision_key("2025년도 비공개기간 경과 금융위원회 안건") is None
+
+
+def test_collect_posts_keeps_hoeuirok_and_mul_committee_hwp_pending():
+    from attach_sanction_minutes import DecisionPost, collect_posts
+
+    fsc_list = """
+<ul>
+  <li><div class="inner"><div class="subject"><a href="/no020101/27677">제15차 금융위원회 회의록</a></div><div class="day">2009-08-26</div></div></li>
+</ul>
+"""
+    sfc_list = """
+<ul>
+  <li><div class="inner"><div class="subject"><a href="/no020102/28768">2012년 제2차 임시 물위원회 의사록</a></div><div class="day">2012-09-10</div></div></li>
+</ul>
+"""
+    fsc_detail = """
+<a href="/comm/getFile?srvcId=BBSTY1&upperNo=27677&fileTy=ATTACH&fileNo=1">2009-제15차 금융위 의사록(홈).hwp</a>
+"""
+    sfc_detail = """
+<a href="/comm/getFile?srvcId=BBSTY1&upperNo=28768&fileTy=ATTACH&fileNo=1">제2차 임시 증선위 의사록(홈).hwp</a>
+"""
+
+    def fetch_text(url: str) -> str:
+        if "curPage=1" in url and "/no020101" in url:
+            return fsc_list
+        if "curPage=1" in url and "/no020102" in url:
+            return sfc_list
+        if "curPage=" in url:
+            return "<ul></ul>"
+        if url.endswith("/27677"):
+            return fsc_detail
+        if url.endswith("/28768"):
+            return sfc_detail
+        raise AssertionError(url)
+
+    pending: list = []
+    posts = collect_posts(fetch_text, date(2009, 8, 26), date(2012, 9, 10), pending)
+    assert posts == [
+        DecisionPost(
+            2009,
+            "금융위",
+            "정기",
+            15,
+            "",
+            [],
+            "제15차 금융위원회 회의록",
+            "https://fsc.go.kr/no020101/27677",
+        ),
+        DecisionPost(
+            2012,
+            "증선위",
+            "임시",
+            2,
+            "",
+            [],
+            "2012년 제2차 임시 물위원회 의사록",
+            "https://fsc.go.kr/no020102/28768",
+        ),
+    ]
+    assert [row["reason"] for row in pending] == ["not-pdf", "not-pdf"]
+    assert [row["filename"] for row in pending] == [
+        "2009-제15차 금융위 의사록(홈).hwp",
+        "제2차 임시 증선위 의사록(홈).hwp",
+    ]
+    assert [row["post_id"] for row in pending] == ["27677", "28768"]
