@@ -1020,6 +1020,13 @@ def test_year_finding_ids_must_start_with_that_year(tmp_path):
 # PR-D: 2019·2020·2022·2023·2024 F004 부착 잠금. 연도마다 커밋 하나로 한 칸씩 더한다.
 # 연도: (부착 JSON sha256, bytes, 부착 뒤 연도 블록 sha256, bytes, 빌드 로그 줄)
 _ATTACH_YEAR_LOCK = {
+    "2020": (
+        "32b5a4f91e684e2a24eba1d5cf63a6935de4bcc315ac8ec072ff036715838688",
+        207382,
+        "2b2eca6a299523e0caef51f0c798f9a42264ac4d14c5128871d1da9cb5319d5b",
+        114206,
+        "F004 부착 2020: 자리 110/110, 이행사항 119, 법인 사유 0곳(0칸), 건너뜀 0",
+    ),
     "2019": (
         "36493a0b48433b5cf3fcc39416f9d0c3112c512c535c7f375754912270043b62",
         128666,
