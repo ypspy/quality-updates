@@ -1020,6 +1020,13 @@ def test_year_finding_ids_must_start_with_that_year(tmp_path):
 # PR-D: 2019·2020·2022·2023·2024 F004 부착 잠금. 연도마다 커밋 하나로 한 칸씩 더한다.
 # 연도: (부착 JSON sha256, bytes, 부착 뒤 연도 블록 sha256, bytes, 빌드 로그 줄)
 _ATTACH_YEAR_LOCK = {
+    "2023": (
+        "0d9e6bb5a9e98c6ee0270dd59178f25d82ba30cd8a714cc17892b05f7fac254b",
+        420495,
+        "4dcc58e5454747e4a5656c8719a95d4dfa674bab1f536c2c6e86ba1fe58f6317",
+        359218,
+        "F004 부착 2023: 자리 216/216, 이행사항 226, 법인 사유 35곳(81칸), 건너뜀 0",
+    ),
     "2022": (
         "be4346280732b70de2a9dc6accd64a66bd5022a0dd609c7da36b000b4e224978",
         425305,
@@ -1076,3 +1083,27 @@ def test_year_every_slot_resolves_and_matches_locked_bytes(year, caplog):
     assert _banned() not in built
     for token in _INTERNAL_IDS + ("history_row_ids",):
         assert token not in built
+
+
+# N11(사용자 결정 2026-11-16 9:48 PM CT, 「N11 4개 모두 붙이지 마」): 2023 네 문단은 붙이지 않는다.
+_N11_2023 = (
+    "2023/등록/1.1/라군/정동회계법인/0",
+    "2023/등록/1.1/라군/정동회계법인/2",
+    "2023/등록/1.2/나군/삼덕회계법인/4",
+    "2023/등록/2.1/나군/삼덕회계법인/3",
+)
+
+
+def test_2023_n11_paragraphs_stay_unattached():
+    data = load_attach(fss_f004_attach.ATTACH_PATHS["2023"])
+    held = [
+        row["finding_id"]
+        for row in data["unattached"]["qu_findings"]
+        if row["reason"] == "user_decision_no_attach"
+    ]
+    assert held == list(_N11_2023)
+    assert data["counts"]["unattached_by_reason"]["user_decision_no_attach"] == 4
+    assert "review_pending" not in data["counts"]["unattached_by_reason"]
+    used = {att["finding_id"] for att in data["attachments"]}
+    used |= {fid for att in data["attachments"] for item in att["f004"] for fid in item.get("covers", [])}
+    assert not used & set(_N11_2023)

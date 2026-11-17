@@ -43,6 +43,17 @@ ATTACH_YEARS = {
         },
         "site_div_sha": "b01f968c1990426aeee6959e251ef6bcf2b2c68a7115fd1acb215890c0c26b10",
     },
+    "2023": {
+        "sha": "0d9e6bb5a9e98c6ee0270dd59178f25d82ba30cd8a714cc17892b05f7fac254b",
+        "bytes": 420495,
+        "rendered": {
+            "f421a76990ef09ef92ab0993344427eb3077e7e63aeb482ec636cf07f6574e9e": (
+                359218,
+                "4dcc58e5454747e4a5656c8719a95d4dfa674bab1f536c2c6e86ba1fe58f6317",
+            ),
+        },
+        "site_div_sha": "afebe619ddf3920787b21ab0e073f0b9bea6844103ae8558b0896cd65c8b751b",
+    },
     "2022": {
         "sha": "be4346280732b70de2a9dc6accd64a66bd5022a0dd609c7da36b000b4e224978",
         "bytes": 425305,
@@ -92,7 +103,6 @@ ATTACH_YEARS = {
 # 부착 연도는 ATTACH_YEARS.site_div_sha로 비교한다.
 PRIOR_YEAR_SHA = {
     "2024": "dd252ed36a6f3debb59d9c5c831dfab643bb3dc51a4918b5f4649b0087f87763",
-    "2023": "a04efa16f933d3aac44bb98434af3bc21160d028790e140c50d77a3f38416baf",
 }
 _INTERNAL_IDS = (
     "f004_row_id",
