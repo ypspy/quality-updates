@@ -2,6 +2,8 @@
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from attach_sanction_minutes import (
@@ -1493,6 +1495,138 @@ def test_meeting_date_ignores_a_publication_note_and_reads_the_minutes_front():
 2026년 8월 1일 제출
 """
     assert meeting_date_from_minutes_text(buried) == "없음"
+
+
+_2008_PAREN_MINUTES = [
+    ("제2차 임시 금융위원회 의사록", "(2008. 3. 24.)", "2008-03-24", "임시", 2, "2008-금융위-임시-2차"),
+    ("제3차 금융위원회 의사록", "(2008. 4. 25.)", "2008-04-25", "정기", 3, "2008-금융위-3차"),
+    ("제4차 금융위원회 의사록", "(2008. 5. 9.)", "2008-05-09", "정기", 4, "2008-금융위-4차"),
+    ("제5차 금융위원회 의사록", "(2008. 5. 23.)", "2008-05-23", "정기", 5, "2008-금융위-5차"),
+    ("제6차 금융위원회 의사록", "(2008. 6. 16.)", "2008-06-16", "정기", 6, "2008-금융위-6차"),
+    ("제7차 금융위원회 의사록", "(2008. 6. 27.)", "2008-06-27", "정기", 7, "2008-금융위-7차"),
+    ("제8차 금융위원회 의사록", "(2008. 7. 11.)", "2008-07-11", "정기", 8, "2008-금융위-8차"),
+    ("제9차 금융위원회 의사록", "(2008. 7. 25.)", "2008-07-25", "정기", 9, "2008-금융위-9차"),
+    ("제10차 금융위원회 의사록", "(2008. 8. 22.)", "2008-08-22", "정기", 10, "2008-금융위-10차"),
+    ("제11차 금융위원회 의사록", "(2008. 9. 12.)", "2008-09-12", "정기", 11, "2008-금융위-11차"),
+    ("제12차 금융위원회 의사록", "(2008. 9. 26.)", "2008-09-26", "정기", 12, "2008-금융위-12차"),
+    ("제13차 금융위원회 의사록", "(2008. 10. 10.)", "2008-10-10", "정기", 13, "2008-금융위-13차"),
+    ("제14차 금융위원회 의사록", "(2008. 10. 27.)", "2008-10-27", "정기", 14, "2008-금융위-14차"),
+]
+
+
+@pytest.mark.parametrize(
+    ("title", "second", "expected", "kind", "number", "folder"),
+    _2008_PAREN_MINUTES,
+)
+def test_2008_minutes_paren_dotted_date_under_the_title(title, second, expected, kind, number, folder):
+    from attach_sanction_minutes import (
+        meeting_date_from_minutes_text,
+        minutes_identity_from_text,
+        resolve_minutes_key,
+        sanction_folder,
+    )
+
+    text = f"{title}\n{second}\n금 융 위 원 회"
+    assert meeting_date_from_minutes_text(text) == expected
+    assert minutes_identity_from_text(text) == {
+        "date": expected,
+        "year": 2008,
+        "committee": "금융위",
+        "kind": kind,
+        "number": number,
+    }
+    key, source, evidence = resolve_minutes_key(
+        (1999, "증선위", "서면", 99),
+        "minutes.pdf",
+        text,
+        bundle=False,
+    )
+    assert source == "pdf-text"
+    assert evidence == expected
+    assert sanction_folder(key) == folder
+
+
+@pytest.mark.parametrize(
+    "second",
+    [
+        "(2008.8.22.)",
+        "(2008.8.22)",
+        "(2008. 08. 22)",
+        "( 2008. 8. 22. )",
+        "（2008．8．22．）",
+        "(2008．8．22)",
+    ],
+)
+def test_paren_dotted_date_variants_under_the_title(second):
+    from attach_sanction_minutes import meeting_date_from_minutes_text
+
+    text = f"제10차 금융위원회 의사록\n{second}\n금 융 위 원 회"
+    assert meeting_date_from_minutes_text(text) == "2008-08-22"
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "제10차 금융위원회 의사록 (2008. 8. 22.)",
+        "제10차 금융위원회 의사록(2008.8.22)",
+    ],
+)
+def test_paren_dotted_date_on_the_title_line(line):
+    from attach_sanction_minutes import meeting_date_from_minutes_text
+
+    assert meeting_date_from_minutes_text(line) == "2008-08-22"
+
+
+@pytest.mark.parametrize("second", ["(2008. 2. 30.)", "(2008. 13. 1.)", "(2008. 0. 5.)"])
+def test_impossible_paren_dotted_date_is_not_the_meeting_day(second):
+    from attach_sanction_minutes import meeting_date_from_minutes_text
+
+    text = f"제10차 금융위원회 의사록\n{second}\n금 융 위 원 회"
+    assert meeting_date_from_minutes_text(text) == "없음"
+
+
+@pytest.mark.parametrize("second", ["(2008. 2. 30.)", "(2008. 13. 1.)", "(2008. 0. 5.)"])
+def test_impossible_paren_dotted_date_falls_through_to_the_session_line(second):
+    from attach_sanction_minutes import meeting_date_from_minutes_text
+
+    text = f"제10차 금융위원회 의사록\n{second}\n일시: 2008년 8월 22일"
+    assert meeting_date_from_minutes_text(text) == "2008-08-22"
+
+
+@pytest.mark.parametrize(
+    "second",
+    [
+        "(08. 8. 22.)",
+        "(2008. 8.)",
+        "(2008. 8. 22. 의결)",
+        "(2008. 8. 22. 공개)",
+    ],
+)
+def test_rejected_paren_date_shapes_are_not_meeting_days(second):
+    from attach_sanction_minutes import meeting_date_from_minutes_text
+
+    text = f"제10차 금융위원회 의사록\n{second}\n금 융 위 원 회"
+    assert meeting_date_from_minutes_text(text) == "없음"
+
+
+def test_publication_note_under_the_title_is_still_not_a_meeting_day():
+    from attach_sanction_minutes import meeting_date_from_minutes_text
+
+    text = "제10차 금융위원회 의사록\n(2026.9.18. 공개)\n"
+    assert meeting_date_from_minutes_text(text) == "없음"
+
+
+def test_agenda_paren_line_still_reaches_the_following_dotted_date():
+    from attach_sanction_minutes import meeting_date_from_minutes_text
+
+    text = "제10차 금융위원회 의사록\n(의결안건 제148호 관련)\n2026. 7. 22.\n"
+    assert meeting_date_from_minutes_text(text) == "2026-07-22"
+
+
+def test_paren_dotted_date_without_a_minutes_title_is_ignored():
+    from attach_sanction_minutes import meeting_date_from_minutes_text
+
+    assert meeting_date_from_minutes_text("(2008. 8. 22.)\n금 융 위 원 회\n") == "없음"
 
 
 def _minutes_pdf(pages: list[list[str]]) -> bytes:
