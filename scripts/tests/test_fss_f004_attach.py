@@ -416,26 +416,6 @@ def _dump_attach(directory: Path, data: dict) -> Path:
     return path
 
 
-def _with_2024_lookalikes(page: str) -> str:
-    marker = '<div class="fss-year" data-year="2024" hidden>'
-    at = page.find(marker)
-    assert at >= 0
-    insert_at = at + len(marker)
-    extra = _LOOKALIKE_REASON + _LOOKALIKE_ATTACH + _LOOKALIKE_MENTION
-    return page[:insert_at] + extra + page[insert_at:]
-
-
-def test_lookalikes_outside_2025_stay_in_place():
-    page = _with_2024_lookalikes(materialize_review_markdown(PAGE.read_text(encoding="utf-8")))
-    built = inject_f004_attach(page, data=load_attach())
-    assert _LOOKALIKE_REASON in built
-    assert _LOOKALIKE_ATTACH in built
-    assert _LOOKALIKE_MENTION in built
-    start, end = fss_f004_attach._year_span(built, "2025")
-    assert built[start:end].count('class="fss-f004-attach"') == 151
-    assert built.count('class="fss-f004-attach"') == 152
-
-
 def _with_outside_lookalikes(page: str) -> str:
     """첫 연도 블록 앞(어느 연도 블록에도 속하지 않는 곳)에 비슷한 조각을 넣는다.
 
@@ -456,6 +436,24 @@ def test_strip_ignores_pages_without_2025_and_outside_lookalikes():
     assert _LOOKALIKE_ATTACH in stripped
     assert _LOOKALIKE_MENTION in stripped
     assert strip_f004_attach(stripped) == stripped
+
+
+def test_lookalikes_outside_year_blocks_stay_in_place():
+    page = _with_outside_lookalikes(materialize_review_markdown(PAGE.read_text(encoding="utf-8")))
+    every_year = sum(
+        load_attach(path)["counts"]["attach_blocks"] for path in fss_f004_attach.ATTACH_PATHS.values()
+    )
+    for built, total in (
+        (inject_f004_attach(page, data=load_attach()), 151 + 1),
+        (inject_f004_attach(page), every_year + 1),
+    ):
+        assert _LOOKALIKE_REASON in built
+        assert _LOOKALIKE_ATTACH in built
+        assert _LOOKALIKE_MENTION in built
+        assert built.index(_LOOKALIKE_REASON) < built.index('<div class="fss-year"')
+        start, end = fss_f004_attach._year_span(built, "2025")
+        assert built[start:end].count('class="fss-f004-attach"') == 151
+        assert built.count('class="fss-f004-attach"') == total
 
 
 def test_counts_mismatch_rejects_and_build_falls_back(tmp_path, monkeypatch, caplog):
@@ -816,8 +814,8 @@ def test_malformed_attachment_raises_value_error_before_block_sum(tmp_path, monk
     assert "ValueError" in caplog.text
 
 
-_ATTACH_2021_SHA = "04423aac698c95a7b246ec3c23d9e3d2f9bc14c0a9a43c57b3ef34bab357568e"
-_ATTACH_2021_BYTES = 291537
+_ATTACH_2021_SHA = "7b06fcd190a5b4a84b593b46f34729513a00d39de95aaf306c4d1bbd2d6aed03"
+_ATTACH_2021_BYTES = 291764
 _RENDER_2021_SHA = "ae6c6f4eb2433ab8e5fd898f82aa693b9e44726641303ec0d59338a7892ec1d7"
 _RENDER_2021_BYTES = 164196
 _SUMMARY_2021 = "F004 부착 2021: 자리 180/180, 이행사항 180, 법인 사유 0곳(0칸), 건너뜀 0"
@@ -1032,36 +1030,36 @@ def test_year_finding_ids_must_start_with_that_year(tmp_path):
 # 연도: (부착 JSON sha256, bytes, 부착 뒤 연도 블록 sha256, bytes, 빌드 로그 줄)
 _ATTACH_YEAR_LOCK = {
     "2024": (
-        "376cd8a2699b2e5ba1fc925f89e79c58aa34b2f2a16545f21250be1a96f6d02e",
-        426702,
+        "9b1f63899daacbc3185949ffef234c12cd481b798c369e37d4a0811f9479c8f5",
+        426827,
         "5133827f6648d5fb6e880a2057a7a342a34a39bc03fd68fc9a99bec8d21f6ed1",
         418985,
         "F004 부착 2024: 자리 228/228, 이행사항 235, 법인 사유 36곳(80칸), 건너뜀 0",
     ),
     "2023": (
-        "0d9e6bb5a9e98c6ee0270dd59178f25d82ba30cd8a714cc17892b05f7fac254b",
-        420495,
+        "e1d10d6c454cb1c08e5a0cbddd72a180085f667367ebf304e4a2ca63d31f6f8e",
+        420851,
         "4dcc58e5454747e4a5656c8719a95d4dfa674bab1f536c2c6e86ba1fe58f6317",
         359218,
         "F004 부착 2023: 자리 216/216, 이행사항 226, 법인 사유 35곳(81칸), 건너뜀 0",
     ),
     "2022": (
-        "8b43f046bd2582f2fee80f53d3a7f381dd8b34c90d8107a63075b362be2567c9",
-        425089,
+        "582254f684a9075133e591c742bb1e2cff8a1a622743f4c9eff125d53e818531",
+        425324,
         "254539dcfcc5c5577d01c22d41e39c79c0a0b9aa5f3c33243b471b69a48cb7ed",
         393128,
         "F004 부착 2022: 자리 221/221, 이행사항 224, 법인 사유 35곳(107칸), 건너뜀 0",
     ),
     "2020": (
-        "b9878d2cba8e1d723f40838a8c5c368ca1fc24723208baa96f45c92c8bdc5e68",
-        195257,
+        "ea6545c7d2fbbcdd57efa7397705749ae4ff2b2f899a61b98f9971cfc31afb1c",
+        195561,
         "b2008599c4fcac92aeb0071760a3c3f8ee8e1332d4a8cb2bcb3f1244ff530f63",
         104112,
         "F004 부착 2020: 자리 110/110, 이행사항 119, 법인 사유 0곳(0칸), 건너뜀 0",
     ),
     "2019": (
-        "36493a0b48433b5cf3fcc39416f9d0c3112c512c535c7f375754912270043b62",
-        128666,
+        "9a06e99c8a2d9cde51aa323d718d3d114937312254ae6148b1bf38d135c0b9b7",
+        128914,
         "be6d53fd6f04f28617b18311268ccd6834c0932fe403b23f7c67b8ca6a3055b7",
         75280,
         "F004 부착 2019: 자리 71/71, 이행사항 73, 법인 사유 0곳(0칸), 건너뜀 0",
@@ -1243,3 +1241,24 @@ def test_2022_joeun_name_has_no_attachment_file_suffix():
     names = [html_lib.unescape(m.group(1)) for m in fss_f004_attach._ORIGINAL_NAME.finditer(html)]
     assert names.count(_JOEUN) == 2
     assert _JOEUN_FILE_SUFFIX not in html
+
+
+# Sonnet #135 Low: 품질관리기준 인용 표·머리표가 어느 해 화면에도 남지 않았는지 본다.
+# 2024 「□」 6개는 삼화회계법인 원문(FSS PDF 그대로)의 가린 날짜 「※ □□□□.□□월」이라 그 문단 하나에만 허용한다.
+_BOX_ALLOWED = {"2024": ("삼화회계법인은 용역거래와 관련하여", "※ □□□□.□□월 이후로는", 6)}
+
+
+@pytest.mark.parametrize("year", list(fss_f004_attach.ATTACH_PATHS))
+def test_standard_quote_tokens_stay_off_every_year_block(year):
+    html = _injected() if year == "2025" else _injected_year(year)
+    for token in ("(참고2)", "(참고3)"):
+        assert token not in html
+    allowed = _BOX_ALLOWED.get(year)
+    if allowed is None:
+        assert "□" not in html
+        return
+    start_text, marker, count = allowed
+    boxed = [m.group(1) for m in re.finditer(r'<p class="fss-finding">(.*?)</p>', html) if "□" in m.group(1)]
+    assert len(boxed) == 1
+    assert start_text in boxed[0] and marker in boxed[0]
+    assert boxed[0].count("□") == html.count("□") == count

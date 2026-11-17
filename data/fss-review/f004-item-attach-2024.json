@@ -1,6 +1,6 @@
 {
  "version": "item-attach-2024-draft-2026-11-17",
- "status": "초안(proposed). 민트 분류·검토. 사용자 확인 전. 화면 반영은 Cabbage 부착 PR에서",
+ "status": "초안(proposed). 민트 분류·검토. 화면 반영: PR-D #134(main 7546d6ff). 매핑(mint_review·mint_override): 민트 판정, 2026-11-17 5:51 AM CT 권고대로 일괄 승인(N10, 행마다 직접 확인한 것은 아님)",
  "year": "2024",
  "source": {
   "main_commit": "01603cc5fffd141a4cce0602595f222480976c8c",
