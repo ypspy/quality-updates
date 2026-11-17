@@ -805,10 +805,10 @@ def test_malformed_attachment_raises_value_error_before_block_sum(tmp_path, monk
     assert "ValueError" in caplog.text
 
 
-_ATTACH_2021_SHA = "b3271fe94f1829919e6ca6b811f88886a518b6efc594e90b048c64984a3c2220"
-_ATTACH_2021_BYTES = 300987
-_RENDER_2021_SHA = "a7422c3075df7a8813228991887733b565bf2c469e58371b98226360f12df955"
-_RENDER_2021_BYTES = 174291
+_ATTACH_2021_SHA = "04423aac698c95a7b246ec3c23d9e3d2f9bc14c0a9a43c57b3ef34bab357568e"
+_ATTACH_2021_BYTES = 291537
+_RENDER_2021_SHA = "ae6c6f4eb2433ab8e5fd898f82aa693b9e44726641303ec0d59338a7892ec1d7"
+_RENDER_2021_BYTES = 164196
 _SUMMARY_2021 = "F004 부착 2021: 자리 180/180, 이행사항 180, 법인 사유 0곳(0칸), 건너뜀 0"
 
 
@@ -883,29 +883,76 @@ def test_gwanggyo_keeps_the_same_as_above_action_verbatim():
     assert "20250627000684" in html[at - 500 : at]
 
 
-def test_jeongin_quote_paragraphs_have_no_attach():
+# M2(사용자 결정 2026-11-16 9:18 PM CT)로 2021 데이터에서 뺀 정인회계법인 품질관리기준 인용 27문단.
+# 값은 PR-C 부착 JSON(b3271fe9…)의 unattached.qu_findings[].text_sha256(NFC 문단 텍스트 sha256).
+_JEONGIN_REMOVED_TEXT_SHA = frozenset(
+    {
+        "0d0604cbf8866a11e0ecff8ebabb7e87b69895394d913dfcf03f70db33ad12f3",
+        "1c22a73515e5381cccdb4c801df3cb3e4e5cf33140b3934cb70bc4b940d8dd25",
+        "39f9ee7a8e279c527380be8718ef6ea041e8b96d6776c18712647f1547183d58",
+        "3aa7a05b7c1377a50cda9e57049b2f7665c5f1e39245440e6960416c9e52f782",
+        "43b4c6cc667a67a013aa48f9305a691bb0badad639d8590147ebd444c99b9bdc",
+        "475846d6c0379b928085fcbbf1c12b4178e69f4f464022da041163d434989739",
+        "48b6c8a16123f911b48a1cacb5ca59588cf86fb17aa335f01926082be416a513",
+        "4947b59c0ec56f208f9ef85466926f15bad6b8d0695f8111352f7ec11ab208e0",
+        "4dbdbc8eeac1ab6ac3ce513d3d673f1d1a295cbb28eef54e43b433e853cc66f7",
+        "54f81408c9eece7110ba39cb38217da1ae7c91c3e90d6c02ebe463407f88242b",
+        "578513b1971d725f4f57f014a0c9cd8a5fdc627e69f5c8b84352a8fb8ffc3f53",
+        "6e4229ccad3278e6f278f3579a3774eb84db418a1adf50b378fda3c33e94f8c6",
+        "7523c1fe8940781e77a913f648b57ec5315e54e4fa1e06ec963e148bcc1af6e7",
+        "80504de78e4daad3f80635e12efdbd70d5f675c06d42a4e14cba280d54a30940",
+        "8ab9dbebf78b8142d01ee4a7c0da57e4c053138b483ddabf3a01869f49ac6497",
+        "8ec72a8f46d34e573c6707c67b5249b177809bff1f8e64fabe94b3dcea87e2c8",
+        "939c619c732fe6d703668c6a10ea64c30d10b07319f681e3472ef1da30ae708d",
+        "97be3f5a05e8369bad1e1595493a07b0a5cbc8de38c5868070a96d05afcafdba",
+        "990beb3fa43024c4f3ca75537bcef8223302fb5ecf275c34a4d68c980577e537",
+        "994799d2547664d7d10798b66b5a40a407fecd58755fd6eda528eda3f16936cc",
+        "a353418034ff5f1afdea1680ecfb6cedf9c3f30bbc8640e4829180efe5eb6b2c",
+        "a668e609463e0904237b736275aa01aee09883b9f78b43f9c77d90bad83f03a4",
+        "b2dfdecdcf792adbd9b4bfcd19fd755c26ea07a5f5fbb83a097b11590f90aa30",
+        "bb2afafffaa2b14af67a530f86c73236a5624162c4fd777d4fe6e1547487eca5",
+        "c3c488264ed48eb613933114c5a7b9489effc0b49151d95cd3122acdb2348146",
+        "cc3c95bb37bdc1797a5f7a7443707214632d40f9c17ded136fe7527e565cb2e2",
+        "eb8b95f4b29e9146f7b59d8c82d5c0a4a45c382367de11f3d17b88cd58d05fbf",
+    }
+)
+# 남는 정인 지적 16문단(중분류별 문단 수). 모두 F004 이행사항이 바로 아래에 붙는다.
+_JEONGIN_KEPT = {"1.2": 2, "2.2": 2, "3.1": 2, "4.3": 3, "5.2": 4, "6.1": 3}
+
+
+def test_jeongin_quote_paragraphs_are_removed_from_2021():
     data = load_attach(fss_f004_attach.ATTACH_PATHS["2021"])
+    assert data["unattached"]["qu_findings"] == []
+    counts = data["counts"]
+    assert counts["unattached_qu_findings"] == 0
+    assert counts["unattached_by_reason"] == {}
+    assert counts["qu_findings"] == counts["qu_findings_with_attach"] == 181
+    assert counts["qu_panels"] == 79
+    assert len(_JEONGIN_REMOVED_TEXT_SHA) == 27
+
+    year = load_year("2021")
+    for section in year["bundles"][0]["sections"]:
+        for group in section["groups"]:
+            if group["heading"].startswith("1.1 "):
+                assert group["blocks"] == [
+                    {"kind": "empty", "gun": gun} for gun in ("가군", "나군", "다군", "라군")
+                ]
+
     html = _injected_2021()
-    unattached = {}
-    for row in data["unattached"]["qu_findings"]:
-        _, bundle, group_no, gun, firm, index = row["finding_id"].split("/")
-        ident = (bundle, group_no, None if gun == "-" else gun, firm, int(index))
-        unattached[ident] = row["text_sha256"]
-    assert len(unattached) == 27
-    hits = 0
+    kept = {}
     for panel in fss_f004_attach._iter_panels(html):
         name = fss_f004_attach._ORIGINAL_NAME.search(panel["html"])
         assert name
         firm = html_lib.unescape(name.group(1))
         group_no = panel["group"].split(" ", 1)[0]
-        for index, match in enumerate(re.finditer(r'<p class="fss-finding">(.*?)</p>', panel["html"])):
-            ident = (panel["bundle"], group_no, panel["gun"], firm, index)
-            if ident not in unattached:
-                continue
-            hits += 1
-            assert fss_f004_attach._finding_sha(match.group(1)) == unattached[ident]
-            assert not panel["html"].startswith('<div class="fss-f004-attach"', match.end())
-    assert hits == 27
+        for match in re.finditer(r'<p class="fss-finding">(.*?)</p>', panel["html"]):
+            assert fss_f004_attach._finding_sha(match.group(1)) not in _JEONGIN_REMOVED_TEXT_SHA
+            if firm == "정인회계법인":
+                kept[group_no] = kept.get(group_no, 0) + 1
+                assert panel["html"].startswith('<div class="fss-f004-attach"', match.end())
+    assert kept == _JEONGIN_KEPT
+    for token in ("(참고2)", "(참고3)", "□"):
+        assert token not in html
 
 
 def test_broken_2021_file_leaves_that_year_plain(tmp_path, monkeypatch, caplog):
