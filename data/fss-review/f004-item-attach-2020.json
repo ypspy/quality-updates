@@ -3,9 +3,9 @@
  "status": "초안(proposed). 민트 분류·검토. 사용자 확인 전. 화면 반영은 Cabbage 부착 PR에서",
  "year": "2020",
  "source": {
-  "main_commit": "01603cc5fffd141a4cce0602595f222480976c8c",
-  "year_json_sha256": "c9c2e84726be7e29886dbf69e151c7d9027db95974d02461d1e5254c9fa3d793",
-  "year_json_note": "data/fss-review/year-2020.json (PR-A5 #131이 옮긴 연도 데이터 파일, main 913d4382부터 이 sha)",
+  "main_commit": "7546d6ff43278f3b682c8fb7aab6ebc0455ac0a9",
+  "year_json_sha256": "6e426ceea925c53b6d5f360b3f938c5160d13aa1fe59b078c163467f1ca710a8",
+  "year_json_note": "main 7546d6ff의 data/fss-review/year-2020.json에서 정동회계법인 품질관리기준 인용 27문단(참고2·참고3 표 글 포함)을 빼고 빈 1.1 라군을 「분류된 지적 없음」으로 바꾼 값 (M2-6, 사용자 결정 2026-11-16 9:18 PM CT)",
   "f004_snapshot": "target.db (v_f004_vi_findings, parser f004-remediation-0.2) sha256 6edbd8f92e702ec70e1c42363babb55111ada47fe58aa70aa0436b6a9193b0a8",
   "classification": "classification-2020.md"
  },
@@ -43,8 +43,8 @@
   ]
  },
  "counts": {
-  "qu_findings": 137,
-  "qu_panels": 59,
+  "qu_findings": 110,
+  "qu_panels": 58,
   "qu_firms": 9,
   "qu_findings_with_attach": 110,
   "attach_slots": 110,
@@ -63,10 +63,8 @@
   "firm_reason_panels_on_screen": 0,
   "firm_reason_by_code": {},
   "qu_findings_under_reason_lines": 0,
-  "unattached_qu_findings": 27,
-  "unattached_by_reason": {
-   "standard_quote_not_finding": 27
-  },
+  "unattached_qu_findings": 0,
+  "unattached_by_reason": {},
   "notes": 0,
   "no_date_blocks": 0,
   "no_action_blocks": 0,
@@ -5510,224 +5508,7 @@
  ],
  "firm_reasons": [],
  "unattached": {
-  "qu_findings": [
-   {
-    "finding_id": "2020/등록/1.1/라군/정동회계법인/0",
-    "text_sha256": "8ec72a8f46d34e573c6707c67b5249b177809bff1f8e64fabe94b3dcea87e2c8",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/1.1/라군/정동회계법인/1",
-    "text_sha256": "8ab9dbebf78b8142d01ee4a7c0da57e4c053138b483ddabf3a01869f49ac6497",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/1.1/라군/정동회계법인/2",
-    "text_sha256": "994799d2547664d7d10798b66b5a40a407fecd58755fd6eda528eda3f16936cc",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/1.1/라군/정동회계법인/3",
-    "text_sha256": "39f9ee7a8e279c527380be8718ef6ea041e8b96d6776c18712647f1547183d58",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/1.1/라군/정동회계법인/4",
-    "text_sha256": "c3c488264ed48eb613933114c5a7b9489effc0b49151d95cd3122acdb2348146",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/2.2/라군/정동회계법인/2",
-    "text_sha256": "80504de78e4daad3f80635e12efdbd70d5f675c06d42a4e14cba280d54a30940",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/2.2/라군/정동회계법인/3",
-    "text_sha256": "cc3c95bb37bdc1797a5f7a7443707214632d40f9c17ded136fe7527e565cb2e2",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/2.2/라군/정동회계법인/4",
-    "text_sha256": "7523c1fe8940781e77a913f648b57ec5315e54e4fa1e06ec963e148bcc1af6e7",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/2.2/라군/정동회계법인/5",
-    "text_sha256": "43b4c6cc667a67a013aa48f9305a691bb0badad639d8590147ebd444c99b9bdc",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/2.2/라군/정동회계법인/6",
-    "text_sha256": "b2dfdecdcf792adbd9b4bfcd19fd755c26ea07a5f5fbb83a097b11590f90aa30",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/2.2/라군/정동회계법인/7",
-    "text_sha256": "a668e609463e0904237b736275aa01aee09883b9f78b43f9c77d90bad83f03a4",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/2.2/라군/정동회계법인/8",
-    "text_sha256": "a353418034ff5f1afdea1680ecfb6cedf9c3f30bbc8640e4829180efe5eb6b2c",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/2.2/라군/정동회계법인/9",
-    "text_sha256": "4947b59c0ec56f208f9ef85466926f15bad6b8d0695f8111352f7ec11ab208e0",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/5.2/라군/정동회계법인/4",
-    "text_sha256": "939c619c732fe6d703668c6a10ea64c30d10b07319f681e3472ef1da30ae708d",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/5.2/라군/정동회계법인/5",
-    "text_sha256": "578513b1971d725f4f57f014a0c9cd8a5fdc627e69f5c8b84352a8fb8ffc3f53",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/5.2/라군/정동회계법인/6",
-    "text_sha256": "3aa7a05b7c1377a50cda9e57049b2f7665c5f1e39245440e6960416c9e52f782",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/5.2/라군/정동회계법인/7",
-    "text_sha256": "bb2afafffaa2b14af67a530f86c73236a5624162c4fd777d4fe6e1547487eca5",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/5.2/라군/정동회계법인/8",
-    "text_sha256": "4dbdbc8eeac1ab6ac3ce513d3d673f1d1a295cbb28eef54e43b433e853cc66f7",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/5.2/라군/정동회계법인/9",
-    "text_sha256": "1c22a73515e5381cccdb4c801df3cb3e4e5cf33140b3934cb70bc4b940d8dd25",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/5.2/라군/정동회계법인/10",
-    "text_sha256": "990beb3fa43024c4f3ca75537bcef8223302fb5ecf275c34a4d68c980577e537",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/5.2/라군/정동회계법인/11",
-    "text_sha256": "54f81408c9eece7110ba39cb38217da1ae7c91c3e90d6c02ebe463407f88242b",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/5.2/라군/정동회계법인/12",
-    "text_sha256": "0d0604cbf8866a11e0ecff8ebabb7e87b69895394d913dfcf03f70db33ad12f3",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/5.2/라군/정동회계법인/13",
-    "text_sha256": "97be3f5a05e8369bad1e1595493a07b0a5cbc8de38c5868070a96d05afcafdba",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/5.2/라군/정동회계법인/14",
-    "text_sha256": "eb8b95f4b29e9146f7b59d8c82d5c0a4a45c382367de11f3d17b88cd58d05fbf",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/5.2/라군/정동회계법인/15",
-    "text_sha256": "475846d6c0379b928085fcbbf1c12b4178e69f4f464022da041163d434989739",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/5.2/라군/정동회계법인/16",
-    "text_sha256": "48b6c8a16123f911b48a1cacb5ca59588cf86fb17aa335f01926082be416a513",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   },
-   {
-    "finding_id": "2020/등록/5.2/라군/정동회계법인/17",
-    "text_sha256": "d7ca4595222f0c3ec6fd1a82835a507041265198a8797e6fcdc6af33612c332a",
-    "reason": "standard_quote_not_finding",
-    "note": "2019·2020 모음집 참고(품질관리기준 인용)가 화면에 섞인 문단(지적 아님). 2021 정인 27문단과 같은 위치. 화면에 아무것도 내지 않음",
-    "v1_candidate_f004_row_id": null,
-    "tier": "none"
-   }
-  ],
+  "qu_findings": [],
   "f004_rows": [
    {
     "row_id": "20230630000381:0:10",
