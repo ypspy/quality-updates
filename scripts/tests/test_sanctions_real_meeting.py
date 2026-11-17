@@ -468,3 +468,54 @@ def test_zip_in_single_dated_post_is_still_extracted_into_the_meeting(tmp_path):
     assert any("감리결과" in path for path in _tree(downloads) if path.startswith(real + "/"))
     assert summary["reviews"] == 0
     assert not (downloads / "sanctions" / "_review").exists()
+
+
+SINGLE_MEETING_CASES = [
+    "late-december-2016-24",
+    "temporary-2016-1",
+    "late-december-2017-23",
+    "written-2009-1",
+    "sfc-2017-1-is-temporary",
+]
+BUNDLE_CASES = ["bundle-2008-5", "cached-27593", "cached-27599"]
+AGENDA_MEMBER = "(공개용) 의결 1. 회계법인 감리결과.pdf"
+
+
+def _rerun_with_zip(downloads: Path, case_id: str) -> tuple[dict, dict, Site]:
+    # 1차: 의사록만 받아 회의 폴더에 둔다. 2차: 같은 글에 ZIP이 붙은 상태로 다시 돈다.
+    base = BY_ID[case_id]
+    _run(Site([base]), downloads)
+    before = _tree(downloads)
+    zip_name = "의안.zip"
+    case = dict(base)
+    case["attachments"] = base["attachments"] + [zip_name]
+    site = Site([case], zips={zip_name: _zip_bytes({AGENDA_MEMBER: b"%PDF-1.4 agenda"})})
+    return _run(site, downloads), before, site
+
+
+@pytest.mark.parametrize("case_id", SINGLE_MEETING_CASES)
+def test_rerun_with_minutes_already_placed_extracts_zip_into_that_meeting(tmp_path, case_id):
+    # 같은 sha로 건너뛴(duplicate) 의사록도 placed_keys에 들어가므로 ZIP은 격리되지 않고 그 회의에 풀린다.
+    downloads = tmp_path / "downloads"
+    summary, before, _site = _rerun_with_zip(downloads, case_id)
+    (real,) = set(BY_ID[case_id]["expected"].values())
+    assert any(line.startswith("duplicate ") for line in summary["report"])
+    tree = _tree(downloads)
+    assert f"{real}/agenda/{AGENDA_MEMBER}" in tree
+    assert {path: data for path, data in tree.items() if "/agenda/" not in path} == before
+    assert summary["reviews"] == 0
+    sanctions = downloads / "sanctions"
+    assert not (sanctions / "_review").exists()
+    assert _jsonl(sanctions / "_review-queue.jsonl") == []
+
+
+@pytest.mark.parametrize("case_id", BUNDLE_CASES)
+def test_rerun_of_bundle_with_minutes_already_placed_still_quarantines_zip(tmp_path, case_id):
+    downloads = tmp_path / "downloads"
+    summary, before, _site = _rerun_with_zip(downloads, case_id)
+    assert _tree(downloads) == before
+    sanctions = downloads / "sanctions"
+    rows = _jsonl(sanctions / "_review-queue.jsonl")
+    assert [(row["filename"], row["reason"]) for row in rows] == [("의안.zip", "zip-in-multi-year-bundle")]
+    assert summary["reviews"] == 1
+    assert len(list((sanctions / "_review" / BY_ID[case_id]["post_id"]).glob("*.zip"))) == 1
