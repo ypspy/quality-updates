@@ -43,6 +43,17 @@ ATTACH_YEARS = {
         },
         "site_div_sha": "b01f968c1990426aeee6959e251ef6bcf2b2c68a7115fd1acb215890c0c26b10",
     },
+    "2024": {
+        "sha": "376cd8a2699b2e5ba1fc925f89e79c58aa34b2f2a16545f21250be1a96f6d02e",
+        "bytes": 426702,
+        "rendered": {
+            "78192da973a4b77854bd921d4ad3109026c497f6c1867a39b85ace6cf83b895e": (
+                418985,
+                "5133827f6648d5fb6e880a2057a7a342a34a39bc03fd68fc9a99bec8d21f6ed1",
+            ),
+        },
+        "site_div_sha": "41490fc76d06dda0b7a82c3543ecca6b7c3f152559e9f54a5039ea779d74e9ad",
+    },
     "2023": {
         "sha": "0d9e6bb5a9e98c6ee0270dd59178f25d82ba30cd8a714cc17892b05f7fac254b",
         "bytes": 420495,
@@ -99,11 +110,9 @@ ATTACH_YEARS = {
         "site_div_sha": "83ab5cebfeef2b16cebd1972ff5c7d3fc67554675ba004fb3e58d12495c4116b",
     },
 }
-# scripts/tests/test_fss_review_cards.py YEAR_SHA (main 94f4882).
+# 부착 없는 연도가 없어 비어 있다(PR-D: 2019·2020·2022·2023·2024 부착).
 # 부착 연도는 ATTACH_YEARS.site_div_sha로 비교한다.
-PRIOR_YEAR_SHA = {
-    "2024": "dd252ed36a6f3debb59d9c5c831dfab643bb3dc51a4918b5f4649b0087f87763",
-}
+PRIOR_YEAR_SHA: dict[str, str] = {}
 _INTERNAL_IDS = (
     "f004_row_id",
     "text_sha256",

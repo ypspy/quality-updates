@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parent.parent
 ATTACH_PATH = ROOT / "data" / "fss-review" / "f004-item-attach.json"
 ATTACH_PATHS = {
     "2025": ATTACH_PATH,
+    "2024": ROOT / "data" / "fss-review" / "f004-item-attach-2024.json",
     "2023": ROOT / "data" / "fss-review" / "f004-item-attach-2023.json",
     "2022": ROOT / "data" / "fss-review" / "f004-item-attach-2022.json",
     "2021": ROOT / "data" / "fss-review" / "f004-item-attach-2021.json",

@@ -436,10 +436,21 @@ def test_lookalikes_outside_2025_stay_in_place():
     assert built.count('class="fss-f004-attach"') == 152
 
 
+def _with_outside_lookalikes(page: str) -> str:
+    """첫 연도 블록 앞(어느 연도 블록에도 속하지 않는 곳)에 비슷한 조각을 넣는다.
+
+    PR-D 뒤에는 2019–2025 모든 연도가 부착 연도라 부착 없는 연도 블록이 없다.
+    """
+    at = page.find('<div class="fss-year"')
+    assert at >= 0
+    extra = _LOOKALIKE_REASON + _LOOKALIKE_ATTACH + _LOOKALIKE_MENTION
+    return page[:at] + extra + page[at:]
+
+
 def test_strip_ignores_pages_without_2025_and_outside_lookalikes():
     lone = _LOOKALIKE_REASON + _LOOKALIKE_ATTACH + _LOOKALIKE_MENTION
     assert strip_f004_attach(lone) == lone
-    page = _with_2024_lookalikes(materialize_review_markdown(PAGE.read_text(encoding="utf-8")))
+    page = _with_outside_lookalikes(materialize_review_markdown(PAGE.read_text(encoding="utf-8")))
     stripped = strip_f004_attach(page)
     assert _LOOKALIKE_REASON in stripped
     assert _LOOKALIKE_ATTACH in stripped
@@ -1020,6 +1031,13 @@ def test_year_finding_ids_must_start_with_that_year(tmp_path):
 # PR-D: 2019·2020·2022·2023·2024 F004 부착 잠금. 연도마다 커밋 하나로 한 칸씩 더한다.
 # 연도: (부착 JSON sha256, bytes, 부착 뒤 연도 블록 sha256, bytes, 빌드 로그 줄)
 _ATTACH_YEAR_LOCK = {
+    "2024": (
+        "376cd8a2699b2e5ba1fc925f89e79c58aa34b2f2a16545f21250be1a96f6d02e",
+        426702,
+        "5133827f6648d5fb6e880a2057a7a342a34a39bc03fd68fc9a99bec8d21f6ed1",
+        418985,
+        "F004 부착 2024: 자리 228/228, 이행사항 235, 법인 사유 36곳(80칸), 건너뜀 0",
+    ),
     "2023": (
         "0d9e6bb5a9e98c6ee0270dd59178f25d82ba30cd8a714cc17892b05f7fac254b",
         420495,
