@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 from datetime import date
@@ -519,3 +520,137 @@ def test_rerun_of_bundle_with_minutes_already_placed_still_quarantines_zip(tmp_p
     assert [(row["filename"], row["reason"]) for row in rows] == [("의안.zip", "zip-in-multi-year-bundle")]
     assert summary["reviews"] == 1
     assert len(list((sanctions / "_review" / BY_ID[case_id]["post_id"]).glob("*.zip"))) == 1
+
+
+def _file_snapshot(downloads: Path) -> dict[str, bytes]:
+    return {
+        str(path.relative_to(downloads)): path.read_bytes()
+        for path in sorted(downloads.rglob("*"))
+        if path.is_file()
+    }
+
+
+def test_dry_run_leaves_files_state_and_jsonl_untouched(tmp_path):
+    # 빈 트리에서 파일을 만들지 않는 검사는 test_backfill_dry_run_does_not_download.
+    # 여기에서는 이미 있는 파일·상태·jsonl을 쓰지 않는지 잠근다.
+    downloads = tmp_path / "downloads"
+    sanctions = downloads / "sanctions"
+    (sanctions / "_backfill-state.json").parent.mkdir(parents=True)
+    (sanctions / "_backfill-state.json").write_text('{"pages":{},"posts":[]}\n', encoding="utf-8")
+    (sanctions / "_review-queue.jsonl").write_text('{"url":"keep"}\n', encoding="utf-8")
+    (sanctions / "_failed-downloads.jsonl").write_text('{"url":"keep-fail"}\n', encoding="utf-8")
+    minutes = sanctions / "2015-금융위-24차" / "minutes.pdf"
+    minutes.parent.mkdir(parents=True)
+    minutes.write_bytes(b"keep")
+    before = _file_snapshot(downloads)
+    site = Site([BY_ID["late-december-2016-24"]])
+    summary = _run(site, downloads, dry_run=True)
+    assert _file_snapshot(downloads) == before
+    assert site.downloaded == []
+    assert summary["folders"] == 1
+    assert summary["files"] == 1
+    assert summary["reviews"] == 0
+
+
+def test_preexisting_staging_can_remain_and_the_next_run_finishes(tmp_path):
+    # L4 후속. 받기 전에 있던 _staging은 실패 뒤 남을 수 있다. 프로덕션에 finally unlink를 넣지 않는다.
+    downloads = tmp_path / "downloads"
+    case = BY_ID["late-december-2016-24"]
+    site = Site([case])
+    list_url = asm._list_url(asm.BOARD_URLS["금융위"], 1, date(2008, 1, 1), date(2017, 12, 31))
+    site.fetch(list_url)
+    site.fetch(asm.absolute_fsc_url(f"/no020101/{case['post_id']}"))
+    url = next(item for item, (_case, name) in site.urls.items() if name.endswith(".pdf"))
+    digest = hashlib.sha256(url.encode()).hexdigest()[:16]
+    staging = downloads / "sanctions" / "_staging" / f"{digest}.pdf"
+    staging.parent.mkdir(parents=True)
+    staging.write_bytes(b"PARTIAL")
+
+    def fail_download(download_url, dest):
+        raise asm.FetchFailed(download_url, 500, "boom", 1)
+
+    failed = asm.run_backfill(
+        site.fetch,
+        fail_download,
+        downloads,
+        since=date(2008, 1, 1),
+        until=date(2017, 12, 31),
+        read_text=site.read_text,
+    )
+    assert failed["reviews"] == 0
+    assert staging.read_bytes() == b"PARTIAL"
+    assert not list((downloads / "sanctions").rglob("minutes.pdf"))
+
+    again = Site([case])
+    finished = _run(again, downloads)
+    assert not staging.exists()
+    assert finished["reviews"] == 0
+    placed = downloads / "sanctions" / case["expected"][case["attachments"][0]] / "minutes.pdf"
+    assert placed.read_bytes() == _payload(case, case["attachments"][0])
+
+
+def test_undated_bundle_rerun_replaces_the_review_queue_row(tmp_path):
+    # L3 후속. 날짜 없는 묶음은 재실행마다 다시 받는다.
+    # 큐는 같은 url을 마지막 행으로 덮어써서 늘지 않는다. 건너뛰기·추가 중복 제거는 넣지 않는다.
+    downloads = tmp_path / "downloads"
+    case = BY_ID["bundle-2008-5"]
+    first = _run(Site([case], dated=False), downloads)
+    assert first["reviews"] == 1
+    rows = _jsonl(downloads / "sanctions" / "_review-queue.jsonl")
+    assert len(rows) == 1
+    assert rows[0]["reason"] == "undated-multi-year-bundle"
+    kept = (downloads / "sanctions" / rows[0]["path"]).read_bytes()
+    url = rows[0]["url"]
+
+    again = Site([case], dated=False)
+    second = _run(again, downloads)
+    assert second["reviews"] == 1
+    assert again.downloaded == [url]
+    rows = _jsonl(downloads / "sanctions" / "_review-queue.jsonl")
+    assert [row["url"] for row in rows] == [url]
+    assert rows[0]["reason"] == "undated-multi-year-bundle"
+    assert (downloads / "sanctions" / rows[0]["path"]).read_bytes() == kept
+    assert len(list((downloads / "sanctions" / "_review").rglob("*.pdf"))) == 1
+
+
+def test_minutes_year_2061_is_accepted_as_the_meeting_year():
+    # L2 후속. 본문 연도 가드는 없다. 2061도 회의일로 채택한다.
+    text = "제1차 금융위원회 의사록\n2061. 1. 1.\n"
+    identity = asm.minutes_identity_from_text(text)
+    assert identity["year"] == 2061
+    assert identity["date"] == "2061-01-01"
+    key, source, evidence = asm.resolve_minutes_key(
+        (2016, "금융위", "정기", 1),
+        "제1차 금융위원회 의사록.pdf",
+        text,
+        bundle=False,
+        posted=date(2016, 6, 1),
+    )
+    assert (key, source, evidence) == ((2061, "금융위", "정기", 1), "pdf-text", "2061-01-01")
+    assert asm.sanction_folder(key) == "2061-금융위-1차"
+
+
+def test_review_path_sanitizes_the_filename_only(tmp_path):
+    # L7 후속. post_id가 숫자인지는 검사하지 않는다. 파일명만 _safe_filename을 탄다.
+    staging = tmp_path / "staging.pdf"
+    staging.write_bytes(b"%PDF")
+    sanctions = tmp_path / "sanctions"
+    target = asm._queue_for_review(
+        staging,
+        sanctions,
+        board="금융위",
+        post_id="14a",
+        page_url="https://fsc.go.kr/no020101/14a",
+        url="https://fsc.go.kr/comm/getFile?fileNo=1",
+        name="../의결:1.pdf",
+        reason="undated-multi-year-bundle",
+        evidence="",
+        candidate="",
+    )
+    assert target.parent == sanctions / "_review" / "14a"
+    assert target.name.endswith("-의결_1.pdf")
+    assert target.is_file()
+    assert not staging.exists()
+    assert not (tmp_path / "의결_1.pdf").exists()
+    rows = _jsonl(sanctions / "_review-queue.jsonl")
+    assert [(row["post_id"], row["filename"]) for row in rows] == [("14a", "../의결:1.pdf")]

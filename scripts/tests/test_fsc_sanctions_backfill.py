@@ -159,6 +159,52 @@ def test_foreign_year_and_duplicate_bytes_are_dropped():
     assert any("09년" in note for note in notes)
 
 
+def test_extract_kept_drops_files_select_named_files_keeps():
+    """같은 연도 불일치·중복 해시라도 실제 ZIP 경로는 select_named_files와 다르다.
+
+    select_named_files는 테스트 전용이고 분류하지 않는다. _extract_kept는 감리
+    안건·의결서만 남긴 뒤 dedupe_payloads로 해시를 줄인다.
+    """
+    import io
+    import zipfile
+
+    from attach_sanction_minutes import _extract_kept, select_named_files
+
+    body = b"same-agenda"
+    files = [
+        ("2009-제18차 증권선물위원회 의사록.hwp", b"old-hwp"),
+        ("(공개용) 의결 1. 회계법인 감리결과 사본.pdf", body),
+        ("(공개용) 의결 1. 회계법인 감리결과.pdf", body),
+        ("의결 1.pdf", b"plain"),
+        ("2008년 의사록.pdf", b"minutes"),
+        ("2000억 과징금 의결서.pdf", b"amount"),
+    ]
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as archive:
+        for name, payload in files:
+            archive.writestr(name, payload)
+    selected, select_notes = select_named_files(2008, files)
+    extracted, whale, extract_notes = _extract_kept(buffer.getvalue(), 2008)
+    assert [name for name, _payload in selected] == [
+        "(공개용) 의결 1. 회계법인 감리결과.pdf",
+        "의결 1.pdf",
+        "2008년 의사록.pdf",
+        "2000억 과징금 의결서.pdf",
+    ]
+    assert [(kind, name) for kind, name, _payload in extracted] == [
+        ("agenda", "(공개용) 의결 1. 회계법인 감리결과.pdf"),
+    ]
+    assert whale == []
+    assert any("2009-제18차" in note for note in select_notes)
+    assert any("2009-제18차" in note for note in extract_notes)
+    assert any("사본" in note for note in select_notes)
+    assert any("사본" in note for note in extract_notes)
+    kept_names = [name for _kind, name, _payload in extracted]
+    assert "의결 1.pdf" not in kept_names
+    assert "2008년 의사록.pdf" not in kept_names
+    assert "2000억 과징금 의결서.pdf" not in kept_names
+
+
 def test_pending_minutes_suffixes():
     from attach_sanction_minutes import is_pending_minutes
 
@@ -996,7 +1042,7 @@ def test_readme_is_tracked_and_originals_stay_ignored():
     tracked = ROOT / "downloads" / "sanctions" / "README.md"
     assert doc.read_bytes() == tracked.read_bytes()
     text = doc.read_text(encoding="utf-8")
-    assert "README.md" in text
+    assert "내려받는 범위를 적는다" in text
     assert "2001-01-26" in text
     assert "2001-02-08" in text
     assert "시장질서교란" in text

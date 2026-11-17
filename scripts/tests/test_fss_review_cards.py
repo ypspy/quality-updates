@@ -390,6 +390,81 @@ def test_year_2025_render_matches_the_dongsung_reclass_bytes():
     )
 
 
+# 재분류 전(main 94f4882d) 경로, 현재 경로, 칸의 첫 문단 badge.
+# 중분류 배치는 1.1, 1.2, 2.1, 3.1, 4.1, 4.3, 5.2, 5.4.
+_DONGSUNG_MOVES = (
+    ("용역 계약체결", "2025/일반회계법인/1.2/-/동성회계법인/1", "2025/일반회계법인/1.1/-/동성회계법인/0", True),
+    ("구성원의 특수관계자", "2025/일반회계법인/1.2/-/동성회계법인/2", "2025/일반회계법인/1.1/-/동성회계법인/1", False),
+    ("내규에 반하여 대표이사", "2025/일반회계법인/1.2/-/동성회계법인/3", "2025/일반회계법인/1.1/-/동성회계법인/2", False),
+    ("개인용 임차보증금", "2025/일반회계법인/1.2/-/동성회계법인/4", "2025/일반회계법인/1.1/-/동성회계법인/3", False),
+    ("대외 발송 문서", "2025/일반회계법인/1.2/-/동성회계법인/5", "2025/일반회계법인/1.1/-/동성회계법인/4", False),
+    ("정관에서 정한 대표이사", "2025/일반회계법인/1.2/-/동성회계법인/6", "2025/일반회계법인/1.1/-/동성회계법인/5", False),
+    ("감사업무시간이 지연입력", "2025/일반회계법인/4.3/-/동성회계법인/1", "2025/일반회계법인/4.1/-/동성회계법인/0", True),
+    ("감사대상회사의 감사의견 거절", "2025/일반회계법인/5.2/-/동성회계법인/0", "2025/일반회계법인/5.4/-/동성회계법인/0", True),
+)
+_DONGSUNG_GROUPS = ("1.1", "1.2", "2.1", "3.1", "4.1", "4.3", "5.2", "5.4")
+# 동성이 아닌 356문단의 finding_id와 본문. 재분류 전과 바이트가 같다.
+_OTHER_FINDING_SHA = "55ff7544832aac4a1996d848e6a21c4ed6e1dc64ce25409d7620401b1cafd2e9"
+_OTHER_FINDING_COUNT = 356
+
+
+def _year_2025_finding_paths(data: dict) -> list[dict]:
+    rows = []
+    for bundle in data["bundles"]:
+        for section in bundle["sections"]:
+            for group in section["groups"]:
+                group_no = group["heading"].split(" ", 1)[0]
+                for block in group["blocks"]:
+                    if block.get("kind") != "firms":
+                        continue
+                    gun = block.get("gun") or "-"
+                    for firm in block["firms"]:
+                        for index, finding in enumerate(firm["findings"]):
+                            rows.append(
+                                {
+                                    "finding_id": (
+                                        f'{data["year"]}/{bundle["name"]}/{group_no}/'
+                                        f'{gun}/{firm["name"]}/{index}'
+                                    ),
+                                    "group": group_no,
+                                    "firm": firm["name"],
+                                    "badge": finding["badge"],
+                                    "text": finding["text"],
+                                }
+                            )
+    return rows
+
+
+def test_dongsung_reclass_paths_and_other_finding_ids_stay():
+    # #121 L3. 동성 8문단의 이동 경로와, 동성이 아닌 356문단의 finding_id 불변.
+    data = load_year_2025()
+    rows = _year_2025_finding_paths(data)
+    by_id = {row["finding_id"]: row for row in rows}
+    by_prefix = {}
+    for row in rows:
+        for prefix, _old_id, _new_id, _badge in _DONGSUNG_MOVES:
+            if row["text"].startswith(prefix):
+                by_prefix.setdefault(prefix, []).append(row)
+    assert {prefix: len(found) for prefix, found in by_prefix.items()} == {
+        prefix: 1 for prefix, _old_id, _new_id, _badge in _DONGSUNG_MOVES
+    }
+    for prefix, old_id, new_id, badge in _DONGSUNG_MOVES:
+        row = by_prefix[prefix][0]
+        assert row["finding_id"] == new_id
+        assert row["firm"] == "동성회계법인"
+        assert row["group"] in _DONGSUNG_GROUPS
+        assert row["badge"] is badge
+        assert old_id != new_id
+        assert old_id not in by_id or not by_id[old_id]["text"].startswith(prefix)
+    dongsung = [row for row in rows if row["firm"] == "동성회계법인"]
+    assert {row["group"] for row in dongsung} == set(_DONGSUNG_GROUPS)
+    others = [row for row in rows if row["firm"] != "동성회계법인"]
+    assert len(others) == _OTHER_FINDING_COUNT
+    assert len(rows) == _OTHER_FINDING_COUNT + len(dongsung) == 370
+    digest, _size = _sha_lines(f'{row["finding_id"]}\t{row["text"]}' for row in others)
+    assert digest == _OTHER_FINDING_SHA
+
+
 def _finding(text, *, severity=None, badge=False):
     return {"severity": severity, "badge": badge, "text": text}
 

@@ -210,7 +210,12 @@ def select_named_files(
     meeting_year: int,
     files: list[tuple[str, bytes]],
 ) -> tuple[list[tuple[str, bytes]], list[str]]:
-    """연도가 다른 파일은 버리고, 같은 내용 해시는 짧은 이름 하나만 남긴다."""
+    """연도가 다른 파일은 버리고, 같은 내용 해시는 짧은 이름 하나만 남긴다.
+
+    테스트 전용이다. 프로덕션은 부르지 않는다. ZIP의 실제 경로는 ``_extract_kept``가
+    연도 불일치를 거른 뒤 ``audit_zip_entries``로 감리 안건·의결서만 남기고
+    ``dedupe_payloads``로 해시를 줄인다. 같은 입력이라도 결과가 다르다.
+    """
     notes: list[str] = []
     candidates: list[tuple[str, bytes]] = []
     for name, payload in files:
@@ -797,6 +802,7 @@ def minutes_identity_from_text(text: str) -> dict | None:
     committee: str | None = None
     kind: str | None = None
     number: int | None = None
+    # L2 후속: 「의사록」이 있는 첫 줄을 바로 채택한다. 본문 연도 가드는 없다.
     for line in text.splitlines()[:_FRONT_LINES]:
         cleaned = _clean_minutes_line(line)
         if "의사록" not in cleaned:
@@ -1713,7 +1719,11 @@ def _download_or_record(
     filename: str,
     failures: Path,
 ) -> bool:
-    """성공하면 True. 실패는 JSONL에 남기고 False."""
+    """성공하면 True. 실패는 JSONL에 남기고 False.
+
+    L4 후속: 받기 전에 이미 있던 파일은 실패해도 지우지 않아 ``_staging``에 남을 수 있다.
+    실패 경로에 finally unlink는 넣지 않는다.
+    """
     existed = dest.exists()
     try:
         download(url, dest)
@@ -1826,7 +1836,12 @@ def _queue_for_review(
     evidence: str,
     candidate: str,
 ) -> Path:
-    """회의를 정할 수 없거나 같은 회의에 다른 파일이 이미 있으면 _review/에 두고 검토 목록에 적는다."""
+    """회의를 정할 수 없거나 같은 회의에 다른 파일이 이미 있으면 _review/에 두고 검토 목록에 적는다.
+
+    L3 후속: 날짜 없는 묶음은 재실행마다 다시 받는다. 큐는 같은 url을 마지막 행으로 덮어쓴다.
+    건너뛰거나 행을 더 지우지 않는다.
+    L7 후속: post_id가 숫자인지는 보지 않는다. 파일명만 ``_safe_filename``을 탄다.
+    """
     digest = _file_sha256(staging)
     target = sanctions / "_review" / (post_id or "unknown") / f"{digest[:12]}-{_safe_filename(name)}"
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -2076,6 +2091,8 @@ def run_backfill(
                             wrote = True
                             continue
                         dest.parent.mkdir(parents=True, exist_ok=True)
+                        # L1 후속: is_file 확인과 os.replace 사이가 비어 있어 동시에 쓰면 덮어쓸 수 있다.
+                        # 배타적 생성으로 바꾸지 않는다.
                         os.replace(staging, dest)
                         placed_keys.append(real)
                         wrote = True
