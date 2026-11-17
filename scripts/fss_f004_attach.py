@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""품질관리감리 2025 지적 문단 바로 아래에 F004 개선권고 이행사항을 붙인다.
+"""품질관리감리 지적 문단 바로 아래에 F004 개선권고 이행사항을 붙인다.
 
 연도 블록을 다시 그리지 않는다. 첨부 JSON이 정한 자리의 ``p.fss-finding`` 뒤에만 넣는다.
 """
@@ -18,6 +18,10 @@ import fss_review_cards
 
 ROOT = Path(__file__).resolve().parent.parent
 ATTACH_PATH = ROOT / "data" / "fss-review" / "f004-item-attach.json"
+ATTACH_PATHS = {
+    "2025": ATTACH_PATH,
+    "2021": ROOT / "data" / "fss-review" / "f004-item-attach-2021.json",
+}
 _LOG = logging.getLogger("mkdocs.plugins.fss_f004_attach")
 _DART_URL = re.compile(r"^https://dart\.fss\.or\.kr/dsaf001/main\.do\?rcpNo=\d{14}$")
 _RCEPT_NO = re.compile(r"\d{14}")
@@ -145,6 +149,19 @@ def _path_key(path: dict) -> tuple:
     return (bundle, section, group, gun, firm, index)
 
 
+def _iter_finding_ids(obj: object):
+    if isinstance(obj, dict):
+        for key, value in obj.items():
+            if key == "finding_id":
+                yield value
+            else:
+                yield from _iter_finding_ids(value)
+        return
+    if isinstance(obj, list):
+        for value in obj:
+            yield from _iter_finding_ids(value)
+
+
 def _validate(data: dict) -> None:
     attachments = data.get("attachments")
     reasons = data.get("firm_reasons")
@@ -166,6 +183,9 @@ def _validate(data: dict) -> None:
     if reason_panels is not None:
         if type(reason_panels) is not int or reason_panels != len(reasons):
             raise ValueError("counts가 목록 길이와 다릅니다.")
+    on_screen = counts.get("firm_reason_panels_on_screen")
+    if on_screen is not None and type(on_screen) is not int:
+        raise ValueError("counts 형식이 아닙니다.")
     if not isinstance(rows, dict):
         raise ValueError("f004_rows가 없습니다.")
     _reject_dart_url(data)
@@ -220,12 +240,26 @@ def _validate(data: dict) -> None:
             raise ValueError("disclosure 형식이 아닙니다.")
         if isinstance(disclosure, dict):
             _require_rcept_pair(disclosure.get("rcept_no"), disclosure.get("dart_url"))
+    year = data.get("year")
+    if year is not None:
+        if not isinstance(year, str) or not year:
+            raise ValueError("year 형식이 아닙니다.")
+        prefix = f"{year}/"
+        for finding_id in _iter_finding_ids(data):
+            if not isinstance(finding_id, str) or not finding_id.startswith(prefix):
+                raise ValueError("finding_id가 연도로 시작하지 않습니다.")
+
+
+def _is_locked_attach(path: Path) -> bool:
+    resolved = path.resolve()
+    candidates = [Path(ATTACH_PATH), *ATTACH_PATHS.values()]
+    return any(resolved == Path(item).resolve() for item in candidates)
 
 
 def load_attach(path: Path = ATTACH_PATH) -> dict:
     """manifest를 확인한 뒤 UTF-8 JSON을 읽고 부착 제약을 확인한다."""
     path = Path(path)
-    if path.resolve() == Path(ATTACH_PATH).resolve():
+    if _is_locked_attach(path):
         _verify_manifest(path)
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -376,21 +410,22 @@ def _fill_panel(panel: str, indexed: dict[int, dict], reason: dict | None, rows:
     return _one_line("".join(parts)), resolved, skipped
 
 
-def _year_span(page: str) -> tuple[int, int]:
+def _year_span(page: str, year: str) -> tuple[int, int]:
+    """``hidden``이 있어도 그 연도 div 하나를 찾는다."""
     found: list[tuple[int, int]] = []
     for start, end in fss_review_cards._year_regions(page):
         head_end = page.find(">", start)
         if head_end < 0 or head_end > end:
             raise ValueError("감리연도 태그가 닫히지 않았습니다.")
-        if 'data-year="2025"' in page[start : head_end + 1]:
+        if f'data-year="{year}"' in page[start : head_end + 1]:
             found.append((start, end))
     if len(found) != 1:
-        raise ValueError("감리연도 2025 블록이 하나가 아닙니다.")
+        raise ValueError(f"감리연도 {year} 블록이 하나가 아닙니다.")
     return found[0]
 
 
-def _insert_attach(page: str, data: dict, *, strict: bool) -> str:
-    start, end = _year_span(page)
+def _insert_attach(page: str, data: dict, *, strict: bool, year: str) -> str:
+    start, end = _year_span(page, year)
     block = page[start:end]
     by_key = _index_attachments(data)
     reasons = {reason["firm"]: reason for reason in data["firm_reasons"]}
@@ -413,7 +448,7 @@ def _insert_attach(page: str, data: dict, *, strict: bool) -> str:
             for index, att in by_key.get(key, {}).items()
             if id(att) not in seen
         }
-        # 사유 법인은 모든 2025 패널에 같은 사유 줄 전체를 단다 (사용자 결정 2026-11-15 9:14 AM CT).
+        # 사유 법인은 그 연도의 모든 패널에 같은 사유 줄 전체를 단다 (사용자 결정 2026-11-15 9:14 AM CT).
         reason = reasons.get(firm)
         updated, got, missed = _fill_panel(panel["html"], indexed, reason, rows)
         for att in got:
@@ -437,8 +472,9 @@ def _insert_attach(page: str, data: dict, *, strict: bool) -> str:
         "\n" in updated_block or "\r" in updated_block
     ):
         raise ValueError("F004 출력에 줄바꿈이 있습니다.")
+    head = "F004 부착" if year == "2025" else f"F004 부착 {year}"
     summary = (
-        f"F004 부착: 자리 {len(resolved)}/{len(data['attachments'])}, "
+        f"{head}: 자리 {len(resolved)}/{len(data['attachments'])}, "
         f"이행사항 {sum(len(att['f004']) for att in resolved)}, "
         f"법인 사유 {len(reason_firms)}곳({reason_panels}칸), 건너뜀 {len(skipped)}"
     )
@@ -448,27 +484,44 @@ def _insert_attach(page: str, data: dict, *, strict: bool) -> str:
     return page[:start] + updated_block + page[end:]
 
 
-def inject_f004_attach(page: str, data: dict | None = None, *, strict: bool | None = None) -> str:
-    """2025 연도 블록의 지적 문단 바로 뒤에 이행사항을 붙인다. 블록 밖은 그대로 둔다.
+def _attach_file(year: str) -> Path:
+    """2025는 테스트가 monkeypatch하는 ``ATTACH_PATH``를 쓴다."""
+    if year == "2025":
+        return Path(ATTACH_PATH)
+    return ATTACH_PATHS[year]
 
-    파일을 직접 읽는 빌드 경로는 실패 대신 입력 페이지를 그대로 돌려준다.
-    ``data``를 넘기면 기본은 엄격하다. ``strict=False``면 못 찾은 자리만 건너뛴다.
+
+def inject_f004_attach(page: str, data: dict | None = None, *, strict: bool | None = None) -> str:
+    """부착 연도 블록의 지적 문단 바로 뒤에 이행사항을 붙인다. 그 밖은 그대로 둔다.
+
+    파일을 직접 읽는 빌드 경로는 연도마다 따로 읽고 따로 붙인다. 한 연도 파일이
+    없거나 깨지면 그 연도만 기록을 남기고 건너뛰고, 다른 연도 부착은 그대로 둔다.
+    ``data``를 넘기면 그 데이터의 연도만 붙인다. 기본은 엄격하다.
+    ``strict=False``면 못 찾은 자리만 건너뛴다.
     """
-    original = page
     if data is None:
-        try:
-            data = load_attach(ATTACH_PATH)
-        except Exception as exc:
-            _LOG.info("F004 부착을 하지 않습니다: %s: %s", type(exc).__name__, exc)
-            return original
-        try:
-            return _insert_attach(strip_f004_attach(page), data, strict=False)
-        except Exception as exc:
-            _LOG.info("F004 부착을 하지 않습니다: %s: %s", type(exc).__name__, exc)
-            return original
+        result = page
+        for year in ATTACH_PATHS:
+            try:
+                loaded = load_attach(_attach_file(year))
+            except Exception as exc:
+                _LOG.info("F004 부착을 하지 않습니다: %s: %s", type(exc).__name__, exc)
+                continue
+            year_key = str(loaded.get("year", year))
+            try:
+                result = _insert_attach(
+                    _strip_year(result, year_key),
+                    loaded,
+                    strict=False,
+                    year=year_key,
+                )
+            except Exception as exc:
+                _LOG.info("F004 부착을 하지 않습니다: %s: %s", type(exc).__name__, exc)
+        return result
     if strict is None:
         strict = True
-    return _insert_attach(strip_f004_attach(page), data, strict=strict)
+    year_key = str(data.get("year", "2025"))
+    return _insert_attach(_strip_year(page, year_key), data, strict=strict, year=year_key)
 
 
 def _merge_spans(spans: list[tuple[int, int]]) -> list[tuple[int, int]]:
@@ -484,10 +537,9 @@ def _merge_spans(spans: list[tuple[int, int]]) -> list[tuple[int, int]]:
     return [(start, end) for start, end in merged]
 
 
-def strip_f004_attach(page: str) -> str:
-    """2025 블록 안에 붙인 이행사항과 법인 사유만 지운다."""
+def _strip_year(page: str, year: str) -> str:
     try:
-        start, end = _year_span(page)
+        start, end = _year_span(page, year)
     except ValueError:
         return page
     block = page[start:end]
@@ -496,3 +548,10 @@ def strip_f004_attach(page: str) -> str:
     for rel_start, rel_end in reversed(_merge_spans(spans)):
         block = block[:rel_start] + block[rel_end:]
     return page[:start] + block + page[end:]
+
+
+def strip_f004_attach(page: str) -> str:
+    """부착 파일이 있는 연도 블록 안에 붙인 이행사항과 법인 사유만 지운다."""
+    for year in ATTACH_PATHS:
+        page = _strip_year(page, year)
+    return page

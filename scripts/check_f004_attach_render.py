@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """F004 부착 결과를 빌드된 감리 페이지에서 센다.
 
-``mkdocs build --strict`` 뒤 ``site/fss-review/index.html``의 5절 값,
-2019~2024 블록 sha, 첨부 JSON·manifest sha가 하나라도 다르면 0이 아닌 코드로 끝난다.
+``mkdocs build --strict`` 뒤 ``site/fss-review/index.html``의 연도별 값,
+부착 없는 연도 블록 sha, 첨부 JSON·manifest sha가 하나라도 다르면 0이 아닌 코드로 끝난다.
 """
 
 from __future__ import annotations
@@ -18,28 +18,51 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 
-from fss_f004_attach import ATTACH_PATH, inject_f004_attach, load_attach
-from fss_review_cards import YEAR_2025_PATH, load_year_2025, render_year_2025_html
+from fss_f004_attach import ATTACH_PATHS, _year_span, inject_f004_attach, load_attach
+from fss_review_cards import (
+    YEAR_FILES,
+    load_year,
+    load_year_2025,
+    render_year_html,
+    render_year_2025_html,
+)
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE_HTML = ROOT / "site" / "fss-review" / "index.html"
-ATTACH_SHA = "241b0edcd6eae831ef38a8d5a742be3f1bb09672cc1560fd93a54ddccc80e682"
-ATTACH_BYTES = 246423
+# 키 집합은 fss_f004_attach.ATTACH_PATHS와 같아야 한다.
+# 2025 화면 수치는 이 표의 잠금과 부착 JSON counts로만 만든다.
+ATTACH_YEARS = {
+    "2025": {
+        "sha": "241b0edcd6eae831ef38a8d5a742be3f1bb09672cc1560fd93a54ddccc80e682",
+        "bytes": 246423,
+        "rendered": {
+            "1c6df2500ba918054bd4b22b3a983af9ef3bdecdedc54908d4a54a04e1ea72e4": (
+                317065,
+                "c250624d21907095667438d0326c1e7765464575da6655d3a119db3dc7e774cc",
+            ),
+        },
+        "site_div_sha": "b01f968c1990426aeee6959e251ef6bcf2b2c68a7115fd1acb215890c0c26b10",
+    },
+    "2021": {
+        "sha": "b3271fe94f1829919e6ca6b811f88886a518b6efc594e90b048c64984a3c2220",
+        "bytes": 300987,
+        "rendered": {
+            "54a36602c3abe8513683f050eb7cf178e433ec1e5ea438e58eb5ef1c59be5a07": (
+                174291,
+                "a7422c3075df7a8813228991887733b565bf2c469e58371b98226360f12df955",
+            ),
+        },
+        "site_div_sha": "41ce89619cc5b8a980b304d3bfe8058ddd22d1c7623f1a377e4c66b444b05c72",
+    },
+}
 # scripts/tests/test_fss_review_cards.py YEAR_SHA (main 94f4882).
-# 2025 블록은 F004가 붙으므로 여기서 비교하지 않는다.
+# 부착 연도는 ATTACH_YEARS.site_div_sha로 비교한다.
 PRIOR_YEAR_SHA = {
     "2024": "dd252ed36a6f3debb59d9c5c831dfab643bb3dc51a4918b5f4649b0087f87763",
     "2023": "a04efa16f933d3aac44bb98434af3bc21160d028790e140c50d77a3f38416baf",
     "2022": "5cf332453ec91121dbbc37aec0c15f540842b5cf845cfde7df98708c839601dc",
-    "2021": "9b278810dd0ff9a0e19300d5d8c1f67cb5ef34db2a07b8bcc437eed11ea2b821",
     "2020": "24375fe9c10e2a0fa0513dea5831fc4141471cca9be2e0c1ea9414c01465ce92",
     "2019": "fb13f1d4d54aaf8126f97bf802feb37ef40b2fee7852694ca22c3215e607d098",
-}
-RENDERED = {
-    "1c6df2500ba918054bd4b22b3a983af9ef3bdecdedc54908d4a54a04e1ea72e4": (
-        317065,
-        "c250624d21907095667438d0326c1e7765464575da6655d3a119db3dc7e774cc",
-    ),
 }
 _INTERNAL_IDS = (
     "f004_row_id",
@@ -56,22 +79,33 @@ _INTERNAL_IDS = (
 SEARCH_INDEX = ROOT / "site" / "search" / "search_index.json"
 
 
-def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+def _manifest_for(path: Path) -> Path:
+    name = path.name
+    if name.endswith(".json"):
+        return path.with_name(name[: -len(".json")] + ".manifest.json")
+    return path.with_name(name + ".manifest.json")
 
 
-def _manifest_path(path: Path) -> Path:
-    return path.with_name("f004-item-attach.manifest.json")
+def _year_slice(html: str, year: str) -> str:
+    try:
+        start, end = _year_span(html, year)
+    except ValueError:
+        return ""
+    return html[start:end]
 
 
-def _prior_year_hashes(html: str) -> dict[str, str]:
+def _div_sha(html: str) -> dict[str, str]:
     soup = BeautifulSoup(html, "html.parser")
     found: dict[str, str] = {}
     for div in soup.select("div.fss-year"):
         year = str(div.get("data-year") or "")
-        if year in PRIOR_YEAR_SHA:
+        if year:
             found[year] = hashlib.sha256(str(div).encode("utf-8")).hexdigest()
     return found
+
+
+def _same_as_above_count(html: str) -> int:
+    return html.count('<p class="fss-f004-action">상동</p>')
 
 
 def _internal_hits(text: str) -> int:
@@ -181,22 +215,47 @@ def _reason_content(html: str, reasons: list[dict]) -> tuple[int, int]:
     return present, wrong
 
 
-def build_report(html: str, search_index: Path = SEARCH_INDEX) -> dict:
+def _count_error(year: str, key: str, got: int, expected: int) -> str:
+    if year == "2025":
+        return f"{key} 화면 {got} / 기대 {expected}"
+    return f"{year} {key} 화면 {got} / 기대 {expected}"
+
+
+def _year_section(html: str, year: str, spec: dict) -> tuple[dict, list[str]]:
     errors: list[str] = []
-    year_sha = _sha256(YEAR_2025_PATH)
-    attach_raw = ATTACH_PATH.read_bytes()
+    path = ATTACH_PATHS[year]
+    attach_raw = path.read_bytes()
     attach_sha = hashlib.sha256(attach_raw).hexdigest()
-    manifest_file = _manifest_path(ATTACH_PATH)
-    manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
-    if attach_sha != ATTACH_SHA or len(attach_raw) != ATTACH_BYTES:
-        errors.append(f"f004-item-attach.json sha {attach_sha} bytes {len(attach_raw)}")
-    if manifest.get("sha256") != ATTACH_SHA or manifest.get("bytes") != ATTACH_BYTES:
-        errors.append("manifest sha 또는 bytes가 첨부 파일과 다릅니다.")
-    if manifest.get("file") != "f004-item-attach.json":
-        errors.append("manifest file 이름이 다릅니다.")
-    loaded = load_attach(ATTACH_PATH)
+    manifest = json.loads(_manifest_for(path).read_text(encoding="utf-8"))
+    if attach_sha != spec["sha"] or len(attach_raw) != spec["bytes"]:
+        errors.append(f"{path.name} sha {attach_sha} bytes {len(attach_raw)}")
+    manifest_mismatch = manifest.get("sha256") != spec["sha"] or manifest.get("bytes") != spec["bytes"]
+    if manifest_mismatch:
+        if year == "2025":
+            errors.append("manifest sha 또는 bytes가 첨부 파일과 다릅니다.")
+        else:
+            errors.append(f"{year} manifest sha 또는 bytes가 첨부 파일과 다릅니다.")
+    if manifest.get("file") != path.name:
+        if year == "2025":
+            errors.append("manifest file 이름이 다릅니다.")
+        else:
+            errors.append(f"{year} manifest file 이름이 다릅니다.")
+    loaded = load_attach(path)
     count_source = loaded["counts"]
-    expected_counts = {
+    year_sha = hashlib.sha256(YEAR_FILES[year].read_bytes()).hexdigest()
+    slice_html = _year_slice(html, year)
+    phrases = _phrase_counts(slice_html)
+    counts = {
+        "attach": slice_html.count('class="fss-f004-attach"'),
+        "reason": slice_html.count('class="fss-f004-reason"'),
+        "same": _short_reason_lines(slice_html),
+        "no_date": phrases["no_date"],
+        "no_action": phrases["no_action"],
+        "note": phrases["note"],
+        "mismatch": phrases["mismatch"],
+        "no_finding": phrases["no_finding"],
+    }
+    expected = {
         "attach": count_source["attach_blocks"],
         "same": 0,
         "no_date": count_source["no_date_blocks"],
@@ -204,81 +263,113 @@ def build_report(html: str, search_index: Path = SEARCH_INDEX) -> dict:
         "note": count_source["notes"],
         "mismatch": 0,
         "no_finding": 0,
-        "dongsung": count_source["dongsung_blocks"],
     }
-    reason_firms = {reason["firm"] for reason in loaded["firm_reasons"]}
-    # 기대 패널 수는 검사할 페이지가 아니라 year-2025.json 렌더(부착 전)에서 센다.
-    # 고정 상수(136)를 두지 않아 데이터가 바뀌어도 그대로 맞고, 페이지에서 패널이 빠지면 잡힌다.
-    source_total, source_reason, _, _ = _reason_panels(
-        render_year_2025_html(load_year_2025()), reason_firms
-    )
-    page_total, page_reason, reason_panel_bad, reason_firm_differ = _reason_panels(
-        html, reason_firms
-    )
-    # 사유 법인은 모든 패널에 같은 사유 줄 전체(사용자 결정 2026-11-15 9:14 AM CT).
-    expected_counts["reason"] = source_reason
-    if page_total != source_total or page_reason != source_reason:
-        errors.append(
-            f"2025 패널 화면 {page_total}(사유 법인 {page_reason})"
-            f" / 기대 {source_total}(사유 법인 {source_reason})"
+    if year == "2025":
+        counts["dongsung"] = _dongsung(slice_html)
+        expected["dongsung"] = count_source["dongsung_blocks"]
+        reason_firms = {reason["firm"] for reason in loaded["firm_reasons"]}
+        # 기대 패널 수는 검사할 페이지가 아니라 year-2025.json 렌더(부착 전)에서 센다.
+        source_total, source_reason, _, _ = _reason_panels(
+            render_year_2025_html(load_year_2025()), reason_firms
         )
-    # 사유 줄이 있는 법인 수는 counts.firm_reason_panels(= firm_reasons 수, load_attach가 확인)와 같아야 한다.
-    present, wrong = _reason_content(html, loaded["firm_reasons"])
-    if present != count_source["firm_reason_panels"]:
-        errors.append(f"사유 줄이 있는 사유 법인 화면 {present} / 기대 {count_source['firm_reason_panels']}")
-    if wrong:
-        errors.append(f"사유 줄 글·링크가 데이터와 다른 사유 법인 {wrong}곳")
-    if year_sha not in RENDERED:
-        errors.append(f"year-2025.json sha를 알 수 없습니다: {year_sha}")
+        page_total, page_reason, reason_panel_bad, reason_firm_differ = _reason_panels(
+            html, reason_firms
+        )
+        expected["reason"] = source_reason
+        if page_total != source_total or page_reason != source_reason:
+            errors.append(
+                f"2025 패널 화면 {page_total}(사유 법인 {page_reason})"
+                f" / 기대 {source_total}(사유 법인 {source_reason})"
+            )
+        # 사유 줄이 있는 법인 수는 counts.firm_reason_panels(= firm_reasons 수, load_attach가 확인)와 같아야 한다.
+        present, wrong = _reason_content(html, loaded["firm_reasons"])
+        if present != count_source["firm_reason_panels"]:
+            errors.append(
+                f"사유 줄이 있는 사유 법인 화면 {present} / 기대 {count_source['firm_reason_panels']}"
+            )
+        if wrong:
+            errors.append(f"사유 줄 글·링크가 데이터와 다른 사유 법인 {wrong}곳")
+        if reason_panel_bad:
+            errors.append(f"사유 줄이 하나가 아닌 사유 법인 패널 {reason_panel_bad}개")
+        if reason_firm_differ:
+            errors.append(f"패널마다 사유 줄이 다른 사유 법인 {reason_firm_differ}곳")
+    else:
+        on_screen = count_source.get("firm_reason_panels_on_screen")
+        if type(on_screen) is not int:
+            errors.append(f"{year} firm_reason_panels_on_screen 형식이 아닙니다.")
+            expected["reason"] = -1
+        else:
+            expected["reason"] = on_screen
+    marks = count_source.get("verbatim_short_mark_blocks")
+    same_above = None
+    if isinstance(marks, dict) and "same_as_above_verbatim" in marks:
+        same_above = _same_as_above_count(slice_html)
+        if same_above != marks["same_as_above_verbatim"]:
+            errors.append(
+                f"{year} 상동 원문 화면 {same_above} / 기대 {marks['same_as_above_verbatim']}"
+            )
+    if year_sha not in spec["rendered"]:
+        errors.append(f"year-{year}.json sha를 알 수 없습니다: {year_sha}")
         rendered_size = 0
         rendered_sha = ""
     else:
-        rendered = inject_f004_attach(render_year_2025_html(load_year_2025())).encode("utf-8")
+        rendered = inject_f004_attach(render_year_html(load_year(year))).encode("utf-8")
         rendered_size = len(rendered)
         rendered_sha = hashlib.sha256(rendered).hexdigest()
-        expect_size, expect_sha = RENDERED[year_sha]
+        expect_size, expect_sha = spec["rendered"][year_sha]
         if rendered_size != expect_size or rendered_sha != expect_sha:
             errors.append(
-                f"2025 렌더 부착 {rendered_size} B {rendered_sha} / 기대 {expect_size} B {expect_sha}"
+                f"{year} 렌더 부착 {rendered_size} B {rendered_sha} / 기대 {expect_size} B {expect_sha}"
             )
-    phrases = _phrase_counts(html)
-    counts = {
-        "attach": html.count('class="fss-f004-attach"'),
-        "reason": html.count('class="fss-f004-reason"'),
-        "same": _short_reason_lines(html),
-        "no_date": phrases["no_date"],
-        "no_action": phrases["no_action"],
-        "note": phrases["note"],
-        "mismatch": phrases["mismatch"],
-        "no_finding": phrases["no_finding"],
-        "dongsung": _dongsung(html),
-    }
-    if reason_panel_bad:
-        errors.append(f"사유 줄이 하나가 아닌 사유 법인 패널 {reason_panel_bad}개")
-    if reason_firm_differ:
-        errors.append(f"패널마다 사유 줄이 다른 사유 법인 {reason_firm_differ}곳")
-    page_ids = _internal_hits(html)
-    if page_ids:
-        errors.append(f"내부 id가 페이지에 {page_ids}건 있습니다.")
-    search = _search_index_report(search_index)
-    errors.extend(search["errors"])
-    for key, expected in expected_counts.items():
-        if counts[key] != expected:
-            errors.append(f"{key} 화면 {counts[key]} / 기대 {expected}")
-    prior = _prior_year_hashes(html)
-    prior_match = prior == PRIOR_YEAR_SHA
-    if not prior_match:
-        missing = sorted(set(PRIOR_YEAR_SHA) - set(prior))
-        changed = sorted(year for year, digest in prior.items() if digest != PRIOR_YEAR_SHA[year])
-        errors.append(f"2019-2024 연도 블록 sha256이 고정값과 다릅니다: 없음 {missing} 다름 {changed}")
-    return {
-        "year_2025_sha256": year_sha,
+    for key, expected_value in expected.items():
+        if counts[key] != expected_value:
+            errors.append(_count_error(year, key, counts[key], expected_value))
+    section = {
+        "year_sha256": year_sha,
         "attach_sha256": attach_sha,
         "attach_bytes": len(attach_raw),
         "manifest_sha256": manifest.get("sha256"),
         "rendered_bytes": rendered_size,
         "rendered_sha256": rendered_sha,
         "counts": counts,
+        "verbatim_same_as_above": same_above,
+    }
+    return section, errors
+
+
+def build_report(html: str, search_index: Path = SEARCH_INDEX) -> dict:
+    errors: list[str] = []
+    div_sha = _div_sha(html)
+    years: dict[str, dict] = {}
+    for year, spec in ATTACH_YEARS.items():
+        section, year_errors = _year_section(html, year, spec)
+        site_sha = div_sha.get(year, "")
+        section["site_div_sha256"] = site_sha
+        if site_sha != spec["site_div_sha"]:
+            year_errors.append(f"{year} 연도 블록 sha256이 고정값과 다릅니다: {site_sha}")
+        years[year] = section
+        errors.extend(year_errors)
+    page_ids = _internal_hits(html)
+    if page_ids:
+        errors.append(f"내부 id가 페이지에 {page_ids}건 있습니다.")
+    search = _search_index_report(search_index)
+    errors.extend(search["errors"])
+    prior = {year: div_sha[year] for year in PRIOR_YEAR_SHA if year in div_sha}
+    prior_match = prior == PRIOR_YEAR_SHA
+    if not prior_match:
+        missing = sorted(set(PRIOR_YEAR_SHA) - set(prior))
+        changed = sorted(year for year, digest in prior.items() if digest != PRIOR_YEAR_SHA[year])
+        errors.append(f"부착 없는 연도 블록 sha256이 고정값과 다릅니다: 없음 {missing} 다름 {changed}")
+    current = years["2025"]
+    return {
+        "years": years,
+        "year_2025_sha256": current["year_sha256"],
+        "attach_sha256": current["attach_sha256"],
+        "attach_bytes": current["attach_bytes"],
+        "manifest_sha256": current["manifest_sha256"],
+        "rendered_bytes": current["rendered_bytes"],
+        "rendered_sha256": current["rendered_sha256"],
+        "counts": current["counts"],
         "prior_year_sha_match": prior_match,
         "internal_ids_in_page": page_ids,
         "internal_ids_in_search_index": search["ids"],
@@ -286,15 +377,21 @@ def build_report(html: str, search_index: Path = SEARCH_INDEX) -> dict:
     }
 
 
-def render_text(report: dict) -> str:
-    counts = report["counts"]
+def _section_lines(year: str, section: dict) -> list[str]:
+    counts = section["counts"]
+    if year == "2025":
+        file_sha = "f004-item-attach.json sha256"
+        file_bytes = "f004-item-attach.json bytes"
+    else:
+        file_sha = f"f004-item-attach-{year}.json sha256"
+        file_bytes = f"f004-item-attach-{year}.json bytes"
     lines = [
-        f"year-2025.json sha256: {report['year_2025_sha256']}",
-        f"f004-item-attach.json sha256: {report['attach_sha256']}",
-        f"f004-item-attach.json bytes: {report['attach_bytes']}",
-        f"manifest sha256: {report['manifest_sha256']}",
-        f"rendered bytes: {report['rendered_bytes']}",
-        f"rendered sha256: {report['rendered_sha256']}",
+        f"year-{year}.json sha256: {section['year_sha256']}",
+        f"{file_sha}: {section['attach_sha256']}",
+        f"{file_bytes}: {section['attach_bytes']}",
+        f"manifest sha256: {section['manifest_sha256']}",
+        f"rendered bytes: {section['rendered_bytes']}",
+        f"rendered sha256: {section['rendered_sha256']}",
         f"fss-f004-attach: {counts['attach']}",
         f"fss-f004-reason: {counts['reason']}",
         f"위와 같음·fss-f004-same: {counts['same']}",
@@ -303,12 +400,26 @@ def render_text(report: dict) -> str:
         f"한 행으로 공시: {counts['note']}",
         f"권고일 표기 불일치: {counts['mismatch']}",
         f"지적사항 없음: {counts['no_finding']}",
-        f"동성회계법인 F004: {counts['dongsung']}",
-        f"prior_year_sha_match: {str(report['prior_year_sha_match']).lower()}",
-        f"internal_ids_in_page: {report['internal_ids_in_page']}",
-        f"internal_ids_in_search_index: {report['internal_ids_in_search_index']}",
-        f"errors: {len(report['errors'])}",
     ]
+    if "dongsung" in counts:
+        lines.append(f"동성회계법인 F004: {counts['dongsung']}")
+    if year != "2025" and section.get("verbatim_same_as_above") is not None:
+        lines.append(f"짧은 표시 상동: {section['verbatim_same_as_above']}")
+    return lines
+
+
+def render_text(report: dict) -> str:
+    lines: list[str] = []
+    for year, section in report["years"].items():
+        lines.extend(_section_lines(year, section))
+    lines.extend(
+        [
+            f"prior_year_sha_match: {str(report['prior_year_sha_match']).lower()}",
+            f"internal_ids_in_page: {report['internal_ids_in_page']}",
+            f"internal_ids_in_search_index: {report['internal_ids_in_search_index']}",
+            f"errors: {len(report['errors'])}",
+        ]
+    )
     for error in report["errors"]:
         lines.append(f"error: {error}")
     return "\n".join(lines)
