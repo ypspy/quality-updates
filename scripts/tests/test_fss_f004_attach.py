@@ -19,8 +19,10 @@ from fss_review_cards import (  # noqa: E402
     YEAR_2025_PATH,
     _matching_div_end,
     _regions,
+    load_year,
     load_year_2025,
     materialize_review_markdown,
+    render_year_html,
     render_year_2025_html,
 )
 from mkdocs_fss_review_year import on_page_markdown  # noqa: E402
@@ -77,6 +79,15 @@ def _panels_named(html: str, firm: str) -> list[str]:
 def _hook(source: str, caplog) -> str:
     with caplog.at_level(logging.INFO, logger="mkdocs.plugins.fss_f004_attach"):
         return on_page_markdown(source, _Page("fss-review/index.md"), None, None)
+
+
+def _year_slice(page: str, year: str) -> str:
+    start, end = fss_f004_attach._year_span(page, year)
+    return page[start:end]
+
+
+def _same_2025_block(built: str, expected: str) -> None:
+    assert _year_slice(built, "2025") == _year_slice(expected, "2025")
 
 
 def test_attach_file_matches_sha_and_manifest():
@@ -167,7 +178,7 @@ def test_bad_file_keeps_the_materialized_page(tmp_path, monkeypatch, caplog):
     source = PAGE.read_text(encoding="utf-8")
     expected = materialize_review_markdown(source)
     monkeypatch.setattr(fss_f004_attach, "ATTACH_PATH", Path("/tmp/f004-item-attach-missing.json"))
-    assert _hook(source, caplog) == expected
+    _same_2025_block(_hook(source, caplog), expected)
     assert "F004 부착을 하지 않습니다" in caplog.text
 
     caplog.clear()
@@ -180,7 +191,7 @@ def test_bad_file_keeps_the_materialized_page(tmp_path, monkeypatch, caplog):
         encoding="utf-8",
     )
     monkeypatch.setattr(fss_f004_attach, "ATTACH_PATH", path)
-    assert _hook(source, caplog) == expected
+    _same_2025_block(_hook(source, caplog), expected)
     assert "sha256" in caplog.text
 
     caplog.clear()
@@ -199,7 +210,7 @@ def test_bad_file_keeps_the_materialized_page(tmp_path, monkeypatch, caplog):
         encoding="utf-8",
     )
     monkeypatch.setattr(fss_f004_attach, "ATTACH_PATH", broken)
-    assert _hook(source, caplog) == expected
+    _same_2025_block(_hook(source, caplog), expected)
     assert "F004 부착을 하지 않습니다" in caplog.text
 
 
@@ -420,7 +431,7 @@ def test_lookalikes_outside_2025_stay_in_place():
     assert _LOOKALIKE_REASON in built
     assert _LOOKALIKE_ATTACH in built
     assert _LOOKALIKE_MENTION in built
-    start, end = fss_f004_attach._year_span(built)
+    start, end = fss_f004_attach._year_span(built, "2025")
     assert built[start:end].count('class="fss-f004-attach"') == 151
     assert built.count('class="fss-f004-attach"') == 152
 
@@ -446,7 +457,7 @@ def test_counts_mismatch_rejects_and_build_falls_back(tmp_path, monkeypatch, cap
         with pytest.raises(ValueError):
             load_attach(path)
         monkeypatch.setattr(fss_f004_attach, "ATTACH_PATH", path)
-        assert _hook(source, caplog) == expected
+        _same_2025_block(_hook(source, caplog), expected)
         caplog.clear()
 
 
@@ -491,7 +502,7 @@ def test_f004_row_shape_rejects_and_build_falls_back(tmp_path, monkeypatch, capl
         with pytest.raises(ValueError):
             load_attach(path)
         monkeypatch.setattr(fss_f004_attach, "ATTACH_PATH", path)
-        assert _hook(source, caplog) == expected
+        _same_2025_block(_hook(source, caplog), expected)
         caplog.clear()
 
 
@@ -623,9 +634,10 @@ def test_consistent_new_counts_still_attach(tmp_path, monkeypatch, caplog):
     monkeypatch.setattr(fss_f004_attach, "ATTACH_PATH", path)
     built = _hook(source, caplog)
     assert built != plain
-    assert built.count('class="fss-f004-attach"') == 151 - len(removed["f004"])
+    year = _year_slice(built, "2025")
+    assert year.count('class="fss-f004-attach"') == 151 - len(removed["f004"])
     # 빠진 사유 법인(효림회계법인) 패널 4개만큼 사유 줄이 준다: 136 - 4 = 132칸.
-    assert built.count(_REASON) == 132
+    assert year.count(_REASON) == 132
     assert "위와 같음" not in built
     assert "자리 142/142" in caplog.text
     assert "법인 사유 40곳(132칸)" in caplog.text
@@ -764,7 +776,7 @@ def test_block_count_mismatch_rejects_and_build_falls_back(tmp_path, monkeypatch
         with pytest.raises(ValueError):
             load_attach(path)
         monkeypatch.setattr(fss_f004_attach, "ATTACH_PATH", path)
-        assert _hook(source, caplog) == expected
+        _same_2025_block(_hook(source, caplog), expected)
         caplog.clear()
 
 
@@ -789,5 +801,170 @@ def test_malformed_attachment_raises_value_error_before_block_sum(tmp_path, monk
     with pytest.raises(ValueError):
         load_attach(_dump_attach(tmp_path / "item", null_item))
     monkeypatch.setattr(fss_f004_attach, "ATTACH_PATH", missing_path)
-    assert _hook(source, caplog) == expected
+    _same_2025_block(_hook(source, caplog), expected)
     assert "ValueError" in caplog.text
+
+
+_ATTACH_2021_SHA = "b3271fe94f1829919e6ca6b811f88886a518b6efc594e90b048c64984a3c2220"
+_ATTACH_2021_BYTES = 300987
+_RENDER_2021_SHA = "a7422c3075df7a8813228991887733b565bf2c469e58371b98226360f12df955"
+_RENDER_2021_BYTES = 174291
+_SUMMARY_2021 = "F004 부착 2021: 자리 180/180, 이행사항 180, 법인 사유 0곳(0칸), 건너뜀 0"
+
+
+def _injected_2021() -> str:
+    return inject_f004_attach(render_year_html(load_year("2021")))
+
+
+def test_2021_attach_file_matches_sha_and_manifest():
+    path = fss_f004_attach.ATTACH_PATHS["2021"]
+    raw = path.read_bytes()
+    assert len(raw) == _ATTACH_2021_BYTES
+    assert hashlib.sha256(raw).hexdigest() == _ATTACH_2021_SHA
+    manifest = json.loads((path.parent / "f004-item-attach-2021.manifest.json").read_text(encoding="utf-8"))
+    assert manifest == {
+        "file": "f004-item-attach-2021.json",
+        "sha256": _ATTACH_2021_SHA,
+        "bytes": _ATTACH_2021_BYTES,
+    }
+
+
+def test_load_2021_attach_counts():
+    data = load_attach(fss_f004_attach.ATTACH_PATHS["2021"])
+    counts = data["counts"]
+    assert counts["attach_slots"] == 180
+    assert counts["attach_blocks"] == 180
+    assert counts["attached_f004_rows"] == 180
+    assert counts["unattached_f004_rows"] == 0
+    assert len(data["firm_reasons"]) == 0
+    assert counts["firm_reason_lines"] == 0
+    assert counts["firm_reason_panels"] == 0
+
+
+def test_2021_every_slot_resolves(caplog):
+    with caplog.at_level(logging.INFO, logger="mkdocs.plugins.fss_f004_attach"):
+        built = _injected_2021()
+    assert _SUMMARY_2021 in caplog.text
+    assert built.count('class="fss-f004-attach"') == 180
+    assert built.count(_REASON) == 0
+    assert "건너뜀 0" in caplog.text
+
+
+def test_rendered_2021_block_matches_the_locked_bytes():
+    raw = _injected_2021().encode("utf-8")
+    assert len(raw) == _RENDER_2021_BYTES
+    assert hashlib.sha256(raw).hexdigest() == _RENDER_2021_SHA
+
+
+def test_strip_restores_materialized_page_after_both_years():
+    page = materialize_review_markdown(PAGE.read_text(encoding="utf-8"))
+    built = inject_f004_attach(page)
+    assert strip_f004_attach(built) == page
+    assert _year_slice(built, "2025").count('class="fss-f004-attach"') == 151
+    assert _year_slice(built, "2021").count('class="fss-f004-attach"') == 180
+
+
+def test_hanul_41_second_paragraph_has_one_shared_block():
+    panel = _firm_group_panel(_injected_2021(), "한울회계법인", "4.1")
+    findings = list(re.finditer(r'<p class="fss-finding">.*?</p>', panel))
+    assert len(findings) >= 2
+    assert not panel.startswith('<div class="fss-f004-attach"', findings[0].end())
+    assert panel.startswith('<div class="fss-f004-attach"', findings[1].end())
+    block = panel[findings[1].end() : panel.find("</div>", findings[1].end())]
+    assert block.count('class="fss-f004-attach"') == 1
+    assert "(위 2개 문단을 F004 한 행으로 공시)" in block
+
+
+def test_gwanggyo_keeps_the_same_as_above_action_verbatim():
+    html = _injected_2021()
+    action = '<p class="fss-f004-action">상동</p>'
+    assert html.count(action) == 1
+    at = html.find(action)
+    assert "20250627000684" in html[at - 500 : at]
+
+
+def test_jeongin_quote_paragraphs_have_no_attach():
+    data = load_attach(fss_f004_attach.ATTACH_PATHS["2021"])
+    html = _injected_2021()
+    unattached = {}
+    for row in data["unattached"]["qu_findings"]:
+        _, bundle, group_no, gun, firm, index = row["finding_id"].split("/")
+        ident = (bundle, group_no, None if gun == "-" else gun, firm, int(index))
+        unattached[ident] = row["text_sha256"]
+    assert len(unattached) == 27
+    hits = 0
+    for panel in fss_f004_attach._iter_panels(html):
+        name = fss_f004_attach._ORIGINAL_NAME.search(panel["html"])
+        assert name
+        firm = html_lib.unescape(name.group(1))
+        group_no = panel["group"].split(" ", 1)[0]
+        for index, match in enumerate(re.finditer(r'<p class="fss-finding">(.*?)</p>', panel["html"])):
+            ident = (panel["bundle"], group_no, panel["gun"], firm, index)
+            if ident not in unattached:
+                continue
+            hits += 1
+            assert fss_f004_attach._finding_sha(match.group(1)) == unattached[ident]
+            assert not panel["html"].startswith('<div class="fss-f004-attach"', match.end())
+    assert hits == 27
+
+
+def test_broken_2021_file_leaves_that_year_plain(tmp_path, monkeypatch, caplog):
+    source = PAGE.read_text(encoding="utf-8")
+    plain = materialize_review_markdown(source)
+    payload = b"{"
+    broken = tmp_path / "f004-item-attach-2021.json"
+    broken.write_bytes(payload)
+    (tmp_path / "f004-item-attach-2021.manifest.json").write_text(
+        json.dumps(
+            {
+                "file": "f004-item-attach-2021.json",
+                "sha256": hashlib.sha256(payload).hexdigest(),
+                "bytes": len(payload),
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setitem(fss_f004_attach.ATTACH_PATHS, "2021", broken)
+    built = _hook(source, caplog)
+    assert _year_slice(built, "2021") == _year_slice(plain, "2021")
+    assert _year_slice(built, "2025").count('class="fss-f004-attach"') == 151
+    assert "F004 부착을 하지 않습니다" in caplog.text
+
+
+def test_broken_2025_file_keeps_2021_blocks(tmp_path, monkeypatch, caplog):
+    source = PAGE.read_text(encoding="utf-8")
+    plain = materialize_review_markdown(source)
+    monkeypatch.setattr(fss_f004_attach, "ATTACH_PATH", tmp_path / "missing-2025.json")
+    built = _hook(source, caplog)
+    assert _year_slice(built, "2025") == _year_slice(plain, "2025")
+    assert _year_slice(built, "2021").count('class="fss-f004-attach"') == 180
+
+
+def test_2021_block_hides_internal_ids_and_the_banned_word():
+    html = _injected_2021()
+    assert _banned() not in html
+    for token in _INTERNAL_IDS + ("history_row_ids",):
+        assert token not in html
+
+
+def test_attach_years_match_the_check_table():
+    assert set(fss_f004_attach.ATTACH_PATHS) == set(check_mod.ATTACH_YEARS)
+
+
+def test_on_screen_count_is_an_int_and_not_tied_to_firm_count(tmp_path):
+    data = _copy_attach()
+    data["counts"]["firm_reason_panels_on_screen"] = "0"
+    with pytest.raises(ValueError):
+        load_attach(_dump_attach(tmp_path / "text", data))
+    data = _copy_attach()
+    data["counts"]["firm_reason_panels_on_screen"] = 0
+    loaded = load_attach(_dump_attach(tmp_path / "zero", data))
+    assert loaded["counts"]["firm_reason_panels_on_screen"] == 0
+    assert loaded["counts"]["firm_reason_panels"] == len(loaded["firm_reasons"])
+
+
+def test_year_finding_ids_must_start_with_that_year(tmp_path):
+    data = json.loads(json.dumps(load_attach(fss_f004_attach.ATTACH_PATHS["2021"])))
+    data["attachments"][0]["finding_id"] = "2025/등록/1.2/가군/삼일회계법인/0"
+    with pytest.raises(ValueError, match="finding_id"):
+        load_attach(_dump_attach(tmp_path, data))
