@@ -43,6 +43,17 @@ ATTACH_YEARS = {
         },
         "site_div_sha": "b01f968c1990426aeee6959e251ef6bcf2b2c68a7115fd1acb215890c0c26b10",
     },
+    "2022": {
+        "sha": "be4346280732b70de2a9dc6accd64a66bd5022a0dd609c7da36b000b4e224978",
+        "bytes": 425305,
+        "rendered": {
+            "70e2b22a7a21d9ec61ba52cf9532fc023348f3722ca8dac5eb9f8984c36bbe45": (
+                393312,
+                "41569935b6fed1565fdd6d72be992b4d73458dcf54056be85c1e4680a2823046",
+            ),
+        },
+        "site_div_sha": "c8224c07f538b74d358482745a8676f3a0f960c5687c9e48a236862eb9f691bd",
+    },
     "2021": {
         "sha": "04423aac698c95a7b246ec3c23d9e3d2f9bc14c0a9a43c57b3ef34bab357568e",
         "bytes": 291537,
@@ -82,7 +93,6 @@ ATTACH_YEARS = {
 PRIOR_YEAR_SHA = {
     "2024": "dd252ed36a6f3debb59d9c5c831dfab643bb3dc51a4918b5f4649b0087f87763",
     "2023": "a04efa16f933d3aac44bb98434af3bc21160d028790e140c50d77a3f38416baf",
-    "2022": "5cf332453ec91121dbbc37aec0c15f540842b5cf845cfde7df98708c839601dc",
 }
 _INTERNAL_IDS = (
     "f004_row_id",
