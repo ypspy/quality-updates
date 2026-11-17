@@ -23,6 +23,11 @@ PAGE = ROOT / "docs" / "fss-review" / "index.md"
 YEAR_FILES = {
     "2025": ROOT / "data" / "fss-review" / "year-2025.json",
     "2021": ROOT / "data" / "fss-review" / "year-2021.json",
+    "2024": ROOT / "data" / "fss-review" / "year-2024.json",
+    "2023": ROOT / "data" / "fss-review" / "year-2023.json",
+    "2022": ROOT / "data" / "fss-review" / "year-2022.json",
+    "2020": ROOT / "data" / "fss-review" / "year-2020.json",
+    "2019": ROOT / "data" / "fss-review" / "year-2019.json",
 }
 YEAR_2025_PATH = YEAR_FILES["2025"]
 
