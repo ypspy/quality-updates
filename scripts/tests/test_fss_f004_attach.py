@@ -1053,10 +1053,10 @@ _ATTACH_YEAR_LOCK = {
         "F004 부착 2022: 자리 221/221, 이행사항 224, 법인 사유 35곳(107칸), 건너뜀 0",
     ),
     "2020": (
-        "32b5a4f91e684e2a24eba1d5cf63a6935de4bcc315ac8ec072ff036715838688",
-        207382,
-        "2b2eca6a299523e0caef51f0c798f9a42264ac4d14c5128871d1da9cb5319d5b",
-        114206,
+        "b9878d2cba8e1d723f40838a8c5c368ca1fc24723208baa96f45c92c8bdc5e68",
+        195257,
+        "b2008599c4fcac92aeb0071760a3c3f8ee8e1332d4a8cb2bcb3f1244ff530f63",
+        104112,
         "F004 부착 2020: 자리 110/110, 이행사항 119, 법인 사유 0곳(0칸), 건너뜀 0",
     ),
     "2019": (
@@ -1125,3 +1125,75 @@ def test_2023_n11_paragraphs_stay_unattached():
     used = {att["finding_id"] for att in data["attachments"]}
     used |= {fid for att in data["attachments"] for item in att["f004"] for fid in item.get("covers", [])}
     assert not used & set(_N11_2023)
+
+
+# M2-6(사용자 결정 2026-11-16 9:18 PM CT)로 2020 데이터에서 뺀 정동회계법인 품질관리기준 인용 27문단.
+# 값은 PR-D 2020 부착 JSON(32b5a4f9…)의 unattached.qu_findings[].text_sha256(NFC 문단 텍스트 sha256).
+_JEONGDONG_REMOVED_TEXT_SHA = frozenset(
+    {
+        "0d0604cbf8866a11e0ecff8ebabb7e87b69895394d913dfcf03f70db33ad12f3",
+        "1c22a73515e5381cccdb4c801df3cb3e4e5cf33140b3934cb70bc4b940d8dd25",
+        "39f9ee7a8e279c527380be8718ef6ea041e8b96d6776c18712647f1547183d58",
+        "3aa7a05b7c1377a50cda9e57049b2f7665c5f1e39245440e6960416c9e52f782",
+        "43b4c6cc667a67a013aa48f9305a691bb0badad639d8590147ebd444c99b9bdc",
+        "475846d6c0379b928085fcbbf1c12b4178e69f4f464022da041163d434989739",
+        "48b6c8a16123f911b48a1cacb5ca59588cf86fb17aa335f01926082be416a513",
+        "4947b59c0ec56f208f9ef85466926f15bad6b8d0695f8111352f7ec11ab208e0",
+        "4dbdbc8eeac1ab6ac3ce513d3d673f1d1a295cbb28eef54e43b433e853cc66f7",
+        "54f81408c9eece7110ba39cb38217da1ae7c91c3e90d6c02ebe463407f88242b",
+        "578513b1971d725f4f57f014a0c9cd8a5fdc627e69f5c8b84352a8fb8ffc3f53",
+        "7523c1fe8940781e77a913f648b57ec5315e54e4fa1e06ec963e148bcc1af6e7",
+        "80504de78e4daad3f80635e12efdbd70d5f675c06d42a4e14cba280d54a30940",
+        "8ab9dbebf78b8142d01ee4a7c0da57e4c053138b483ddabf3a01869f49ac6497",
+        "8ec72a8f46d34e573c6707c67b5249b177809bff1f8e64fabe94b3dcea87e2c8",
+        "939c619c732fe6d703668c6a10ea64c30d10b07319f681e3472ef1da30ae708d",
+        "97be3f5a05e8369bad1e1595493a07b0a5cbc8de38c5868070a96d05afcafdba",
+        "990beb3fa43024c4f3ca75537bcef8223302fb5ecf275c34a4d68c980577e537",
+        "994799d2547664d7d10798b66b5a40a407fecd58755fd6eda528eda3f16936cc",
+        "a353418034ff5f1afdea1680ecfb6cedf9c3f30bbc8640e4829180efe5eb6b2c",
+        "a668e609463e0904237b736275aa01aee09883b9f78b43f9c77d90bad83f03a4",
+        "b2dfdecdcf792adbd9b4bfcd19fd755c26ea07a5f5fbb83a097b11590f90aa30",
+        "bb2afafffaa2b14af67a530f86c73236a5624162c4fd777d4fe6e1547487eca5",
+        "c3c488264ed48eb613933114c5a7b9489effc0b49151d95cd3122acdb2348146",
+        "cc3c95bb37bdc1797a5f7a7443707214632d40f9c17ded136fe7527e565cb2e2",
+        "d7ca4595222f0c3ec6fd1a82835a507041265198a8797e6fcdc6af33612c332a",
+        "eb8b95f4b29e9146f7b59d8c82d5c0a4a45c382367de11f3d17b88cd58d05fbf",
+    }
+)
+# 남는 정동 지적 16문단(중분류별 문단 수). 모두 F004 이행사항이 바로 아래에 붙는다.
+_JEONGDONG_KEPT = {"1.2": 2, "2.2": 2, "3.1": 2, "4.3": 3, "5.2": 4, "5.4": 1, "6.1": 2}
+
+
+def test_jeongdong_quote_paragraphs_are_removed_from_2020():
+    data = load_attach(fss_f004_attach.ATTACH_PATHS["2020"])
+    assert data["unattached"]["qu_findings"] == []
+    counts = data["counts"]
+    assert counts["unattached_qu_findings"] == 0
+    assert counts["unattached_by_reason"] == {}
+    assert counts["qu_findings"] == counts["qu_findings_with_attach"] == 110
+    assert counts["qu_panels"] == 58
+    assert len(_JEONGDONG_REMOVED_TEXT_SHA) == 27
+
+    year = load_year("2020")
+    for section in year["bundles"][0]["sections"]:
+        for group in section["groups"]:
+            if group["heading"].startswith("1.1 "):
+                assert [block["gun"] for block in group["blocks"]] == ["가군", "나군", "다군", "라군"]
+                assert [block["kind"] for block in group["blocks"][:3]] == ["firms"] * 3
+                assert group["blocks"][3] == {"kind": "empty", "gun": "라군"}
+
+    html = _injected_year("2020")
+    kept = {}
+    for panel in fss_f004_attach._iter_panels(html):
+        name = fss_f004_attach._ORIGINAL_NAME.search(panel["html"])
+        assert name
+        firm = html_lib.unescape(name.group(1))
+        group_no = panel["group"].split(" ", 1)[0]
+        for match in re.finditer(r'<p class="fss-finding">(.*?)</p>', panel["html"]):
+            assert fss_f004_attach._finding_sha(match.group(1)) not in _JEONGDONG_REMOVED_TEXT_SHA
+            if firm == "정동회계법인":
+                kept[group_no] = kept.get(group_no, 0) + 1
+                assert panel["html"].startswith('<div class="fss-f004-attach"', match.end())
+    assert kept == _JEONGDONG_KEPT
+    for token in ("(참고2)", "(참고3)", "□"):
+        assert token not in html
