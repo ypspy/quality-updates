@@ -436,10 +436,21 @@ def test_lookalikes_outside_2025_stay_in_place():
     assert built.count('class="fss-f004-attach"') == 152
 
 
+def _with_outside_lookalikes(page: str) -> str:
+    """첫 연도 블록 앞(어느 연도 블록에도 속하지 않는 곳)에 비슷한 조각을 넣는다.
+
+    PR-D 뒤에는 2019–2025 모든 연도가 부착 연도라 부착 없는 연도 블록이 없다.
+    """
+    at = page.find('<div class="fss-year"')
+    assert at >= 0
+    extra = _LOOKALIKE_REASON + _LOOKALIKE_ATTACH + _LOOKALIKE_MENTION
+    return page[:at] + extra + page[at:]
+
+
 def test_strip_ignores_pages_without_2025_and_outside_lookalikes():
     lone = _LOOKALIKE_REASON + _LOOKALIKE_ATTACH + _LOOKALIKE_MENTION
     assert strip_f004_attach(lone) == lone
-    page = _with_2024_lookalikes(materialize_review_markdown(PAGE.read_text(encoding="utf-8")))
+    page = _with_outside_lookalikes(materialize_review_markdown(PAGE.read_text(encoding="utf-8")))
     stripped = strip_f004_attach(page)
     assert _LOOKALIKE_REASON in stripped
     assert _LOOKALIKE_ATTACH in stripped
@@ -1015,3 +1026,102 @@ def test_year_finding_ids_must_start_with_that_year(tmp_path):
     data["attachments"][0]["finding_id"] = "2025/등록/1.2/가군/삼일회계법인/0"
     with pytest.raises(ValueError, match="finding_id"):
         load_attach(_dump_attach(tmp_path, data))
+
+
+# PR-D: 2019·2020·2022·2023·2024 F004 부착 잠금. 연도마다 커밋 하나로 한 칸씩 더한다.
+# 연도: (부착 JSON sha256, bytes, 부착 뒤 연도 블록 sha256, bytes, 빌드 로그 줄)
+_ATTACH_YEAR_LOCK = {
+    "2024": (
+        "376cd8a2699b2e5ba1fc925f89e79c58aa34b2f2a16545f21250be1a96f6d02e",
+        426702,
+        "5133827f6648d5fb6e880a2057a7a342a34a39bc03fd68fc9a99bec8d21f6ed1",
+        418985,
+        "F004 부착 2024: 자리 228/228, 이행사항 235, 법인 사유 36곳(80칸), 건너뜀 0",
+    ),
+    "2023": (
+        "0d9e6bb5a9e98c6ee0270dd59178f25d82ba30cd8a714cc17892b05f7fac254b",
+        420495,
+        "4dcc58e5454747e4a5656c8719a95d4dfa674bab1f536c2c6e86ba1fe58f6317",
+        359218,
+        "F004 부착 2023: 자리 216/216, 이행사항 226, 법인 사유 35곳(81칸), 건너뜀 0",
+    ),
+    "2022": (
+        "be4346280732b70de2a9dc6accd64a66bd5022a0dd609c7da36b000b4e224978",
+        425305,
+        "41569935b6fed1565fdd6d72be992b4d73458dcf54056be85c1e4680a2823046",
+        393312,
+        "F004 부착 2022: 자리 221/221, 이행사항 224, 법인 사유 35곳(107칸), 건너뜀 0",
+    ),
+    "2020": (
+        "32b5a4f91e684e2a24eba1d5cf63a6935de4bcc315ac8ec072ff036715838688",
+        207382,
+        "2b2eca6a299523e0caef51f0c798f9a42264ac4d14c5128871d1da9cb5319d5b",
+        114206,
+        "F004 부착 2020: 자리 110/110, 이행사항 119, 법인 사유 0곳(0칸), 건너뜀 0",
+    ),
+    "2019": (
+        "36493a0b48433b5cf3fcc39416f9d0c3112c512c535c7f375754912270043b62",
+        128666,
+        "be6d53fd6f04f28617b18311268ccd6834c0932fe403b23f7c67b8ca6a3055b7",
+        75280,
+        "F004 부착 2019: 자리 71/71, 이행사항 73, 법인 사유 0곳(0칸), 건너뜀 0",
+    ),
+}
+
+
+def _injected_year(year: str) -> str:
+    return inject_f004_attach(render_year_html(load_year(year)))
+
+
+@pytest.mark.parametrize("year", list(_ATTACH_YEAR_LOCK))
+def test_year_attach_file_matches_sha_manifest_and_serialization(year):
+    attach_sha, attach_bytes, _render_sha, _render_bytes, _summary = _ATTACH_YEAR_LOCK[year]
+    path = fss_f004_attach.ATTACH_PATHS[year]
+    assert path.name == f"f004-item-attach-{year}.json"
+    raw = path.read_bytes()
+    assert len(raw) == attach_bytes
+    assert hashlib.sha256(raw).hexdigest() == attach_sha
+    assert raw.decode("utf-8") == json.dumps(json.loads(raw), ensure_ascii=False, indent=1)
+    manifest = json.loads(path.with_name(f"f004-item-attach-{year}.manifest.json").read_text(encoding="utf-8"))
+    assert manifest == {"file": path.name, "sha256": attach_sha, "bytes": attach_bytes}
+
+
+@pytest.mark.parametrize("year", list(_ATTACH_YEAR_LOCK))
+def test_year_every_slot_resolves_and_matches_locked_bytes(year, caplog):
+    _attach_sha, _attach_bytes, render_sha, render_bytes, summary = _ATTACH_YEAR_LOCK[year]
+    counts = load_attach(fss_f004_attach.ATTACH_PATHS[year])["counts"]
+    with caplog.at_level(logging.INFO, logger="mkdocs.plugins.fss_f004_attach"):
+        built = _injected_year(year)
+    assert summary in caplog.text
+    assert built.count('class="fss-f004-attach"') == counts["attach_blocks"]
+    assert built.count(_REASON) == counts["firm_reason_panels_on_screen"]
+    raw = built.encode("utf-8")
+    assert len(raw) == render_bytes
+    assert hashlib.sha256(raw).hexdigest() == render_sha
+    assert _banned() not in built
+    for token in _INTERNAL_IDS + ("history_row_ids",):
+        assert token not in built
+
+
+# N11(사용자 결정 2026-11-16 9:48 PM CT, 「N11 4개 모두 붙이지 마」): 2023 네 문단은 붙이지 않는다.
+_N11_2023 = (
+    "2023/등록/1.1/라군/정동회계법인/0",
+    "2023/등록/1.1/라군/정동회계법인/2",
+    "2023/등록/1.2/나군/삼덕회계법인/4",
+    "2023/등록/2.1/나군/삼덕회계법인/3",
+)
+
+
+def test_2023_n11_paragraphs_stay_unattached():
+    data = load_attach(fss_f004_attach.ATTACH_PATHS["2023"])
+    held = [
+        row["finding_id"]
+        for row in data["unattached"]["qu_findings"]
+        if row["reason"] == "user_decision_no_attach"
+    ]
+    assert held == list(_N11_2023)
+    assert data["counts"]["unattached_by_reason"]["user_decision_no_attach"] == 4
+    assert "review_pending" not in data["counts"]["unattached_by_reason"]
+    used = {att["finding_id"] for att in data["attachments"]}
+    used |= {fid for att in data["attachments"] for item in att["f004"] for fid in item.get("covers", [])}
+    assert not used & set(_N11_2023)

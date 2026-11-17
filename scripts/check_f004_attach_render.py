@@ -43,6 +43,39 @@ ATTACH_YEARS = {
         },
         "site_div_sha": "b01f968c1990426aeee6959e251ef6bcf2b2c68a7115fd1acb215890c0c26b10",
     },
+    "2024": {
+        "sha": "376cd8a2699b2e5ba1fc925f89e79c58aa34b2f2a16545f21250be1a96f6d02e",
+        "bytes": 426702,
+        "rendered": {
+            "78192da973a4b77854bd921d4ad3109026c497f6c1867a39b85ace6cf83b895e": (
+                418985,
+                "5133827f6648d5fb6e880a2057a7a342a34a39bc03fd68fc9a99bec8d21f6ed1",
+            ),
+        },
+        "site_div_sha": "41490fc76d06dda0b7a82c3543ecca6b7c3f152559e9f54a5039ea779d74e9ad",
+    },
+    "2023": {
+        "sha": "0d9e6bb5a9e98c6ee0270dd59178f25d82ba30cd8a714cc17892b05f7fac254b",
+        "bytes": 420495,
+        "rendered": {
+            "f421a76990ef09ef92ab0993344427eb3077e7e63aeb482ec636cf07f6574e9e": (
+                359218,
+                "4dcc58e5454747e4a5656c8719a95d4dfa674bab1f536c2c6e86ba1fe58f6317",
+            ),
+        },
+        "site_div_sha": "afebe619ddf3920787b21ab0e073f0b9bea6844103ae8558b0896cd65c8b751b",
+    },
+    "2022": {
+        "sha": "be4346280732b70de2a9dc6accd64a66bd5022a0dd609c7da36b000b4e224978",
+        "bytes": 425305,
+        "rendered": {
+            "70e2b22a7a21d9ec61ba52cf9532fc023348f3722ca8dac5eb9f8984c36bbe45": (
+                393312,
+                "41569935b6fed1565fdd6d72be992b4d73458dcf54056be85c1e4680a2823046",
+            ),
+        },
+        "site_div_sha": "c8224c07f538b74d358482745a8676f3a0f960c5687c9e48a236862eb9f691bd",
+    },
     "2021": {
         "sha": "04423aac698c95a7b246ec3c23d9e3d2f9bc14c0a9a43c57b3ef34bab357568e",
         "bytes": 291537,
@@ -54,16 +87,32 @@ ATTACH_YEARS = {
         },
         "site_div_sha": "7928d4b8a973ec66f7ddbf2a6bfb29f3190a55f44eeb66c2f528f8868120b5e7",
     },
+    "2020": {
+        "sha": "32b5a4f91e684e2a24eba1d5cf63a6935de4bcc315ac8ec072ff036715838688",
+        "bytes": 207382,
+        "rendered": {
+            "c9c2e84726be7e29886dbf69e151c7d9027db95974d02461d1e5254c9fa3d793": (
+                114206,
+                "2b2eca6a299523e0caef51f0c798f9a42264ac4d14c5128871d1da9cb5319d5b",
+            ),
+        },
+        "site_div_sha": "7971762f0d3475b59374a8f9089a2a105e140008c604c959d482b8adfa27e541",
+    },
+    "2019": {
+        "sha": "36493a0b48433b5cf3fcc39416f9d0c3112c512c535c7f375754912270043b62",
+        "bytes": 128666,
+        "rendered": {
+            "4438ab7f1555c0260e2534cfdb863fbec08349821d9e38554bfe90d8098a79a0": (
+                75280,
+                "be6d53fd6f04f28617b18311268ccd6834c0932fe403b23f7c67b8ca6a3055b7",
+            ),
+        },
+        "site_div_sha": "83ab5cebfeef2b16cebd1972ff5c7d3fc67554675ba004fb3e58d12495c4116b",
+    },
 }
-# scripts/tests/test_fss_review_cards.py YEAR_SHA (main 94f4882).
+# 부착 없는 연도가 없어 비어 있다(PR-D: 2019·2020·2022·2023·2024 부착).
 # 부착 연도는 ATTACH_YEARS.site_div_sha로 비교한다.
-PRIOR_YEAR_SHA = {
-    "2024": "dd252ed36a6f3debb59d9c5c831dfab643bb3dc51a4918b5f4649b0087f87763",
-    "2023": "a04efa16f933d3aac44bb98434af3bc21160d028790e140c50d77a3f38416baf",
-    "2022": "5cf332453ec91121dbbc37aec0c15f540842b5cf845cfde7df98708c839601dc",
-    "2020": "24375fe9c10e2a0fa0513dea5831fc4141471cca9be2e0c1ea9414c01465ce92",
-    "2019": "fb13f1d4d54aaf8126f97bf802feb37ef40b2fee7852694ca22c3215e607d098",
-}
+PRIOR_YEAR_SHA: dict[str, str] = {}
 _INTERNAL_IDS = (
     "f004_row_id",
     "text_sha256",
