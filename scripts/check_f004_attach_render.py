@@ -33,15 +33,15 @@ SITE_HTML = ROOT / "site" / "fss-review" / "index.html"
 # 2025 화면 수치는 이 표의 잠금과 부착 JSON counts로만 만든다.
 ATTACH_YEARS = {
     "2025": {
-        "sha": "01391c04a9c9926a0779b1e4b238544bddc90e3d884ec396c09f642c6b588f1a",
-        "bytes": 246757,
+        "sha": "a27862374326741a2c39a1e59eb371d67ffe614160b23bcd0e9d2db43870d899",
+        "bytes": 247081,
         "rendered": {
-            "42808d6e32f2f3fa9bfe9079a068d607c656a226a23b239331936e486e5b4479": (
-                317066,
-                "b4e4d7df26c3a415f41f507a656eac3e1fd4870515763dd6710b8dbfea726324",
+            "b885f6ceb580551acf411cfa49532b57cb3288865533910f25bdc999fef3725a": (
+                317076,
+                "5f03782787e8eb8e7b9e646b9c04175953534c2a9337fcb0aead9397d0b8cf46",
             ),
         },
-        "site_div_sha": "d376ead3720a124d30bcdc205ed1e6a1e6a4d8e47cd1225d2a9e6da53331498a",
+        "site_div_sha": "6dedeef72cf4970cd6455fc999dc89eb73e181bcb13f23e7ca502d2cf53af661",
     },
     "2024": {
         "sha": "2e000f25ab05b1f0640e0cbfa859f5dc09adb5f1a8eececaa10526125e61a627",

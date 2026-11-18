@@ -32,13 +32,13 @@ import check_f004_attach_render as check_mod  # noqa: E402
 import fss_f004_attach  # noqa: E402
 
 # sha256sum data/fss-review/f004-item-attach.json
-ATTACH_SHA = "01391c04a9c9926a0779b1e4b238544bddc90e3d884ec396c09f642c6b588f1a"
-ATTACH_BYTES = 246757
+ATTACH_SHA = "a27862374326741a2c39a1e59eb371d67ffe614160b23bcd0e9d2db43870d899"
+ATTACH_BYTES = 247081
 # render_year_2025_html(load_year_2025())에 부착한 2025 블록.
 RENDERED = {
-    "42808d6e32f2f3fa9bfe9079a068d607c656a226a23b239331936e486e5b4479": (
-        317066,
-        "b4e4d7df26c3a415f41f507a656eac3e1fd4870515763dd6710b8dbfea726324",
+    "b885f6ceb580551acf411cfa49532b57cb3288865533910f25bdc999fef3725a": (
+        317076,
+        "5f03782787e8eb8e7b9e646b9c04175953534c2a9337fcb0aead9397d0b8cf46",
     ),
 }
 _SUMMARY = "F004 부착: 자리 143/143, 이행사항 151, 법인 사유 41곳(136칸), 건너뜀 0"

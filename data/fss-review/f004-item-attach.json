@@ -3,8 +3,8 @@
  "status": "v2: 동성 재분류 뒤 year-2025.json 기준. 사람 확인 20문단, 동성 14문단, F004 22행 결정 반영",
  "source": {
   "main_commit": "ad479b819ea66822af5194e42d41cae33d005569",
-  "year_2025_json_sha256": "42808d6e32f2f3fa9bfe9079a068d607c656a226a23b239331936e486e5b4479",
-  "year_2025_json_note": "동성 재분류 PR 뒤 year-2025.json / 그 뒤 대주 2.2 띄어쓰기 원문 정정(「발생시」「지연 ․ 미신고한」)을 반영한 sha",
+  "year_2025_json_sha256": "b885f6ceb580551acf411cfa49532b57cb3288865533910f25bdc999fef3725a",
+  "year_2025_json_note": "동성 재분류 PR 뒤 year-2025.json / 그 뒤 대주 2.2 띄어쓰기 원문 정정(「발생시」「지연 ․ 미신고한」)을 반영한 sha / 그 뒤 U+2024 앞뒤 공백 원문 정정(대주 3.1 「작성 ․ 승인」, 예일 5.2 「작성 ․ 관리」, 태일 2.1 「지연 ․ 미신고 또는 지연 ․ 미제출」)과 가운뎃점 옆 띄어쓰기 정정(호수 4.1 「집계·관리 하지」, 신영 5.3 「감사조서 입·출고」)을 반영한 sha",
   "f004_followup_v4_sha256": "617ccf2d8dd778c7235c6f9809b3fe57ea0798226b25eabc407b2f47e9132798",
   "item_attach_v1_sha256": "e575e0c126487c42e635944cd6a6c05ed7ff4dcf13eeeb6dd70fbde75b0a49dc",
   "proposal": "proposal-item-attach/proposal.md sha256 4f0d8843a21bb1e48910aa666fbbf19fdafec0d4519961a4579bf5b673c9d860"
@@ -3184,7 +3184,7 @@
     "firm": "태일회계법인",
     "index": 0
    },
-   "text_sha256": "2d1b83cd4de9491538adf094f759336dffbadb4f8673e7928d1540b38cc7affe",
+   "text_sha256": "c3a10e039e968eb328676170403c1ce8d5113bc079615adaa62249a4b467ce68",
    "f004": [
     {
      "f004_row_id": "20260630000660:0:8",
@@ -4936,7 +4936,7 @@
     "firm": "신영회계법인",
     "index": 2
    },
-   "text_sha256": "e6af2fad9db45c5a131025540fd106152244538483a6c5edfb2ab07354be573c",
+   "text_sha256": "50054de48bb4412f879519b9106d51c8bb2c820a880b1ca8d90be78c69d3dace",
    "f004": [
     {
      "f004_row_id": "20260630000428:0:14",
