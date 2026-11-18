@@ -44,15 +44,15 @@ ATTACH_YEARS = {
         "site_div_sha": "6dedeef72cf4970cd6455fc999dc89eb73e181bcb13f23e7ca502d2cf53af661",
     },
     "2024": {
-        "sha": "1d8cc108da7c319671aae0331123954c546445bd051d8ea4cbf5aecbaaa37d39",
-        "bytes": 427145,
+        "sha": "57dba3000fd844f9f99fadaa1f6de4a0506a3590fd7ad7493c6666a767379228",
+        "bytes": 427370,
         "rendered": {
-            "a5304a47e67eb0373ee3b8a3ef3df3f8b616720cbd6d0472b7ae9fb982f5640b": (
-                420611,
-                "16e8ab050be3eacc4aff2eeb65de918a312d80bd7a54879551722a33f9674ea6",
+            "512c7bca6d914ccc6c2fe5f7397390ae22f34d16d64203081fd69a5af4cf9e75": (
+                421685,
+                "901861bd92d1d5350d24a7b9554aeb7ffc498f2309ee2ae659dc1faa40463a40",
             ),
         },
-        "site_div_sha": "72f5501d7514318e24eea733aec0cc535090e39547756d6e9e51df7d5f513ae5",
+        "site_div_sha": "c87caa1ac72bcc3c4c307307e99f85abc1c16d4f6c2d91d73bd693587338316a",
     },
     "2023": {
         "sha": "e0c8411786330160aa24f4fcb27911c32b0262884b22f142622fdcf79fe29659",

@@ -41,7 +41,7 @@ TEXT_SHA = "52cc34bd678d19c923e754db7ae5040e969e1853f3fadcbc2b2c670bab31ef0a"
 SEV_SHA = "4bfdbdb1e18949b271977b4f34da038519cca775d1c997cff4bffbab6c17f208"
 YEAR_SHA = {
     "2025": "75b6d28d47f3fd46dcdb4bb013e409065196b267cec138efcf3d72b87191667f",
-    "2024": "802cd67a04f190eb7873ffe6d90ad92c3fdcd055fa7b029a05ed057547aed539",
+    "2024": "41756d94967e0a4328e17cf220106a8b1d4e39e9ab8e6cd095c27d728b0ee63c",
     "2023": "fd560864f0e1b4c100cdbb686d9cc929bb417340fec69dc9762ce5eec41550c1",
     "2022": "4c150effed6afb5f2d1c242a0285916d4f486ca436242cc15de6b05e63ea2dd2",
     "2021": "42f72494b69082746ea8ef063835a8c9343140b3310b75fb269bffbc4b66a414",
@@ -725,3 +725,19 @@ def test_year_2024_attach_text_sha_matches_year_paragraphs():
     assert len(refs) == 239
     for finding_id, digest in refs:
         assert _nfc_sha(texts[finding_id]) == digest, finding_id
+
+
+# SP-24 회귀 방지(사용자 결정 2026-11-18 「SP24-RT (가)」): 2024 지적 509문단 전체에서 띄어쓰기 없이
+# 한글 음절이 12자 이상 이어지는 곳은 0개여야 한다. SP-24 PR 1·PR 2 뒤 값이다(main d25a46bd에서는 429개).
+# 줄바꿈 자리라 판단하지 못해 붙인 채 둔 83곳과 가운뎃점(U+2024 등) 옆 간격은 고치지 않았지만,
+# 그 자리에서 12자 이상 연속이 생기지 않아 허용 목록 없이 0으로 잠근다.
+_LONG_HANGUL_RUN = re.compile(r"[\uac00-\ud7a3]{12,}")
+
+
+def test_year_2024_findings_have_no_long_unspaced_hangul_runs():
+    runs = [
+        (finding_id, run)
+        for finding_id, text in _year_2024_findings().items()
+        for run in _LONG_HANGUL_RUN.findall(text)
+    ]
+    assert runs == []
