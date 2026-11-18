@@ -109,18 +109,22 @@ def test_source_index_has_one_hook_per_year_and_no_static_year_div():
 
 
 # 손전사에서 마지막 불릿(종결만 있던 줄)이 빠지면 문장이 연결어미로 끊긴다.
-# 끝 공백을 버린 뒤 마지막 글자가 쉼표·쌍반점이면 그 앞 어절을 본다(「…하고,」).
-# 그 밖의 구두점으로 끝나면 통과한다. 마지막 어절이 연결어미로 끝나면 걸린다.
-# 연결어미: 용언 어간 + 「고」(수행하고·이루어지고·없고), 「며」(없으며·되었으며),
-# 「으나」, 「거나」, 「지만」, 「면서」, 「하여」, 「되어」.
-# 「미신고」「보고」「참고」처럼 명사 끝음절이 「고」인 경우는 연결어미가 아니다.
+# 끝 공백을 버린 뒤 끝의 쉼표·쌍반점(반각·전각·「、」, 여러 개·앞 공백 포함)을 떼고 그 앞 어절을 본다
+# (「…하고,」「…하고 ,」「…하고，」). 그 밖의 구두점으로 끝나면 통과한다. 마지막 어절이 연결어미로
+# 끝나면 걸린다. 어간 쪽은 열린 규칙이 아니라 아래에 적은 음절 목록이다.
+# 연결어미: 「고」(수행하고·이루어지고·없고·시키고, 줄인 과거 했고·됐고·왔고·줬고·켰고),
+# 「며」(없으며·되었으며·시키며·주며), 「으나」(하였으나·않으나), 「거나」, 「지만」, 「면서」,
+# 「하여(서)」, 「되어(서)」.
+# 걸지 않는 것: 「미신고」「보고」「참고」(명사 끝음절 「고」), 「확인하였나」「없었나」(의문형),
+# 「3월까지만」(「까지」+「만」), 「수행한다면서」(인용형). 「수행하나」「수행하면」은 명사 끝(「중 하나」 등)과
+# 구별이 어려워 걸지 않는다.
 _DANGLING_CONNECTIVE = re.compile(
-    r"(?:하|되|있|없|않|같|싶|겠|었|았|였|지|이)고$"
-    r"|(?:하|되|있|없|않|이|으|었|았|였)며$"
-    r"|(?:으|었|았|였)나$"
-    r"|거나$|지만$|면서$|하여$|되어$"
+    r"(?:하|되|있|없|않|같|싶|겠|었|았|였|했|됐|왔|줬|켰|키|지|이)고$"
+    r"|(?:하|되|있|없|않|이|으|었|았|였|키|주)며$"
+    r"|으나$"
+    r"|거나$|(?<!까)지만$|(?<![다라])면서$|하여서?$|되어서?$"
 )
-_SOFT_STOPS = frozenset(",;\u3001")
+_SOFT_STOPS = frozenset(",;\u3001\uff0c\uff1b")
 
 # 원문 PDF 불릿도 쉼표로 끝나고 다음 불릿·하위 불릿으로 이어지는 문단(손전사 탈락 아님).
 # (연도 파일, 법인, 마지막 어절) — 2023 대성삼경 법인 PDF p.3, 2024 안진 법인 PDF p.3,
@@ -136,17 +140,16 @@ _SOURCE_ENDS_ON_COMMA = frozenset(
 
 def _dangling_connective_token(text: str) -> str | None:
     stripped = text.rstrip()
-    if not stripped:
-        return None
     body = stripped
-    if stripped[-1] in _SOFT_STOPS:
-        body = stripped[:-1].rstrip()
-        if not body:
-            return None
-    elif unicodedata.category(stripped[-1]).startswith("P"):
+    while body and body[-1] in _SOFT_STOPS:
+        body = body[:-1].rstrip()
+    if not body:
         return None
-    if _DANGLING_CONNECTIVE.search(body.split()[-1]):
-        return stripped.split()[-1]
+    if body == stripped and unicodedata.category(stripped[-1]).startswith("P"):
+        return None
+    word = body.split()[-1]
+    if _DANGLING_CONNECTIVE.search(word):
+        return word + "".join(stripped[len(body):].split())
     return None
 
 
@@ -167,6 +170,23 @@ def _dangling_connective_token(text: str) -> str | None:
         ("조서관리를 수행하고,", "수행하고,"),
         ("사례가 발견되었으며,", "발견되었으며,"),
         ("사전심리를 요청한 사례가 있고;", "있고;"),
+        ("교육을 이수시키고", "이수시키고"),
+        ("업무를 이관했고", "이관했고"),
+        ("절차가 생략됐고", "생략됐고"),
+        ("검토를 거치지 않도록 하며", "하며"),
+        ("구성원에게 이수시키며", "이수시키며"),
+        ("업무를 수행하여서", "수행하여서"),
+        ("서명이 누락되어서", "누락되어서"),
+        ("관리대장을 작성하였으나", "작성하였으나"),
+        ("조서관리를 수행하고 ,", "수행하고,"),
+        ("조서관리를 수행하고,,", "수행하고,,"),
+        ("조서관리를 수행하고\uff0c", "수행하고\uff0c"),
+        ("조서관리를 수행하고\u3001", "수행하고\u3001"),
+        ("검토를 확인하였나", None),
+        ("관련 절차가 없었나", None),
+        ("2024년 3월까지만", None),
+        ("전기까지만", None),
+        ("수행한다면서", None),
         ("운영이 미흡함", None),
         ("수행하고 있지 아니함", None),
         ("이를 지연 \u2024 미신고", None),
@@ -189,7 +209,7 @@ def test_finding_texts_do_not_end_on_a_dangling_connective():
     paths = sorted(review_dir.glob("year-*.json"))
     assert paths
     offenders = []
-    allowed = set()
+    allowed = []
     for path in paths:
         data = json.loads(path.read_text(encoding="utf-8"))
         for firm_name, finding in iter_year_findings(data):
@@ -198,11 +218,12 @@ def test_finding_texts_do_not_end_on_a_dangling_connective():
                 continue
             key = (path.name, firm_name, token)
             if key in _SOURCE_ENDS_ON_COMMA:
-                allowed.add(key)
+                allowed.append(key)
             else:
                 offenders.append(f"{path.name} {firm_name} …{token}")
     assert offenders == []
-    assert allowed == _SOURCE_ENDS_ON_COMMA
+    # 예외 하나는 문단 하나만 덮는다(같은 키가 두 번 나오면 실패).
+    assert sorted(allowed) == sorted(_SOURCE_ENDS_ON_COMMA)
 
 
 # 원문 PDF 띄어쓰기·문장부호 그대로(2026-11-17 사용자 결정 「원문대로 고치는 초안 PR」).
