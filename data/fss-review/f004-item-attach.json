@@ -3,8 +3,8 @@
  "status": "v2: 동성 재분류 뒤 year-2025.json 기준. 사람 확인 20문단, 동성 14문단, F004 22행 결정 반영",
  "source": {
   "main_commit": "ad479b819ea66822af5194e42d41cae33d005569",
-  "year_2025_json_sha256": "1c6df2500ba918054bd4b22b3a983af9ef3bdecdedc54908d4a54a04e1ea72e4",
-  "year_2025_json_note": "동성 재분류 PR 뒤 year-2025.json",
+  "year_2025_json_sha256": "42808d6e32f2f3fa9bfe9079a068d607c656a226a23b239331936e486e5b4479",
+  "year_2025_json_note": "동성 재분류 PR 뒤 year-2025.json / 그 뒤 대주 2.2 띄어쓰기 원문 정정(「발생시」「지연 ․ 미신고한」)을 반영한 sha",
   "f004_followup_v4_sha256": "617ccf2d8dd778c7235c6f9809b3fe57ea0798226b25eabc407b2f47e9132798",
   "item_attach_v1_sha256": "e575e0c126487c42e635944cd6a6c05ed7ff4dcf13eeeb6dd70fbde75b0a49dc",
   "proposal": "proposal-item-attach/proposal.md sha256 4f0d8843a21bb1e48910aa666fbbf19fdafec0d4519961a4579bf5b673c9d860"

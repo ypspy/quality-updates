@@ -33,19 +33,19 @@ SITE_HTML = ROOT / "site" / "fss-review" / "index.html"
 # 2025 화면 수치는 이 표의 잠금과 부착 JSON counts로만 만든다.
 ATTACH_YEARS = {
     "2025": {
-        "sha": "2d8820567ad80dd4a6484cdd88a2e9891573e6ad250b931e6ebee8b53c6e93f9",
-        "bytes": 246646,
+        "sha": "01391c04a9c9926a0779b1e4b238544bddc90e3d884ec396c09f642c6b588f1a",
+        "bytes": 246757,
         "rendered": {
-            "1c6df2500ba918054bd4b22b3a983af9ef3bdecdedc54908d4a54a04e1ea72e4": (
-                317065,
-                "c250624d21907095667438d0326c1e7765464575da6655d3a119db3dc7e774cc",
+            "42808d6e32f2f3fa9bfe9079a068d607c656a226a23b239331936e486e5b4479": (
+                317066,
+                "b4e4d7df26c3a415f41f507a656eac3e1fd4870515763dd6710b8dbfea726324",
             ),
         },
-        "site_div_sha": "b01f968c1990426aeee6959e251ef6bcf2b2c68a7115fd1acb215890c0c26b10",
+        "site_div_sha": "d376ead3720a124d30bcdc205ed1e6a1e6a4d8e47cd1225d2a9e6da53331498a",
     },
     "2024": {
-        "sha": "6bdcf24a88d795ffce6cb73977ae665dd4ea0e5dca3950e4bc7ea540d6fb1183",
-        "bytes": 426827,
+        "sha": "2e000f25ab05b1f0640e0cbfa859f5dc09adb5f1a8eececaa10526125e61a627",
+        "bytes": 426911,
         "rendered": {
             "ff7b6768ab358fdf7f3a99ca7996267e5e40859c2d462ad60908dea5fdec663b": (
                 418992,
@@ -55,26 +55,26 @@ ATTACH_YEARS = {
         "site_div_sha": "2097293dd8ed2bcaac4efb6cd1e645bc5254d8db06bfe1e3ec741d63bcc587a2",
     },
     "2023": {
-        "sha": "b142c31b97cddd61a0e7fb94a62c617b8954253dced0da5dda47bee92d65555d",
-        "bytes": 420851,
+        "sha": "e0c8411786330160aa24f4fcb27911c32b0262884b22f142622fdcf79fe29659",
+        "bytes": 421019,
         "rendered": {
-            "4fa7e4e73ffb94fb33571b22e6566159037f47c296e6cc872e3f0ab66afeb891": (
-                359269,
-                "caf4abf1a734baca660082cb72cbd90efc38824345b48e61da0a4661ff750af5",
+            "cff5f578f58a112631417f0306fc74994255aa53865f2bda941c48aeaffd95b6": (
+                359271,
+                "3858c983781a45eae5832013b2d45b3798a7bba207e159bd0d2a97fd6a519c64",
             ),
         },
-        "site_div_sha": "f6171596b0605a53ac32b2bd13d899336829e1bf1fc996e7368d43da03cb612f",
+        "site_div_sha": "46b44b8a91eab39599f8d1f086dc68fdb53538ddb38c5e15f4cd04c042d05ebe",
     },
     "2022": {
-        "sha": "db0170a490aea9281c1b0344664989255f92c2f067d951d28df219004c846285",
-        "bytes": 425807,
+        "sha": "6329b4cc77e42530a3da252a63919119b2bccfbc80ed32616cac5494f054a8e6",
+        "bytes": 425948,
         "rendered": {
-            "3a940a00fd7c5ddcae8cc3db2c06e7e5a58a365666a71181bd218656621b714b": (
-                396412,
-                "487cdae9bd5e16710b55d7cfa9461413fcfbc02e456e2f104474c2eed1293948",
+            "1ff091e283eb705480a6ed9b8f53a16ebd5107173a400f786628000b2c38bfb4": (
+                396411,
+                "1c80f054774ea8e3d205e53bb655b27b88b1201bdc6020e65a646b0128059bae",
             ),
         },
-        "site_div_sha": "889dbdc73707ba429145cebaf3e344ad55a391ca9b313a1dec5df26db7575c76",
+        "site_div_sha": "8aa8846e43ea9f8bd29a3d361662619ef55bddbc6e1975b096cbfad647f0fa6f",
     },
     "2021": {
         "sha": "7b06fcd190a5b4a84b593b46f34729513a00d39de95aaf306c4d1bbd2d6aed03",
