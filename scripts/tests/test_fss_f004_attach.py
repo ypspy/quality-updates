@@ -1327,3 +1327,17 @@ def test_2022_aram_audit_team_added_with_hwpx_spacing():
     seed = Path(__file__).parent / "fixtures" / "b0000291" / "2022-seed.csv"
     rows = [line.split(",") for line in seed.read_text(encoding="utf-8").splitlines() if line.startswith("127983,")]
     assert [(r[1], r[3]) for r in rows] == [("2022-03-15", _ARAM)]
+
+
+# #144 독립 검토 낮음 1: 부착 JSON source의 연도 파일 sha256이 지금 연도 파일과 같아야 한다.
+# 연도 파일을 고치면 부착 JSON(그리고 그 잠금)도 같은 PR에서 함께 고친다.
+_SOURCE_YEAR_SHA_KEY = {"2025": "year_2025_json_sha256", "2021": "year_2021_json_sha256"}
+
+
+@pytest.mark.parametrize("year", sorted(fss_f004_attach.ATTACH_PATHS))
+def test_attach_source_year_sha_matches_the_year_file(year):
+    attach_path = fss_f004_attach.ATTACH_PATHS[year]
+    source = json.loads(attach_path.read_text(encoding="utf-8"))["source"]
+    key = _SOURCE_YEAR_SHA_KEY.get(year, "year_json_sha256")
+    year_path = attach_path.parent / f"year-{year}.json"
+    assert source[key] == hashlib.sha256(year_path.read_bytes()).hexdigest()

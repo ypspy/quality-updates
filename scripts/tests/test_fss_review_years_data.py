@@ -109,20 +109,79 @@ def test_source_index_has_one_hook_per_year_and_no_static_year_div():
 
 
 # 손전사에서 마지막 불릿(종결만 있던 줄)이 빠지면 문장이 연결어미로 끊긴다.
-# 끝 공백을 버린 뒤 마지막 글자가 구두점이면 통과한다. 원문은 쉼표로 끊기도 한다.
-# 그렇지 않으면 마지막 어절이 연결어미 「고」(용언 어간 + 고) 또는 「거나」로
-# 끝나면 실패한다. 「미신고」처럼 명사 끝음절이 「고」인 경우는 연결어미가 아니다.
-_DANGLING_CONNECTIVE = re.compile(r"(?:하|되|있|않|같|싶|겠|었|았|였)고$|거나$")
+# 끝 공백을 버린 뒤 마지막 글자가 쉼표·쌍반점이면 그 앞 어절을 본다(「…하고,」).
+# 그 밖의 구두점으로 끝나면 통과한다. 마지막 어절이 연결어미로 끝나면 걸린다.
+# 연결어미: 용언 어간 + 「고」(수행하고·이루어지고·없고), 「며」(없으며·되었으며),
+# 「으나」, 「거나」, 「지만」, 「면서」, 「하여」, 「되어」.
+# 「미신고」「보고」「참고」처럼 명사 끝음절이 「고」인 경우는 연결어미가 아니다.
+_DANGLING_CONNECTIVE = re.compile(
+    r"(?:하|되|있|없|않|같|싶|겠|었|았|였|지|이)고$"
+    r"|(?:하|되|있|없|않|이|으|었|았|였)며$"
+    r"|(?:으|었|았|였)나$"
+    r"|거나$|지만$|면서$|하여$|되어$"
+)
+_SOFT_STOPS = frozenset(",;\u3001")
+
+# 원문 PDF 불릿도 쉼표로 끝나고 다음 불릿·하위 불릿으로 이어지는 문단(손전사 탈락 아님).
+# (연도 파일, 법인, 마지막 어절) — 2023 대성삼경 법인 PDF p.3, 2024 안진 법인 PDF p.3,
+# 2025 대주 법인 PDF p.2. 예외가 데이터에서 사라지면 이 표도 지운다.
+_SOURCE_ENDS_ON_COMMA = frozenset(
+    {
+        ("year-2023.json", "대성삼경회계법인", "있고,"),
+        ("year-2024.json", "안진회계법인", "발견되었고,"),
+        ("year-2025.json", "대주회계법인", "발견되었으며,"),
+    }
+)
 
 
 def _dangling_connective_token(text: str) -> str | None:
     stripped = text.rstrip()
-    if not stripped or unicodedata.category(stripped[-1]).startswith("P"):
+    if not stripped:
         return None
-    token = stripped.split()[-1]
-    if _DANGLING_CONNECTIVE.search(token):
-        return token
+    body = stripped
+    if stripped[-1] in _SOFT_STOPS:
+        body = stripped[:-1].rstrip()
+        if not body:
+            return None
+    elif unicodedata.category(stripped[-1]).startswith("P"):
+        return None
+    if _DANGLING_CONNECTIVE.search(body.split()[-1]):
+        return stripped.split()[-1]
     return None
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("체계적인 조서관리를 수행하고", "수행하고"),
+        ("발행 통제가 수행되고", "수행되고"),
+        ("거래내역만 확인하고  ", "확인하고"),
+        ("입출고 내역을 기록하거나", "기록하거나"),
+        ("상호검토가 실질적으로 이루어지고", "이루어지고"),
+        ("확인하는 절차가 없으며", "없으며"),
+        ("보관하고 있으며", "있으며"),
+        ("절차를 수립하고 있으나", "있으나"),
+        ("모니터링을 실시하였지만", "실시하였지만"),
+        ("감사조서를 작성하면서", "작성하면서"),
+        ("업무를 수행하여", "수행하여"),
+        ("조서관리를 수행하고,", "수행하고,"),
+        ("사례가 발견되었으며,", "발견되었으며,"),
+        ("사전심리를 요청한 사례가 있고;", "있고;"),
+        ("운영이 미흡함", None),
+        ("수행하고 있지 아니함", None),
+        ("이를 지연 \u2024 미신고", None),
+        ("결과를 보고", None),
+        ("관련 규정을 참고", None),
+        ("미신고,", None),
+        ("운영이 미흡함.", None),
+        ("수행하고 있음)", None),
+        ("", None),
+        ("   ", None),
+        (",", None),
+    ],
+)
+def test_dangling_connective_token_cases(text, expected):
+    assert _dangling_connective_token(text) == expected
 
 
 def test_finding_texts_do_not_end_on_a_dangling_connective():
@@ -130,17 +189,25 @@ def test_finding_texts_do_not_end_on_a_dangling_connective():
     paths = sorted(review_dir.glob("year-*.json"))
     assert paths
     offenders = []
+    allowed = set()
     for path in paths:
         data = json.loads(path.read_text(encoding="utf-8"))
         for firm_name, finding in iter_year_findings(data):
             token = _dangling_connective_token(finding["text"])
-            if token is not None:
+            if token is None:
+                continue
+            key = (path.name, firm_name, token)
+            if key in _SOURCE_ENDS_ON_COMMA:
+                allowed.add(key)
+            else:
                 offenders.append(f"{path.name} {firm_name} …{token}")
     assert offenders == []
+    assert allowed == _SOURCE_ENDS_ON_COMMA
 
 
 # 원문 PDF 띄어쓰기·문장부호 그대로(2026-11-17 사용자 결정 「원문대로 고치는 초안 PR」).
-# (연도, 법인, 원문 문구, 손전사 문구) — 2022 원지는 일반회계법인 모음집 p.31 신영 같은 문장,
+# (연도, 법인, 원문 문구, 손전사 문구) — 2022 원지는 법인 PDF p.2와 일반회계법인 모음집 p.10이
+# 모두 「보관·관리」 뒤에서 줄을 바꾸므로, 띄어쓰기는 같은 모음집 p.31 신영의 같은 문장을 따른다.
 # 2023 대성삼경은 법인 PDF p.3, 2025 대주는 법인 PDF p.2.
 _SOURCE_SPACING = (
     ("2022", "회계법인 원지", "지점에서 보관\u00b7관리하고 있는", "보관\u00b7관리 하고"),
