@@ -1030,10 +1030,10 @@ def test_year_finding_ids_must_start_with_that_year(tmp_path):
 # 연도: (부착 JSON sha256, bytes, 부착 뒤 연도 블록 sha256, bytes, 빌드 로그 줄)
 _ATTACH_YEAR_LOCK = {
     "2024": (
-        "57dba3000fd844f9f99fadaa1f6de4a0506a3590fd7ad7493c6666a767379228",
-        427370,
-        "901861bd92d1d5350d24a7b9554aeb7ffc498f2309ee2ae659dc1faa40463a40",
-        421685,
+        "74b7fa25d5f8aa7e67f0197a0c9d268d1ff3c0921f0f5a4f77616cd876e7ea05",
+        427581,
+        "91691b822ecd2d3ae241638b820f3b1e101309506fc22bb0090131488ba53fa5",
+        421977,
         "F004 부착 2024: 자리 228/228, 이행사항 235, 법인 사유 36곳(80칸), 건너뜀 0",
     ),
     "2023": (

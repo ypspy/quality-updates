@@ -41,7 +41,7 @@ TEXT_SHA = "52cc34bd678d19c923e754db7ae5040e969e1853f3fadcbc2b2c670bab31ef0a"
 SEV_SHA = "4bfdbdb1e18949b271977b4f34da038519cca775d1c997cff4bffbab6c17f208"
 YEAR_SHA = {
     "2025": "75b6d28d47f3fd46dcdb4bb013e409065196b267cec138efcf3d72b87191667f",
-    "2024": "41756d94967e0a4328e17cf220106a8b1d4e39e9ab8e6cd095c27d728b0ee63c",
+    "2024": "876db5b0453ac2a36a985a275685085364b1746d724342727603c26430794e46",
     "2023": "fd560864f0e1b4c100cdbb686d9cc929bb417340fec69dc9762ce5eec41550c1",
     "2022": "4c150effed6afb5f2d1c242a0285916d4f486ca436242cc15de6b05e63ea2dd2",
     "2021": "42f72494b69082746ea8ef063835a8c9343140b3310b75fb269bffbc4b66a414",
@@ -741,3 +741,35 @@ def test_year_2024_findings_have_no_long_unspaced_hangul_runs():
         for run in _LONG_HANGUL_RUN.findall(text)
     ]
     assert runs == []
+
+
+# DOT-24(사용자 결정 2026-11-18): 2024 지적 문장의 가운뎃점 U+2024 양옆 띄어쓰기는 법인 PDF 글자 좌표대로다.
+# 같은 줄에서 띄어 있으면 띄우고 붙어 있으면 붙인다. 문단 맨 앞 목록 기호는 뒤만 띄운다.
+# 아래는 양옆을 다 띄우지 않은 자리 전부다. 이촌 2곳은 PDF에서도 붙어 있고, 나머지 5곳은
+# 한쪽이 PDF 줄바꿈 자리라 판단하지 못해 그 쪽을 그대로 둔 것이다. (finding_id, 가운뎃점 앞 2자~뒤 2자)
+_YEAR_2024_DOT_EXCEPTIONS = (
+    ("2024/등록/1.1/다군/삼화회계법인/0", " 중\u2024 용"),
+    ("2024/등록/1.1/다군/삼화회계법인/1", "며,\u2024 일"),
+    ("2024/등록/1.2/다군/삼화회계법인/0", "며,\u2024 감"),
+    ("2024/등록/4.3/나군/이촌회계법인/1", "집계\u2024관리"),
+    ("2024/등록/4.3/나군/이촌회계법인/1", "집계\u2024관리"),
+    ("2024/등록/6.1/다군/삼화회계법인/0", "며,\u2024 사"),
+    ("2024/감사반/5.3/-/도우리공인회계사감사반(제459호)/0", "지 \u2024안전"),
+)
+
+
+def test_year_2024_middle_dot_spacing_follows_source():
+    dots = 0
+    found = []
+    for finding_id, text in _year_2024_findings().items():
+        for i, ch in enumerate(text):
+            if ch != "\u2024":
+                continue
+            dots += 1
+            left = i > 0 and text[i - 1] == " "
+            right = text[i + 1 : i + 2] == " "
+            if right and (left or i == 0):
+                continue
+            found.append((finding_id, text[max(0, i - 2) : i + 3]))
+    assert dots == 163
+    assert sorted(found) == sorted(_YEAR_2024_DOT_EXCEPTIONS)

@@ -4,8 +4,8 @@
  "year": "2024",
  "source": {
   "main_commit": "01603cc5fffd141a4cce0602595f222480976c8c",
-  "year_json_sha256": "512c7bca6d914ccc6c2fe5f7397390ae22f34d16d64203081fd69a5af4cf9e75",
-  "year_json_note": "data/fss-review/year-2024.json (PR-A5 #131이 옮긴 연도 데이터 파일, main 913d4382부터 이 sha) / 그 뒤 #143(main f249d9df) 지적 문장 끝 보충(안진 2.1)을 반영한 sha / 그 뒤 SP-24 PR 1(attachments 앵커·text_sha256 참조가 없는 172문단에 법인 PDF 같은 줄 공백 1619곳 보충. 이 가운데 96문단은 f004[].covers·scores에만 나오고 sha를 적지 않는다)을 반영한 sha / 그 뒤 SP-24 PR 2(attachments 앵커·unattached.qu_findings가 text_sha256으로 가리키는 153문단에 법인 PDF 같은 줄 공백 1074곳 보충, 그 text_sha256 153곳을 새 문단 sha로 바꿈)를 반영한 sha",
+  "year_json_sha256": "908d225b9f0ef0c09aee962fd4b0b645d817d583c9da91d39e83b53fdc5019b7",
+  "year_json_note": "data/fss-review/year-2024.json (PR-A5 #131이 옮긴 연도 데이터 파일, main 913d4382부터 이 sha) / 그 뒤 #143(main f249d9df) 지적 문장 끝 보충(안진 2.1)을 반영한 sha / 그 뒤 SP-24 PR 1(attachments 앵커·text_sha256 참조가 없는 172문단에 법인 PDF 같은 줄 공백 1619곳 보충. 이 가운데 96문단은 f004[].covers·scores에만 나오고 sha를 적지 않는다)을 반영한 sha / 그 뒤 SP-24 PR 2(attachments 앵커·unattached.qu_findings가 text_sha256으로 가리키는 153문단에 법인 PDF 같은 줄 공백 1074곳 보충, 그 text_sha256 153곳을 새 문단 sha로 바꿈)를 반영한 sha / 그 뒤 DOT-24(114문단의 가운뎃점 U+2024 양옆에 법인 PDF 같은 줄 공백 292곳 보충, 그 가운데 text_sha256으로 가리키는 37문단의 sha를 새 문단 sha로 바꿈)를 반영한 sha",
   "f004_snapshot": "target.db (v_f004_vi_findings, parser f004-remediation-0.2) sha256 6edbd8f92e702ec70e1c42363babb55111ada47fe58aa70aa0436b6a9193b0a8",
   "classification": "classification-2024.md"
  },
@@ -6754,7 +6754,7 @@
     "firm": "삼화회계법인",
     "index": 0
    },
-   "text_sha256": "746099b38fb057b766403aa4d22943b56e11b37ac7786264e111ef281a1612b7",
+   "text_sha256": "3aed757647f04026568cd90b0edaaf3926623d74a1808c94d19d9bf4b3c6e6c7",
    "f004": [
     {
      "f004_row_id": "20260630000589:0:7",
@@ -8080,7 +8080,7 @@
     "firm": "금강회계법인",
     "index": 0
    },
-   "text_sha256": "fa8b8bfa92c6b73ad89f61048d4b5a79761bc86dd9369cf2a5f300031c790f8f",
+   "text_sha256": "438f69c6171f63df656410856fc2f1f643a05fb1586c2bb2feda8d3b5103cff9",
    "f004": [
     {
      "f004_row_id": "20260630000043:0:10",
@@ -8154,7 +8154,7 @@
     "firm": "율성회계법인",
     "index": 0
    },
-   "text_sha256": "e4fa2bd790a068202ce604dcf126fdf07f32520a898f234e90e327d525adcee3",
+   "text_sha256": "e4e0e9e8a566dbc1e3302cbc244eca7a3bacee3753f781a1a0c4f2948a7e29d6",
    "f004": [
     {
      "f004_row_id": "20260630000192:0:11",
@@ -8258,7 +8258,7 @@
     "firm": "대교회계법인",
     "index": 0
    },
-   "text_sha256": "b2372a4f898b9909873ed784044e8cfc603411831bba723525922c355309e9a0",
+   "text_sha256": "b9c401c4ae1db656090446657b207758d2538f10c813e4c5e6f10a2a1a02f264",
    "f004": [
     {
      "f004_row_id": "20260630000873:0:8",
@@ -8283,7 +8283,7 @@
     "firm": "일신회계법인",
     "index": 0
    },
-   "text_sha256": "333bc4679bb3bb3512ae90b6824a6203afe92e89e1c4e615d26052c8bd6b2158",
+   "text_sha256": "641395715d88b5ac76818790f07a9e71a9a01ad53d5c906c813ef7957cfa8ee2",
    "f004": [
     {
      "f004_row_id": "20260630000427:0:9",
@@ -8489,7 +8489,7 @@
     "firm": "선경회계법인",
     "index": 0
    },
-   "text_sha256": "f51e6218dbd3b2575085f91b1e0928c20a3392443cb1c421a7bc9413ff617a7c",
+   "text_sha256": "fa3e6bc314836ba3ee4ab1fa07b4335639a4d1d098babdd7749a110583efd31f",
    "f004": [
     {
      "f004_row_id": "20250630000500:0:12",
@@ -8572,7 +8572,7 @@
     "firm": "세영회계법인",
     "index": 0
    },
-   "text_sha256": "acd4114336ad5068b35145230d18305bd67d304a81f784709cd5a23f38218046",
+   "text_sha256": "4c24945f76837484cc32489332c955d8f0a7e4c74aea684c25270759c5a2d30c",
    "f004": [
     {
      "f004_row_id": "20250630000093:0:8",
@@ -8881,7 +8881,7 @@
     "firm": "한빛회계법인",
     "index": 0
    },
-   "text_sha256": "7ed1bb65101de0196130f8a249a6801762cb2b7a8d87fc6f16957770f60f2a38",
+   "text_sha256": "cc98e89ce38dce70ef609dab0f451dc6f11b1048979c07a80471023acd177aaf",
    "f004": [
     {
      "f004_row_id": "20260630000170:0:1",
@@ -8985,7 +8985,7 @@
     "firm": "회계법인 마일스톤",
     "index": 0
    },
-   "text_sha256": "30194866daff0ca1192e3dc474fb321f0d009b57073cdfd24d74789aefbef239",
+   "text_sha256": "1ddfb90713b9b7d070146db3b59d0d066945e50183e31133244d476fbd010f6b",
    "f004": [
     {
      "f004_row_id": "20260630000961:0:8",
@@ -9035,7 +9035,7 @@
     "firm": "가은회계법인",
     "index": 1
    },
-   "text_sha256": "1e00bfcf4e58d3ebe430c7e243d07863cf45570c15ea6c0b06514a1fd1344afd",
+   "text_sha256": "5292f000ca03a6be1464f95f59e665d6dcde001f75ce89cda2cae7cab4434eee",
    "f004": [
     {
      "f004_row_id": "20260630000225:0:9",
@@ -9112,7 +9112,7 @@
     "firm": "재정회계법인",
     "index": 1
    },
-   "text_sha256": "1e00bfcf4e58d3ebe430c7e243d07863cf45570c15ea6c0b06514a1fd1344afd",
+   "text_sha256": "5292f000ca03a6be1464f95f59e665d6dcde001f75ce89cda2cae7cab4434eee",
    "f004": [
     {
      "f004_row_id": "20260629000504:0:9",
@@ -9137,7 +9137,7 @@
     "firm": "지암회계법인",
     "index": 1
    },
-   "text_sha256": "1e00bfcf4e58d3ebe430c7e243d07863cf45570c15ea6c0b06514a1fd1344afd",
+   "text_sha256": "5292f000ca03a6be1464f95f59e665d6dcde001f75ce89cda2cae7cab4434eee",
    "f004": [
     {
      "f004_row_id": "20260630000781:0:9",
@@ -9164,7 +9164,7 @@
     "firm": "태율회계법인",
     "index": 1
    },
-   "text_sha256": "91a845bafbaf7c00ca91589b10c704fea6d790006d53db2755d1b3147a194ad8",
+   "text_sha256": "12dc56d23c4692c102572cbe8e0e01b2654a30bd3f645fe5464d9baed050d805",
    "f004": [
     {
      "f004_row_id": "20260630000774:0:8",
@@ -9217,7 +9217,7 @@
     "firm": "회계법인 더함",
     "index": 2
    },
-   "text_sha256": "1b69d9dcbfa7dbcf5aebb8bee6512ab8f7510979f4473bb1601108994c041060",
+   "text_sha256": "ebe4a78dabe45651be7eca13f24a5d116d4978da5d3dfabd7bd33edf38f8cfb6",
    "f004": [
     {
      "f004_row_id": "20260630000095:0:8",
@@ -9246,7 +9246,7 @@
     "firm": "다한회계법인",
     "index": 2
    },
-   "text_sha256": "59c8c1455b8a7a11f70ad40b26cfcf315ec765f683d290d0fa1d20dc8f5b411e",
+   "text_sha256": "c068b8182f4a349760dd999a40c45425168a91b9c45c52ce284818c1364558cf",
    "f004": [
     {
      "f004_row_id": "20260629000169:0:9",
@@ -9325,7 +9325,7 @@
     "firm": "더클회계법인",
     "index": 2
    },
-   "text_sha256": "5e086eac5cdaa36a96d1bbf74ba4ee154e4c95a2f693713bbe87543d493a0f27",
+   "text_sha256": "81a7f54d3c3a90ad48261b3e2c7653ebcd2aaf62593646f76926ba47898d2488",
    "f004": [
     {
      "f004_row_id": "20260630000260:0:10",
@@ -9350,7 +9350,7 @@
     "firm": "도영회계법인",
     "index": 2
    },
-   "text_sha256": "1ccba4b02c23cc6676ddcb55a992830c1c5f42deb930ddbbd6334ef09ed6f2bf",
+   "text_sha256": "8d897ea07b24fcc53e2115c9811192e02c78e3b69393d7a2c219f8548929196f",
    "f004": [
     {
      "f004_row_id": "20260630000494:0:8",
@@ -9425,7 +9425,7 @@
     "firm": "진성회계법인",
     "index": 2
    },
-   "text_sha256": "13791215e7c8e0cb86adec6b90506842674c4fc655e6ddca8d82c9665afe463a",
+   "text_sha256": "4bfa0b85cbdd6d91021794e748752326fff21ab018b94bece899f5f0e66a971b",
    "f004": [
     {
      "f004_row_id": "20260630000036:0:2",
@@ -9448,7 +9448,7 @@
     "firm": "로엘회계법인",
     "index": 1
    },
-   "text_sha256": "03cb6c9097fd0487b3b2b4ea4ba62b8f331aeee383d7d8eaba9544a69ec9b341",
+   "text_sha256": "88ff305d1479b5eac0894e2cf46fb7417ee9eb025d1b249f8ed5797e1bd97806",
    "f004": [
     {
      "f004_row_id": "20260930000749:0:9",
@@ -9475,7 +9475,7 @@
     "firm": "선경회계법인",
     "index": 1
    },
-   "text_sha256": "45328c0c3d4da8757933db7219f307db1869beeb50aa2c7698a54113e648def4",
+   "text_sha256": "6ffddd99260c1a251bb5601dde09b534fc0165b0af3ae708b328b45b85926ee2",
    "f004": [
     {
      "f004_row_id": "20250630000500:0:12",
@@ -9502,7 +9502,7 @@
     "firm": "미래회계법인",
     "index": 1
    },
-   "text_sha256": "f3413c4d54b0264a388a49069f2a997f685229de46164618733daa92d2c3a569",
+   "text_sha256": "6df942f87bc93969a29ccadf0ca9e6f43edba5a9dbda0aecadc496338a30118b",
    "f004": [
     {
      "f004_row_id": "20260626000231:0:8",
@@ -9529,7 +9529,7 @@
     "firm": "서린회계법인",
     "index": 2
    },
-   "text_sha256": "d8dce4359ac3d1e8c4c2fb1675533730421bcbafb2b63f25d1f8745e3fc167fc",
+   "text_sha256": "cdfb1fffd4f88c3ae37976d669520e2647c79157fc0d4e90442166e85e66d176",
    "f004": [
     {
      "f004_row_id": "20260630000038:0:8",
@@ -9558,7 +9558,7 @@
     "firm": "안세회계법인",
     "index": 2
    },
-   "text_sha256": "7146a23141b95791b6312fe7e0ef8383a776dcff9ef259a264aa1f768e34e745",
+   "text_sha256": "e1046389636abc93a71bd55d8ccb6365edda815f8bc0378a50ebf6421156d095",
    "f004": [
     {
      "f004_row_id": "20250627000294:0:8",
@@ -9587,7 +9587,7 @@
     "firm": "성산회계법인",
     "index": 2
    },
-   "text_sha256": "bb504fa323ac4718ae3b9db1eebdb0f0dbd4ddc660b122cbbd90bf03dc25c8a1",
+   "text_sha256": "a3eb4f0363badc6673d44d71b2b33936be01377f31e89c1fb68741b1ceab4c6c",
    "f004": [
     {
      "f004_row_id": "20260630000001:0:9",
@@ -9616,7 +9616,7 @@
     "firm": "한빛회계법인",
     "index": 2
    },
-   "text_sha256": "55e8a08e2ff85807ce693ddad2b5ae750c6a733ffc5cf81f58cd683d5bd2645d",
+   "text_sha256": "cd72e4eff30e21f248fca5cbae2c78c859dbb19bb2d0d30fa28960112ef23df7",
    "f004": [
     {
      "f004_row_id": "20260630000170:0:0",
@@ -9641,7 +9641,7 @@
     "firm": "세영회계법인",
     "index": 2
    },
-   "text_sha256": "1d9ff5bf4c6ec84b2f7f19f9bb501f7f588620aea636536a8bbd4701b01eb8da",
+   "text_sha256": "f2750574e73cd00c90e2f03c0f2bb10e1efb53fc06d1ce430d3528141fcbc4c6",
    "f004": [
     {
      "f004_row_id": "20250630000093:0:8",
@@ -9695,7 +9695,7 @@
     "firm": "신원회계법인",
     "index": 1
    },
-   "text_sha256": "3801a851e5790889c7a76742873013d4f2ca712c3c8dbd3b5f0375900bf5a5f0",
+   "text_sha256": "619555a11c8b37afd1e15c739a06977a5450c16e13ed63ad2364f7b01bac3351",
    "f004": [
     {
      "f004_row_id": "20250630000085:0:9",
@@ -9720,7 +9720,7 @@
     "firm": "신원회계법인",
     "index": 2
    },
-   "text_sha256": "498063c6a2888cf26945dc999f6e8c7b357d9025cd775b2a62e5b082a9311590",
+   "text_sha256": "bb36dd58932a70a486d7f0d6e90bb6a309eeb6f717fe538e29feedaeb6137266",
    "f004": [
     {
      "f004_row_id": "20250630000085:0:10",
@@ -9745,7 +9745,7 @@
     "firm": "양지회계법인",
     "index": 2
    },
-   "text_sha256": "a0bb519cead0a029c7ee0b502d96113b461e0ba93d3acb5a0f6df688a49abd82",
+   "text_sha256": "82a9c8ba12912d3d12c645362986661d1f856d73f26bd7fc886e1f7b33bdcb79",
    "f004": [
     {
      "f004_row_id": "20260630000112:0:0",
@@ -9770,7 +9770,7 @@
     "firm": "우덕회계법인",
     "index": 2
    },
-   "text_sha256": "1fd01b15263b0f2e10e31704f41177a11d120dbe06ce491b34649342a24382b2",
+   "text_sha256": "17f42135e4bcd946d5b7039966bb0f9f9b2f1df8c76af22e527c502593ea3740",
    "f004": [
     {
      "f004_row_id": "20260630000799:0:10",
@@ -9933,7 +9933,7 @@
     "firm": "율성회계법인",
     "index": 1
    },
-   "text_sha256": "ddb1a8aee38165904d9bd563dcb52b44d8097d82d2f0de2189e54becf2af132e",
+   "text_sha256": "d997cde9fe4803f1e75e0745f4a7d6d5a2b8963f570df793862044b178413c4d",
    "f004": [
     {
      "f004_row_id": "20260630000192:0:10",
@@ -9958,7 +9958,7 @@
     "firm": "회계법인 마일스톤",
     "index": 2
    },
-   "text_sha256": "34c1b0c5d643e4b61568ebe83ab7254c4e0093045a860c0b95c57693425bf125",
+   "text_sha256": "15b9fd64b920599b8170d1d62fe00a1935e8df0cf83d8c0f5e459e52647941ae",
    "f004": [
     {
      "f004_row_id": "20260630000961:0:8",
@@ -9987,7 +9987,7 @@
     "firm": "일신회계법인",
     "index": 1
    },
-   "text_sha256": "b32013a9333bf891045437e54ad9388294c0b8747f2e46cb9ea386b9b408ec26",
+   "text_sha256": "1a97723572739de13fa598eee01c4498c9a10b3ad7b105fd62af1258970a26c1",
    "f004": [
     {
      "f004_row_id": "20260630000427:0:8",
@@ -10014,7 +10014,7 @@
     "firm": "일우회계법인",
     "index": 2
    },
-   "text_sha256": "46fc262c91c8d0f6543046e5a7be11cf3fdc85ab26da7347037af47dc2115f8b",
+   "text_sha256": "2b9a55b644271cdbf25c91c0ce20661f8e670080bee6f8b8dd703d211e836ca6",
    "f004": [
     {
      "f004_row_id": "20260630001067:0:8",
@@ -10095,7 +10095,7 @@
     "firm": "참회계법인",
     "index": 1
    },
-   "text_sha256": "eb728ea90ce9dcb34f396718486f366f012751feb4c8afc30d45003cbd8f5949",
+   "text_sha256": "7ce1f699ce0ed2983edc1e42e9ac4f53c58d49224edabdd7d52b44084cba28e9",
    "f004": [
     {
      "f004_row_id": "20260630000914:0:8",
@@ -10220,7 +10220,7 @@
     "firm": "회계법인 지평",
     "index": 2
    },
-   "text_sha256": "a7b323d4a8d45740ae046a0400c5d3c9a4822e0344dd32c5eeaa85d577535f04",
+   "text_sha256": "7c3095c16fe66aed3a0933385c8a0afb1d789a7a99512f9bb19dfb68527dc475",
    "f004": [
     {
      "f004_row_id": "20260630000032:0:10",
@@ -10676,7 +10676,7 @@
    },
    {
     "finding_id": "2024/일반회계법인/5.3/-/윤성회계법인/1",
-    "text_sha256": "ded94dd96efa91bfdfd2fd315c3eef0f4263d999a3a04a32f66856d9983e6d5a",
+    "text_sha256": "fd07b9c3649f3c00119d56e1617f95a484d49959e3d96ec9744228aa27fc7890",
     "reason": "mint_no_same_row",
     "note": "같은 대분류 F004 행 문구·주제가 문단과 다름(예: 사전심리·발행 문단 ↔ 조서 관리 행, 개별감사 항목 행). 민트 확인 결과 같은 권고 행 없음. 붙이지 않음",
     "v1_candidate_f004_row_id": "20260630000971:0:8",
