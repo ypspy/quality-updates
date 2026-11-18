@@ -37,10 +37,10 @@ from fss_review_cards import (  # noqa: E402
 )
 from mkdocs_fss_review_year import on_page_markdown  # noqa: E402
 
-TEXT_SHA = "14ad8d0aa751244ad822054d4b9d3688dcbdd33027fc56835cd41e727f0f0301"
-SEV_SHA = "f62c274c58e2817c45ee1fa3f45070de61b5c7fdf63babcd103754be8048e093"
+TEXT_SHA = "52cc34bd678d19c923e754db7ae5040e969e1853f3fadcbc2b2c670bab31ef0a"
+SEV_SHA = "4bfdbdb1e18949b271977b4f34da038519cca775d1c997cff4bffbab6c17f208"
 YEAR_SHA = {
-    "2025": "b44c1c59dc62fdaee0169e1c99ecd0aaf35dd64f8fab68a753683099f65aafa7",
+    "2025": "75b6d28d47f3fd46dcdb4bb013e409065196b267cec138efcf3d72b87191667f",
     "2024": "d58f37b1fb3a0eb25143e9ff5d116f796d42f8b18073075e2cc2cf32688806dc",
     "2023": "fd560864f0e1b4c100cdbb686d9cc929bb417340fec69dc9762ce5eec41550c1",
     "2022": "4c150effed6afb5f2d1c242a0285916d4f486ca436242cc15de6b05e63ea2dd2",
@@ -322,10 +322,10 @@ def test_year_2025_inventory_is_locked():
         for finding in firm["findings"]
     ]
     html_records = finding_records(BeautifulSoup(rendered, "html.parser").select_one("div.fss-year"))
-    assert _sha_lines(record["text"] for record in json_records) == (TEXT_SHA, 129055)
-    assert _sha_lines(record["text"] for record in html_records) == (TEXT_SHA, 129055)
-    assert _sha_lines(f'{record["severity"]}\t{record["text"]}' for record in json_records) == (SEV_SHA, 133730)
-    assert _sha_lines(f'{record["severity"]}\t{record["text"]}' for record in html_records) == (SEV_SHA, 133730)
+    assert _sha_lines(record["text"] for record in json_records) == (TEXT_SHA, 129065)
+    assert _sha_lines(record["text"] for record in html_records) == (TEXT_SHA, 129065)
+    assert _sha_lines(f'{record["severity"]}\t{record["text"]}' for record in json_records) == (SEV_SHA, 133740)
+    assert _sha_lines(f'{record["severity"]}\t{record["text"]}' for record in html_records) == (SEV_SHA, 133740)
 
     firms, findings = _bundle_counts(data)
     assert {name: len(dict.fromkeys(values)) for name, values in firms.items()} == {
@@ -386,9 +386,9 @@ def test_build_hook_inserts_the_2025_year_once():
 def test_year_2025_render_matches_the_dongsung_reclass_bytes():
     with YEAR_2025_PATH.open(encoding="utf-8") as handle:
         rendered = render_year_2025_html(json.load(handle)).encode("utf-8")
-    assert len(rendered) == 223529
+    assert len(rendered) == 223539
     assert hashlib.sha256(rendered).hexdigest() == (
-        "0ede42ec87afc0e4f4c8cade1c66dc526e3adfd6b9edea5de9b890f1b60d3ae4"
+        "2b497abca3be462aad7f478309b3a6f5e56fe1493d60105fff779089d281ba89"
     )
 
 
@@ -405,8 +405,9 @@ _DONGSUNG_MOVES = (
     ("감사대상회사의 감사의견 거절", "2025/일반회계법인/5.2/-/동성회계법인/0", "2025/일반회계법인/5.4/-/동성회계법인/0", True),
 )
 _DONGSUNG_GROUPS = ("1.1", "1.2", "2.1", "3.1", "4.1", "4.3", "5.2", "5.4")
-# 동성이 아닌 356문단의 finding_id와 본문. 재분류 전과 바이트가 같다.
-_OTHER_FINDING_SHA = "768fb7944ffc8382b0ec12c8ab57b283279696db44125804c2aa3cfbb9152ff6"
+# 동성이 아닌 356문단의 finding_id와 본문. finding_id는 재분류 전과 같고, 본문은 원문 PDF
+# 띄어쓰기 정정(#144 대주 2.2, 2025 U+2024 앞뒤 공백, 호수 4.1·신영 5.3 가운뎃점 옆 띄어쓰기) 뒤 값이다.
+_OTHER_FINDING_SHA = "ca8dec7c2feaa87d7a887bb793c0819cb00dd52b2aef3eb503863122573319df"
 _OTHER_FINDING_COUNT = 356
 
 
@@ -623,3 +624,60 @@ def test_commit_parked_years_parks_both_years_or_writes_nothing(tmp_path, monkey
     assert path_2025.read_text(encoding="utf-8") == "sentinel-2025"
     assert path_2021.read_text(encoding="utf-8") == "sentinel-2021"
     assert page_path.read_bytes() == b"sentinel-page"
+
+
+# 2025 법인 PDF는 U+2024(․) 앞뒤에 공백을 둔다(사용자 결정 DOT-25 「원문대로 맞추는 초안 PR」).
+# 대주 p.2·p.3, 예일 p.3, 태일 p.3. 다른 점 문자(U+00B7·U+FF65·U+2027)는 원문과 이미 같다.
+_ONE_DOT_LEADER_PHRASES = (
+    ("대주회계법인", "이를 지연 \u2024 미신고한"),
+    ("대주회계법인", "본인이 작성 \u2024 승인하고 있음"),
+    ("예일회계법인", "시스템으로만 작성 \u2024 관리"),
+    ("태일회계법인", "지연 \u2024 미신고 또는 지연 \u2024 미제출한"),
+)
+
+
+def test_year_2025_one_dot_leaders_keep_source_spacing():
+    data = load_year_2025()
+    texts = [
+        (firm["name"], finding["text"])
+        for bundle in data["bundles"]
+        for section in bundle["sections"]
+        for group in section["groups"]
+        for block in group["blocks"]
+        if block["kind"] == "firms"
+        for firm in block["firms"]
+        for finding in firm["findings"]
+    ]
+    dotted = [(name, text) for name, text in texts if "\u2024" in text]
+    assert sum(text.count("\u2024") for _name, text in dotted) == 5
+    for _name, text in dotted:
+        assert text.count("\u2024") == text.count(" \u2024 ")
+    for firm_name, phrase in _ONE_DOT_LEADER_PHRASES:
+        assert sum(phrase in text for name, text in dotted if name == firm_name) == 1, phrase
+
+
+# 가운뎃점(U+00B7) 옆 띄어쓰기도 원문 PDF대로(사용자 결정 SP-25 「가운뎃점 정리 PR에 함께 넣어」).
+# 호수 p.3 「집계·관리 하지」, 신영 p.3 「감사조서 입·출고」. 지우 p.2는 「집계·관리하지」로 붙어 있다.
+_MIDDLE_DOT_SPACING = (
+    ("호수회계법인", "감사시간을 집계·관리 하지 아니하며", "집계·관리하지"),
+    ("신영회계법인", "아니하고, 감사조서 입·출고 관리대장", "감사조서입·출고"),
+    ("지우회계법인", "감사시간을 집계·관리하지 아니하며", "집계·관리 하지"),
+)
+
+
+def test_year_2025_middle_dot_spacing_follows_source():
+    data = load_year_2025()
+    texts = [
+        (firm["name"], finding["text"])
+        for bundle in data["bundles"]
+        for section in bundle["sections"]
+        for group in section["groups"]
+        for block in group["blocks"]
+        if block["kind"] == "firms"
+        for firm in block["firms"]
+        for finding in firm["findings"]
+    ]
+    for firm_name, phrase, wrong in _MIDDLE_DOT_SPACING:
+        own = [text for name, text in texts if name == firm_name]
+        assert sum(phrase in text for text in own) == 1, phrase
+        assert not any(wrong in text for text in own), wrong
