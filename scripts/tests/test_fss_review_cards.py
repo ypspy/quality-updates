@@ -681,3 +681,47 @@ def test_year_2025_middle_dot_spacing_follows_source():
         own = [text for name, text in texts if name == firm_name]
         assert sum(phrase in text for text in own) == 1, phrase
         assert not any(wrong in text for text in own), wrong
+
+
+# SP-24(사용자 결정 2026-11-18 「SP-24-Q」)는 2024 지적 문장에 법인 PDF의 같은 줄 공백만 넣는다.
+# 공백을 모두 지운 문단 글자 열을 잠가 공백 밖 글자가 바뀌면 멈춘다. 값은 main d25a46bd와 SP-24 PR 1 뒤가 같다.
+_YEAR_2024_LETTERS = (509, "d787bec0f33d64224f9952e00389158f6d8c2eba35d459aadcf408df5fc84620")
+
+
+def _year_2024_findings() -> dict:
+    data = json.loads(YEAR_FILES["2024"].read_text(encoding="utf-8"))
+    out = {}
+    for bundle in data["bundles"]:
+        for section in bundle["sections"]:
+            for group in section["groups"]:
+                code = group["heading"].split()[0]
+                for block in group["blocks"]:
+                    if block["kind"] != "firms":
+                        continue
+                    gun = block.get("gun") or "-"
+                    for firm in block["firms"]:
+                        for index, finding in enumerate(firm["findings"]):
+                            out[f"2024/{bundle['name']}/{code}/{gun}/{firm['name']}/{index}"] = finding["text"]
+    return out
+
+
+def _nfc_sha(text: str) -> str:
+    return hashlib.sha256(unicodedata.normalize("NFC", text).encode("utf-8")).hexdigest()
+
+
+def test_year_2024_findings_change_only_by_spaces():
+    texts = list(_year_2024_findings().values())
+    letters = "\n".join(re.sub(r"\s", "", unicodedata.normalize("NFC", text)) for text in texts)
+    assert (len(texts), hashlib.sha256(letters.encode("utf-8")).hexdigest()) == _YEAR_2024_LETTERS
+
+
+def test_year_2024_attach_text_sha_matches_year_paragraphs():
+    # 부착 앵커(attachments)와 unattached.qu_findings의 text_sha256 239개는 연도 파일 문단과 같아야 한다.
+    # f004[].covers·scores에 나오는 이웃 문단은 sha를 적지 않으므로 이 검사 밖이다.
+    texts = _year_2024_findings()
+    data = fss_f004_attach.load_attach(fss_f004_attach.ATTACH_PATHS["2024"])
+    refs = [(row["finding_id"], row["text_sha256"]) for row in data["attachments"]]
+    refs += [(row["finding_id"], row["text_sha256"]) for row in data["unattached"]["qu_findings"]]
+    assert len(refs) == 239
+    for finding_id, digest in refs:
+        assert _nfc_sha(texts[finding_id]) == digest, finding_id

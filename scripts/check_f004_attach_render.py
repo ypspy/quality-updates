@@ -44,8 +44,8 @@ ATTACH_YEARS = {
         "site_div_sha": "6dedeef72cf4970cd6455fc999dc89eb73e181bcb13f23e7ca502d2cf53af661",
     },
     "2024": {
-        "sha": "4ef137266d8f80e782ae63d98ec915c76fbe7b177e51c290b322045c14bc3fc6",
-        "bytes": 427044,
+        "sha": "1d8cc108da7c319671aae0331123954c546445bd051d8ea4cbf5aecbaaa37d39",
+        "bytes": 427145,
         "rendered": {
             "a5304a47e67eb0373ee3b8a3ef3df3f8b616720cbd6d0472b7ae9fb982f5640b": (
                 420611,
