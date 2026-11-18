@@ -4,8 +4,8 @@
  "year": "2024",
  "source": {
   "main_commit": "01603cc5fffd141a4cce0602595f222480976c8c",
-  "year_json_sha256": "ff7b6768ab358fdf7f3a99ca7996267e5e40859c2d462ad60908dea5fdec663b",
-  "year_json_note": "data/fss-review/year-2024.json (PR-A5 #131이 옮긴 연도 데이터 파일, main 913d4382부터 이 sha) / 그 뒤 #143(main f249d9df) 지적 문장 끝 보충(안진 2.1)을 반영한 sha",
+  "year_json_sha256": "a5304a47e67eb0373ee3b8a3ef3df3f8b616720cbd6d0472b7ae9fb982f5640b",
+  "year_json_note": "data/fss-review/year-2024.json (PR-A5 #131이 옮긴 연도 데이터 파일, main 913d4382부터 이 sha) / 그 뒤 #143(main f249d9df) 지적 문장 끝 보충(안진 2.1)을 반영한 sha / 그 뒤 SP-24 PR 1(attachments 앵커·text_sha256 참조가 없는 172문단에 법인 PDF 같은 줄 공백 1619곳 보충. 이 가운데 96문단은 f004[].covers·scores에만 나오고 sha를 적지 않는다)을 반영한 sha",
   "f004_snapshot": "target.db (v_f004_vi_findings, parser f004-remediation-0.2) sha256 6edbd8f92e702ec70e1c42363babb55111ada47fe58aa70aa0436b6a9193b0a8",
   "classification": "classification-2024.md"
  },
