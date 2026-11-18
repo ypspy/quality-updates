@@ -32,13 +32,13 @@ import check_f004_attach_render as check_mod  # noqa: E402
 import fss_f004_attach  # noqa: E402
 
 # sha256sum data/fss-review/f004-item-attach.json
-ATTACH_SHA = "2d8820567ad80dd4a6484cdd88a2e9891573e6ad250b931e6ebee8b53c6e93f9"
-ATTACH_BYTES = 246646
+ATTACH_SHA = "01391c04a9c9926a0779b1e4b238544bddc90e3d884ec396c09f642c6b588f1a"
+ATTACH_BYTES = 246757
 # render_year_2025_html(load_year_2025())에 부착한 2025 블록.
 RENDERED = {
-    "1c6df2500ba918054bd4b22b3a983af9ef3bdecdedc54908d4a54a04e1ea72e4": (
-        317065,
-        "c250624d21907095667438d0326c1e7765464575da6655d3a119db3dc7e774cc",
+    "42808d6e32f2f3fa9bfe9079a068d607c656a226a23b239331936e486e5b4479": (
+        317066,
+        "b4e4d7df26c3a415f41f507a656eac3e1fd4870515763dd6710b8dbfea726324",
     ),
 }
 _SUMMARY = "F004 부착: 자리 143/143, 이행사항 151, 법인 사유 41곳(136칸), 건너뜀 0"
@@ -1030,24 +1030,24 @@ def test_year_finding_ids_must_start_with_that_year(tmp_path):
 # 연도: (부착 JSON sha256, bytes, 부착 뒤 연도 블록 sha256, bytes, 빌드 로그 줄)
 _ATTACH_YEAR_LOCK = {
     "2024": (
-        "6bdcf24a88d795ffce6cb73977ae665dd4ea0e5dca3950e4bc7ea540d6fb1183",
-        426827,
+        "2e000f25ab05b1f0640e0cbfa859f5dc09adb5f1a8eececaa10526125e61a627",
+        426911,
         "d5ee062ed4c660af629d7903fd2244eccc37b2c735ab4b69a734224b81750a6e",
         418992,
         "F004 부착 2024: 자리 228/228, 이행사항 235, 법인 사유 36곳(80칸), 건너뜀 0",
     ),
     "2023": (
-        "b142c31b97cddd61a0e7fb94a62c617b8954253dced0da5dda47bee92d65555d",
-        420851,
-        "caf4abf1a734baca660082cb72cbd90efc38824345b48e61da0a4661ff750af5",
-        359269,
+        "e0c8411786330160aa24f4fcb27911c32b0262884b22f142622fdcf79fe29659",
+        421019,
+        "3858c983781a45eae5832013b2d45b3798a7bba207e159bd0d2a97fd6a519c64",
+        359271,
         "F004 부착 2023: 자리 216/216, 이행사항 226, 법인 사유 35곳(81칸), 건너뜀 0",
     ),
     "2022": (
-        "db0170a490aea9281c1b0344664989255f92c2f067d951d28df219004c846285",
-        425807,
-        "487cdae9bd5e16710b55d7cfa9461413fcfbc02e456e2f104474c2eed1293948",
-        396412,
+        "6329b4cc77e42530a3da252a63919119b2bccfbc80ed32616cac5494f054a8e6",
+        425948,
+        "1c80f054774ea8e3d205e53bb655b27b88b1201bdc6020e65a646b0128059bae",
+        396411,
         "F004 부착 2022: 자리 221/221, 이행사항 224, 법인 사유 36곳(110칸), 건너뜀 0",
     ),
     "2020": (

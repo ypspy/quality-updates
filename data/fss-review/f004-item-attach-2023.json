@@ -4,8 +4,8 @@
  "year": "2023",
  "source": {
   "main_commit": "01603cc5fffd141a4cce0602595f222480976c8c",
-  "year_json_sha256": "f421a76990ef09ef92ab0993344427eb3077e7e63aeb482ec636cf07f6574e9e",
-  "year_json_note": "data/fss-review/year-2023.json (PR-A5 #131이 옮긴 연도 데이터 파일, main 913d4382부터 이 sha)",
+  "year_json_sha256": "cff5f578f58a112631417f0306fc74994255aa53865f2bda941c48aeaffd95b6",
+  "year_json_note": "data/fss-review/year-2023.json (PR-A5 #131이 옮긴 연도 데이터 파일, main 913d4382부터 이 sha) / 그 뒤 #143(main f249d9df) 지적 문장 끝 보충과 대성삼경 5.2 띄어쓰기 원문 정정(「하나 기한을」「요청한 사례가」)을 반영한 sha",
   "f004_snapshot": "target.db (v_f004_vi_findings, parser f004-remediation-0.2) sha256 6edbd8f92e702ec70e1c42363babb55111ada47fe58aa70aa0436b6a9193b0a8",
   "classification": "classification-2023.md"
  },
@@ -7347,7 +7347,7 @@
     "firm": "대성삼경회계법인",
     "index": 0
    },
-   "text_sha256": "8befc1e10308e7561db268a74af3578c6e321f04661c88c0b9b8e6bbd82ee689",
+   "text_sha256": "0db9e68a4cfa5811d69aa239c89cc76f17184587c7162fd5c26c0ebb6beeba9d",
    "f004": [
     {
      "f004_row_id": "20260630000234:0:10",

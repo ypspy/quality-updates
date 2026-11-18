@@ -25,8 +25,8 @@ from fss_review_cards import (  # noqa: E402
 YEAR_FILE = {
     "2019": (46895, "4438ab7f1555c0260e2534cfdb863fbec08349821d9e38554bfe90d8098a79a0"),
     "2020": (68603, "6e426ceea925c53b6d5f360b3f938c5160d13aa1fe59b078c163467f1ca710a8"),
-    "2022": (311350, "3a940a00fd7c5ddcae8cc3db2c06e7e5a58a365666a71181bd218656621b714b"),
-    "2023": (274221, "4fa7e4e73ffb94fb33571b22e6566159037f47c296e6cc872e3f0ab66afeb891"),
+    "2022": (311349, "1ff091e283eb705480a6ed9b8f53a16ebd5107173a400f786628000b2c38bfb4"),
+    "2023": (274223, "cff5f578f58a112631417f0306fc74994255aa53865f2bda941c48aeaffd95b6"),
     "2024": (339837, "ff7b6768ab358fdf7f3a99ca7996267e5e40859c2d462ad60908dea5fdec663b"),
 }
 
@@ -43,14 +43,14 @@ YEAR_BLOCK = {
         "d2063bb5eec1fa4b5bcc9c96fc0a8fbab315e6335ca580a1bc94813088152a62",
     ),
     "2022": (
-        266851,
-        "c8b458249a19d9edee8ea9f4a860c1a31fa53b1bcde0e04d6108219a306dcbff",
-        "f28b048692eeca4ab3741a60e3c616d2d2ca3b3931567ba4ae7e4332ddde16eb",
+        266850,
+        "5300cac92bb5c3dec1b40c47f6ecedf552d56b198de4c3f82f06c71c30b0cafc",
+        "4c150effed6afb5f2d1c242a0285916d4f486ca436242cc15de6b05e63ea2dd2",
     ),
     "2023": (
-        231418,
-        "3a4e9dadf551d8fe4a3680ffd497944cbb514a14f8c3596b1f917b6934add654",
-        "eee534837396dbd9fe3cdb9490e0902dc1ddb6cee867863a751c498b81049886",
+        231420,
+        "306b7303be8fc06760d5411e15b2a3f5c068d523de293d3399c89a8e456e328d",
+        "fd560864f0e1b4c100cdbb686d9cc929bb417340fec69dc9762ce5eec41550c1",
     ),
     "2024": (
         282777,
@@ -137,3 +137,24 @@ def test_finding_texts_do_not_end_on_a_dangling_connective():
             if token is not None:
                 offenders.append(f"{path.name} {firm_name} …{token}")
     assert offenders == []
+
+
+# 원문 PDF 띄어쓰기·문장부호 그대로(2026-11-17 사용자 결정 「원문대로 고치는 초안 PR」).
+# (연도, 법인, 원문 문구, 손전사 문구) — 2022 원지는 일반회계법인 모음집 p.31 신영 같은 문장,
+# 2023 대성삼경은 법인 PDF p.3, 2025 대주는 법인 PDF p.2.
+_SOURCE_SPACING = (
+    ("2022", "회계법인 원지", "지점에서 보관\u00b7관리하고 있는", "보관\u00b7관리 하고"),
+    ("2023", "대성삼경회계법인", "요청하여야 하나 기한을 경과하여 사전심리를 요청한 사례가 있고,", "하나기한을"),
+    ("2023", "대성삼경회계법인", "요청한 사례가 있고,", "요청한사례가"),
+    ("2025", "대주회계법인", "고용관계 등 발생시 14일 이내에", "발생 시"),
+    ("2025", "대주회계법인", "이를 지연 \u2024 미신고한 사례가 발견되었으며,", "지연\u2024미신고한"),
+)
+
+
+def test_three_finding_spacings_follow_the_source_pdf():
+    review_dir = next(iter(YEAR_FILES.values())).parent
+    for year, firm, source, typed in _SOURCE_SPACING:
+        data = json.loads((review_dir / f"year-{year}.json").read_text(encoding="utf-8"))
+        texts = [finding["text"] for name, finding in iter_year_findings(data) if name == firm]
+        assert sum(source in text for text in texts) == 1, (year, firm, source)
+        assert not any(typed in text for text in texts), (year, firm, typed)

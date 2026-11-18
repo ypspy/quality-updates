@@ -37,13 +37,13 @@ from fss_review_cards import (  # noqa: E402
 )
 from mkdocs_fss_review_year import on_page_markdown  # noqa: E402
 
-TEXT_SHA = "f3cc9c262e5fe3777ec6a2558f593e2b7eecd173a212a38433b9ef1565f77cc7"
-SEV_SHA = "85ac5bbeb31f682bd707bb439315a74327818a4834099296249c8239faa26401"
+TEXT_SHA = "14ad8d0aa751244ad822054d4b9d3688dcbdd33027fc56835cd41e727f0f0301"
+SEV_SHA = "f62c274c58e2817c45ee1fa3f45070de61b5c7fdf63babcd103754be8048e093"
 YEAR_SHA = {
-    "2025": "f2c0b3f2f03e5423596c036f872a9024bff4cee13ed2c87a28a5a7db07d7b330",
+    "2025": "b44c1c59dc62fdaee0169e1c99ecd0aaf35dd64f8fab68a753683099f65aafa7",
     "2024": "d58f37b1fb3a0eb25143e9ff5d116f796d42f8b18073075e2cc2cf32688806dc",
-    "2023": "eee534837396dbd9fe3cdb9490e0902dc1ddb6cee867863a751c498b81049886",
-    "2022": "f28b048692eeca4ab3741a60e3c616d2d2ca3b3931567ba4ae7e4332ddde16eb",
+    "2023": "fd560864f0e1b4c100cdbb686d9cc929bb417340fec69dc9762ce5eec41550c1",
+    "2022": "4c150effed6afb5f2d1c242a0285916d4f486ca436242cc15de6b05e63ea2dd2",
     "2021": "42f72494b69082746ea8ef063835a8c9343140b3310b75fb269bffbc4b66a414",
     "2020": "d2063bb5eec1fa4b5bcc9c96fc0a8fbab315e6335ca580a1bc94813088152a62",
     "2019": "fb13f1d4d54aaf8126f97bf802feb37ef40b2fee7852694ca22c3215e607d098",
@@ -322,10 +322,10 @@ def test_year_2025_inventory_is_locked():
         for finding in firm["findings"]
     ]
     html_records = finding_records(BeautifulSoup(rendered, "html.parser").select_one("div.fss-year"))
-    assert _sha_lines(record["text"] for record in json_records) == (TEXT_SHA, 129054)
-    assert _sha_lines(record["text"] for record in html_records) == (TEXT_SHA, 129054)
-    assert _sha_lines(f'{record["severity"]}\t{record["text"]}' for record in json_records) == (SEV_SHA, 133729)
-    assert _sha_lines(f'{record["severity"]}\t{record["text"]}' for record in html_records) == (SEV_SHA, 133729)
+    assert _sha_lines(record["text"] for record in json_records) == (TEXT_SHA, 129055)
+    assert _sha_lines(record["text"] for record in html_records) == (TEXT_SHA, 129055)
+    assert _sha_lines(f'{record["severity"]}\t{record["text"]}' for record in json_records) == (SEV_SHA, 133730)
+    assert _sha_lines(f'{record["severity"]}\t{record["text"]}' for record in html_records) == (SEV_SHA, 133730)
 
     firms, findings = _bundle_counts(data)
     assert {name: len(dict.fromkeys(values)) for name, values in firms.items()} == {
@@ -386,9 +386,9 @@ def test_build_hook_inserts_the_2025_year_once():
 def test_year_2025_render_matches_the_dongsung_reclass_bytes():
     with YEAR_2025_PATH.open(encoding="utf-8") as handle:
         rendered = render_year_2025_html(json.load(handle)).encode("utf-8")
-    assert len(rendered) == 223528
+    assert len(rendered) == 223529
     assert hashlib.sha256(rendered).hexdigest() == (
-        "93af2273d37457b845183bb3347e425ebd69f00ad4937d181076eef590902697"
+        "0ede42ec87afc0e4f4c8cade1c66dc526e3adfd6b9edea5de9b890f1b60d3ae4"
     )
 
 
@@ -406,7 +406,7 @@ _DONGSUNG_MOVES = (
 )
 _DONGSUNG_GROUPS = ("1.1", "1.2", "2.1", "3.1", "4.1", "4.3", "5.2", "5.4")
 # 동성이 아닌 356문단의 finding_id와 본문. 재분류 전과 바이트가 같다.
-_OTHER_FINDING_SHA = "55ff7544832aac4a1996d848e6a21c4ed6e1dc64ce25409d7620401b1cafd2e9"
+_OTHER_FINDING_SHA = "768fb7944ffc8382b0ec12c8ab57b283279696db44125804c2aa3cfbb9152ff6"
 _OTHER_FINDING_COUNT = 356
 
 
