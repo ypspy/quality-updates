@@ -108,31 +108,97 @@ def test_source_index_has_one_hook_per_year_and_no_static_year_div():
         assert source.count(year_mark(year)) == 1
 
 
-# 손전사에서 마지막 불릿(종결만 있던 줄)이 빠지면 문장이 연결어미로 끊긴다.
-# 끝 공백을 버린 뒤 끝의 쉼표·쌍반점(반각·전각·「、」, 여러 개·앞 공백 포함)을 떼고 그 앞 어절을 본다
-# (「…하고,」「…하고 ,」「…하고，」). 그 밖의 구두점으로 끝나면 통과한다. 마지막 어절이 연결어미로
-# 끝나면 걸린다. 어간 쪽은 열린 규칙이 아니라 아래에 적은 음절 목록이다.
-# 연결어미: 「고」(수행하고·이루어지고·없고·시키고, 줄인 과거 했고·됐고·왔고·줬고·켰고),
-# 「며」(없으며·되었으며·시키며·주며), 「으나」(하였으나·않으나), 「거나」, 「지만」, 「면서」,
-# 「하여(서)」, 「되어(서)」.
-# 걸지 않는 것: 「미신고」「보고」「참고」(명사 끝음절 「고」), 「확인하였나」「없었나」(의문형),
-# 「3월까지만」(「까지」+「만」), 「수행한다면서」(인용형). 「수행하나」「수행하면」은 명사 끝(「중 하나」 등)과
-# 구별이 어려워 걸지 않는다.
+# 손전사에서 마지막 불릿(종결만 있던 줄)이 빠지면 문장이 끊긴 채 남는다.
+# 검사는 화이트리스트로 한다(#145 후속, 2026-11-18 사용자 결정 「결정대기 추천대로 실행해줘」).
+# 문단 끝에서 공백, 끝 문장부호(. ． ! ? 。 …), 짝이 맞는 닫는 괄호 묶음(「설정(5년)」의 「(5년)」)을
+# 차례로 떼고 남은 마지막 어절을 본다. 짝은 안쪽 괄호까지 세어 찾고, 짝이 없으면 떼지 않는다.
+# 아래 하나면 문장 끝으로 본다.
+#   1. 끝 음절이 함·음·됨·움·짐 다섯 가지(미흡함·있음·누락됨·어려움·떨어짐 …).
+#      ㅁ 받침 전체가 아니다. 「점검」「위험」「시스템」「감사팀」 같은 명사 앞에서 잘린 문단을 걸기 위해서다.
+#   2. 어절이 _END_NOUNS의 명사로 끝남(「미흡」「사례발견」「미준수」 …)
+# 「다」·숫자 끝은 지금 데이터에 없어 받지 않는다(「전기보다」「분기마다」「①」 같은 절단을 걸기 위해서).
+# 그 밖의 문단은 _SOURCE_END_EXCEPTIONS 예외 표에 (연도 파일, 법인, 마지막 어절)로 있어야 하고,
+# 예외 하나는 문단 하나만 덮는다. 쉼표·쌍반점은 떼지 않으므로 「…하고,」는 예외 표 없이는 걸린다.
+# 끝 음절과 끝 명사 목록은 main d25a46bd 연도 파일 7개(2,130문단)의 문단 끝 어절에서 뽑았다.
+# 한 글자 명사 「등」「중」은 접미사로 두면 「…조서 등」「…보관 중」 앞 절단까지 통과시켜서 목록에서 빼고
+# 해당 문단(2022 예일, 2024 안진) 둘만 예외 표에 둔다.
+# 새 연도에서 처음 보는 끝이 나오면 이 검사가 실패하니, 원문 PDF를 확인한 뒤 목록이나 예외 표에 더한다.
+_END_NOUNS = (
+    "미흡", "발견", "소지", "결정", "수행", "누락", "미비", "사례", "작성", "준수",
+    "체결", "부재", "확인", "존재", "우려", "입력", "발생", "수립", "공시", "지급",
+    "종결", "부족", "운영", "관리", "지출", "실시", "신고", "기재", "승인", "배정",
+    "투입", "설정", "불명확", "역전", "위반", "평가", "문서화", "불가", "활용",
+)
+_SENTENCE_FINAL_SYLLABLES = frozenset("\ud568\uc74c\ub428\uc6c0\uc9d0")  # 함 음 됨 움 짐
+_END_PUNCT = frozenset(".!?\u3002\u2026\uff0e")
+_CLOSE_TO_OPEN = {")": "(", "\uff09": "\uff08", "]": "[", "\u300d": "\u300c", "\u300f": "\u300e"}
+
+
+def _matching_open(text: str) -> int | None:
+    close = text[-1]
+    open_ = _CLOSE_TO_OPEN[close]
+    depth = 0
+    for i in range(len(text) - 1, -1, -1):
+        if text[i] == close:
+            depth += 1
+        elif text[i] == open_:
+            depth -= 1
+            if depth == 0:
+                return i
+    return None
+
+
+def _sentence_core(text: str) -> str:
+    core = text.rstrip()
+    while True:
+        cut = core
+        while cut and cut[-1] in _END_PUNCT:
+            cut = cut[:-1].rstrip()
+        if cut and cut[-1] in _CLOSE_TO_OPEN:
+            opening = _matching_open(cut)
+            if opening is not None and opening > 0:
+                cut = cut[:opening].rstrip()
+        if cut == core:
+            return core
+        core = cut
+
+
+def _ends_like_sentence(text: str) -> bool:
+    words = _sentence_core(text).split()
+    if not words:
+        return False
+    word = words[-1]
+    if word[-1] in _SENTENCE_FINAL_SYLLABLES:
+        return True
+    return word.endswith(_END_NOUNS)
+
+
+# 실패 문구에 붙이는 진단용 연결어미 목록(검사 자체는 위 화이트리스트가 한다).
+# 「고」(수행하고·이루어지고·없고·시키고, 줄인 과거 했고·됐고·왔고·줬고·켰고), 「며」(없으며·되었으며·
+# 시키며·주며·어려우며), 「으나」, 「거나」, 「지만」(실시하였지만·했지만), 「면서」, 「하여(서)」,
+# 「되어(서)」, 「도록」, 「위해」「대해」, 「해서」. 끝 문장부호(「수행하고.」)는 떼고 본다.
+# 연결어미로 보지 않는 것: 「미신고」「보고」「참고」(명사 끝음절 「고」), 「확인하였나」「없었나」(의문형),
+# 「3월까지만」「통지만」(명사+「만」), 「수행한다면서」「하자면서」(인용형). 이런 끝도 화이트리스트에 없으면
+# 걸리지만, 실패 문구에는 연결어미가 아니라 「끝 확인 필요」로 나온다.
 _DANGLING_CONNECTIVE = re.compile(
     r"(?:하|되|있|없|않|같|싶|겠|었|았|였|했|됐|왔|줬|켰|키|지|이)고$"
-    r"|(?:하|되|있|없|않|이|으|었|았|였|키|주)며$"
+    r"|(?:하|되|있|없|않|이|으|었|았|였|키|주|우)며$"
     r"|으나$"
-    r"|거나$|(?<!까)지만$|(?<![다라])면서$|하여서?$|되어서?$"
+    r"|거나$|(?:하|되|있|없|않|이|었|았|였|했|겠|좋|크|많|높|낮|렵)지만$|(?<![다라자])면서$|하여서?$|되어서?$"
+    r"|도록$|[위대]해$|해서$"
 )
 _SOFT_STOPS = frozenset(",;\u3001\uff0c\uff1b")
 
-# 원문 PDF 불릿도 쉼표로 끝나고 다음 불릿·하위 불릿으로 이어지는 문단(손전사 탈락 아님).
-# (연도 파일, 법인, 마지막 어절) — 2023 대성삼경 법인 PDF p.3, 2024 안진 법인 PDF p.3,
-# 2025 대주 법인 PDF p.2. 예외가 데이터에서 사라지면 이 표도 지운다.
-_SOURCE_ENDS_ON_COMMA = frozenset(
+# 원문 PDF도 문장 끝이 아닌 말로 끝나는 문단(손전사 탈락 아님). (연도 파일, 법인, 마지막 어절)
+# 쉼표로 끝나고 다음 불릿으로 이어짐: 2023 대성삼경 법인 PDF p.3, 2024 안진 p.3, 2025 대주 p.2.
+# 목록·상태로 끝남: 2022 예일 법인 PDF p.4 「…이해 관련 조서 등」, 2024 안진 법인 PDF p.4 「…암호화 없이 보관 중」.
+# 예외가 데이터에서 사라지면 이 표도 지운다.
+_SOURCE_END_EXCEPTIONS = frozenset(
     {
+        ("year-2022.json", "예일회계법인", "등"),
         ("year-2023.json", "대성삼경회계법인", "있고,"),
         ("year-2024.json", "안진회계법인", "발견되었고,"),
+        ("year-2024.json", "안진회계법인", "중"),
         ("year-2025.json", "대주회계법인", "발견되었으며,"),
     }
 )
@@ -141,7 +207,7 @@ _SOURCE_ENDS_ON_COMMA = frozenset(
 def _dangling_connective_token(text: str) -> str | None:
     stripped = text.rstrip()
     body = stripped
-    while body and body[-1] in _SOFT_STOPS:
+    while body and (body[-1] in _SOFT_STOPS or body[-1] in _END_PUNCT):
         body = body[:-1].rstrip()
     if not body:
         return None
@@ -198,32 +264,108 @@ def _dangling_connective_token(text: str) -> str | None:
         ("", None),
         ("   ", None),
         (",", None),
+        # #145 fix1 2차 독립 검토: 놓친 끝 다섯 가지와 오탐 두 가지.
+        ("독립성 여부를 판단하기 어려우며", "어려우며"),
+        ("품질관리실이 검토하도록", "검토하도록"),
+        ("독립성을 확인하기 위해", "위해"),
+        ("해당 회사에 대해", "대해"),
+        ("검토 절차를 생략해서", "생략해서"),
+        ("감사 결과를 회사에 통지만", None),
+        ("절차를 보완하자면서", None),
+        # #148 독립 검토 경미: 끝 문장부호 뒤 연결어미, 형용사 어간 「지만」.
+        ("조서관리를 수행하고.", "수행하고."),
+        ("조서관리를 수행하고\uff0e", "수행하고\uff0e"),
+        ("검토 절차는 좋지만", "좋지만"),
+        ("업무 부담이 크지만", "크지만"),
     ],
 )
 def test_dangling_connective_token_cases(text, expected):
     assert _dangling_connective_token(text) == expected
 
 
-def test_finding_texts_do_not_end_on_a_dangling_connective():
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("운영이 미흡함", True),
+        ("운영이 미흡함.", True),
+        ("운영이 미흡함\uff0e", True),
+        ("수행하고 있지 아니함", True),
+        ("관련 서명이 누락됨", True),
+        ("판단이 어려움", True),
+        ("보관하고 있음)", False),  # 짝 없는 닫는 괄호는 떼지 않는다
+        ("통제절차가 미흡", True),
+        ("통제절차가 미흡 ( 2)", True),
+        ("법인이름을사용하는사례발견", True),
+        ("대표이사후보자선정등절차를미운영", True),
+        ("일부 감사조서를 미작성", True),
+        ("업무시간을 지연입력\u00b7지연승인", True),
+        ("보존기한을 설정(5년)", True),
+        # #148 독립 검토 1: ㅁ 받침 명사 앞 절단은 걸린다.
+        ("주기적으로 내부통제 점검", False),
+        ("담당 감사팀", False),
+        ("관련 전산 시스템", False),
+        ("품질관리 책임", False),
+        ("내부통제 위험", False),
+        # 2: 「등」「중」은 목록에 없다(예외 표의 두 문단만 통과).
+        ("이해 관련 조서 등", False),
+        ("조서실사등", False),
+        ("암호화 없이 보관 중", False),
+        ("대표이사후보자선정등", False),
+        # 3: 안쪽 괄호까지 세어 짝을 찾는다.
+        ("작성함(가) 수행하고)", False),
+        ("완료함(근거). 절차를 수행하고)", False),
+        ("작성함(가(나))", True),
+        # 4: 「다」·숫자 끝은 받지 않는다.
+        ("관리가 미흡하다", False),
+        ("전기보다", False),
+        ("분기마다", False),
+        ("계상 과다", False),
+        ("검토 대상 회사 수 12", False),
+        ("문단 3.", False),
+        ("\u2460", False),
+        ("독립성 여부를 판단하기 어려우며", False),
+        ("품질관리실이 검토하도록", False),
+        ("독립성을 확인하기 위해", False),
+        ("해당 회사에 대해", False),
+        ("검토 절차를 생략해서", False),
+        ("감사 결과를 회사에 통지만", False),
+        ("절차를 보완하자면서", False),
+        ("조서관리를 수행하고", False),
+        ("조서관리를 수행하고,", False),
+        ("사례가 발견되었으며,", False),
+        ("관련 규정을 참고", False),
+        ("", False),
+        ("   ", False),
+        ("(5년)", False),
+    ],
+)
+def test_ends_like_sentence_cases(text, expected):
+    assert _ends_like_sentence(text) is expected
+
+
+def test_finding_texts_end_like_a_sentence():
     review_dir = next(iter(YEAR_FILES.values())).parent
     paths = sorted(review_dir.glob("year-*.json"))
-    assert paths
+    assert len(paths) == 7
     offenders = []
     allowed = []
     for path in paths:
         data = json.loads(path.read_text(encoding="utf-8"))
         for firm_name, finding in iter_year_findings(data):
-            token = _dangling_connective_token(finding["text"])
-            if token is None:
+            text = finding["text"]
+            if _ends_like_sentence(text):
                 continue
-            key = (path.name, firm_name, token)
-            if key in _SOURCE_ENDS_ON_COMMA:
+            words = text.split()
+            key = (path.name, firm_name, words[-1] if words else "")
+            if key in _SOURCE_END_EXCEPTIONS:
                 allowed.append(key)
-            else:
-                offenders.append(f"{path.name} {firm_name} …{token}")
+                continue
+            token = _dangling_connective_token(text)
+            reason = f"연결어미 {token}" if token else "끝 확인 필요"
+            offenders.append(f"{path.name} {firm_name} …{key[2]} ({reason})")
     assert offenders == []
-    # 예외 하나는 문단 하나만 덮는다(같은 키가 두 번 나오면 실패).
-    assert sorted(allowed) == sorted(_SOURCE_ENDS_ON_COMMA)
+    # 예외 하나는 문단 하나만 덮는다(같은 키가 두 번 나오거나 사라지면 실패).
+    assert sorted(allowed) == sorted(_SOURCE_END_EXCEPTIONS)
 
 
 # 원문 PDF 띄어쓰기·문장부호 그대로(2026-11-17 사용자 결정 「원문대로 고치는 초안 PR」).
