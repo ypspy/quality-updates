@@ -33,7 +33,7 @@
 - 품질관리감리 결과 보도가 분기 규제 문서에 들어갈 때는 서로 알린다.
 - 파이프라인은 볼트에 직접 쓰지 않는다.
 - 질의회신 seq는 질의회신 식별자이다. 수집 PR이 머지된 뒤 새 seq 목록과 요약을 넘긴다. `data/kasb-replies/{seq}/item.md`를 볼트 `raw/kasb-replies/{seq}.md`로 넣되, 있는 파일은 유지하고 첨부는 저장소에 둔다. `--sibling-rev`는 그 파일을 덮지 않고 `{seq}.{rev}.md`와 `manifest-{rev}.jsonl`만 만든다.
-- 회계기준위원회 회의록·의안은 질의회신과 별도다. 코드는 `scripts/crawler/kasb_meetings.py`이고, 인자가 없으면 안내 후 끝난다. 네트워크는 열지 않는다. 오프라인 확인은 `--dry-run`이다. 실수집은 승인 전이다. 안내: [kasb-meetings-collector.md](kasb-meetings-collector.md).
+- 회계기준위원회 회의록·의안은 질의회신과 별도다. 코드는 `scripts/crawler/kasb_meetings.py`이고, 인자가 없으면 안내 후 끝난다. 네트워크는 열지 않는다. 오프라인 확인은 `--dry-run`이다. 실수집은 승인 전이다. 실수집의 연속 HTTP 간격은 `--delay`이고 기본은 0.3초다. `--dry-run`에는 적용하지 않는다. 안내: [kasb-meetings-collector.md](kasb-meetings-collector.md).
 - 금감원 질의회신도 별도다. `data/fss-replies/{board}/{nttId}/item.md`와 `manifest.jsonl`만 git에 두고, 첨부 HWP/HWPX는 `data/fss-replies/.gitignore`로 뺀다. 수집은 `crawl_fss_replies.py`, 본문 추출은 네트워크 없는 `--extract-local`, 실패한 첨부만 나중에 Whale로 둔다. 볼트 복사는 `export_fss_replies_raw.py`이고, `--update-pending`일 때만 대상이 `pending_whale`이고 소스가 갱신된 파일을 덮어쓴다.
 - 제재는 회차이다. `downloads/sanctions/{회차}/`에 `record.md`와 의사록 PDF가 생기면 경로와 회차 목록을 넘긴다.
 - `export_kasb_replies_raw.py`와 `export_quarterly_raw.py`는 복사 도구이다.

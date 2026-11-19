@@ -4,6 +4,7 @@
 질의회신 수집기(kasb_replies)와 목록 크롤러(KASB.py)를 import하지 않는다.
 인자가 없으면 안내 후 끝난다. --dry-run은 묶음 HTML만 읽고 소켓을 열지 않는다.
 실사이트 수집은 --live와 함께 --limit 또는 --seq가 있을 때만 가능하다.
+그때 연속 HTTP 사이에는 --delay(기본 0.3초)를 둔다. --dry-run은 간격을 두지 않는다.
 """
 from __future__ import annotations
 
@@ -11,6 +12,7 @@ import argparse
 import json
 import re
 import sys
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -26,6 +28,7 @@ DOWNLOAD_URL = "https://www.kasb.or.kr/commonFile/fileDownload.do"
 SITE_CD = "002000000000000"
 COMMITTEE = "회계기준위원회"
 MAX_LIST_PAGES = 200
+DEFAULT_DELAY = 0.3
 
 _DETAIL_RE = re.compile(r"fn_Detail\s*\(\s*'(\d+)'")
 _FILE_RE = re.compile(
@@ -728,11 +731,35 @@ def _refuse_download(file_no: str, file_seq: str) -> bytes:
     raise RuntimeError("dry-run does not download")
 
 
-def make_session():
+class PacedSession:
+    """라이브 HTTP 앞단. 첫 요청 전에는 쉬지 않고, 다음 요청마다 delay초를 쉰다."""
+
+    def __init__(self, session, delay: float = DEFAULT_DELAY, sleep=time.sleep):
+        self._session = session
+        self._delay = delay
+        self._sleep = sleep
+        self._started = False
+
+    def _before(self) -> None:
+        if self._started and self._delay:
+            self._sleep(self._delay)
+        self._started = True
+
+    def get(self, url, **kwargs):
+        self._before()
+        return self._session.get(url, **kwargs)
+
+    def post(self, url, **kwargs):
+        self._before()
+        return self._session.post(url, **kwargs)
+
+
+def make_session(delay: float = DEFAULT_DELAY, sleep=time.sleep):
     import requests
 
-    session = requests.Session()
-    session.headers["User-Agent"] = "Mozilla/5.0"
+    raw = requests.Session()
+    raw.headers["User-Agent"] = "Mozilla/5.0"
+    session = PacedSession(raw, delay, sleep)
     session.get(LIST_URL, timeout=30)
     return session
 
@@ -858,6 +885,12 @@ def parse_args(argv=None):
         action="store_true",
         help="실사이트 수집. 별도 승인 전 사용하지 않는다. --limit 또는 --seq가 필요하다",
     )
+    parser.add_argument(
+        "--delay",
+        type=float,
+        default=DEFAULT_DELAY,
+        help="실수집에서 연속 HTTP 사이 간격(초). 기본 0.3. 0이면 쉬지 않는다. dry-run에는 적용하지 않는다",
+    )
     parser.add_argument("--dest", type=Path, default=default_dest())
     parser.add_argument("--fixtures", type=Path, default=default_fixture_dir())
     parser.add_argument("--start", default="", help="live 목록 s_date_start")
@@ -868,6 +901,9 @@ def parse_args(argv=None):
 def main(argv=None) -> int:
     args = parse_args(argv)
     seqs = _parse_seqs(args.seq)
+    if args.delay < 0:
+        print("--delay는 0 이상이어야 합니다.", file=sys.stderr)
+        return 2
     if args.live and args.dry_run:
         print("dry-run과 live는 함께 쓸 수 없습니다.", file=sys.stderr)
         return 2
@@ -892,7 +928,7 @@ def main(argv=None) -> int:
     if args.limit is None and not seqs:
         print("실수집은 --limit 또는 --seq가 필요합니다. 전량은 돌리지 않습니다.", file=sys.stderr)
         return 2
-    session = make_session()
+    session = make_session(delay=args.delay)
     result = crawl_live(
         args.dest,
         session,

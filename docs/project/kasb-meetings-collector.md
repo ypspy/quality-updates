@@ -27,14 +27,17 @@ cd scripts && python -m crawler.kasb_meetings --dry-run --limit 3
 실사이트 수집은 별도 승인이 난 뒤에만 `--live`와 `--limit` 또는 `--seq`를 함께 준다.
 
 ```bash
-cd scripts && python -m crawler.kasb_meetings --live --limit 3
+cd scripts && python -m crawler.kasb_meetings --live --limit 3 --delay 0.3
 cd scripts && python -m crawler.kasb_meetings --live --seq 1105 --retry-failed
 ```
+
+실수집의 연속 HTTP 사이에는 `--delay`초를 둔다. 기본값은 0.3초다. 세션을 여는 첫 GET 전에는 쉬지 않고, 그 다음 목록·`calView.do`(본문이 비면 `calViewB.do`)·`calmeetView.do`·첨부 요청마다 쉰다. `--delay 0`이면 쉬지 않는다. `--dry-run`은 사이트를 열지 않으므로 이 간격을 적용하지 않는다.
+
+같은 호스트 질의회신 수집(`crawl_kasb_replies.py`)은 0.2초다. 금감원 질의회신(`crawl_fss_replies.py`)은 0.3초다. 회의록은 한 건에 상세와 첨부가 이어지므로 0.3초를 기본으로 둔다.
 
 ## 승인 전 실수집에서 정할 것
 
 - 시범 범위. 예: 최근 3회, 또는 seq 목록
 - 기간(`--start`, `--end`)을 둘지
 - 첨부 원문(HWP, HWPX)을 받을지, 메타만 둘지
-- 요청 간격
 - `calView.do`가 비어 `calViewB.do`로 넘어가는 동작이 맞는지
