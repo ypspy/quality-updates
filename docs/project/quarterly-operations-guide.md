@@ -34,7 +34,7 @@
 - 파이프라인은 볼트에 직접 쓰지 않는다.
 - 질의회신 seq는 질의회신 식별자이다. 수집 PR이 머지된 뒤 새 seq 목록과 요약을 넘긴다. `data/kasb-replies/{seq}/item.md`를 볼트 `raw/kasb-replies/{seq}.md`로 넣되, 있는 파일은 유지하고 첨부는 저장소에 둔다. `--sibling-rev`는 그 파일을 덮지 않고 `{seq}.{rev}.md`와 `manifest-{rev}.jsonl`만 만든다.
 - 회계기준위원회 회의록·의안은 질의회신과 별도다. 코드는 `scripts/crawler/kasb_meetings.py`이고, 인자가 없으면 안내 후 끝난다. 네트워크는 열지 않는다. 오프라인 확인은 `--dry-run`이다. 실수집은 승인 전이다. 실수집의 연속 HTTP 간격은 `--delay`이고 기본은 0.3초다. `--dry-run`에는 적용하지 않는다. 안내: [kasb-meetings-collector.md](kasb-meetings-collector.md).
-- 금감원 질의회신도 별도다. `data/fss-replies/{board}/{nttId}/item.md`와 `manifest.jsonl`만 git에 두고, 첨부 HWP/HWPX는 `data/fss-replies/.gitignore`로 뺀다. 수집은 `crawl_fss_replies.py`, 본문 추출은 네트워크 없는 `--extract-local`, 실패한 첨부만 나중에 Whale로 둔다. 볼트 복사는 `export_fss_replies_raw.py`이고, `--update-pending`일 때만 대상이 `pending_whale`이고 소스가 갱신된 파일을 덮어쓴다.
+- 금감원 질의회신도 별도다. `data/fss-replies/{board}/{nttId}/item.md`와 `manifest.jsonl`만 git에 두고, 첨부 HWP/HWPX는 `data/fss-replies/.gitignore`로 뺀다. 수집은 `crawl_fss_replies.py`, 본문 추출은 네트워크 없는 `--extract-local`, 실패한 첨부만 나중에 Whale로 둔다. 볼트 복사는 `export_fss_replies_raw.py`이고, `--update-pending`일 때만 대상이 `pending_whale`이고 소스가 갱신된 파일을 덮어쓴다. 증분 수집은 1월·4월·7월·10월 5일 분기 루틴에 포함한다. `--dry-run`은 없고 시범은 `--limit` 소량 라이브다. 명령은 6절이다.
 - 제재는 회차이다. `downloads/sanctions/{회차}/`에 `record.md`와 의사록 PDF가 생기면 경로와 회차 목록을 넘긴다.
 - `export_kasb_replies_raw.py`와 `export_quarterly_raw.py`는 복사 도구이다.
 
@@ -94,6 +94,17 @@ flowchart TB
 - [ ] 분기 기간이 달력 분기와 일치하는지
 - [ ] 본문에 Executive Summary **없음**이 정상 (아직 수집 단계)
 - [ ] Appendix A에 원자료가 포함되었는지
+
+**금감원 질의회신 증분**
+
+`crawl.py`와 별도다. 1월·4월·7월·10월 5일 분기 루틴에 포함한다.
+시범은 `python scripts/crawl_fss_replies.py --limit 1`이다.
+`crawl_fss_replies.py`에는 `--dry-run` 플래그가 없다.
+`--limit N`은 금감원 사이트에서 N건을 받아 `data/fss-replies/`에 쓰는 소량 라이브다.
+완료되어 건너뛴 항목은 N에 세지 않는다.
+`saved` `skipped` `failed`를 본 뒤 `--limit` 없이 전량을 받는다.
+한 게시판만 보려면 `--board B0000132`(K-IFRS) 또는 `--board B0000133`(일반기업회계기준)을 붙인다.
+기본 `--board`는 `all`이다.
 
 ---
 
@@ -280,6 +291,9 @@ python scripts/export_kasb_replies_raw.py --sibling-rev
 
 # 금감원 질의회신. 분기 크롤러와 별도다. 원문은 사이트, 분기 문서, MCP 코퍼스에 넣지 않는다.
 # 첨부는 git에 넣지 않는다. data/fss-replies/.gitignore는 item.md와 manifest.jsonl만 허용한다.
+# 증분 주기는 1·4·7·10월 5일이다. --dry-run은 없다. 시범은 --limit 1 소량 라이브다.
+python scripts/crawl_fss_replies.py --limit 1
+python scripts/crawl_fss_replies.py --board B0000132 --limit 1
 python scripts/crawl_fss_replies.py
 python scripts/crawl_fss_replies.py --extract-local
 python scripts/export_fss_replies_raw.py
@@ -297,7 +311,7 @@ python scripts/reorder_chronological.py docs/quality-updates/2025/2025-01-01_to_
 
 `export_kasb_replies_raw.py`는 `item.md`만 복사한다. 기본 목적지는 `C:\dev\obsidian-vault\raw\kasb-replies`이고, `--dest`로 바꿀 수 있다. 같은 `{seq}.md`가 있으면 덮어쓰지 않는다. 첨부 파일은 복사하지 않는다. `--sibling-rev`는 기존 `{seq}.md` 대신 `{seq}.{rev}.md`와 `manifest-{rev}.jsonl`을 쓴다. REV를 생략하면 git HEAD 8자를 쓰고, git이 실패하면 끝낸다.
 
-`crawl_fss_replies.py`는 금감원 질의회신 증분 수집이다. 이 단계에서 HWP/HWPX는 `pending_whale`이고 원본 바이트만 남긴다. `--extract-local`은 네트워크 없이 그 로컬 첨부만 읽는다. `.hwp`는 `hwp5html --html`로, `.hwpx`는 ZIP의 `Contents/section*.xml`로 뽑는다. `hwp5txt`는 쓰지 않는다. 이미 파싱한 첨부는 다시 쓰지 않고, 원본은 지우거나 옮기지 않는다. 실패·시간 초과·파일 없음은 `pending_whale`으로 두어 나중에 Whale로 넘긴다. 첨부가 모두 성공하면 항목은 `ok`다.
+`crawl_fss_replies.py`는 금감원 질의회신 증분 수집이다. 주기는 1월·4월·7월·10월 5일의 분기 루틴이다. 이 스크립트에는 `--dry-run` 플래그가 없다. 시범은 `--limit N` 소량 라이브다. 이번에 새로 받거나 다시 시도하는 항목을 N건까지 사이트에서 받아 `data/fss-replies/`에 쓴다. 완료되어 건너뛴 항목은 N에 세지 않는다. 새 항목이 없으면 `saved=0`으로 끝난다. 분기마다 `python scripts/crawl_fss_replies.py --limit 1`로 한 건을 확인한 뒤 `--limit` 없이 남은 목록을 받는다. `--board` 기본값은 `all`이고, `B0000132`는 K-IFRS, `B0000133`은 일반기업회계기준이다. 이 단계에서 HWP/HWPX는 `pending_whale`이고 원본 바이트만 남긴다. `--extract-local`은 네트워크 없이 그 로컬 첨부만 읽는다. `.hwp`는 `hwp5html --html`로, `.hwpx`는 ZIP의 `Contents/section*.xml`로 뽑는다. `hwp5txt`는 쓰지 않는다. 이미 파싱한 첨부는 다시 쓰지 않고, 원본은 지우거나 옮기지 않는다. 실패·시간 초과·파일 없음은 `pending_whale`으로 두어 나중에 Whale로 넘긴다. 첨부가 모두 성공하면 항목은 `ok`다.
 
 `export_fss_replies_raw.py`는 `item.md`만 `{board}/{nttId}.md`로 복사한다. 기본 목적지는 `C:\dev\obsidian-vault\raw\fss-replies`이고, 대상이 있으면 건너뛴다. 첨부는 복사하지 않는다. `--update-pending`은 대상 `extract_status`가 `pending_whale`이고 소스 `extract_status`가 더 이상 `pending_whale`이 아닐 때만 덮어쓴다. 대상만 있는 파일은 지우지 않는다. `--sibling-rev`는 기존 `{nttId}.md` 대신 `{nttId}.{rev}.md`와 `manifest-{rev}.jsonl`을 쓰고, `--update-pending`과 함께 쓰면 오류다.
 
@@ -372,6 +386,7 @@ npm: `npm run crawl`, `npm run prepare:deploy`, `npm test`, `npm run build:stric
 
 | 날짜 | 내용 |
 |------|------|
+| 2026-11-19 | 금감원 질의회신 증분 주기(1·4·7·10월 5일)와 --limit 소량 라이브 시범을 2절·Phase 1·6절에 적음 |
 | 2026-11-16 | 6절에 품질관리감리 B0000291 주간 감지(`watch_fss_b0000291.py`) 추가 |
 | 2026-11-16 | B0000291 감지기: 상태를 보고 뒤에 쓰고(종료 코드 7), 기준선 없이 실행하면 거부(종료 코드 6, `--init --force`) |
 | 2026-11-12 | 금감원 질의회신 `--extract-local`과 export `--update-pending`을 2절·6절에 추가 |
