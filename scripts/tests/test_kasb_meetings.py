@@ -337,7 +337,7 @@ def _committee_row(seq: str, title: str) -> str:
 
 
 def _patch_live(monkeypatch, fetch_list):
-    monkeypatch.setattr(kasb_meetings, "make_session", lambda: object())
+    monkeypatch.setattr(kasb_meetings, "make_session", lambda *args, **kwargs: object())
     monkeypatch.setattr(kasb_meetings, "http_fetch_list", fetch_list)
     monkeypatch.setattr(
         kasb_meetings,
@@ -680,3 +680,170 @@ def test_view_fetch_error_still_fails_the_whole_seq(tmp_path):
     assert result["counts"]["failed"] == 1
     assert result["counts"]["saved"] == 0
     assert list(tmp_path.rglob("record.md")) == []
+
+
+def test_delay_defaults_to_0_3_and_parses_float():
+    assert kasb_meetings.DEFAULT_DELAY == 0.3
+    assert kasb_meetings.parse_args(["--dry-run"]).delay == 0.3
+    parsed = kasb_meetings.parse_args(["--live", "--limit", "1", "--delay", "0.5"])
+    assert parsed.delay == 0.5
+    assert kasb_meetings.parse_args(["--live", "--limit", "1", "--delay", "0"]).delay == 0.0
+
+
+def test_negative_delay_exits_without_a_socket(monkeypatch, capsys):
+    _block_network(monkeypatch)
+    code = kasb_meetings.main(["--live", "--limit", "1", "--delay", "-0.1"])
+    assert code == 2
+    assert "0 이상" in capsys.readouterr().err
+
+
+def test_dry_run_ignores_delay(monkeypatch, capsys):
+    def boom(seconds):
+        raise AssertionError(seconds)
+
+    monkeypatch.setattr(kasb_meetings.time, "sleep", boom)
+    code = kasb_meetings.main(["--dry-run", "--limit", "1", "--delay", "5"])
+    assert code == 0
+    assert "network=no" in capsys.readouterr().out
+
+
+def test_live_cli_passes_delay_into_make_session(monkeypatch, tmp_path):
+    seen = {}
+
+    def make_session(delay=kasb_meetings.DEFAULT_DELAY, **kwargs):
+        seen["delay"] = delay
+        return object()
+
+    def crawl_live(*args, **kwargs):
+        return {"counts": {"saved": 0, "meta_only": 0, "skipped": 0, "failed": 0}, "errors": []}
+
+    monkeypatch.setattr(kasb_meetings, "make_session", make_session)
+    monkeypatch.setattr(kasb_meetings, "crawl_live", crawl_live)
+    assert kasb_meetings.main(["--live", "--limit", "1", "--dest", str(tmp_path)]) == 0
+    assert seen["delay"] == 0.3
+    assert kasb_meetings.main(
+        ["--live", "--seq", "1105", "--delay", "1.25", "--dest", str(tmp_path)]
+    ) == 0
+    assert seen["delay"] == 1.25
+
+
+def test_make_session_sleeps_after_the_opening_get(monkeypatch):
+    sleeps = []
+    calls = []
+
+    class RawSession:
+        def __init__(self):
+            self.headers = {}
+
+        def get(self, url, **kwargs):
+            calls.append(("get", url))
+            return _Response(200, "ok")
+
+        def post(self, url, **kwargs):
+            calls.append(("post", url))
+            return _Response(200, "<table><tbody></tbody></table>")
+
+    class RequestsModule:
+        Session = RawSession
+
+    monkeypatch.setitem(sys.modules, "requests", RequestsModule)
+    session = kasb_meetings.make_session(delay=0.3, sleep=sleeps.append)
+    kasb_meetings.http_fetch_list(session, 1, "", "")
+    assert calls[0] == ("get", kasb_meetings.LIST_URL)
+    assert calls[1][0] == "post"
+    assert sleeps == [0.3]
+
+
+def test_paced_session_skips_sleep_when_delay_is_zero():
+    slept = []
+
+    class Raw:
+        def get(self, url, **kwargs):
+            return url
+
+        def post(self, url, **kwargs):
+            return url
+
+    session = kasb_meetings.PacedSession(Raw(), 0, sleep=slept.append)
+    session.get("https://example.test/a")
+    session.post("https://example.test/b")
+    assert slept == []
+
+
+def test_view_fallback_sleeps_between_the_two_gets():
+    calls = []
+    sleeps = []
+
+    class Raw:
+        def get(self, url, params=None, timeout=None):
+            calls.append(url)
+            if url == kasb_meetings.VIEW_URL:
+                return _Response(200, "<html></html>")
+            if url == kasb_meetings.VIEW_B_URL:
+                return _Response(200, _read("view/1105.html"))
+            raise AssertionError(url)
+
+    session = kasb_meetings.PacedSession(Raw(), 0.3, sleep=sleeps.append)
+    html = kasb_meetings.http_fetch_view(session, "1105")
+    assert calls == [kasb_meetings.VIEW_URL, kasb_meetings.VIEW_B_URL]
+    assert sleeps == [0.3]
+    assert "의결1_예시안건.hwp" in html
+
+
+def test_live_http_sleeps_between_list_view_meet_and_files(tmp_path):
+    sleeps = []
+    calls = []
+
+    class Raw:
+        def post(self, url, data=None, timeout=None):
+            calls.append(url)
+            if url == kasb_meetings.LIST_URL:
+                if (data or {}).get("page") == 1:
+                    return _Response(200, _read("list.html"))
+                return _Response(200, "<table><tbody></tbody></table>")
+            if url == kasb_meetings.DOWNLOAD_URL:
+                return _Response(200, content=b"bytes")
+            raise AssertionError(url)
+
+        def get(self, url, params=None, timeout=None):
+            calls.append(url)
+            if url == kasb_meetings.VIEW_URL:
+                return _Response(200, _read("view/1105.html"))
+            if url == kasb_meetings.MEET_URL:
+                return _Response(200, _read("meet/1105.html"))
+            raise AssertionError(url)
+
+    session = kasb_meetings.PacedSession(Raw(), 0.3, sleep=sleeps.append)
+    result = kasb_meetings.crawl_live(
+        tmp_path,
+        session,
+        start="",
+        end="",
+        limit=1,
+        seqs={"1105"},
+        retry_failed=False,
+    )
+    assert result["counts"]["saved"] == 1
+    assert calls == [
+        kasb_meetings.LIST_URL,
+        kasb_meetings.VIEW_URL,
+        kasb_meetings.MEET_URL,
+        kasb_meetings.DOWNLOAD_URL,
+        kasb_meetings.DOWNLOAD_URL,
+        kasb_meetings.DOWNLOAD_URL,
+        kasb_meetings.DOWNLOAD_URL,
+    ]
+    assert sleeps == [0.3] * (len(calls) - 1)
+
+
+def test_docs_record_the_live_delay_default():
+    root = Path(kasb_meetings.__file__).resolve().parents[2]
+    collector = (root / "docs/project/kasb-meetings-collector.md").read_text(encoding="utf-8")
+    guide = (root / "docs/project/quarterly-operations-guide.md").read_text(encoding="utf-8")
+    assert "--delay" in collector
+    assert "0.3" in collector
+    assert "적용하지 않는다" in collector
+    checklist = collector.split("## 승인 전 실수집에서 정할 것", 1)[1]
+    assert "요청 간격" not in checklist
+    assert "--delay" in guide
+    assert "0.3" in guide
