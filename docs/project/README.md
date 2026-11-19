@@ -71,6 +71,7 @@ README·CONTRIBUTING·AGENTS.md의 운영·큐레이션 요약은 위 문서를 
 | 로컬 개발 | `README.md` |
 | PR/CI | `CONTRIBUTING.md` |
 | B0000291 2022 수집 | [fss-b0000291-collector.md](fss-b0000291-collector.md) |
+| 회계기준위원회 회의록 | [kasb-meetings-collector.md](kasb-meetings-collector.md) |
 
 ## 저장소 트리
 
