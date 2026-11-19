@@ -2,7 +2,7 @@
 """회계기준위원회 회의록·의안 수집기.
 
 질의회신 수집기(kasb_replies)와 목록 크롤러(KASB.py)를 import하지 않는다.
-기본 실행과 --dry-run은 묶음 HTML만 읽고 소켓을 열지 않는다.
+인자가 없으면 안내 후 끝난다. --dry-run은 묶음 HTML만 읽고 소켓을 열지 않는다.
 실사이트 수집은 --live와 함께 --limit 또는 --seq가 있을 때만 가능하다.
 """
 from __future__ import annotations
@@ -93,6 +93,7 @@ class MeetingPlan:
     decision_items: list[str]
     report_items: list[str]
     attachments: list[Attachment]
+    meet_error: str = ""
 
     def line(self) -> str:
         return (
@@ -391,6 +392,8 @@ def compose_record(plan: MeetingPlan, fetched_at: str) -> str:
         ],
         "fetched_at": fetched_at,
     }
+    if plan.meet_error:
+        meta["meet_error"] = plan.meet_error
     dumped = yaml.safe_dump(meta, allow_unicode=True, sort_keys=False).strip()
     lines = ["---", dumped, "---", "", "## 의결 안건", ""]
     lines.extend(_bullet_lines(plan.decision_items))
@@ -503,11 +506,23 @@ def select_rows(
     return chosen
 
 
-def gather_rows(fetch_page, *, limit: int | None, seqs: set[str] | None) -> list[ScheduleRow]:
-    """fetch_page(page) -> html. 빈 목록이면 멈추고, limit에 닿으면 다음 쪽을 열지 않는다."""
+def gather_rows(
+    fetch_page,
+    *,
+    limit: int | None,
+    seqs: set[str] | None,
+    scan: dict | None = None,
+) -> list[ScheduleRow]:
+    """fetch_page(page) -> html. 빈 목록이면 멈추고, limit에 닿으면 다음 쪽을 열지 않는다.
+
+    scan을 주면 complete(다음 쪽을 열지 않고 멈췄으면 False)와 observed(이번 스캔에서 본 회계기준위원회 seq)를 채운다.
+    limit에 닿아도 그 페이지의 나머지 행은 봐 두고, 다음 페이지는 열지 않는다.
+    """
     found: list[ScheduleRow] = []
     seen: set[str] = set()
+    observed: set[str] = set()
     wanted = set(seqs) if seqs else None
+    complete = True
     for page in range(1, MAX_LIST_PAGES + 1):
         rows = parse_schedule_rows(fetch_page(page))
         if not rows:
@@ -515,17 +530,28 @@ def gather_rows(fetch_page, *, limit: int | None, seqs: set[str] | None) -> list
         fresh = [row for row in rows if row.seq not in seen]
         if not fresh:
             break
+        hit_limit = False
         for row in fresh:
             seen.add(row.seq)
             if not row.is_committee:
                 continue
+            observed.add(row.seq)
             if wanted is not None and row.seq not in wanted:
+                continue
+            if limit is not None and len(found) >= limit:
+                hit_limit = True
                 continue
             found.append(row)
             if limit is not None and len(found) >= limit:
-                return found
+                hit_limit = True
+        if hit_limit:
+            complete = False
+            break
         if wanted is not None and wanted.issubset({row.seq for row in found}):
             break
+    if scan is not None:
+        scan["complete"] = complete
+        scan["observed"] = observed
     return found
 
 
@@ -571,12 +597,23 @@ def collect(
             continue
         try:
             view = parse_view_page(fetch_view(row.seq))
-            meet_html = fetch_meet(row.seq) or ""
+            meet_error = None
+            try:
+                meet_html = fetch_meet(row.seq) or ""
+            except Exception as exc:
+                meet_error = _short_error(exc)
+                meet_html = ""
             meet = parse_meet_page(meet_html)
             plan = build_plan(row, view, meet)
+            if meet_error:
+                plan.status = "partial"
+                plan.meet_error = meet_error
             plans.append(plan)
             if dry_run:
                 counts["planned"] += 1
+                if meet_error:
+                    counts["failed"] += 1
+                    errors.append(f"seq={row.seq} meet_error={meet_error}")
                 continue
             blobs: list[tuple[Attachment, bytes]] = []
             if plan.attachments:
@@ -590,10 +627,21 @@ def collect(
                 (folder / item.role / item.saved_name).write_bytes(payload)
             text = compose_record(plan, _now_stamp(now))
             (folder / "record.md").write_text(text, encoding="utf-8")
-            state["done"][row.seq] = {"status": plan.status, "folder": folder.name}
-            state["failed"].pop(row.seq, None)
-            save_state(state_path, state)
-            counts[plan.status] += 1
+            if meet_error:
+                counts["failed"] += 1
+                errors.append(f"seq={row.seq} meet_error={meet_error}")
+                state["done"].pop(row.seq, None)
+                state["failed"][row.seq] = {
+                    "error": meet_error,
+                    "folder": folder.name,
+                    "status": "partial",
+                }
+                save_state(state_path, state)
+            else:
+                state["done"][row.seq] = {"status": plan.status, "folder": folder.name}
+                state["failed"].pop(row.seq, None)
+                save_state(state_path, state)
+                counts[plan.status] += 1
         except Exception as exc:
             counts["failed"] += 1
             message = _short_error(exc)
@@ -603,6 +651,24 @@ def collect(
             state["failed"][row.seq] = {"error": message, "folder": None}
             save_state(state_path, state)
     return {"counts": counts, "plans": plans, "state": state, "errors": errors}
+
+
+def absent_lines(seqs: set[str] | None, found: set[str], *, scan_complete: bool) -> list[str]:
+    """요청 seq 중 이번에 본 목록에 없는 것의 안내.
+
+    목록을 끝까지 봤으면 missing=list 다. limit 때문에 다음 쪽을 열지 않았으면 missing=limit 다.
+    """
+    if not seqs:
+        return []
+    reason = "list" if scan_complete else "limit"
+    return [f"seq={seq} missing={reason}" for seq in sorted(set(seqs) - set(found))]
+
+
+def _note_absent(result: dict, lines: list[str]) -> None:
+    for line in lines:
+        result["counts"]["failed"] += 1
+        result["errors"].append(line)
+    result["missing"] = lines
 
 
 def _short_error(exc: BaseException) -> str:
@@ -647,17 +713,14 @@ def dry_run_from_fixtures(
         limit=limit,
         seqs=seqs,
     )
+    _note_absent(
+        result,
+        absent_lines(seqs, {row.seq for row in rows}, scan_complete=True),
+    )
     lines = [f"dry-run network=no meetings={len(result['plans'])}"]
     lines.extend(plan.line() for plan in result["plans"])
     lines.extend(result["errors"])
-    missing = []
-    if seqs:
-        found = {plan.seq for plan in result["plans"]}
-        missing = sorted(seqs - found)
-        for seq in missing:
-            lines.append(f"seq={seq} missing=list")
     result["lines"] = lines
-    result["missing"] = missing
     return result
 
 
@@ -742,12 +805,14 @@ def crawl_live(
     seqs: set[str] | None,
     retry_failed: bool,
 ) -> dict:
+    scan: dict = {}
     rows = gather_rows(
         lambda page: http_fetch_list(session, page, start, end),
         limit=limit,
         seqs=seqs,
+        scan=scan,
     )
-    return collect(
+    result = collect(
         dest,
         rows,
         fetch_view=lambda seq: http_fetch_view(session, seq),
@@ -756,6 +821,12 @@ def crawl_live(
         dry_run=False,
         retry_failed=retry_failed,
     )
+    observed = scan.get("observed", {row.seq for row in rows})
+    _note_absent(
+        result,
+        absent_lines(seqs, observed, scan_complete=bool(scan.get("complete", True))),
+    )
+    return result
 
 
 def _parse_seqs(values: list[str] | None) -> set[str] | None:
@@ -777,7 +848,11 @@ def parse_args(argv=None):
     parser.add_argument("--dry-run", action="store_true", help="묶음 HTML만 읽고 저장하지 않는다")
     parser.add_argument("--limit", type=int, default=None, help="처리할 회의 수")
     parser.add_argument("--seq", action="append", default=None, help="이 seq만. 쉼표로 여러 개")
-    parser.add_argument("--retry-failed", action="store_true", help="실패 seq만 다시 시도")
+    parser.add_argument(
+        "--retry-failed",
+        action="store_true",
+        help="끝난 seq는 건너뛴다. 실패 seq는 다시 시도하고, 이번 선택에 들어온 새 seq도 받는다.",
+    )
     parser.add_argument(
         "--live",
         action="store_true",
@@ -827,6 +902,8 @@ def main(argv=None) -> int:
         seqs=seqs,
         retry_failed=args.retry_failed,
     )
+    for line in result["errors"]:
+        print(line)
     counts = result["counts"]
     print(
         "saved={saved} meta_only={meta_only} skipped={skipped} failed={failed}".format(**counts)

@@ -10,7 +10,8 @@
 - 저장: `downloads/kasb-meetings/{연도}-회계기준위원회-{N}회/`
 - 그 폴더에 `record.md`, `agenda/`, `results/`를 둔다. 의안 첨부는 `agenda/`, 회의결과·회의록은 `results/`다.
 - 첨부가 없으면 `record.md`의 상태는 `meta_only`다.
-- 상태 파일은 `downloads/kasb-meetings/_state.json`이다. 끝난 seq는 다시 받지 않고, `--retry-failed`는 실패 seq만 다시 시도한다.
+- 회의결과 페이지가 404이면 결과 첨부는 비운다. 404가 아닌 오류이면 의안과 메타는 남기고 상태는 `partial`이다. 그 seq는 실패로 남고, `--retry-failed`일 때만 다시 연다.
+- 상태 파일은 `downloads/kasb-meetings/_state.json`이다. 끝난 seq는 다시 받지 않는다. `--retry-failed`는 실패 seq를 다시 시도하고, 이번 선택에 들어온 새 seq도 받는다.
 - `downloads/`는 gitignore다. 첨부 원문은 커밋하지 않는다.
 
 ## 실행
@@ -21,7 +22,7 @@
 cd scripts && python -m crawler.kasb_meetings --dry-run --limit 3
 ```
 
-인자가 없거나 `--live`만 있으면 끝난다. 전량 수집은 하지 않는다.
+인자가 없거나 `--live`만 있으면 끝난다. 전량 수집은 하지 않는다. 요청한 `--seq`가 이번 목록에 없으면 안내를 내고 종료 코드 1이다. `--limit` 때문에 다음 쪽을 열지 않아 확인하지 못한 seq도 같다.
 
 실사이트 수집은 별도 승인이 난 뒤에만 `--live`와 `--limit` 또는 `--seq`를 함께 준다.
 
