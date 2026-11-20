@@ -319,7 +319,7 @@ _ADMONITION_OPEN = re.compile(r"^[!?]{3}\+?\s*(.*)$")
 _QUOTED_TITLE = re.compile(r"""["'“”‘’](.*?)["'“”‘’]""")
 _EMPH_MARK = re.compile(r"\*\*|__|\*|_")
 _EMPH = r"(?:\*\*|__|\*|_)?"
-_ISO_FLEX = r"\d{4}\s*[.\-/]\s*\d{1,2}\s*[.\-/]\s*\d{1,2}\.?"
+_ISO_FLEX = r"(?<!\d)(?:\d{4}|\d{2})(?!\d)\s*[.\-/]\s*\d{1,2}\s*[.\-/]\s*\d{1,2}\.?"
 _KR_DATE = r"\d{4}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일"
 _DATE_TOKEN = rf"(?:{_ISO_FLEX}|{_KR_DATE})"
 _RANGE_SEP = r"(?:~|～|〜|∼|－|−|–|—|부터|\bto\b|-)"
@@ -390,6 +390,7 @@ def quarter_timing_errors(
         errors.extend((source, err) for err in _link_timing_errors(root, rel.as_posix(), text, now, allow))
         if rel.as_posix() in _HIGHLIGHT_SOURCES:
             errors.extend((source, err) for err in _latest_update_errors(text, now))
+            errors.extend((source, err) for err in _outside_highlight_errors(text, now))
     return errors
 
 
@@ -662,7 +663,12 @@ def _highlight_date(raw: str) -> date:
     parts = normalized.split("-")
     if len(parts) != 3:
         raise ValueError(raw)
-    return date(int(parts[0]), int(parts[1]), int(parts[2]))
+    year = int(parts[0])
+    if len(parts[0]) == 2:
+        year += 2000
+    elif len(parts[0]) != 4:
+        raise ValueError(raw)
+    return date(year, int(parts[1]), int(parts[2]))
 
 
 def _line_for_offset(block: list[tuple[int, str]], offset: int) -> int:
@@ -746,6 +752,57 @@ def _latest_update_errors(text: str, now: datetime) -> list[ValidationError]:
                         "error",
                     )
                 )
+    return errors
+
+
+def _outside_highlight_errors(text: str, now: datetime) -> list[ValidationError]:
+    """Quarter ranges in the two index files that sit outside Latest Update.
+
+    Lone press dates are not ranges. A range whose update instant has passed,
+    including a past-quarter press window, is quiet.
+    """
+    covered = {number for block in _latest_update_blocks(text) for number, _line in block}
+    errors: list[ValidationError] = []
+    for match in _DATE_RANGE.finditer(text):
+        line_no = text.count("\n", 0, match.start()) + 1
+        if line_no in covered:
+            continue
+        start_raw = match.group("start")
+        end_raw = match.group("end")
+        try:
+            start_day = _highlight_date(start_raw)
+            end_day = _highlight_date(end_raw)
+        except ValueError:
+            errors.append(
+                ValidationError(
+                    line_no,
+                    "QUARTER_DATE_INVALID",
+                    f"하이라이트 기간이 올바른 날짜가 아닙니다: {start_raw} ~ {end_raw}",
+                    "error",
+                )
+            )
+            continue
+        if start_day > end_day:
+            errors.append(
+                ValidationError(
+                    line_no,
+                    "QUARTER_DATE_ORDER",
+                    "하이라이트 시작일 "
+                    f"{start_day.isoformat()}이 종료일 {end_day.isoformat()}보다 늦습니다.",
+                    "error",
+                )
+            )
+        update_at = governing_update(start_day, end_day)
+        if now < update_at:
+            errors.append(
+                ValidationError(
+                    line_no,
+                    "QUARTER_HIGHLIGHT_TOO_EARLY",
+                    "하이라이트가 갱신일 전 분기를 가리킵니다. "
+                    f"{start_raw} ~ {end_raw} 의 갱신일은 {_stamp(update_at)} KST입니다.",
+                    "error",
+                )
+            )
     return errors
 
 
