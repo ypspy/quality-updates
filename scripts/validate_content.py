@@ -753,10 +753,22 @@ def _latest_update_errors(text: str, now: datetime) -> list[ValidationError]:
 AGENDA_DECISION_SOURCE_FROM = (2026, 1)
 _AGENDA_INFO = re.compile(r'^(\s*)!!! info "안건 분석"\s*$')
 _DECISION_SOURCE = re.compile(
-    r"^- \(출처\) \[[^\]\n]+\]"
-    r"\(https://www\.fsc\.go\.kr/comm/getFile\?srvcId=BBSTY1&upperNo=\d+&fileTy=ATTACH&fileNo=\d+\)"
-    r"(.*)$"
+    r"^- \(출처\) \[(?P<label>[^\]\n]+)\]"
+    r"\((?P<url>https://www\.fsc\.go\.kr/comm/getFile\?srvcId=BBSTY1&upperNo=\d+&fileTy=ATTACH&fileNo=\d+)\)"
+    r"(?P<trail>.*)$"
 )
+# 금융위 임시회차처럼 첨부명이 「(공개용) 의결 NNN. …」인 경우.
+_PUBLIC_DECISION_LABEL = re.compile(r"^\(공개용\)\s*의결\s+\d+\.")
+_AGENDA_NUMBER = re.compile(r"(?:의결|보고)\s*제\d+호")
+
+
+def _decision_source_label_ok(label: str) -> bool:
+    """의결서 묶음 이름 또는 공개용 의결 파일명. 의사록 이름만으로는 통과하지 않는다."""
+    if "의사록" in label:
+        return False
+    if "안건" in label and "의결서" in label:
+        return True
+    return _PUBLIC_DECISION_LABEL.match(label) is not None
 
 
 def agenda_decision_source_required(path: Path) -> bool:
@@ -796,11 +808,19 @@ def validate_agenda_decision_sources(lines: list[str], path: Path) -> list[Valid
         if _AGENDA_INFO.match(line) is None:
             continue
         bullets = [item.strip() for item in _admonition_body(lines, index) if item.strip().startswith("- ")]
-        if bullets and _DECISION_SOURCE.match(bullets[0]):
+        matched = _DECISION_SOURCE.match(bullets[0]) if bullets else None
+        if (
+            matched
+            and _decision_source_label_ok(matched.group("label"))
+            and _AGENDA_NUMBER.search(matched.group("trail"))
+        ):
             continue
         if bullets and bullets[0].startswith("- (출처)"):
             code = "AGENDA_SOURCE_FORMAT"
-            message = "안건 분석 출처 링크 형식이 위원 논의 출처와 같은 의결서 첨부 주소가 아닙니다."
+            message = (
+                "안건 분석 출처는 의결서 첨부 이름과 의결 제N호(보고 안건은 보고 제N호)가 있어야 합니다. "
+                "의사록 첨부 이름만으로는 통과하지 않습니다."
+            )
         elif any(_DECISION_SOURCE.match(item) for item in bullets):
             code = "AGENDA_SOURCE_FORMAT"
             message = "안건 분석 의결서 출처 링크는 첫 불릿이어야 합니다."
