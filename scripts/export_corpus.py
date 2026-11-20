@@ -16,7 +16,7 @@ if str(_SCRIPTS_DIR) not in sys.path:
 
 from corpus.parse import discover_quarter_files, infer_period_from_filename, parse_corpus_items  # noqa: E402
 from corpus.schema import SCHEMA_VERSION  # noqa: E402
-from quarter_timing import nonstandard_quarter_paths  # noqa: E402
+from quarter_timing import nonstandard_quarter_paths, quarter_release_blockers  # noqa: E402
 
 KST = timezone(timedelta(hours=9))
 
@@ -70,11 +70,15 @@ def export_corpus(
     strict: bool = False,
     output_dir: Path | None = None,
     root: Path | None = None,
+    now: datetime | None = None,
 ) -> dict:
     root = Path(root) if root is not None else repo_root()
     unexpected = nonstandard_quarter_paths(root)
     if unexpected:
         raise SystemExit("nonstandard quarter markdown: " + ", ".join(unexpected))
+    blocked = quarter_release_blockers(root, now)
+    if blocked:
+        raise SystemExit("quarter not releasable: " + "; ".join(blocked))
     qu_dir = root / "docs" / "quality-updates"
     out_dir = output_dir or (root / "data" / "corpus")
     site_url = load_site_url(root)

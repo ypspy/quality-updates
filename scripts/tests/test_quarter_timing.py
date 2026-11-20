@@ -566,3 +566,128 @@ def test_ready_latest_update_en_dash_is_quiet(tmp_path):
         encoding="utf-8",
     )
     assert quarter_timing_errors(root, NOV_20) == []
+
+
+def test_second_latest_update_block_is_not_skipped(tmp_path):
+    root = _mini_repo(tmp_path)
+    (root / "docs" / "index.md").write_text(
+        '!!! info "Latest Update"\n'
+        "    **2026-07-01 ~ 2026-09-30 규제 업데이트가 추가되었습니다.**\n"
+        "\n"
+        '!!! info "Latest Update"\n'
+        "    **2026-10-01 ~ 2026-12-31 규제 업데이트가 추가되었습니다.**\n",
+        encoding="utf-8",
+    )
+    assert "QUARTER_HIGHLIGHT_TOO_EARLY" in _codes(quarter_timing_errors(root, NOV_20))
+
+
+@pytest.mark.parametrize(
+    "heading",
+    [
+        '??? note "Latest Update"',
+        "!!! warning 'Latest Update'",
+        "!!! tip “Latest Update”",
+        "!!! abstract ‘Latest Update’",
+        "!!! danger Latest Update",
+        '!!! info "latest update"',
+        '??? INFO "LATEST UPDATE"',
+    ],
+)
+def test_latest_update_accepts_admonition_and_quote_forms(tmp_path, heading):
+    root = _mini_repo(tmp_path)
+    (root / "docs" / "index.md").write_text(
+        f"{heading}\n    2026-10-01 ~ 2026-12-31\n",
+        encoding="utf-8",
+    )
+    assert "QUARTER_HIGHLIGHT_TOO_EARLY" in _codes(quarter_timing_errors(root, NOV_20))
+
+
+def test_quarter_index_latest_update_is_checked(tmp_path):
+    root = _mini_repo(tmp_path)
+    (root / "docs" / "quality-updates" / "index.md").write_text(
+        '??? note "Latest Update"\n'
+        "    2026-10-01 ~ 2026-12-31\n",
+        encoding="utf-8",
+    )
+    assert "QUARTER_HIGHLIGHT_TOO_EARLY" in _codes(quarter_timing_errors(root, NOV_20))
+
+
+def test_latest_update_reversed_range_is_date_order(tmp_path):
+    root = _mini_repo(tmp_path)
+    (root / "docs" / "index.md").write_text(
+        '!!! info "Latest Update"\n'
+        "    2026-03-31 ~ 2026-01-01\n",
+        encoding="utf-8",
+    )
+    assert "QUARTER_DATE_ORDER" in _codes(quarter_timing_errors(root, NOV_20))
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "    2026-10-01 〜 2026-12-31",
+        "    2026-10-01 ∼ 2026-12-31",
+        "    2026-10-01 － 2026-12-31",
+        "    2026-10-01 − 2026-12-31",
+        "    2026.10.01 ~ 2026.12.31",
+        "    2026/10/01 ~ 2026/12/31",
+        "    **2026-10-01** ~ **2026-12-31**",
+    ],
+)
+def test_latest_update_reads_more_date_and_separator_forms(tmp_path, line):
+    root = _mini_repo(tmp_path)
+    (root / "docs" / "index.md").write_text(
+        '!!! info "Latest Update"\n' + line + "\n",
+        encoding="utf-8",
+    )
+    errors = quarter_timing_errors(root, NOV_20)
+    assert _codes(errors) == ["QUARTER_HIGHLIGHT_TOO_EARLY"]
+
+
+def test_latest_update_range_may_split_across_lines(tmp_path):
+    root = _mini_repo(tmp_path)
+    (root / "docs" / "index.md").write_text(
+        '!!! info "Latest Update"\n'
+        "    2026-10-01\n"
+        "    ~\n"
+        "    2026-12-31\n",
+        encoding="utf-8",
+    )
+    assert _codes(quarter_timing_errors(root, NOV_20)) == ["QUARTER_HIGHLIGHT_TOO_EARLY"]
+
+
+def test_visible_latest_update_date_without_a_range_is_an_error(tmp_path):
+    root = _mini_repo(tmp_path)
+    (root / "docs" / "index.md").write_text(
+        '!!! info "Latest Update"\n'
+        "    2026.10.01 규제 업데이트\n",
+        encoding="utf-8",
+    )
+    assert "QUARTER_DATE_INVALID" in _codes(quarter_timing_errors(root, NOV_20))
+
+
+def test_html_href_on_both_indexes_is_timed(tmp_path):
+    root = _mini_repo(tmp_path)
+    (root / "docs" / "quality-updates" / "index.md").write_text(
+        '<a href="2026/2026-10-01_to_2026-12-31.md">4분기</a>\n',
+        encoding="utf-8",
+    )
+    (root / "docs" / "index.md").write_text(
+        '<a href="quality-updates&#47;2026&#47;2026-10-01_to_2026-12-31.md">4분기</a>\n',
+        encoding="utf-8",
+    )
+    errors = quarter_timing_errors(root, NOV_20)
+    assert _codes(errors) == ["QUARTER_LINK_TOO_EARLY", "QUARTER_LINK_TOO_EARLY"]
+    assert {path.relative_to(root).as_posix() for path, _err in errors} == {
+        "docs/quality-updates/index.md",
+        "docs/index.md",
+    }
+
+
+def test_html_href_with_reversed_dates_is_date_order(tmp_path):
+    root = _mini_repo(tmp_path)
+    (root / "docs" / "quality-updates" / "index.md").write_text(
+        '<a href="2026/2026-03-31_to_2026-01-01.md">거꾸로</a>\n',
+        encoding="utf-8",
+    )
+    assert "QUARTER_DATE_ORDER" in _codes(quarter_timing_errors(root, NOV_20))

@@ -314,12 +314,21 @@ def _read_text(path: Path) -> str | None:
         return None
 
 
-_LATEST_UPDATE = re.compile(r'^!!!\s+info\s+"Latest Update(?:[^"]*)"\s*$')
-_DATE_TOKEN = r"(?:\d{4}-\d{2}-\d{2}|\d{4}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일)"
-_DATE_RANGE = re.compile(
-    rf"(?P<start>{_DATE_TOKEN})\s*(?:~|～|\u2013|\u2014|부터|\bto\b|-)\s*(?P<end>{_DATE_TOKEN})",
+_LATEST_HEADING = re.compile(
+    r"""^[!?]{3}\s+\S+\s+(?:["'“”‘’])?\s*latest\s+update\b""",
     re.IGNORECASE,
 )
+_EMPH = r"(?:\*\*|__|\*|_)?"
+_ISO_FLEX = r"\d{4}[-/.]\d{1,2}[-/.]\d{1,2}"
+_KR_DATE = r"\d{4}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일"
+_DATE_TOKEN = rf"(?:{_ISO_FLEX}|{_KR_DATE})"
+_RANGE_SEP = r"(?:~|～|〜|∼|－|−|–|—|부터|\bto\b|-)"
+_DATE_RANGE = re.compile(
+    rf"{_EMPH}\s*(?P<start>{_DATE_TOKEN})\s*{_EMPH}\s*{_RANGE_SEP}\s*{_EMPH}\s*(?P<end>{_DATE_TOKEN})\s*{_EMPH}",
+    re.IGNORECASE,
+)
+_LONE_DATE = re.compile(_DATE_TOKEN)
+_HIGHLIGHT_SOURCES = {"docs/index.md", "docs/quality-updates/index.md"}
 
 
 def _stamp(moment: datetime) -> str:
@@ -379,7 +388,7 @@ def quarter_timing_errors(
         if text is None:
             continue
         errors.extend((source, err) for err in _link_timing_errors(root, rel.as_posix(), text, now, allow))
-        if rel.as_posix() == "docs/index.md":
+        if rel.as_posix() in _HIGHLIGHT_SOURCES:
             errors.extend((source, err) for err in _latest_update_errors(text, now))
     return errors
 
@@ -576,29 +585,36 @@ def _standard_link_errors(
     return errors
 
 
-def _latest_update_lines(text: str) -> list[tuple[int, str]]:
-    """Heading and body of ``!!! info "Latest Update"``, with 1-based line numbers."""
+def _latest_update_blocks(text: str) -> list[list[tuple[int, str]]]:
+    """Every Latest Update admonition, heading plus body, with 1-based line numbers.
+
+    ``!!!`` and ``???``, every admonition type, and quoted or bare titles are
+    included. A later block is not dropped because an earlier one was found.
+    """
     lines = text.splitlines()
-    start = None
-    base_indent = 0
-    for index, line in enumerate(lines):
-        if _LATEST_UPDATE.match(line.strip()):
-            start = index
-            base_indent = len(line) - len(line.lstrip(" "))
-            break
-    if start is None:
-        return []
-    body: list[tuple[int, str]] = [(start + 1, lines[start])]
-    for index in range(start + 1, len(lines)):
+    blocks: list[list[tuple[int, str]]] = []
+    index = 0
+    while index < len(lines):
         line = lines[index]
-        if not line.strip():
-            body.append((index + 1, line))
+        if not _LATEST_HEADING.match(line.strip()):
+            index += 1
             continue
-        indent = len(line) - len(line.lstrip(" "))
-        if indent <= base_indent:
-            break
-        body.append((index + 1, line))
-    return body
+        base_indent = len(line) - len(line.lstrip(" "))
+        block = [(index + 1, line)]
+        index += 1
+        while index < len(lines):
+            nxt = lines[index]
+            if not nxt.strip():
+                block.append((index + 1, nxt))
+                index += 1
+                continue
+            indent = len(nxt) - len(nxt.lstrip(" "))
+            if indent <= base_indent:
+                break
+            block.append((index + 1, nxt))
+            index += 1
+        blocks.append(block)
+    return blocks
 
 
 def _highlight_date(raw: str) -> date:
@@ -607,13 +623,31 @@ def _highlight_date(raw: str) -> date:
         if not match:
             raise ValueError(raw)
         return date(int(match.group(1)), int(match.group(2)), int(match.group(3)))
-    return datetime.strptime(raw, "%Y-%m-%d").date()
+    normalized = raw.strip().replace(".", "-").replace("/", "-")
+    parts = normalized.split("-")
+    if len(parts) != 3:
+        raise ValueError(raw)
+    return date(int(parts[0]), int(parts[1]), int(parts[2]))
+
+
+def _line_for_offset(block: list[tuple[int, str]], offset: int) -> int:
+    cursor = 0
+    line_no = block[0][0]
+    for number, line in block:
+        if cursor <= offset:
+            line_no = number
+        cursor += len(line) + 1
+    return line_no
 
 
 def _latest_update_errors(text: str, now: datetime) -> list[ValidationError]:
     errors: list[ValidationError] = []
-    for line_no, line in _latest_update_lines(text):
-        for match in _DATE_RANGE.finditer(line):
+    for block in _latest_update_blocks(text):
+        joined = "\n".join(line for _number, line in block)
+        consumed: list[tuple[int, int]] = []
+        for match in _DATE_RANGE.finditer(joined):
+            consumed.append(match.span())
+            line_no = _line_for_offset(block, match.start())
             start_raw = match.group("start")
             end_raw = match.group("end")
             try:
@@ -629,6 +663,16 @@ def _latest_update_errors(text: str, now: datetime) -> list[ValidationError]:
                     )
                 )
                 continue
+            if start_day > end_day:
+                errors.append(
+                    ValidationError(
+                        line_no,
+                        "QUARTER_DATE_ORDER",
+                        "Latest Update 시작일 "
+                        f"{start_day.isoformat()}이 종료일 {end_day.isoformat()}보다 늦습니다.",
+                        "error",
+                    )
+                )
             update_at = governing_update(start_day, end_day)
             if now < update_at:
                 errors.append(
@@ -640,6 +684,17 @@ def _latest_update_errors(text: str, now: datetime) -> list[ValidationError]:
                         "error",
                     )
                 )
+        for match in _LONE_DATE.finditer(joined):
+            if any(start <= match.start() and match.end() <= end for start, end in consumed):
+                continue
+            errors.append(
+                ValidationError(
+                    _line_for_offset(block, match.start()),
+                    "QUARTER_DATE_INVALID",
+                    f"Latest Update에 날짜가 있으나 기간으로 읽지 못했습니다: {match.group(0)}",
+                    "error",
+                )
+            )
     return errors
 
 

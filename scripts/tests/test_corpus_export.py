@@ -3,9 +3,14 @@
 
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import pytest
+
+SEOUL = ZoneInfo("Asia/Seoul")
+NOV_20 = datetime(2026, 11, 20, 12, 0, tzinfo=SEOUL)
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -84,6 +89,53 @@ def test_export_rejects_nonstandard_quarter_markdown(tmp_path):
     assert "2026/q4/2026-10-01_to_2026-12-31.md" in message
     assert "docs/quality-updates/2026-10-01_to_2026-12-31.md" in message
     assert "index.md" not in message
+
+
+def _sentinel_corpus(out: Path) -> tuple[bytes, bytes]:
+    out.mkdir()
+    jsonl = out / "corpus.jsonl"
+    manifest = out / "manifest.json"
+    jsonl.write_bytes(b"KEEP-JSONL\n")
+    manifest.write_bytes(b"KEEP-MANIFEST\n")
+    return jsonl.read_bytes(), manifest.read_bytes()
+
+
+@pytest.mark.parametrize("dry_run", [False, True])
+def test_export_refuses_early_standard_file_without_rewriting_corpus(tmp_path, dry_run):
+    root = tmp_path / "repo"
+    quarter = root / "docs" / "quality-updates" / "2026"
+    quarter.mkdir(parents=True)
+    (quarter / "2026-07-01_to_2026-09-30.md").write_text(
+        "---\nperiod:\n  start: 2026-10-01\n  end: 2026-12-31\n---\n",
+        encoding="utf-8",
+    )
+    out = tmp_path / "corpus"
+    before_jsonl, before_manifest = _sentinel_corpus(out)
+
+    with pytest.raises(SystemExit, match="2026-07-01_to_2026-09-30"):
+        export_corpus(dry_run=dry_run, strict=False, output_dir=out, root=root, now=NOV_20)
+
+    assert (out / "corpus.jsonl").read_bytes() == before_jsonl
+    assert (out / "manifest.json").read_bytes() == before_manifest
+
+
+@pytest.mark.parametrize("dry_run", [False, True])
+def test_export_refuses_reversed_period_without_rewriting_corpus(tmp_path, dry_run):
+    root = tmp_path / "repo"
+    quarter = root / "docs" / "quality-updates" / "2026"
+    quarter.mkdir(parents=True)
+    (quarter / "2026-03-31_to_2026-01-01.md").write_text(
+        "---\nperiod:\n  start: 2026-03-31\n  end: 2026-01-01\n---\n",
+        encoding="utf-8",
+    )
+    out = tmp_path / "corpus"
+    before_jsonl, before_manifest = _sentinel_corpus(out)
+
+    with pytest.raises(SystemExit, match="2026-03-31_to_2026-01-01"):
+        export_corpus(dry_run=dry_run, strict=False, output_dir=out, root=root, now=NOV_20)
+
+    assert (out / "corpus.jsonl").read_bytes() == before_jsonl
+    assert (out / "manifest.json").read_bytes() == before_manifest
 
 
 def test_export_writes_jsonl(tmp_path):

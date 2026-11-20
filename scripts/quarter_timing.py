@@ -13,6 +13,7 @@ A naive datetime is rejected and is not read as KST.
 from __future__ import annotations
 
 import calendar
+import html
 import re
 from dataclasses import dataclass
 from datetime import date, datetime
@@ -46,6 +47,7 @@ _EXACT_REL = re.compile(
 _PAREN_TARGET = re.compile(r"\(([^()\s]+)\)")
 _YAML_VALUE = re.compile(r":\s*[\"']?(\S+)")
 _BARE_QUARTER = re.compile(r"(?:docs/)?quality-updates/\S+")
+_HREF = re.compile(r"""href\s*=\s*(['"])(.*?)\1""", re.IGNORECASE)
 _ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 
@@ -246,9 +248,50 @@ def iso_dates_in(text: str) -> list[DateToken]:
 
 
 def _clean_target(raw: str) -> str:
-    token = raw.strip().strip("\"'").replace("\\", "/")
+    token = raw.strip().strip("\"'")
+    token = re.split(r"[<>'\"\s]", token, maxsplit=1)[0]
+    token = token.replace("\\", "/")
     token = token.split("#", 1)[0].split("?", 1)[0]
     return token.rstrip(".,;:\"')")
+
+
+def quarter_release_blockers(repo_root: Path, now: datetime | None = None) -> list[str]:
+    """Standard quarter files that are early or whose start date is after the end.
+
+    Judged from the filename and from ``period`` front matter. ``now`` defaults
+    to the current Asia/Seoul time.
+    """
+    current = as_seoul(now)
+    docs = Path(repo_root) / "docs" / "quality-updates"
+    if not docs.is_dir():
+        return []
+    problems: list[str] = []
+    root = Path(repo_root)
+    for path in sorted(docs.rglob("*.md")):
+        rel = path.relative_to(root).as_posix()
+        if not is_standard_quarter_rel(rel):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError:
+            problems.append(f"{rel}: unreadable")
+            continue
+        bounds = filename_bounds(path.name)
+        period_start, period_end = front_matter_bounds(text)
+        if bounds is not None:
+            filename_start, filename_end = bounds
+            if filename_start.value and filename_end.value and filename_start.value > filename_end.value:
+                problems.append(f"{rel}: 시작일이 종료일보다 늦습니다")
+        if period_start.value and period_end.value and period_start.value > period_end.value:
+            problems.append(f"{rel}: period 시작일이 종료일보다 늦습니다")
+        days = [
+            token.value
+            for token in (*(bounds or ()), period_start, period_end)
+            if token.value is not None
+        ]
+        if days and current < governing_update(*days):
+            problems.append(f"{rel}: 갱신일 전")
+    return problems
 
 
 def iter_doc_targets(source_rel: str, line: str) -> list[str]:
@@ -256,12 +299,15 @@ def iter_doc_targets(source_rel: str, line: str) -> list[str]:
 
     Exact standard paths stay exact. A suffix, extra directory, missing year
     folder, or other variant is returned unchanged in shape so it cannot inherit
-    an allow-list entry for the canonical file.
+    an allow-list entry for the canonical file. HTML ``href`` values are
+    included, and ``&#47;`` is read as ``/``.
     """
+    decoded = html.unescape(line)
     raws: list[str] = []
-    raws.extend(match.group(1) for match in _PAREN_TARGET.finditer(line))
-    raws.extend(match.group(1) for match in _YAML_VALUE.finditer(line))
-    raws.extend(match.group(0) for match in _BARE_QUARTER.finditer(line))
+    raws.extend(match.group(1) for match in _PAREN_TARGET.finditer(decoded))
+    raws.extend(match.group(1) for match in _YAML_VALUE.finditer(decoded))
+    raws.extend(match.group(0) for match in _BARE_QUARTER.finditer(decoded))
+    raws.extend(match.group(2) for match in _HREF.finditer(decoded))
     found: list[str] = []
     for raw in raws:
         rel = _resolve_doc_target(source_rel, _clean_target(raw))
