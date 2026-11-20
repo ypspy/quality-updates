@@ -1,13 +1,20 @@
 # -*- coding: utf-8 -*-
-"""Quarter update instant: 09:00 Asia/Seoul on the 5th of the month after period end.
+"""Quarter update instant: 09:00 Asia/Seoul on the 5th after the calendar quarter.
 
-1/5, 4/5, 7/5, and 10/5. A quarter may be created or linked only at or after that instant.
+A date belongs to the calendar quarter that contains it (Q1 Jan–Mar, Q2 Apr–Jun,
+Q3 Jul–Sep, Q4 Oct–Dec). The update instant is 09:00 Asia/Seoul on the 5th of the
+month after that quarter ends: 4/5, 7/5, 10/5, or 1/5. A quarter may be created
+or linked only at or after that instant.
+
+``now`` must be timezone-aware. ``None`` means the current Asia/Seoul time.
+A naive datetime is rejected and is not read as KST.
 """
 
 from __future__ import annotations
 
 import calendar
 import re
+from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -19,6 +26,9 @@ _QUARTER_REF = re.compile(
     r"(?:docs/)?(?:quality-updates/)?"
     r"(?P<year>\d{4})/(?P<name>\d{4}-\d{2}-\d{2}_to_\d{4}-\d{2}-\d{2}\.md)"
 )
+_EXACT_ALLOW = re.compile(
+    r"docs/quality-updates/\d{4}/\d{4}-\d{2}-\d{2}_to_\d{4}-\d{2}-\d{2}\.md"
+)
 
 
 class QuarterNotReady(Exception):
@@ -26,20 +36,35 @@ class QuarterNotReady(Exception):
 
 
 def as_seoul(now: datetime | None) -> datetime:
+    """Return ``now`` as Asia/Seoul.
+
+    ``None`` is the current Asia/Seoul time. A naive datetime raises TypeError.
+    It is not treated as KST, because a wall time without a zone is ambiguous.
+    Aware values are converted with ``astimezone``.
+    """
     if now is None:
         return datetime.now(SEOUL)
-    if now.tzinfo is None:
-        return now.replace(tzinfo=SEOUL)
+    if now.tzinfo is None or now.tzinfo.utcoffset(now) is None:
+        raise TypeError("now must be timezone-aware; naive datetimes are not treated as KST")
     return now.astimezone(SEOUL)
 
 
-def quarter_update_at(period_end: date) -> datetime:
-    """5th day, 09:00 Asia/Seoul, of the calendar month after period_end."""
-    if period_end.month == 12:
-        year, month = period_end.year + 1, 1
+def quarter_update_at(day: date) -> datetime:
+    """09:00 Asia/Seoul on the 5th of the month after the calendar quarter containing ``day``."""
+    year, quarter = day.year, (day.month - 1) // 3 + 1
+    _start, quarter_end = quarter_bounds(year, quarter)
+    if quarter_end.month == 12:
+        update_year, update_month = quarter_end.year + 1, 1
     else:
-        year, month = period_end.year, period_end.month + 1
-    return datetime(year, month, 5, 9, 0, tzinfo=SEOUL)
+        update_year, update_month = quarter_end.year, quarter_end.month + 1
+    return datetime(update_year, update_month, 5, 9, 0, tzinfo=SEOUL)
+
+
+def governing_update(*days: date) -> datetime:
+    """Latest update instant among the calendar quarters that contain ``days``."""
+    if not days:
+        raise ValueError("governing_update requires at least one date")
+    return max(quarter_update_at(day) for day in days)
 
 
 def quarter_bounds(year: int, quarter: int) -> tuple[date, date]:
@@ -74,11 +99,42 @@ def is_before_update(period_end: date, now: datetime | None = None) -> bool:
     return as_seoul(now) < quarter_update_at(period_end)
 
 
-def find_period_end(text: str) -> tuple[date | None, int]:
-    """Front matter period.end, if present, and its 1-based line number."""
+@dataclass(frozen=True)
+class DateToken:
+    """A parsed YYYY-MM-DD token. ``invalid`` means the token is not a real calendar date."""
+
+    value: date | None
+    line: int
+    invalid: bool
+    raw: str
+
+    @staticmethod
+    def absent() -> DateToken:
+        return DateToken(None, 1, False, "")
+
+
+def _date_token(raw: str, line: int) -> DateToken:
+    try:
+        return DateToken(date.fromisoformat(raw), line, False, raw)
+    except ValueError:
+        return DateToken(None, line, True, raw)
+
+
+def filename_bounds(name: str) -> tuple[DateToken, DateToken] | None:
+    """Start and end tokens from ``YYYY-MM-DD_to_YYYY-MM-DD.md``, or None if the name is not one."""
+    match = _FILENAME.match(name)
+    if not match:
+        return None
+    return _date_token(match.group("start"), 1), _date_token(match.group("end"), 1)
+
+
+def front_matter_bounds(text: str) -> tuple[DateToken, DateToken]:
+    """``period.start`` and ``period.end`` from YAML front matter. Invalid dates do not raise."""
+    start = DateToken.absent()
+    end = DateToken.absent()
     lines = text.splitlines()
     if not lines or lines[0].strip() != "---":
-        return None, 1
+        return start, end
     in_period = False
     for index, line in enumerate(lines[1:], start=2):
         if line.strip() == "---":
@@ -91,22 +147,13 @@ def find_period_end(text: str) -> tuple[date | None, int]:
         if line[:1] not in {" ", "\t"}:
             in_period = False
             continue
-        match = re.match(r"^\s+end:\s*(\d{4}-\d{2}-\d{2})\s*$", line)
-        if match:
-            return date.fromisoformat(match.group(1)), index
-    return None, 1
-
-
-def period_end_from_text(text: str) -> date | None:
-    end, _line = find_period_end(text)
-    return end
-
-
-def period_end_from_filename(name: str) -> date | None:
-    match = _FILENAME.match(name)
-    if not match:
-        return None
-    return date.fromisoformat(match.group("end"))
+        start_match = re.match(r"^\s+start:\s*(\d{4}-\d{2}-\d{2})\s*$", line)
+        end_match = re.match(r"^\s+end:\s*(\d{4}-\d{2}-\d{2})\s*$", line)
+        if start_match:
+            start = _date_token(start_match.group(1), index)
+        elif end_match:
+            end = _date_token(end_match.group(1), index)
+    return start, end
 
 
 def canonical_quarter_key(year: str, name: str) -> str:
@@ -128,15 +175,20 @@ def iter_quarter_refs(line: str):
 
 
 def load_allow_list(path: Path) -> set[str]:
-    """Repo-relative quarter paths. Blank lines and # comments are ignored."""
+    """Exact repo-relative POSIX quarter paths.
+
+    Blank lines and comment lines (optional indent, then ``#``) are ignored.
+    Only trailing whitespace is removed. The remaining text is allowed only when
+    it equals ``docs/quality-updates/YYYY/YYYY-MM-DD_to_YYYY-MM-DD.md``.
+    Leading spaces, backslashes, prefixes, suffixes, and inline comments do not match.
+    """
     if not path.is_file():
         return set()
     allowed: set[str] = set()
     for raw in path.read_text(encoding="utf-8").splitlines():
-        stripped = raw.strip()
-        if not stripped or stripped.startswith("#"):
+        line = raw.rstrip(" \t")
+        if not line.strip() or line.lstrip(" \t").startswith("#"):
             continue
-        match = _QUARTER_REF.search(stripped.replace("\\", "/"))
-        if match:
-            allowed.add(canonical_quarter_key(match.group("year"), match.group("name")))
+        if _EXACT_ALLOW.fullmatch(line):
+            allowed.add(line)
     return allowed

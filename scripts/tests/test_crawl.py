@@ -130,6 +130,37 @@ def test_main_refuses_early_quarter(tmp_path, monkeypatch, capsys):
     assert "--allow-open-quarter" in err
 
 
+def test_october_partial_range_uses_q4_update(tmp_path, monkeypatch, capsys):
+    _block_crawl(monkeypatch, tmp_path)
+    from crawl import main
+
+    code = main(["--start", "2026-10-01", "--end", "2026-10-31"], now=NOV_20)
+    assert code == 2
+    err = capsys.readouterr().err
+    assert "2027-01-05 09:00" in err
+    assert "--allow-open-quarter" in err
+
+
+def test_partial_range_inside_a_ready_quarter_is_allowed():
+    from crawl import guard_period
+
+    guard_period("2026-01-15", "2026-03-20", NOV_20, allow_open_quarter=False)
+
+
+def test_span_into_an_unready_quarter_is_refused():
+    from crawl import QuarterNotReady, guard_period
+
+    with pytest.raises(QuarterNotReady, match="2027-01-05 09:00"):
+        guard_period("2026-09-15", "2026-10-31", NOV_20, allow_open_quarter=False)
+
+
+def test_main_rejects_naive_now():
+    from crawl import main
+
+    with pytest.raises(TypeError, match="timezone-aware"):
+        main(["--year", "2026", "--quarter", "3"], now=datetime(2026, 11, 20, 12, 0))
+
+
 def test_start_end_before_update_is_refused(tmp_path, monkeypatch, capsys):
     _block_crawl(monkeypatch, tmp_path)
     from crawl import main

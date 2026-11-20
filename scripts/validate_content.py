@@ -15,14 +15,12 @@ from fss_review_cards import audit_review_html, materialize_review_markdown
 from quarter_timing import (
     as_seoul,
     canonical_quarter_key,
-    is_before_update,
+    filename_bounds,
+    front_matter_bounds,
+    governing_update,
     iter_quarter_refs,
-    find_period_end,
     load_allow_list,
-    period_end_from_filename,
-    period_end_from_text,
     quarter_key_for_path,
-    quarter_update_at,
 )
 from source_marker_layout import find_unsafe_source_layout
 
@@ -315,15 +313,22 @@ def _read_text(path: Path) -> str | None:
         return None
 
 
-def _timing_message(period_end, key: str, *, kind: str) -> str:
-    stamp = quarter_update_at(period_end).strftime("%Y-%m-%d %H:%M")
-    if kind == "file":
-        return (
-            "분기 갱신일 전 파일입니다. "
-            f"기간 종료 {period_end.isoformat()}의 갱신일은 {stamp} KST이며, "
-            "그 전에는 파일을 두거나 내용을 넣지 않습니다."
-        )
-    return f"분기 갱신일 전 링크입니다. {key} 의 갱신일은 {stamp} KST입니다."
+_LATEST_UPDATE = re.compile(r'^!!! info "Latest Update"\s*$')
+_DATE_RANGE = re.compile(
+    r"(?P<start>\d{4}-\d{2}-\d{2})\s*[~～]\s*(?P<end>\d{4}-\d{2}-\d{2})"
+)
+
+
+def _stamp(moment: datetime) -> str:
+    return moment.strftime("%Y-%m-%d %H:%M")
+
+
+def _too_early_file_message(ends: list, stamp: str) -> str:
+    if len({day.isoformat() for day in ends}) > 1:
+        detail = f"파일명 종료일과 period.end 중 늦은 갱신일은 {stamp} KST"
+    else:
+        detail = f"기간 종료 {ends[0].isoformat()}의 갱신일은 {stamp} KST"
+    return f"분기 갱신일 전 파일입니다. {detail}이며, 그 전에는 파일을 두거나 내용을 넣지 않습니다."
 
 
 def quarter_timing_errors(
@@ -341,65 +346,181 @@ def quarter_timing_errors(
     docs = root / "docs" / "quality-updates"
     if docs.is_dir():
         for path in sorted(docs.rglob("*.md")):
-            key = quarter_key_for_path(path)
-            if key is None or key in allow:
+            if quarter_key_for_path(path) is None:
                 continue
             text = _read_text(path)
             if text is None:
                 errors.append((path, ValidationError(0, "READ", f"파일을 읽지 못했습니다: {path.name}", "error")))
                 continue
-            end, line_no = _period_end_and_line(text, path.name)
-            if end is None or not is_before_update(end, now):
-                continue
-            errors.append(
-                (
-                    path,
-                    ValidationError(line_no, "QUARTER_TOO_EARLY", _timing_message(end, key, kind="file"), "error"),
-                )
-            )
+            errors.extend((path, err) for err in _file_timing_errors(path, text, now, allow))
 
     for rel in _LINK_SOURCES:
         source = root / rel
         text = _read_text(source)
         if text is None:
             continue
-        for line_no, line in enumerate(text.splitlines(), start=1):
-            for year, name in iter_quarter_refs(line):
-                key = canonical_quarter_key(year, name)
-                if key in allow:
-                    continue
-                end = _period_end_for_target(root / key, name)
-                if end is None or not is_before_update(end, now):
-                    continue
-                errors.append(
-                    (
-                        source,
-                        ValidationError(
-                            line_no,
-                            "QUARTER_LINK_TOO_EARLY",
-                            _timing_message(end, key, kind="link"),
-                            "error",
-                        ),
-                    )
-                )
+        errors.extend((source, err) for err in _link_timing_errors(root, text, now, allow))
+        if rel.as_posix() == "docs/index.md":
+            errors.extend((source, err) for err in _latest_update_errors(text, now))
     return errors
 
 
-def _period_end_and_line(text: str, filename: str) -> tuple:
-    end, line_no = find_period_end(text)
-    if end is not None:
-        return end, line_no
-    return period_end_from_filename(filename), 1
+def _invalid_date_error(label: str, token) -> ValidationError | None:
+    if not token.invalid:
+        return None
+    return ValidationError(
+        token.line,
+        "QUARTER_DATE_INVALID",
+        f"{label} 값이 올바른 날짜가 아닙니다: {token.raw}",
+        "error",
+    )
 
 
-def _period_end_for_target(path: Path, filename: str):
-    if path.is_file():
-        text = _read_text(path)
-        if text is not None:
-            end = period_end_from_text(text)
-            if end is not None:
-                return end
-    return period_end_from_filename(filename)
+def _file_timing_errors(path: Path, text: str, now: datetime, allow: set[str]) -> list[ValidationError]:
+    key = quarter_key_for_path(path)
+    bounds = filename_bounds(path.name)
+    if key is None or bounds is None:
+        return []
+    filename_start, filename_end = bounds
+    period_start, period_end = front_matter_bounds(text)
+    errors: list[ValidationError] = []
+    for label, token in (
+        ("파일명 시작일", filename_start),
+        ("파일명 종료일", filename_end),
+        ("period.start", period_start),
+        ("period.end", period_end),
+    ):
+        invalid = _invalid_date_error(label, token)
+        if invalid is not None:
+            errors.append(invalid)
+
+    mismatches: list[str] = []
+    if filename_start.value and period_start.value and filename_start.value != period_start.value:
+        mismatches.append(
+            f"시작일 파일명 {filename_start.value.isoformat()} / period.start {period_start.value.isoformat()}"
+        )
+    if filename_end.value and period_end.value and filename_end.value != period_end.value:
+        mismatches.append(
+            f"종료일 파일명 {filename_end.value.isoformat()} / period.end {period_end.value.isoformat()}"
+        )
+    if mismatches:
+        line_no = period_end.line if period_end.value or period_end.invalid else period_start.line
+        errors.append(
+            ValidationError(
+                line_no,
+                "QUARTER_PERIOD_MISMATCH",
+                "파일명과 front matter period가 다릅니다: " + "; ".join(mismatches),
+                "error",
+            )
+        )
+
+    ends = [token.value for token in (filename_end, period_end) if token.value is not None]
+    if ends and key not in allow and now < governing_update(*ends):
+        stamp = _stamp(governing_update(*ends))
+        errors.append(
+            ValidationError(1, "QUARTER_TOO_EARLY", _too_early_file_message(ends, stamp), "error")
+        )
+    return errors
+
+
+def _link_timing_errors(root: Path, text: str, now: datetime, allow: set[str]) -> list[ValidationError]:
+    errors: list[ValidationError] = []
+    for line_no, line in enumerate(text.splitlines(), start=1):
+        for year, name in iter_quarter_refs(line):
+            key = canonical_quarter_key(year, name)
+            if key in allow:
+                continue
+            bounds = filename_bounds(name)
+            ends: list = []
+            if bounds is None:
+                continue
+            filename_start, filename_end = bounds
+            invalid = _invalid_date_error("링크 파일명의 종료일", filename_end)
+            if invalid is not None:
+                errors.append(invalid._replace(line_no=line_no))
+            elif filename_end.value is not None:
+                ends.append(filename_end.value)
+            if filename_start.invalid:
+                invalid_start = _invalid_date_error("링크 파일명의 시작일", filename_start)
+                if invalid_start is not None:
+                    errors.append(invalid_start._replace(line_no=line_no))
+            target = root / key
+            if target.is_file():
+                target_text = _read_text(target)
+                if target_text is not None:
+                    _period_start, period_end = front_matter_bounds(target_text)
+                    if period_end.value is not None:
+                        ends.append(period_end.value)
+            if not ends or not (now < governing_update(*ends)):
+                continue
+            stamp = _stamp(governing_update(*ends))
+            errors.append(
+                ValidationError(
+                    line_no,
+                    "QUARTER_LINK_TOO_EARLY",
+                    f"분기 갱신일 전 링크입니다. {key} 의 갱신일은 {stamp} KST입니다.",
+                    "error",
+                )
+            )
+    return errors
+
+
+def _latest_update_lines(text: str) -> list[tuple[int, str]]:
+    """Body lines of the ``!!! info "Latest Update"`` admonition, with 1-based line numbers."""
+    lines = text.splitlines()
+    start = None
+    base_indent = 0
+    for index, line in enumerate(lines):
+        if _LATEST_UPDATE.match(line.strip()):
+            start = index
+            base_indent = len(line) - len(line.lstrip(" "))
+            break
+    if start is None:
+        return []
+    body: list[tuple[int, str]] = []
+    for index in range(start + 1, len(lines)):
+        line = lines[index]
+        if not line.strip():
+            body.append((index + 1, line))
+            continue
+        indent = len(line) - len(line.lstrip(" "))
+        if indent <= base_indent:
+            break
+        body.append((index + 1, line))
+    return body
+
+
+def _latest_update_errors(text: str, now: datetime) -> list[ValidationError]:
+    errors: list[ValidationError] = []
+    for line_no, line in _latest_update_lines(text):
+        for match in _DATE_RANGE.finditer(line):
+            start_raw = match.group("start")
+            end_raw = match.group("end")
+            try:
+                start_day = datetime.strptime(start_raw, "%Y-%m-%d").date()
+                end_day = datetime.strptime(end_raw, "%Y-%m-%d").date()
+            except ValueError:
+                errors.append(
+                    ValidationError(
+                        line_no,
+                        "QUARTER_DATE_INVALID",
+                        f"Latest Update 기간이 올바른 날짜가 아닙니다: {start_raw} ~ {end_raw}",
+                        "error",
+                    )
+                )
+                continue
+            update_at = governing_update(start_day, end_day)
+            if now < update_at:
+                errors.append(
+                    ValidationError(
+                        line_no,
+                        "QUARTER_HIGHLIGHT_TOO_EARLY",
+                        "Latest Update가 갱신일 전 분기를 가리킵니다. "
+                        f"{start_raw} ~ {end_raw} 의 갱신일은 {_stamp(update_at)} KST입니다.",
+                        "error",
+                    )
+                )
+    return errors
 
 
 def validate_file(filepath: Path, strict: bool) -> list[ValidationError]:

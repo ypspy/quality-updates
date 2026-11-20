@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 """CLI entry point: python scripts/crawl.py [--year Y --quarter Q] [--start ... --end ...]
 
-With no period flags, the target is the latest quarter whose update instant has
-passed (09:00 Asia/Seoul on the 5th of the month after the quarter ends). A
-period whose update instant is still ahead is refused unless --allow-open-quarter
-is set.
+With no period flags, the target is the latest calendar quarter whose update
+instant has passed (09:00 Asia/Seoul on the 5th of the month after that quarter
+ends). An explicit period is refused with exit 2 unless --allow-open-quarter is
+set, when the calendar quarter containing its start or its end is not yet due.
+The later of those two update instants is the one that must have passed.
 """
 
 from __future__ import annotations
@@ -75,9 +76,15 @@ def resolve_period(args: argparse.Namespace, now: datetime | None = None) -> tup
 
 
 def guard_period(start: str, end: str, now: datetime, allow_open_quarter: bool) -> None:
-    """Refuse a period whose update instant (next month's 5th, 09:00 KST) is still ahead."""
+    """Refuse a period whose calendar quarter is not yet due.
+
+    Start and end are each mapped to the calendar quarter that contains them.
+    The update instant is 09:00 KST on the 5th of the month after that quarter
+    ends. The later of the two instants must already have passed.
+    """
+    start_date = date.fromisoformat(start)
     end_date = date.fromisoformat(end)
-    update_at = quarter_update_at(end_date)
+    update_at = max(quarter_update_at(start_date), quarter_update_at(end_date))
     if as_seoul(now) < update_at and not allow_open_quarter:
         stamp = update_at.strftime("%Y-%m-%d %H:%M")
         raise QuarterNotReady(
