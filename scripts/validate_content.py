@@ -911,6 +911,47 @@ def validate_agenda_decision_sources(lines: list[str], path: Path) -> list[Valid
     return errors
 
 
+_MINUTES_NOTE = re.compile(r'^(\s*)!!! note "위원 논의"\s*$')
+_MINUTES_SOURCE = re.compile(
+    r"^- \(출처\) \[(?P<label>[^\]\n]+)\]"
+    r"\((?P<url>https://www\.fsc\.go\.kr/comm/getFile\?srvcId=BBSTY1&upperNo=(?P<upper>\d+)&fileTy=ATTACH&fileNo=\d+)\)"
+    r"(?P<trail>.*)"
+    r" \u00b7 \[게시물\]\((?P<post>https://www\.fsc\.go\.kr/no02010[12]/(?P<post_id>\d+))\)\s*$"
+)
+
+
+def validate_minutes_sources(lines: list[str], path: Path) -> list[ValidationError]:
+    """2026 Q1 이후 위원 논의의 의사록 출처는 getFile 주 링크다.
+
+    미공개 줄은 통과한다. 확장자는 보지 않는다. 안건 분석 의결서 검사는 별도다.
+    """
+    if not agenda_decision_source_required(path):
+        return []
+    errors: list[ValidationError] = []
+    for index, line in enumerate(lines):
+        if _MINUTES_NOTE.match(line) is None:
+            continue
+        body = _admonition_body(lines, index)
+        for offset, item in enumerate(body):
+            stripped = item.strip()
+            if not stripped.startswith("- (출처)"):
+                continue
+            if "미공개" in stripped and "](" not in stripped:
+                continue
+            matched = _MINUTES_SOURCE.match(stripped)
+            if matched and "의사록" in matched.group("label") and matched.group("upper") == matched.group("post_id"):
+                continue
+            errors.append(
+                ValidationError(
+                    index + 2 + offset,
+                    "MINUTES_SOURCE_FORMAT",
+                    "위원 논의 의사록 출처의 주 링크는 getFile 주소이고 표시 이름에 의사록이 있어야 합니다.",
+                    "error",
+                )
+            )
+    return errors
+
+
 def validate_file(filepath: Path, strict: bool) -> list[ValidationError]:
     """단일 파일 검증."""
     try:
@@ -930,6 +971,7 @@ def validate_file(filepath: Path, strict: bool) -> list[ValidationError]:
         validate_no_phase2,
         validate_no_collapsible_note,
         validate_agenda_decision_sources,
+        validate_minutes_sources,
     ]:
         all_errors.extend(fn(lines, filepath))
     sanctions_root = Path(__file__).resolve().parent.parent / "downloads" / "sanctions"

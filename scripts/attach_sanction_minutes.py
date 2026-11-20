@@ -711,6 +711,91 @@ def decision_source_bullet(attachments: list[tuple[str, str]], trailing: str = "
     return format_decision_source_bullet(decision_source_label(name), canonical, trailing)
 
 
+_MINUTES_EXT = {
+    ".pdf": "pdf",
+    ".hwp": "hwp",
+    ".hwpx": "hwp",
+    ".hml": "hwp",
+}
+_BOARD_POST = re.compile(r"^/(no020101|no020102)/(\d+)$")
+# 의결서 줄에는 다운로드와 게시물을 한 줄에 적는 관례가 없다.
+# 의사록 출처만 줄 끝에 이 구분자로 게시물을 남긴다.
+_POST_LINK_GAP = " \u00b7 "
+
+
+def minutes_attachment_kind(name: str) -> str | None:
+    """파일명에 「의사록」이 있는 PDF·HWP. 파일다운로드·zip·의결서는 제외."""
+    text = name.strip()
+    if not text or text == "파일다운로드" or "의사록" not in text:
+        return None
+    return _MINUTES_EXT.get(Path(text).suffix.lower())
+
+
+def select_minutes_attachment(attachments: list[tuple[str, str]]) -> tuple[str, str] | None:
+    """의사록 첨부 하나. PDF가 있으면 PDF, 없고 HWP만 있으면 HWP.
+
+    fileNo는 그 첨부 주소의 값이다. 1로 고정하지 않는다.
+    같은 종류의 본편 의사록이 둘 이상이면 None.
+    """
+    ranked: list[tuple[str, str, str]] = []
+    seen: set[str] = set()
+    for name, url in attachments:
+        kind = minutes_attachment_kind(name)
+        if kind is None:
+            continue
+        canonical = canonical_decision_file_url(url)
+        if canonical is None or canonical in seen:
+            continue
+        seen.add(canonical)
+        ranked.append((name, canonical, kind))
+    pdfs = [item for item in ranked if item[2] == "pdf"]
+    pool = pdfs or [item for item in ranked if item[2] == "hwp"]
+    if not pool:
+        return None
+    primary = [item for item in pool if not is_additional_minutes(item[0])]
+    chosen = primary or pool
+    if len(chosen) != 1:
+        return None
+    name, canonical, _kind = chosen[0]
+    return name, canonical
+
+
+def canonical_board_post_url(url: str) -> str | None:
+    """증선위·금융위 의결정보 글 주소를 www 호스트로 맞춘다."""
+    raw = url.strip()
+    if raw.startswith("/"):
+        raw = "https://www.fsc.go.kr" + raw
+    parsed = urlparse(raw)
+    host = parsed.netloc.lower().split(":", 1)[0]
+    if host not in {"www.fsc.go.kr", "fsc.go.kr"}:
+        return None
+    matched = _BOARD_POST.match(parsed.path.rstrip("/"))
+    if matched is None:
+        return None
+    board, post = matched.groups()
+    return f"https://www.fsc.go.kr/{board}/{post}"
+
+
+def minutes_source_bullet(
+    attachments: list[tuple[str, str]],
+    post_url: str,
+    label: str,
+    trailing: str = "",
+) -> str | None:
+    """위원 논의 의사록 출처. 주 링크는 의사록 첨부 getFile, 줄 끝에 게시물.
+
+    표시 이름은 호출자가 넘긴다. 「의사록」이 없으면 None.
+    의사록 첨부가 없으면 None이고, 그때 위원 논의는 미공개로 둔다.
+    """
+    chosen = select_minutes_attachment(attachments)
+    page = canonical_board_post_url(post_url)
+    if chosen is None or page is None or "의사록" not in label:
+        return None
+    _name, file_url = chosen
+    bullet = format_decision_source_bullet(label, file_url, trailing)
+    return f"{bullet}{_POST_LINK_GAP}[게시물]({page})"
+
+
 def zip_entry_names(data: bytes) -> list[str]:
     with zipfile.ZipFile(io.BytesIO(data)) as archive:
         return [_zip_name(info) for info in archive.infolist() if not info.is_dir()]
