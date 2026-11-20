@@ -15,6 +15,7 @@ from __future__ import annotations
 import calendar
 import html
 import re
+import unicodedata
 import urllib.parse
 from dataclasses import dataclass
 from datetime import date, datetime
@@ -163,17 +164,52 @@ def filename_bounds(name: str) -> tuple[DateToken, DateToken] | None:
     return _date_token(match.group("start"), 1), _date_token(match.group("end"), 1)
 
 
+def normalize_scan_text(text: str, *, strip_emphasis: bool = False) -> str:
+    """Fold a copy used only for quarter checks. The source text stays unchanged.
+
+    NFKC maps fullwidth digits, periods, and hyphens. Format characters (Cf)
+    and the meaningless marks called out for this guard (CGJ, variation
+    selectors) are dropped. NBSP-family spaces become a normal space, and
+    dash-family characters become ``-``. Emphasis marks are removed only when
+    the caller is scanning prose, not a path or a YAML key.
+    """
+    folded = unicodedata.normalize("NFKC", text)
+    chars: list[str] = []
+    for ch in folded:
+        code = ord(ch)
+        if unicodedata.category(ch) == "Cf":
+            continue
+        if ch == "\u034f" or 0xFE00 <= code <= 0xFE0F or 0xE0100 <= code <= 0xE01EF:
+            continue
+        if ch in "\u00a0\u202f\u2007\u2008\u2009\u200a\u205f\u3000":
+            chars.append(" ")
+            continue
+        if 0x2010 <= code <= 0x2015 or code in (0x2212, 0xFE58, 0xFE63, 0xFF0D):
+            chars.append("-")
+            continue
+        chars.append(ch)
+    result = "".join(chars)
+    if strip_emphasis:
+        result = re.sub(r"\*\*|__|~~|`|\*|_", "", result)
+    return result
+
+
+def _fence_mark(line: str) -> str:
+    """``---`` or ``...`` after the same fold used for prose and keys."""
+    mark = normalize_scan_text(line).strip()
+    if mark in {"---", "..."}:
+        return mark
+    return ""
+
+
 def _front_matter_lines(text: str) -> list[str] | None:
     lines = text.splitlines()
-    while lines and lines[0].lstrip("\ufeff").strip() == "":
+    while lines and _fence_mark(lines[0]) == "" and normalize_scan_text(lines[0]).strip() == "":
         del lines[0]
-    if not lines:
-        return None
-    lines[0] = lines[0].lstrip("\ufeff")
-    if lines[0].strip() != "---":
+    if not lines or _fence_mark(lines[0]) == "":
         return None
     for index, line in enumerate(lines[1:], start=1):
-        if line.strip() == "---":
+        if _fence_mark(line):
             return lines[1:index]
     return None
 
@@ -209,9 +245,11 @@ def front_matter_bounds(text: str) -> tuple[DateToken, DateToken]:
 
     Only an exact ``period`` mapping with both ``start`` and ``end`` is a
     period. A different spelling (``Period``, ``period_start``), a ``period.``
-    / ``period_`` / ``period-`` key other than ``period_label``, or a mapping
-    that is missing either date or carries another key is an invalid token.
-    ``period: null`` stays absent.
+    / ``period_`` / ``period-`` key other than ``period_label``, a homoglyph or
+    invisible-character variant of ``period``, or a mapping that is missing
+    either date or carries another key is an invalid token.
+    ``period: null`` stays absent. The opening and closing lines may be
+    ``---`` or ``...`` after NBSP and other scan-fold spaces are removed.
     """
     body_lines = _front_matter_lines(text)
     if body_lines is None:
@@ -246,15 +284,56 @@ def front_matter_bounds(text: str) -> tuple[DateToken, DateToken]:
     return start, end
 
 
+# Cyrillic and Greek letters that look like Latin, after casefold.
+_CONFUSABLE_LATIN = str.maketrans(
+    {
+        "а": "a",
+        "е": "e",
+        "о": "o",
+        "р": "p",
+        "с": "c",
+        "х": "x",
+        "у": "y",
+        "і": "i",
+        "ј": "j",
+        "ѕ": "s",
+        "һ": "h",
+        "ԁ": "d",
+        "α": "a",
+        "ε": "e",
+        "ι": "i",
+        "ο": "o",
+        "ρ": "p",
+        "ν": "v",
+        "τ": "t",
+        "κ": "k",
+        "υ": "u",
+        "г": "r",
+    }
+)
+
+
+def _fold_period_key(key: str) -> str:
+    """Scan-fold, then casefold, then fold Cyrillic and Greek lookalikes."""
+    normalized = normalize_scan_text(key).strip().casefold()
+    return normalized.translate(_CONFUSABLE_LATIN)
+
+
 def _is_misspelled_period_key(key: object) -> bool:
     """True for a period-shaped key that is not the exact ``period`` field.
 
     ``period_label`` is the separate display label on every quarter file.
+    After the shared scan fold, a key that is ``period``, ``period_start``,
+    or ``period_end``, or that starts with ``period`` but is not exactly
+    ``period`` or ``period_label``, is the same kind of misspelling. A
+    variation selector or other dropped mark on ``period`` counts too.
     """
-    if not isinstance(key, str) or key == "period":
+    if not isinstance(key, str):
         return False
-    folded = key.casefold()
+    folded = _fold_period_key(key)
     if folded == "period_label":
+        return False
+    if key == "period":
         return False
     if folded == "period":
         return True
@@ -287,21 +366,56 @@ def iso_dates_in(text: str) -> list[DateToken]:
 
 _DECODE_LIMIT = 8
 _UNSTABLE_LINK = "docs/quality-updates/undecoded-link.md"
+_MARKUP_ENTITY = re.compile(r"&(?:#[0-9]+|#[xX][0-9a-fA-F]+|[A-Za-z][A-Za-z0-9]+);?")
+_CONTROL_CHARS = {9: None, 10: None, 13: None}
+
+
+def _unescape_entities_drop_controls(text: str) -> str:
+    """Unescape one pass. Tab, LF, and CR produced by an entity are removed.
+
+    A newline that is already in the text, including one from ``%0A``, stays.
+    WHATWG strips those controls after HTML parsing and before URL parsing.
+    """
+
+    def repl(match: re.Match[str]) -> str:
+        raw = match.group(0)
+        decoded = html.unescape(raw)
+        if decoded == raw:
+            return raw
+        return decoded.translate(_CONTROL_CHARS)
+
+    return _MARKUP_ENTITY.sub(repl, text)
+
+
+def unescape_prose_line(line: str) -> str:
+    """HTML-unescape one prose line without turning entities into new lines."""
+    current = line
+    for _ in range(_DECODE_LIMIT):
+        nxt = _unescape_entities_drop_controls(current)
+        if nxt == current:
+            return current
+        current = nxt
+    return current
 
 
 def _normalize_link_line(line: str) -> tuple[str, bool]:
     """HTML-unescape and URL-decode until the line stops changing.
 
-    The second value is False when ``_DECODE_LIMIT`` rounds were not enough.
-    ``#`` fragments are split only after this returns.
+    Entity decoding removes tab, LF, and CR before the path is cut, matching
+    a browser that unescapes the attribute and then applies the WHATWG URL
+    strip. Percent-decoded ``%0A`` is not removed. The second value is False
+    when ``_DECODE_LIMIT`` rounds were not enough. ``#`` fragments are split
+    only after this returns.
     """
     current = line
     for _ in range(_DECODE_LIMIT):
-        nxt = urllib.parse.unquote(html.unescape(current))
+        folded = normalize_scan_text(_unescape_entities_drop_controls(current))
+        nxt = urllib.parse.unquote(folded)
         if nxt == current:
             return current, True
         current = nxt
-    nxt = urllib.parse.unquote(html.unescape(current))
+    folded = normalize_scan_text(_unescape_entities_drop_controls(current))
+    nxt = urllib.parse.unquote(folded)
     return current, nxt == current
 
 
