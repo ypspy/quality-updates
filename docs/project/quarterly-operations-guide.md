@@ -80,7 +80,7 @@ flowchart TB
 | **정렬** | 본문 dated list는 **과거→현재** (`unified.py`) | — | Appendix A는 크롤 수집 순(최신→과거) **유지** |
 | **검토** | — | 기간·건수 이상 여부, 누락 기관 없는지 샘플 확인 | — |
 
-분기 문서(`docs/quality-updates/YYYY/YYYY-MM-DD_to_YYYY-MM-DD.md`)는 그 분기가 끝난 다음 달 5일 09:00 KST(1/5·4/5·7/5·10/5) 이후에만 새로 만든다. 인자 없는 `crawl.py`는 갱신일이 지난 마지막 분기를 고른다. `--year`/`--quarter` 또는 `--start`/`--end`가 아직 그 시각 전인 달력 분기를 가리키면 종료 코드 2로 거부한다. `--allow-open-quarter`는 윤석님 명시 승인 때만 쓴다.
+분기 문서(`docs/quality-updates/YYYY/YYYY-MM-DD_to_YYYY-MM-DD.md`)는 그 분기가 끝난 다음 달 5일 09:00 KST(1/5·4/5·7/5·10/5) 이후에만 새로 만들거나 내용을 넣는다. 확정 규칙: 윤석님 11/5 「분기 루틴 시점은 '분기 다음 달 5일 9시 KST'」. 그 시점 전에는 그 분기를 `mkdocs.yml` nav, `docs/quality-updates/index.md`, `docs/index.md` 「최신」 링크·하이라이트에 올리지 않는다. `docs/quality-updates/` 아래 `.md`는 그 표준 경로와 `docs/quality-updates/index.md`만 둔다. 다른 이름, 하위 폴더, 연도 폴더가 없는 파일은 오류다. 백필·소급(R3 등) 범위에 진행 중이거나 갱신일 전인 분기가 걸리면 그 분기는 빼고, 해당 항목은 다음 정규 분기 루틴 체크리스트로 넘긴다. 예외는 윤석님 본인의 명시 승인만 인정한다. 승인은 `data/qu-early-allow.txt`의 정확한 표준 경로로만 기록하고, 대시나 경로를 바꾼 줄은 예외가 아니다. `crawl.py`는 `--year`와 `--quarter`를 항상 명시한다. 인자 없는 `crawl.py`는 갱신일이 지난 마지막 분기를 고른다. `--year`/`--quarter` 또는 `--start`/`--end`가 아직 그 시각 전인 달력 분기를 가리키면 종료 코드 2로 거부한다. 거부 문구는 우회 플래그를 안내하지 않는다.
 
 `조사·감리결과 조치`가 없는 금융위 보도와 금감원·한공회·회계기준원 링크는 `보도자료` 등 기존 제목에 둔다.
 
@@ -210,7 +210,7 @@ PDF가 없는 HWP/HWPX는 `fetch_attachments.py` 보고의 변환 목록이다. 
 
 - nav/index **자동 커밋하지 않음**. HITL 승인 후에만 반영.
 
-갱신일(다음 달 5일 09:00 KST) 전에는 `mkdocs.yml` nav, `docs/quality-updates/index.md`, `docs/index.md` 최신 링크·하이라이트에 그 분기를 올리지 않는다.
+갱신일(다음 달 5일 09:00 KST) 전에는 `mkdocs.yml` nav, `docs/quality-updates/index.md`, `docs/index.md` 최신 링크·하이라이트에 그 분기를 올리지 않는다. 표준 경로가 아닌 대상도 오류다.
 
 ---
 
@@ -390,6 +390,7 @@ npm: `npm run crawl`, `npm run prepare:deploy`, `npm test`, `npm run build:stric
 
 | 날짜 | 내용 |
 |------|------|
+| 2026-11-20 | 표준 경로가 아닌 분기 문서·nav·index 대상은 오류다. 따옴표와 한 줄 period도 읽고, 시작일이 종료일보다 늦으면 오류다. 조기 수집은 허용 목록의 정확한 경로가 있을 때만 진행한다 |
 | 2026-11-20 | 분기 문서와 nav·최신 링크는 다음 달 5일 09:00 KST 이후에만 만든다. 인자 없는 `crawl.py`는 갱신일이 지난 마지막 분기를 고르고, 명시 기간이 이르면 종료 코드 2 |
 | 2026-11-20 | 갱신일은 종료일이 속한 달력 분기 기준으로 계산한다. 파일명과 front matter period가 다르면 오류 |
 | 2026-11-19 | 금감원 질의회신 증분 주기(1·4·7·10월 5일)와 --limit 소량 라이브 시범을 2절·Phase 1·6절에 적음 |
