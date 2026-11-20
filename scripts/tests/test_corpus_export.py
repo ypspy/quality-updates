@@ -318,6 +318,42 @@ def test_export_refuses_blank_line_bom_early_period(tmp_path, dry_run):
     assert (out / "manifest.json").read_bytes() == before_manifest
 
 
+@pytest.mark.parametrize("dry_run", [False, True])
+def test_export_refuses_period_closed_with_dots(tmp_path, dry_run):
+    root, out, name = _ready_named_quarter(
+        tmp_path,
+        "---\nperiod:\n  start: 2026-10-01\n  end: 2026-12-31\n...\n",
+        allow=False,
+    )
+    before_jsonl, before_manifest = _sentinel_corpus(out)
+
+    with pytest.raises(SystemExit, match=name):
+        export_corpus(dry_run=dry_run, strict=False, output_dir=out, root=root, now=NOV_20)
+
+    assert (out / "corpus.jsonl").read_bytes() == before_jsonl
+    assert (out / "manifest.json").read_bytes() == before_manifest
+
+
+@pytest.mark.parametrize("dry_run", [False, True])
+@pytest.mark.parametrize(
+    "key",
+    ["peri\u043ed", "per\u200biod", "peri\u03bfd"],
+)
+def test_export_refuses_confusable_period_key(tmp_path, dry_run, key):
+    root, out, name = _ready_named_quarter(
+        tmp_path,
+        f"---\n{key}:\n  start: 2026-10-01\n  end: 2026-12-31\n---\n",
+        allow=True,
+    )
+    before_jsonl, before_manifest = _sentinel_corpus(out)
+
+    with pytest.raises(SystemExit, match=name):
+        export_corpus(dry_run=dry_run, strict=False, output_dir=out, root=root, now=NOV_20)
+
+    assert (out / "corpus.jsonl").read_bytes() == before_jsonl
+    assert (out / "manifest.json").read_bytes() == before_manifest
+
+
 def test_export_accepts_ready_period_and_front_matterless_quarters(tmp_path):
     root = tmp_path / "repo"
     q3 = root / "docs" / "quality-updates" / "2026"

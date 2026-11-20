@@ -15,6 +15,7 @@ from __future__ import annotations
 import calendar
 import html
 import re
+import unicodedata
 import urllib.parse
 from dataclasses import dataclass
 from datetime import date, datetime
@@ -173,7 +174,8 @@ def _front_matter_lines(text: str) -> list[str] | None:
     if lines[0].strip() != "---":
         return None
     for index, line in enumerate(lines[1:], start=1):
-        if line.strip() == "---":
+        # MkDocs 1.6.1 YAML_RE closes on --- or ... with optional trailing space.
+        if line.strip() == "---" or re.fullmatch(r"\.\.\.[ \t]*", line):
             return lines[1:index]
     return None
 
@@ -209,9 +211,10 @@ def front_matter_bounds(text: str) -> tuple[DateToken, DateToken]:
 
     Only an exact ``period`` mapping with both ``start`` and ``end`` is a
     period. A different spelling (``Period``, ``period_start``), a ``period.``
-    / ``period_`` / ``period-`` key other than ``period_label``, or a mapping
-    that is missing either date or carries another key is an invalid token.
-    ``period: null`` stays absent.
+    / ``period_`` / ``period-`` key other than ``period_label``, a homoglyph or
+    invisible-character variant of ``period``, or a mapping that is missing
+    either date or carries another key is an invalid token.
+    ``period: null`` stays absent. The closing line may be ``---`` or ``...``.
     """
     body_lines = _front_matter_lines(text)
     if body_lines is None:
@@ -246,10 +249,47 @@ def front_matter_bounds(text: str) -> tuple[DateToken, DateToken]:
     return start, end
 
 
+# Cyrillic and Greek letters that look like Latin, after casefold.
+_CONFUSABLE_LATIN = str.maketrans(
+    {
+        "а": "a",
+        "е": "e",
+        "о": "o",
+        "р": "p",
+        "с": "c",
+        "х": "x",
+        "у": "y",
+        "і": "i",
+        "ј": "j",
+        "ѕ": "s",
+        "һ": "h",
+        "ԁ": "d",
+        "α": "a",
+        "ε": "e",
+        "ι": "i",
+        "ο": "o",
+        "ρ": "p",
+        "ν": "v",
+        "τ": "t",
+        "κ": "k",
+        "υ": "u",
+    }
+)
+
+
+def _fold_period_key(key: str) -> str:
+    """NFKC, drop Unicode Cf, then fold Cyrillic and Greek lookalikes."""
+    normalized = unicodedata.normalize("NFKC", key)
+    stripped = "".join(ch for ch in normalized if unicodedata.category(ch) != "Cf")
+    return stripped.casefold().translate(_CONFUSABLE_LATIN)
+
+
 def _is_misspelled_period_key(key: object) -> bool:
     """True for a period-shaped key that is not the exact ``period`` field.
 
     ``period_label`` is the separate display label on every quarter file.
+    A top-level key that folds to ``period`` only after NFKC, Cf removal, or
+    Cyrillic/Greek confusable folding is the same kind of misspelling.
     """
     if not isinstance(key, str) or key == "period":
         return False
@@ -258,7 +298,12 @@ def _is_misspelled_period_key(key: object) -> bool:
         return False
     if folded == "period":
         return True
-    return folded.startswith(("period.", "period_", "period-"))
+    if folded.startswith(("period.", "period_", "period-")):
+        return True
+    homoglyph = _fold_period_key(key)
+    if homoglyph == "period_label":
+        return False
+    return homoglyph == "period"
 
 
 def is_standard_quarter_rel(rel: str) -> bool:
@@ -287,21 +332,54 @@ def iso_dates_in(text: str) -> list[DateToken]:
 
 _DECODE_LIMIT = 8
 _UNSTABLE_LINK = "docs/quality-updates/undecoded-link.md"
+_MARKUP_ENTITY = re.compile(r"&(?:#[0-9]+|#[xX][0-9a-fA-F]+|[A-Za-z][A-Za-z0-9]+);?")
+_CONTROL_CHARS = {9: None, 10: None, 13: None}
+
+
+def _unescape_entities_drop_controls(text: str) -> str:
+    """Unescape one pass. Tab, LF, and CR produced by an entity are removed.
+
+    A newline that is already in the text, including one from ``%0A``, stays.
+    WHATWG strips those controls after HTML parsing and before URL parsing.
+    """
+
+    def repl(match: re.Match[str]) -> str:
+        raw = match.group(0)
+        decoded = html.unescape(raw)
+        if decoded == raw:
+            return raw
+        return decoded.translate(_CONTROL_CHARS)
+
+    return _MARKUP_ENTITY.sub(repl, text)
+
+
+def unescape_prose_line(line: str) -> str:
+    """HTML-unescape one prose line without turning entities into new lines."""
+    current = line
+    for _ in range(_DECODE_LIMIT):
+        nxt = _unescape_entities_drop_controls(current)
+        if nxt == current:
+            return current
+        current = nxt
+    return current
 
 
 def _normalize_link_line(line: str) -> tuple[str, bool]:
     """HTML-unescape and URL-decode until the line stops changing.
 
-    The second value is False when ``_DECODE_LIMIT`` rounds were not enough.
-    ``#`` fragments are split only after this returns.
+    Entity decoding removes tab, LF, and CR before the path is cut, matching
+    a browser that unescapes the attribute and then applies the WHATWG URL
+    strip. Percent-decoded ``%0A`` is not removed. The second value is False
+    when ``_DECODE_LIMIT`` rounds were not enough. ``#`` fragments are split
+    only after this returns.
     """
     current = line
     for _ in range(_DECODE_LIMIT):
-        nxt = urllib.parse.unquote(html.unescape(current))
+        nxt = urllib.parse.unquote(_unescape_entities_drop_controls(current))
         if nxt == current:
             return current, True
         current = nxt
-    nxt = urllib.parse.unquote(html.unescape(current))
+    nxt = urllib.parse.unquote(_unescape_entities_drop_controls(current))
     return current, nxt == current
 
 
