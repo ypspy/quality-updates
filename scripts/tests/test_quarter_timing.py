@@ -1607,6 +1607,135 @@ def test_yearless_full_quarter_in_an_older_file_uses_now(tmp_path):
     assert "2027-01-05 09:00" in errors[0][1].message
 
 
+def test_nav_section_without_a_path_is_a_highlight(tmp_path):
+    root = _mini_repo(tmp_path)
+    (root / "mkdocs.yml").write_text(
+        "nav:\n"
+        "  - 2026년 4분기:\n"
+        "      - 항목: quality-updates/2026/2026-07-01_to_2026-09-30.md\n",
+        encoding="utf-8",
+    )
+    errors = quarter_timing_errors(root, NOV_20)
+    assert _codes(errors) == ["QUARTER_HIGHLIGHT_TOO_EARLY"]
+    assert errors[0][1].line_no == 2
+    assert "2027-01-05 09:00" in errors[0][1].message
+
+
+def test_quoted_nav_section_is_a_highlight(tmp_path):
+    root = _mini_repo(tmp_path)
+    (root / "mkdocs.yml").write_text(
+        "nav:\n"
+        '  - "2026년 4분기":\n'
+        "      - 항목: quality-updates/2026/2026-07-01_to_2026-09-30.md\n",
+        encoding="utf-8",
+    )
+    errors = quarter_timing_errors(root, NOV_20)
+    assert _codes(errors) == ["QUARTER_HIGHLIGHT_TOO_EARLY"]
+    assert errors[0][1].line_no == 2
+
+
+@pytest.mark.parametrize(
+    "child",
+    [
+        "4분기 (10–12월)",
+        "4분기 (10-12월)",
+    ],
+)
+def test_relative_nav_quarter_inherits_the_year_section(tmp_path, child):
+    root = _mini_repo(tmp_path)
+    (root / "mkdocs.yml").write_text(
+        "nav:\n"
+        "  - 2026년:\n"
+        f"      - {child}: quality-updates/2026/2026-07-01_to_2026-09-30.md\n",
+        encoding="utf-8",
+    )
+    errors = quarter_timing_errors(root, NOV_20)
+    assert _codes(errors) == ["QUARTER_HIGHLIGHT_TOO_EARLY"]
+    assert errors[0][1].line_no == 3
+    assert "2027-01-05 09:00" in errors[0][1].message
+
+
+def test_relative_nav_quarter_under_a_ready_year_is_quiet(tmp_path):
+    root = _mini_repo(tmp_path)
+    (root / "mkdocs.yml").write_text(
+        "nav:\n"
+        "  - 2026년:\n"
+        "      - 3분기 (07–09월): quality-updates/2026/2026-07-01_to_2026-09-30.md\n"
+        "  - 2025년:\n"
+        "      - 4분기 (10–12월): quality-updates/2025/2025-10-01_to_2025-12-31.md\n",
+        encoding="utf-8",
+    )
+    assert quarter_timing_errors(root, NOV_20) == []
+
+
+def test_nav_section_quarter_follows_the_update_instant(tmp_path):
+    root = _mini_repo(tmp_path)
+    (root / "mkdocs.yml").write_text(
+        "nav:\n"
+        "  - 2026년 4분기:\n"
+        "      - 항목: quality-updates/2026/2026-07-01_to_2026-09-30.md\n",
+        encoding="utf-8",
+    )
+    early = datetime(2027, 1, 5, 8, 59, tzinfo=SEOUL)
+    ready = datetime(2027, 1, 5, 9, 0, tzinfo=SEOUL)
+    assert _codes(quarter_timing_errors(root, early)) == ["QUARTER_HIGHLIGHT_TOO_EARLY"]
+    assert quarter_timing_errors(root, ready) == []
+
+
+@pytest.mark.parametrize("inside", [False, True])
+@pytest.mark.parametrize("nav", [False, True])
+@pytest.mark.parametrize(
+    "line",
+    [
+        "2026년 4/4분기",
+        "2026년도 4/4분기",
+        "2026년 제4/4분기",
+        "2026년 **4/4분기**",
+        "2026년 ４／４분기",
+    ],
+)
+def test_slash_quarter_names_are_too_early(tmp_path, inside, nav, line):
+    root = _mini_repo(tmp_path)
+    if nav:
+        (root / "mkdocs.yml").write_text(
+            f"nav:\n  - {line}: quality-updates/2026/2026-07-01_to_2026-09-30.md\n",
+            encoding="utf-8",
+        )
+    else:
+        (root / "docs" / "index.md").write_text(_index_body(line, inside=inside), encoding="utf-8")
+    errors = quarter_timing_errors(root, NOV_20)
+    assert _codes(errors) == ["QUARTER_HIGHLIGHT_TOO_EARLY"]
+    assert "2027-01-05 09:00" in errors[0][1].message
+
+
+def test_slash_quarter_in_a_ready_file_body_is_too_early(tmp_path):
+    root = _mini_repo(tmp_path)
+    _write_ready_quarter(
+        root,
+        "---\nperiod:\n  start: 2026-07-01\n  end: 2026-09-30\n---\n\n2026년 4/4분기\n",
+    )
+    errors = quarter_timing_errors(root, NOV_20)
+    assert _codes(errors) == ["QUARTER_HIGHLIGHT_TOO_EARLY"]
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "2020년 4/4분기",
+        "2026년 3/4분기",
+        "2026년 1/2분기",
+    ],
+)
+def test_published_or_non_fourth_slash_quarters_are_quiet(tmp_path, line):
+    root = _mini_repo(tmp_path)
+    (root / "docs" / "index.md").write_text(_index_body(line, inside=False), encoding="utf-8")
+    _write_ready_quarter(
+        root,
+        "---\nperiod:\n  start: 2026-07-01\n  end: 2026-09-30\n---\n\n" + line + "\n",
+    )
+    assert quarter_timing_errors(root, NOV_20) == []
+
+
 def test_folded_nav_scalar_title_is_a_highlight(tmp_path):
     root = _mini_repo(tmp_path)
     (root / "mkdocs.yml").write_text(
