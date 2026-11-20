@@ -22,6 +22,7 @@ from quarter_timing import (
     is_standard_quarter_rel,
     iter_doc_targets,
     load_allow_list,
+    normalize_scan_text,
     quarter_bounds,
     quarter_update_at,
     unescape_prose_line,
@@ -328,18 +329,23 @@ _DATE_TOKEN = rf"(?:{_ISO_FLEX}|{_KR_DATE})"
 _DATE_OPEN = r"['’‘(]?"
 _WEEKDAY_PAREN = r"\([월화수목금토일]\)"
 _DATE_CLOSE = rf"(?:{_WEEKDAY_PAREN}|\))?"
-_RANGE_SEP = r"(?:~|～|〜|∼|－|−|–|—|·|부터|(?<![A-Za-z])to(?![A-Za-z])|-)"
+_RANGE_SEP = r"(?:~|～|〜|∼|·|부터|에서|(?<![A-Za-z])to(?![A-Za-z])|-)"
+_CLOCK = r"(?:오전|오후)?\s*\d{1,2}\s*(?:시(?:\s*\d{1,2}\s*분?)?|:\d{2})"
+_GAP = rf"(?:\s*{_WEEKDAY_PAREN})?(?:\s*{_CLOCK})?"
+_DOT_MD = r"(?<!\d)\d{1,2}\s*[.\-/]\s*\d{1,2}\.?"
 _DATE_RANGE = re.compile(
-    rf"{_EMPH}\s*{_DATE_OPEN}\s*(?P<start>{_DATE_TOKEN})\s*{_DATE_CLOSE}\s*{_EMPH}"
+    rf"{_EMPH}\s*{_DATE_OPEN}\s*(?P<start>{_DATE_TOKEN})\s*{_DATE_CLOSE}{_GAP}\s*{_EMPH}"
     rf"\s*{_RANGE_SEP}\s*"
-    rf"{_EMPH}\s*{_DATE_OPEN}\s*(?P<end>{_DATE_TOKEN}|{_KR_MONTH_DAY})\s*{_DATE_CLOSE}\s*{_EMPH}",
+    rf"{_EMPH}\s*{_DATE_OPEN}\s*(?P<end>{_DATE_TOKEN}|{_KR_MONTH_DAY}|{_DOT_MD})\s*{_DATE_CLOSE}{_GAP}\s*{_EMPH}",
     re.IGNORECASE,
 )
 _YEARLESS_KR_RANGE = re.compile(
     rf"(?P<sm>\d{{1,2}})\s*월\s*(?P<sd>\d{{1,2}})\s*일\s*{_RANGE_SEP}\s*"
     rf"(?P<em>\d{{1,2}})\s*월\s*(?P<ed>\d{{1,2}})\s*일"
 )
-_QUARTER_NAME = re.compile(r"(?<!\d)(?P<year>\d{4})\s*년\s*(?P<quarter>[1-4])\s*분기")
+_QUARTER_NAME = re.compile(
+    r"(?<!\d)(?P<year>\d{4})\s*년(?:도)?\s*제?\s*(?P<quarter>[1-4])\s*분기"
+)
 _EXPLICIT_DATE = re.compile(_DATE_TOKEN)
 _LONE_DATE = re.compile(_DATE_TOKEN)
 _NAV_KEY = re.compile(r"^[A-Za-z0-9_]+:")
@@ -417,7 +423,7 @@ def quarter_timing_errors(
                     now,
                     file_year=_filename_year(path.name),
                     skip_latest=False,
-                    yearless_only=True,
+                    exact_quarter_only=True,
                 )
             )
 
@@ -726,49 +732,79 @@ def _month_day(raw: str) -> tuple[int, int] | None:
     return int(match.group(1)), int(match.group(2))
 
 
+def _dotted_month_day(raw: str) -> tuple[int, int] | None:
+    match = re.fullmatch(r"(\d{1,2})\s*[.\-/]\s*(\d{1,2})\.?", raw.strip())
+    if not match:
+        return None
+    return int(match.group(1)), int(match.group(2))
+
+
 def _range_days(start_raw: str, end_raw: str) -> tuple[date, date]:
     start_day = _highlight_date(start_raw)
-    month_day = _month_day(end_raw)
+    month_day = _month_day(end_raw) or _dotted_month_day(end_raw)
     if month_day is not None:
         return start_day, date(start_day.year, month_day[0], month_day[1])
     return start_day, _highlight_date(end_raw)
 
 
-def _nearest_explicit_year(text: str, span: tuple[int, int]) -> int | None:
-    best_year: int | None = None
-    best_dist: int | None = None
-    for match in _EXPLICIT_DATE.finditer(text):
-        if match.end() <= span[0]:
-            dist = span[0] - match.end()
-        elif match.start() >= span[1]:
-            dist = match.start() - span[1]
-        else:
-            continue
+def _paragraph_span(text: str, offset: int) -> tuple[int, int]:
+    """Blank-line paragraph that contains ``offset``. Distant dates stay outside."""
+    start = text.rfind("\n\n", 0, offset)
+    start = 0 if start < 0 else start + 2
+    end = text.find("\n\n", offset)
+    end = len(text) if end < 0 else end
+    return start, end
+
+
+def _explicit_years_between(text: str, start: int, end: int) -> list[int]:
+    years: list[int] = []
+    for match in _EXPLICIT_DATE.finditer(text, start, end):
         try:
             year = _highlight_date(match.group(0)).year
         except ValueError:
             continue
-        if best_dist is None or dist < best_dist:
-            best_dist = dist
-            best_year = year
-    return best_year
+        if year not in years:
+            years.append(year)
+    return years
 
 
-def _context_year(text: str, span: tuple[int, int], now: datetime, file_year: int | None) -> int:
-    nearest = _nearest_explicit_year(text, span)
-    if nearest is not None:
-        return nearest
-    if file_year is not None:
-        return file_year
-    return now.year
+def _candidate_years(text: str, span: tuple[int, int], now: datetime, file_year: int | None) -> list[int]:
+    """Same paragraph years, plus the file year and ``now`` when those exist.
+
+    A year from another paragraph does not count. ``now.year`` stays even when
+    a nearby past year is present, so that year cannot hide an unpublished
+    full quarter.
+    """
+    paragraph = _paragraph_span(text, span[0])
+    years = _explicit_years_between(text, paragraph[0], paragraph[1])
+    if file_year is not None and file_year not in years:
+        years.append(file_year)
+    if now.year not in years:
+        years.append(now.year)
+    return years
+
+
+def _exact_quarter(start: date, end: date) -> tuple[int, int] | None:
+    if start.year != end.year or start > end:
+        return None
+    quarter = (start.month - 1) // 3 + 1
+    quarter_start, quarter_end = quarter_bounds(start.year, quarter)
+    if start == quarter_start and end == quarter_end:
+        return start.year, quarter
+    return None
 
 
 def _overlaps(spans: list[tuple[int, int]], start: int, end: int) -> bool:
     return any(start < closing and end > opening for opening, closing in spans)
 
 
-def _unescape_prose(text: str) -> str:
-    return "\n".join(unescape_prose_line(line) for line in text.split("\n"))
+def _prepare_scan_line(line: str) -> str:
+    return normalize_scan_text(unescape_prose_line(line).replace("\r", ""), strip_emphasis=True)
+
+
+def _prepare_scan_text(text: str) -> str:
+    """Per-line scan fold. Newlines stay, so reported line numbers are the source lines."""
+    return "\n".join(_prepare_scan_line(line) for line in text.split("\n"))
 
 
 def _dated_range_errors(
@@ -778,15 +814,20 @@ def _dated_range_errors(
     now: datetime,
     *,
     latest: bool,
+    exact_quarter_only: bool = False,
 ) -> list[ValidationError]:
     try:
         start_day, end_day = _range_days(start_raw, end_raw)
     except ValueError:
+        if exact_quarter_only:
+            return []
         if latest:
             message = f"Latest Update 기간이 올바른 날짜가 아닙니다: {start_raw} ~ {end_raw}"
         else:
             message = f"하이라이트 기간이 올바른 날짜가 아닙니다: {start_raw} ~ {end_raw}"
         return [ValidationError(line_no, "QUARTER_DATE_INVALID", message, "error")]
+    if exact_quarter_only and _exact_quarter(start_day, end_day) is None:
+        return []
     errors: list[ValidationError] = []
     if start_day > end_day:
         if latest:
@@ -825,32 +866,27 @@ def _yearless_range_errors(
     *,
     latest: bool,
 ) -> list[ValidationError]:
-    year = _context_year(text, match.span(), now, file_year)
+    """Reject only when a candidate year makes the span one whole unpublished quarter.
+
+    Candidates are explicit years in the same paragraph, the file's year, and
+    the year of ``now``. One published year does not cancel another candidate.
+    """
     shown = match.group(0)
-    try:
-        start_day = date(year, int(match.group("sm")), int(match.group("sd")))
-        end_day = date(year, int(match.group("em")), int(match.group("ed")))
-    except ValueError:
-        if latest:
-            message = f"Latest Update 기간이 올바른 날짜가 아닙니다: {shown}"
-        else:
-            message = f"하이라이트 기간이 올바른 날짜가 아닙니다: {shown}"
-        return [ValidationError(line_no, "QUARTER_DATE_INVALID", message, "error")]
-    errors: list[ValidationError] = []
-    if start_day > end_day:
-        if latest:
-            message = (
-                "Latest Update 시작일 "
-                f"{start_day.isoformat()}이 종료일 {end_day.isoformat()}보다 늦습니다."
-            )
-        else:
-            message = (
-                "하이라이트 시작일 "
-                f"{start_day.isoformat()}이 종료일 {end_day.isoformat()}보다 늦습니다."
-            )
-        errors.append(ValidationError(line_no, "QUARTER_DATE_ORDER", message, "error"))
-    update_at = governing_update(start_day, end_day)
-    if now < update_at:
+    month = int(match.group("sm"))
+    day = int(match.group("sd"))
+    end_month = int(match.group("em"))
+    end_day_num = int(match.group("ed"))
+    for year in _candidate_years(text, match.span(), now, file_year):
+        try:
+            start_day = date(year, month, day)
+            end_day = date(year, end_month, end_day_num)
+        except ValueError:
+            continue
+        if _exact_quarter(start_day, end_day) is None:
+            continue
+        update_at = governing_update(start_day, end_day)
+        if now >= update_at:
+            continue
         if latest:
             message = (
                 "Latest Update가 갱신일 전 분기를 가리킵니다. "
@@ -861,8 +897,8 @@ def _yearless_range_errors(
                 "하이라이트가 갱신일 전 분기를 가리킵니다. "
                 f"{shown} 의 갱신일은 {_stamp(update_at)} KST입니다."
             )
-        errors.append(ValidationError(line_no, "QUARTER_HIGHLIGHT_TOO_EARLY", message, "error"))
-    return errors
+        return [ValidationError(line_no, "QUARTER_HIGHLIGHT_TOO_EARLY", message, "error")]
+    return []
 
 
 def _quarter_name_errors(match: re.Match[str], line_no: int, now: datetime, *, latest: bool) -> list[ValidationError]:
@@ -921,7 +957,7 @@ def _line_for_offset(block: list[tuple[int, str]], offset: int) -> int:
 def _latest_update_errors(text: str, now: datetime) -> list[ValidationError]:
     errors: list[ValidationError] = []
     for block in _latest_update_blocks(text):
-        unescaped = [(number, unescape_prose_line(line)) for number, line in block]
+        unescaped = [(number, _prepare_scan_line(line)) for number, line in block]
         joined = "\n".join(line for _number, line in unescaped)
         destinations = _link_destination_spans(joined)
         consumed: list[tuple[int, int]] = []
@@ -996,16 +1032,16 @@ def _outside_highlight_errors(
     file_year: int | None = None,
     *,
     skip_latest: bool = True,
-    yearless_only: bool = False,
+    exact_quarter_only: bool = False,
 ) -> list[ValidationError]:
-    """Quarter ranges outside Latest Update, plus yearless ranges when asked.
+    """Quarter ranges outside Latest Update.
 
-    Lone press dates are not ranges. A range whose update instant has passed,
-    including a past-quarter press window, is quiet. HTML entities are decoded
-    before the match. ``yearless_only`` is the quarter-file scan: a month-day
-    span uses a nearby explicit year, then the file period year, then ``now``.
+    The text is scan-folded per line before matching, so line numbers stay on
+    the source. ``exact_quarter_only`` is the quarter-file body scan: a dated
+    range counts only when it is the whole span of a quarter that is not yet
+    releasable. Deadlines and partial windows in that body stay quiet.
     """
-    unescaped = _unescape_prose(text)
+    unescaped = _prepare_scan_text(text)
     covered: set[int] = set()
     if skip_latest:
         covered = {number for block in _latest_update_blocks(text) for number, _line in block}
@@ -1019,20 +1055,20 @@ def _outside_highlight_errors(
     def skip(start: int, end: int) -> bool:
         return line_of(start) in covered or _inside_span(destinations, start, end)
 
-    if not yearless_only:
-        for match in _DATE_RANGE.finditer(unescaped):
-            consumed.append(match.span())
-            if skip(match.start(), match.end()):
-                continue
-            errors.extend(
-                _dated_range_errors(
-                    match.group("start"),
-                    match.group("end"),
-                    line_of(match.start()),
-                    now,
-                    latest=False,
-                )
+    for match in _DATE_RANGE.finditer(unescaped):
+        consumed.append(match.span())
+        if skip(match.start(), match.end()):
+            continue
+        errors.extend(
+            _dated_range_errors(
+                match.group("start"),
+                match.group("end"),
+                line_of(match.start()),
+                now,
+                latest=False,
+                exact_quarter_only=exact_quarter_only,
             )
+        )
     errors.extend(
         _extra_highlight_errors(
             unescaped,
@@ -1042,15 +1078,31 @@ def _outside_highlight_errors(
             consumed=consumed,
             line_of=line_of,
             skip=skip,
-            include_names=not yearless_only,
+            include_names=True,
             include_yearless=True,
         )
     )
     return errors
 
 
+_NAV_FOLD = frozenset({">", "|", ">-", "|-", ">+", "|+"})
+
+
+def _nav_title_from_body(body: str) -> str | None:
+    """Title before the last ``: `` path separator. ``20:00`` has no space after ``:``."""
+    if body in _NAV_FOLD or ": " not in body:
+        return None
+    title, _rest = body.rsplit(": ", 1)
+    title = title.strip().strip("'\"")
+    return title or None
+
+
 def _iter_nav_titles(text: str):
-    """Yield ``(line_no, title)`` for keys under the mkdocs ``nav:`` block."""
+    """Yield ``(line_no, title)`` for keys under the mkdocs ``nav:`` block.
+
+    A folded scalar (``- >`` on its own line, title on the next line) is read
+    too. The path after the colon is not a title.
+    """
     in_nav = False
     for index, line in enumerate(text.splitlines(), start=1):
         if not in_nav:
@@ -1062,13 +1114,15 @@ def _iter_nav_titles(text: str):
         if _NAV_KEY.match(line):
             break
         item = _NAV_ITEM.match(line)
-        if not item:
+        if item:
+            title = _nav_title_from_body(item.group(1).strip())
+            if title:
+                yield index, title
             continue
-        body = item.group(1).strip()
-        title, sep, _rest = body.partition(":")
-        if not sep:
-            title = body
-        title = title.strip().strip("'\"")
+        folded = re.match(r"^\s+(?!-\s)(.*)$", line)
+        if not folded:
+            continue
+        title = _nav_title_from_body(folded.group(1).strip())
         if title:
             yield index, title
 

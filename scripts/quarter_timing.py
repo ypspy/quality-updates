@@ -164,18 +164,52 @@ def filename_bounds(name: str) -> tuple[DateToken, DateToken] | None:
     return _date_token(match.group("start"), 1), _date_token(match.group("end"), 1)
 
 
+def normalize_scan_text(text: str, *, strip_emphasis: bool = False) -> str:
+    """Fold a copy used only for quarter checks. The source text stays unchanged.
+
+    NFKC maps fullwidth digits, periods, and hyphens. Format characters (Cf)
+    and the meaningless marks called out for this guard (CGJ, variation
+    selectors) are dropped. NBSP-family spaces become a normal space, and
+    dash-family characters become ``-``. Emphasis marks are removed only when
+    the caller is scanning prose, not a path or a YAML key.
+    """
+    folded = unicodedata.normalize("NFKC", text)
+    chars: list[str] = []
+    for ch in folded:
+        code = ord(ch)
+        if unicodedata.category(ch) == "Cf":
+            continue
+        if ch == "\u034f" or 0xFE00 <= code <= 0xFE0F or 0xE0100 <= code <= 0xE01EF:
+            continue
+        if ch in "\u00a0\u202f\u2007\u2008\u2009\u200a\u205f\u3000":
+            chars.append(" ")
+            continue
+        if 0x2010 <= code <= 0x2015 or code in (0x2212, 0xFE58, 0xFE63, 0xFF0D):
+            chars.append("-")
+            continue
+        chars.append(ch)
+    result = "".join(chars)
+    if strip_emphasis:
+        result = re.sub(r"\*\*|__|~~|`|\*|_", "", result)
+    return result
+
+
+def _fence_mark(line: str) -> str:
+    """``---`` or ``...`` after the same fold used for prose and keys."""
+    mark = normalize_scan_text(line).strip()
+    if mark in {"---", "..."}:
+        return mark
+    return ""
+
+
 def _front_matter_lines(text: str) -> list[str] | None:
     lines = text.splitlines()
-    while lines and lines[0].lstrip("\ufeff").strip() == "":
+    while lines and _fence_mark(lines[0]) == "" and normalize_scan_text(lines[0]).strip() == "":
         del lines[0]
-    if not lines:
-        return None
-    lines[0] = lines[0].lstrip("\ufeff")
-    if lines[0].strip() != "---":
+    if not lines or _fence_mark(lines[0]) == "":
         return None
     for index, line in enumerate(lines[1:], start=1):
-        # MkDocs 1.6.1 YAML_RE closes on --- or ... with optional trailing space.
-        if line.strip() == "---" or re.fullmatch(r"\.\.\.[ \t]*", line):
+        if _fence_mark(line):
             return lines[1:index]
     return None
 
@@ -214,7 +248,8 @@ def front_matter_bounds(text: str) -> tuple[DateToken, DateToken]:
     / ``period_`` / ``period-`` key other than ``period_label``, a homoglyph or
     invisible-character variant of ``period``, or a mapping that is missing
     either date or carries another key is an invalid token.
-    ``period: null`` stays absent. The closing line may be ``---`` or ``...``.
+    ``period: null`` stays absent. The opening and closing lines may be
+    ``---`` or ``...`` after NBSP and other scan-fold spaces are removed.
     """
     body_lines = _front_matter_lines(text)
     if body_lines is None:
@@ -273,37 +308,36 @@ _CONFUSABLE_LATIN = str.maketrans(
         "τ": "t",
         "κ": "k",
         "υ": "u",
+        "г": "r",
     }
 )
 
 
 def _fold_period_key(key: str) -> str:
-    """NFKC, drop Unicode Cf, then fold Cyrillic and Greek lookalikes."""
-    normalized = unicodedata.normalize("NFKC", key)
-    stripped = "".join(ch for ch in normalized if unicodedata.category(ch) != "Cf")
-    return stripped.casefold().translate(_CONFUSABLE_LATIN)
+    """Scan-fold, then casefold, then fold Cyrillic and Greek lookalikes."""
+    normalized = normalize_scan_text(key).strip().casefold()
+    return normalized.translate(_CONFUSABLE_LATIN)
 
 
 def _is_misspelled_period_key(key: object) -> bool:
     """True for a period-shaped key that is not the exact ``period`` field.
 
     ``period_label`` is the separate display label on every quarter file.
-    A top-level key that folds to ``period`` only after NFKC, Cf removal, or
-    Cyrillic/Greek confusable folding is the same kind of misspelling.
+    After the shared scan fold, a key that is ``period``, ``period_start``,
+    or ``period_end``, or that starts with ``period`` but is not exactly
+    ``period`` or ``period_label``, is the same kind of misspelling. A
+    variation selector or other dropped mark on ``period`` counts too.
     """
-    if not isinstance(key, str) or key == "period":
+    if not isinstance(key, str):
         return False
-    folded = key.casefold()
+    folded = _fold_period_key(key)
     if folded == "period_label":
+        return False
+    if key == "period":
         return False
     if folded == "period":
         return True
-    if folded.startswith(("period.", "period_", "period-")):
-        return True
-    homoglyph = _fold_period_key(key)
-    if homoglyph == "period_label":
-        return False
-    return homoglyph == "period"
+    return folded.startswith(("period.", "period_", "period-"))
 
 
 def is_standard_quarter_rel(rel: str) -> bool:
@@ -375,11 +409,13 @@ def _normalize_link_line(line: str) -> tuple[str, bool]:
     """
     current = line
     for _ in range(_DECODE_LIMIT):
-        nxt = urllib.parse.unquote(_unescape_entities_drop_controls(current))
+        folded = normalize_scan_text(_unescape_entities_drop_controls(current))
+        nxt = urllib.parse.unquote(folded)
         if nxt == current:
             return current, True
         current = nxt
-    nxt = urllib.parse.unquote(_unescape_entities_drop_controls(current))
+    folded = normalize_scan_text(_unescape_entities_drop_controls(current))
+    nxt = urllib.parse.unquote(folded)
     return current, nxt == current
 
 
