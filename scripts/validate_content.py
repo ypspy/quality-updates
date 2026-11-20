@@ -11,6 +11,8 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import NamedTuple
 
+import yaml
+
 from fss_review_cards import audit_review_html, materialize_review_markdown
 from quarter_timing import (
     APPROVED_NON_QUARTER_PAGES,
@@ -344,8 +346,10 @@ _YEARLESS_KR_RANGE = re.compile(
     rf"(?P<em>\d{{1,2}})\s*월\s*(?P<ed>\d{{1,2}})\s*일"
 )
 _QUARTER_NAME = re.compile(
-    r"(?<!\d)(?P<year>\d{4})\s*년(?:도)?\s*제?\s*(?P<quarter>[1-4])\s*분기"
+    r"(?<!\d)(?P<year>\d{4})\s*년(?:도)?\s*제?\s*(?P<quarter>[1-4])(?:\s*/\s*4)?\s*분기"
 )
+_RELATIVE_QUARTER = re.compile(r"(?<!\d)제?\s*[1-4](?:\s*/\s*4)?\s*분기")
+_YEAR_SECTION = re.compile(r"(\d{4})\s*년")
 _EXPLICIT_DATE = re.compile(_DATE_TOKEN)
 _LONE_DATE = re.compile(_DATE_TOKEN)
 _NAV_KEY = re.compile(r"^[A-Za-z0-9_]+:")
@@ -1088,23 +1092,141 @@ def _outside_highlight_errors(
 _NAV_FOLD = frozenset({">", "|", ">-", "|-", ">+", "|+"})
 
 
-def _nav_title_from_body(body: str) -> str | None:
-    """Title before the last ``: `` path separator. ``20:00`` has no space after ``:``."""
-    if body in _NAV_FOLD or ": " not in body:
-        return None
-    title, _rest = body.rsplit(": ", 1)
-    title = title.strip().strip("'\"")
-    return title or None
+def _strip_nav_quotes(key: str) -> str:
+    key = key.strip()
+    if len(key) >= 2 and key[0] == key[-1] and key[0] in {"'", '"'}:
+        return key[1:-1].strip()
+    return key
 
 
-def _iter_nav_titles(text: str):
-    """Yield ``(line_no, title)`` for keys under the mkdocs ``nav:`` block.
+def _nav_key_from_body(body: str) -> str | None:
+    """Visible nav key, including a section whose value is a nested list.
 
-    A folded scalar (``- >`` on its own line, title on the next line) is read
-    too. The path after the colon is not a title.
+    ``20:00`` has no space after the colon, so only ``": "`` splits a path.
+    A trailing colon with no path is a section title. Quotes around the key
+    are removed.
     """
+    if body in _NAV_FOLD:
+        return None
+    if ": " in body:
+        key = body.rsplit(": ", 1)[0]
+    elif body.endswith(":"):
+        key = body[:-1]
+    else:
+        return None
+    key = _strip_nav_quotes(key.strip())
+    return key or None
+
+
+def _nav_key_on_line(line: str) -> tuple[int, str] | None:
+    item = _NAV_ITEM.match(line)
+    if item:
+        indent = len(line) - len(line.lstrip(" "))
+        key = _nav_key_from_body(item.group(1).strip())
+    else:
+        folded = re.match(r"^(\s+)(?!-\s)(.*)$", line)
+        if not folded:
+            return None
+        indent = len(folded.group(1))
+        key = _nav_key_from_body(folded.group(2).strip())
+    if key is None:
+        return None
+    return indent, key
+
+
+def _year_section_number(key: str) -> int | None:
+    folded = normalize_scan_text(key).strip()
+    match = _YEAR_SECTION.fullmatch(folded)
+    if not match:
+        return None
+    return int(match.group(1))
+
+
+def _title_with_inherited_year(key: str, inherited_year: int | None) -> str | None:
+    """Section titles to judge. A bare year section such as ``2026년`` is not one.
+
+    A relative title (``4분기 (10–12월)``) takes the nearest parent year section.
+    """
+    if _year_section_number(key) is not None:
+        return None
+    folded = normalize_scan_text(key).strip()
+    if inherited_year is None or re.search(r"(?<!\d)\d{4}(?!\d)", folded):
+        return key
+    if _RELATIVE_QUARTER.search(folded):
+        return f"{inherited_year}년 {key}"
+    return key
+
+
+def _walk_nav_yaml(node: object, inherited_year: int | None):
+    if isinstance(node, list):
+        for item in node:
+            yield from _walk_nav_yaml(item, inherited_year)
+        return
+    if not isinstance(node, dict):
+        return
+    for raw_key, value in node.items():
+        key = str(raw_key).strip()
+        year_here = _year_section_number(key)
+        child_year = year_here if year_here is not None else inherited_year
+        yield key, inherited_year
+        if isinstance(value, list):
+            yield from _walk_nav_yaml(value, child_year)
+
+
+def _nav_block_end(lines: list[str], start: int) -> int:
+    for index in range(start, len(lines)):
+        line = lines[index]
+        if line and not line[0].isspace() and not line.startswith(("#", "-")) and _NAV_KEY.match(line):
+            return index
+    return len(lines)
+
+
+def _map_keys_to_nav_lines(lines: list[str], start: int, keys: list[str]) -> list[int] | None:
+    found: list[int] = []
+    cursor = start
+    end = _nav_block_end(lines, start)
+    for key in keys:
+        matched = None
+        for index in range(cursor, end):
+            parsed = _nav_key_on_line(lines[index])
+            if parsed and parsed[1] == key:
+                matched = index
+                break
+        if matched is None:
+            return None
+        found.append(matched)
+        cursor = matched + 1
+    return found
+
+
+def _nav_titles_from_yaml(lines: list[str], nav: object) -> list[tuple[int, str]] | None:
+    walked = list(_walk_nav_yaml(nav, None))
+    if not walked:
+        return None
+    start = None
+    for index, line in enumerate(lines):
+        if re.fullmatch(r"nav:\s*(#.*)?", line):
+            start = index + 1
+            break
+    if start is None:
+        return None
+    mapped = _map_keys_to_nav_lines(lines, start, [key for key, _year in walked])
+    if mapped is None:
+        return None
+    titles: list[tuple[int, str]] = []
+    for line_index, (key, inherited) in zip(mapped, walked):
+        title = _title_with_inherited_year(key, inherited)
+        if title:
+            titles.append((line_index + 1, title))
+    return titles
+
+
+def _nav_titles_from_indent(lines: list[str]) -> list[tuple[int, str]]:
+    """Indent stack used when the YAML nav tree cannot be lined up with the file."""
     in_nav = False
-    for index, line in enumerate(text.splitlines(), start=1):
+    stack: list[tuple[int, int | None]] = []
+    titles: list[tuple[int, str]] = []
+    for index, line in enumerate(lines):
         if not in_nav:
             if re.fullmatch(r"nav:\s*(#.*)?", line):
                 in_nav = True
@@ -1113,18 +1235,40 @@ def _iter_nav_titles(text: str):
             continue
         if _NAV_KEY.match(line):
             break
-        item = _NAV_ITEM.match(line)
-        if item:
-            title = _nav_title_from_body(item.group(1).strip())
-            if title:
-                yield index, title
+        parsed = _nav_key_on_line(line)
+        if parsed is None:
             continue
-        folded = re.match(r"^\s+(?!-\s)(.*)$", line)
-        if not folded:
-            continue
-        title = _nav_title_from_body(folded.group(1).strip())
+        indent, key = parsed
+        while stack and stack[-1][0] >= indent:
+            stack.pop()
+        inherited = next((year for _indent, year in reversed(stack) if year is not None), None)
+        year_here = _year_section_number(key)
+        stack.append((indent, year_here if year_here is not None else inherited))
+        title = _title_with_inherited_year(key, inherited)
         if title:
-            yield index, title
+            titles.append((index + 1, title))
+    return titles
+
+
+def _iter_nav_titles(text: str):
+    """Yield ``(line_no, title)`` for visible mkdocs nav keys, including section titles.
+
+    A year section (``2026년``) is kept only as context for a child such as
+    ``4분기 (10–12월)``. The path after a colon is not a title. YAML order is
+    preferred; a bad parse falls back to indentation.
+    """
+    lines = text.splitlines()
+    titles: list[tuple[int, str]] | None = None
+    try:
+        loaded = yaml.safe_load(text)
+    except yaml.YAMLError:
+        loaded = None
+    nav = loaded.get("nav") if isinstance(loaded, dict) else None
+    if nav is not None:
+        titles = _nav_titles_from_yaml(lines, nav)
+    if titles is None:
+        titles = _nav_titles_from_indent(lines)
+    yield from titles
 
 
 def _nav_title_errors(text: str, now: datetime) -> list[ValidationError]:
