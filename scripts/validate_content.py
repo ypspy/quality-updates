@@ -749,6 +749,68 @@ def _latest_update_errors(text: str, now: datetime) -> list[ValidationError]:
     return errors
 
 
+# 2026년 3분기부터. 이전 분기 문서는 안건 분석 출처를 소급하지 않는다.
+AGENDA_DECISION_SOURCE_FROM = (2026, 3)
+_AGENDA_INFO = re.compile(r'^(\s*)!!! info "안건 분석"\s*$')
+_DECISION_SOURCE = re.compile(
+    r"^- \(출처\) \[[^\]\n]+\]"
+    r"\(https://www\.fsc\.go\.kr/comm/getFile\?srvcId=BBSTY1&upperNo=\d+&fileTy=ATTACH&fileNo=\d+\)"
+    r"(.*)$"
+)
+
+
+def agenda_decision_source_required(path: Path) -> bool:
+    bounds = filename_bounds(path.name)
+    if bounds is None or bounds[1].value is None:
+        return False
+    end = bounds[1].value
+    quarter = (end.month - 1) // 3 + 1
+    return (end.year, quarter) >= AGENDA_DECISION_SOURCE_FROM
+
+
+def _admonition_body(lines: list[str], start: int) -> list[str]:
+    header = lines[start]
+    base = len(header) - len(header.lstrip(" "))
+    body: list[str] = []
+    index = start + 1
+    while index < len(lines):
+        nxt = lines[index]
+        if nxt.strip() == "":
+            body.append(nxt)
+            index += 1
+            continue
+        indent = len(nxt) - len(nxt.lstrip(" "))
+        if indent <= base:
+            break
+        body.append(nxt)
+        index += 1
+    return body
+
+
+def validate_agenda_decision_sources(lines: list[str], path: Path) -> list[ValidationError]:
+    """2026 Q3 이후 안건 분석의 첫 불릿은 의결서 첨부 출처다."""
+    if not agenda_decision_source_required(path):
+        return []
+    errors: list[ValidationError] = []
+    for index, line in enumerate(lines):
+        if _AGENDA_INFO.match(line) is None:
+            continue
+        bullets = [item.strip() for item in _admonition_body(lines, index) if item.strip().startswith("- ")]
+        if bullets and _DECISION_SOURCE.match(bullets[0]):
+            continue
+        if bullets and bullets[0].startswith("- (출처)"):
+            code = "AGENDA_SOURCE_FORMAT"
+            message = "안건 분석 출처 링크 형식이 위원 논의 출처와 같은 의결서 첨부 주소가 아닙니다."
+        elif any(_DECISION_SOURCE.match(item) for item in bullets):
+            code = "AGENDA_SOURCE_FORMAT"
+            message = "안건 분석 의결서 출처 링크는 첫 불릿이어야 합니다."
+        else:
+            code = "AGENDA_SOURCE_MISSING"
+            message = "안건 분석에 의결서 출처 링크가 없습니다."
+        errors.append(ValidationError(index + 1, code, message, "error"))
+    return errors
+
+
 def validate_file(filepath: Path, strict: bool) -> list[ValidationError]:
     """단일 파일 검증."""
     try:
@@ -767,6 +829,7 @@ def validate_file(filepath: Path, strict: bool) -> list[ValidationError]:
         validate_source_layout,
         validate_no_phase2,
         validate_no_collapsible_note,
+        validate_agenda_decision_sources,
     ]:
         all_errors.extend(fn(lines, filepath))
     sanctions_root = Path(__file__).resolve().parent.parent / "downloads" / "sanctions"
