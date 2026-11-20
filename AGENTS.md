@@ -72,6 +72,7 @@ Cursor·Claude 등 **AI 에이전트**가 이 저장소에서 작업할 때의 �
 분기 규제·제재 의결·질의회신 파이프라인은 Agent와 전문가가 협업한다.
 Agent 담당: crawl.py 실행, prepare_deploy, validate/build
 HITL 담당: editor 큐레이션, 요약 검증, nav/index, push 승인
+분기 문서와 nav·index 최신 링크는 그 분기 다음 달 5일 09:00 KST 이후에만 만든다.
 ```
 
 ---
@@ -80,6 +81,7 @@ HITL 담당: editor 큐레이션, 요약 검증, nav/index, push 승인
 
 - **분기 요약 포맷**: `quality-updates-writer` 스킬 없이 링크별 note 블록 형식을 임의로 바꾸지 않는다.
 - **HITL 큐레이션**: `<!-- skip -->`, `<!-- source: … -->`를 사용자 지시 없이 대량 변경하지 않는다.
+- **분기 시점**: 분기 문서(`docs/quality-updates/YYYY/YYYY-MM-DD_to_YYYY-MM-DD.md`)와 `mkdocs.yml` nav·`docs/quality-updates/index.md`·`docs/index.md` 최신 링크는 그 분기 다음 달 5일 09:00 KST(1/5·4/5·7/5·10/5) 이후에만 만든다. 그 전에 걸린 백필 항목은 다음 정규 분기 루틴으로 넘긴다. 예외는 윤석님 명시 승인만이며, 허용 경로는 `data/qu-early-allow.txt`에 적는다. `crawl.py`는 `--year`와 `--quarter`를 명시한다.
 - **기획 → 구현**: `/brainstorming`으로 spec이 승인되기 전 코드·대규모 리팩터를 시작하지 않는다.
 - **커밋**: 사용자가 요청할 때만. `quality-updates-writer`는 RIGID 스킬이다.
 - **SUMMARIZE 슬림** (요약 시): `gold-excerpts` + 분기 md ±80줄 윈도우 + REFERENCE 온디맨드; 재주입 금지 — [spec](docs/superpowers/specs/2026-07-23-summarize-slim-design.md)

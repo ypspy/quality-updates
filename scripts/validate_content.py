@@ -7,10 +7,23 @@ admonition 들여쓰기, YAML front matter, 날짜 형식, 테이블 스키마 �
 import argparse
 import re
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import NamedTuple
 
 from fss_review_cards import audit_review_html, materialize_review_markdown
+from quarter_timing import (
+    as_seoul,
+    canonical_quarter_key,
+    is_before_update,
+    iter_quarter_refs,
+    find_period_end,
+    load_allow_list,
+    period_end_from_filename,
+    period_end_from_text,
+    quarter_key_for_path,
+    quarter_update_at,
+)
 from source_marker_layout import find_unsafe_source_layout
 
 
@@ -288,6 +301,107 @@ def validate_fss_review_cards(text: str) -> list[ValidationError]:
     ]
 
 
+_LINK_SOURCES = (
+    Path("mkdocs.yml"),
+    Path("docs/quality-updates/index.md"),
+    Path("docs/index.md"),
+)
+
+
+def _read_text(path: Path) -> str | None:
+    try:
+        return path.read_text(encoding="utf-8")
+    except OSError:
+        return None
+
+
+def _timing_message(period_end, key: str, *, kind: str) -> str:
+    stamp = quarter_update_at(period_end).strftime("%Y-%m-%d %H:%M")
+    if kind == "file":
+        return (
+            "분기 갱신일 전 파일입니다. "
+            f"기간 종료 {period_end.isoformat()}의 갱신일은 {stamp} KST이며, "
+            "그 전에는 파일을 두거나 내용을 넣지 않습니다."
+        )
+    return f"분기 갱신일 전 링크입니다. {key} 의 갱신일은 {stamp} KST입니다."
+
+
+def quarter_timing_errors(
+    repo_root: Path,
+    now: datetime | None = None,
+    allow: set[str] | None = None,
+) -> list[tuple[Path, ValidationError]]:
+    """Quarter files and nav/index links that appear before their update instant."""
+    now = as_seoul(now)
+    root = Path(repo_root)
+    if allow is None:
+        allow = load_allow_list(root / "data" / "qu-early-allow.txt")
+    errors: list[tuple[Path, ValidationError]] = []
+
+    docs = root / "docs" / "quality-updates"
+    if docs.is_dir():
+        for path in sorted(docs.rglob("*.md")):
+            key = quarter_key_for_path(path)
+            if key is None or key in allow:
+                continue
+            text = _read_text(path)
+            if text is None:
+                errors.append((path, ValidationError(0, "READ", f"파일을 읽지 못했습니다: {path.name}", "error")))
+                continue
+            end, line_no = _period_end_and_line(text, path.name)
+            if end is None or not is_before_update(end, now):
+                continue
+            errors.append(
+                (
+                    path,
+                    ValidationError(line_no, "QUARTER_TOO_EARLY", _timing_message(end, key, kind="file"), "error"),
+                )
+            )
+
+    for rel in _LINK_SOURCES:
+        source = root / rel
+        text = _read_text(source)
+        if text is None:
+            continue
+        for line_no, line in enumerate(text.splitlines(), start=1):
+            for year, name in iter_quarter_refs(line):
+                key = canonical_quarter_key(year, name)
+                if key in allow:
+                    continue
+                end = _period_end_for_target(root / key, name)
+                if end is None or not is_before_update(end, now):
+                    continue
+                errors.append(
+                    (
+                        source,
+                        ValidationError(
+                            line_no,
+                            "QUARTER_LINK_TOO_EARLY",
+                            _timing_message(end, key, kind="link"),
+                            "error",
+                        ),
+                    )
+                )
+    return errors
+
+
+def _period_end_and_line(text: str, filename: str) -> tuple:
+    end, line_no = find_period_end(text)
+    if end is not None:
+        return end, line_no
+    return period_end_from_filename(filename), 1
+
+
+def _period_end_for_target(path: Path, filename: str):
+    if path.is_file():
+        text = _read_text(path)
+        if text is not None:
+            end = period_end_from_text(text)
+            if end is not None:
+                return end
+    return period_end_from_filename(filename)
+
+
 def validate_file(filepath: Path, strict: bool) -> list[ValidationError]:
     """단일 파일 검증."""
     try:
@@ -317,7 +431,7 @@ def validate_file(filepath: Path, strict: bool) -> list[ValidationError]:
     return all_errors
 
 
-def main():
+def main(argv: list[str] | None = None, now: datetime | None = None, repo_root: Path | None = None) -> int:
     parser = argparse.ArgumentParser(description="Quality-updates 마크다운 문서 콘텐츠 검증")
     parser.add_argument(
         "files",
@@ -329,9 +443,10 @@ def main():
         action="store_true",
         help="경고도 에러로 처리",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
-    repo_root = Path(__file__).resolve().parent.parent
+    repo_root = Path(repo_root) if repo_root is not None else Path(__file__).resolve().parent.parent
+    now = as_seoul(now)
     docs_dir = repo_root / "docs" / "quality-updates"
 
     if args.files:
@@ -368,8 +483,14 @@ def main():
             print(f"{rel}:{e.line_no}: [{sev}] {e.code}: {e.message}")
         if errs:
             print(f"  → {err_count} error(s), {warn_count} warning(s)")
-    sys.exit(1 if total_errors > 0 else 0)
+
+    for path, err in quarter_timing_errors(repo_root, now):
+        rel = path.relative_to(repo_root) if path.is_relative_to(repo_root) else path
+        print(f"{rel}:{err.line_no}: [ERROR] {err.code}: {err.message}")
+        total_errors += 1
+
+    return 1 if total_errors > 0 else 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
