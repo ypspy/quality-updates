@@ -3,9 +3,9 @@
 
 With no period flags, the target is the latest calendar quarter whose update
 instant has passed (09:00 Asia/Seoul on the 5th of the month after that quarter
-ends). An explicit period is refused with exit 2 unless --allow-open-quarter is
-set, when the calendar quarter containing its start or its end is not yet due.
-The later of those two update instants is the one that must have passed.
+ends). An explicit period whose start or end is not yet due is refused with
+exit 2. ``--allow-open-quarter`` does not override that refusal unless the
+exact output path is listed in ``data/qu-early-allow.txt``.
 """
 
 from __future__ import annotations
@@ -22,7 +22,9 @@ if str(_SCRIPTS_DIR) not in sys.path:
 from quarter_timing import (  # noqa: E402
     QuarterNotReady,
     as_seoul,
+    is_standard_quarter_rel,
     last_ready_quarter,
+    load_allow_list,
     quarter_bounds,
     quarter_update_at,
 )
@@ -89,7 +91,7 @@ def guard_period(start: str, end: str, now: datetime, allow_open_quarter: bool) 
         stamp = update_at.strftime("%Y-%m-%d %H:%M")
         raise QuarterNotReady(
             f"{start} ~ {end} 갱신일({stamp} KST) 전에는 수집하지 않습니다. "
-            "예외는 --allow-open-quarter 가 있을 때만 허용합니다."
+            "예외는 윤석님 본인의 명시 승인만 인정합니다."
         )
 
 
@@ -104,7 +106,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--allow-open-quarter",
         action="store_true",
-        help="갱신일(다음 달 5일 09:00 KST) 이전에도 수집한다. 윤석님 명시 승인 때만 사용.",
+        help=(
+            "출력 경로가 data/qu-early-allow.txt에 정확히 있을 때만 갱신일 전 수집을 진행한다. "
+            "그 목록은 윤석님 본인의 명시 승인으로만 채운다."
+        ),
     )
     return parser.parse_args(argv)
 
@@ -114,7 +119,10 @@ def main(argv: list[str] | None = None, now: datetime | None = None) -> int:
     try:
         args = parse_args(argv)
         start_str, end_str = resolve_period(args, now=now)
-        guard_period(start_str, end_str, now, allow_open_quarter=args.allow_open_quarter)
+        output_key = compute_output_path(start_str, end_str).relative_to(repo_root()).as_posix()
+        allowed = load_allow_list(repo_root() / "data" / "qu-early-allow.txt")
+        permitted = bool(args.allow_open_quarter) and output_key in allowed and is_standard_quarter_rel(output_key)
+        guard_period(start_str, end_str, now, allow_open_quarter=permitted)
     except (ValueError, QuarterNotReady) as exc:
         print(f"[ERROR] {exc}", file=sys.stderr)
         return 2

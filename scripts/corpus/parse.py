@@ -272,11 +272,16 @@ def parse_corpus_items(
     return meta, items
 
 
+_QUARTER_NAME = re.compile(r"^\d{4}-\d{2}-\d{2}_to_\d{4}-\d{2}-\d{2}\.md$")
+
+
 def discover_quarter_files(root: Path) -> list[Path]:
+    """Standard quarter files only: ``YYYY/YYYY-MM-DD_to_YYYY-MM-DD.md``."""
     files: list[Path] = []
-    for year_dir in sorted(root.glob("*")):
-        if not year_dir.is_dir():
+    for year_dir in sorted(path for path in root.glob("*") if path.is_dir()):
+        if not re.fullmatch(r"\d{4}", year_dir.name):
             continue
         for md in sorted(year_dir.glob("*.md")):
-            files.append(md)
+            if _QUARTER_NAME.match(md.name):
+                files.append(md)
     return files
