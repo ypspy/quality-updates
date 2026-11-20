@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-11-21T02:51:12.906237+09:00",
+  "generated_at": "2026-11-21T02:53:33.547284+09:00",
   "item_count": 2842,
   "periods": [
     "2026-Q3",
@@ -52,5 +52,5 @@
     "2014-Q2",
     "2014-Q1"
   ],
-  "source_commit": "fc2e7fdbccbc797d78948141b9e41a80c1bb2417"
+  "source_commit": "457cae4374acd12b6e69037a6827cbd0470d6dd5"
 }
