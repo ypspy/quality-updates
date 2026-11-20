@@ -11,6 +11,7 @@ import zipfile
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from pathlib import Path
+from urllib.parse import parse_qs, urlparse
 
 LINK_RE = re.compile(r"^- \((\d{2})-(\d{2})-(\d{2})\) \[(.+?)\]\((https?://[^\)]+)\)")
 _YEAR_QUOTES = "'\u2018\u2019"
@@ -633,6 +634,81 @@ def minutes_pdf_urls(detail_html: str) -> list[str]:
 
 def agenda_zip_urls(detail_html: str) -> list[str]:
     return [url for name, url in detail_attachments(detail_html) if name.lower().endswith(".zip")]
+
+
+def _is_decision_bundle_name(name: str) -> bool:
+    """게시글 첨부 이름이 회차 「안건 및 (제재안건) 의결서」인지."""
+    text = name.strip()
+    if not text or text == "파일다운로드":
+        return False
+    return "안건" in text and "의결서" in text
+
+
+def canonical_decision_file_url(url: str) -> str | None:
+    """의결서 첨부 주소를 www 호스트와 고정된 쿼리 순서로 맞춘다."""
+    raw = url.strip()
+    if raw.startswith("/"):
+        raw = FSC_ORIGIN + raw
+    parsed = urlparse(raw)
+    if not parsed.path.endswith("/getFile"):
+        return None
+    query = parse_qs(parsed.query, keep_blank_values=True)
+
+    def one(key: str) -> str | None:
+        values = query.get(key) or []
+        if len(values) != 1:
+            return None
+        return values[0]
+
+    upper = one("upperNo")
+    file_no = one("fileNo")
+    if one("srvcId") != "BBSTY1" or one("fileTy") != "ATTACH":
+        return None
+    if not upper or not upper.isdigit() or not file_no or not file_no.isdigit():
+        return None
+    return (
+        "https://www.fsc.go.kr/comm/getFile?"
+        f"srvcId=BBSTY1&upperNo={upper}&fileTy=ATTACH&fileNo={file_no}"
+    )
+
+
+def decision_source_label(filename: str) -> str:
+    name = filename.strip()
+    name = re.sub(r"\.(?:zip|pdf)$", "", name, flags=re.IGNORECASE)
+    name = re.sub(r"\(홈\)\s*$", "", name).strip()
+    return name
+
+
+def format_decision_source_bullet(label: str, file_url: str, trailing: str = "") -> str:
+    """위원 논의 출처와 같은 `- (출처) [이름](주소)` 불릿."""
+    bullet = f"- (출처) [{label}]({file_url})"
+    trailing = trailing.strip()
+    if not trailing:
+        return bullet
+    if trailing.startswith("("):
+        return bullet + trailing
+    return f"{bullet} {trailing}"
+
+
+def decision_source_bullet(attachments: list[tuple[str, str]], trailing: str = "") -> str | None:
+    """파일명으로 고른 의결서 첨부 하나의 출처 줄. 없거나 둘 이상이면 None.
+
+    fileNo는 첨부 주소의 값이다. 2로 고정하지 않는다.
+    """
+    found: list[tuple[str, str]] = []
+    seen: set[str] = set()
+    for name, url in attachments:
+        if not _is_decision_bundle_name(name):
+            continue
+        canonical = canonical_decision_file_url(url)
+        if canonical is None or canonical in seen:
+            continue
+        seen.add(canonical)
+        found.append((name, canonical))
+    if len(found) != 1:
+        return None
+    name, canonical = found[0]
+    return format_decision_source_bullet(decision_source_label(name), canonical, trailing)
 
 
 def zip_entry_names(data: bytes) -> list[str]:
