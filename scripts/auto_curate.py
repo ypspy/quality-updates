@@ -1067,9 +1067,16 @@ def _fsc_enforcement_section(section: str) -> bool:
     return "보도자료" in section or "제재 의결" in section
 
 
+def _enforcement_progress(title: str) -> bool:
+    """A progress note is not the sanction release itself (2017Q1 nttId 13219)."""
+    return "진행상황" in squash(title)
+
+
 def _has_fsc_enforcement_pair(item: Item, items: list[Item]) -> bool:
     for other in items:
         if other is item or other.agency != "금융위원회":
+            continue
+        if _enforcement_progress(other.title):
             continue
         if not _fsc_enforcement_section(other.section):
             continue
@@ -1085,10 +1092,13 @@ def apply_fss_enforcement_skip(items: list[Item], decisions: list[Decision]) -> 
     """Drop an FSS enforcement link when the same meeting is on the FSC side.
 
     보도자료 and 제재 의결 both count. With no pair, the link-only marker stays.
+    A title that says 진행상황 stays link-only even when a pair exists.
     """
     adjusted = list(decisions)
     for index, (item, decision) in enumerate(zip(items, decisions)):
         if item.agency != "금융감독원" or decision.rule_id != "R3-enforcement-fss":
+            continue
+        if _enforcement_progress(item.title):
             continue
         if not _has_fsc_enforcement_pair(item, items):
             continue

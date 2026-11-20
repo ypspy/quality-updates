@@ -160,6 +160,26 @@ def test_fss_enforcement_is_link_only_and_fsc_is_summary():
     assert decide_one(standard).state == "needs_summary"
 
 
+def test_enforcement_progress_update_stays_link_only_with_fsc_pair():
+    """2017Q1 nttId 13219 stays a link. A progress note is not the sanction to drop."""
+    fss = _item(
+        "대우조선해양 및 안진회계법인 등에 대한 감리결과조치 진행상황",
+        date="17-02-24",
+        url="https://www.fss.or.kr/fss/bbs/B0000188/view.do?nttId=13219",
+    )
+    fsc = _item(
+        "[보도참고]대우조선해양 및 안진회계법인 등에 대한 감리결과 조치 진행상황",
+        agency="금융위원회",
+        date="17-02-24",
+        url="https://fsc.go.kr/no010101/72604",
+    )
+    decisions = decide_all([fss, fsc])
+    assert decisions[0].state == "no_summary"
+    assert decisions[0].rule_id == "R3-enforcement-fss"
+    assert decisions[0].marker() == "<!-- no_summary -->"
+    assert decisions[1].state == "needs_summary"
+
+
 def test_unfair_trading_enforcement_is_not_treated_as_accounting_review():
     decision = decide_one(_item(
         "불공정거래 조사·심리기관 협의회 개최",
