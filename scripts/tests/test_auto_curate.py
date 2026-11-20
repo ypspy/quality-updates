@@ -64,16 +64,120 @@ def test_summary_marker_matches_editor_saver():
 
 def test_fss_enforcement_is_link_only_and_fsc_is_summary():
     title = "사업보고서 등에 대한 조사·감리결과 조치 - 제6차 금융위원회 조치 의결"
-    fss = decide_one(_item(title, agency="금융감독원"))
-    fsc = decide_one(_item(
+    fss = _item(title, agency="금융감독원", date="26-04-02")
+    fsc_press = _item(
         title,
         agency="금융위원회",
+        section="보도자료",
+        date="26-04-02",
         url="https://fsc.go.kr/no010101/1",
-    ))
-    assert fss.state == "no_summary"
-    assert fss.marker() == "<!-- no_summary -->"
-    assert fsc.state == "needs_summary"
-    assert fsc.rule_id == "R4-enforcement-fsc"
+    )
+    paired = decide_all([fss, fsc_press])
+    assert paired[0].state == "skip"
+    assert paired[0].rule_id == "R3-enforcement-fss"
+    assert paired[0].marker() == "<!-- skip -->"
+    assert paired[1].state == "needs_summary"
+    assert paired[1].rule_id == "R4-enforcement-fsc"
+
+    fsc_sanction = _item(
+        title,
+        agency="금융위원회",
+        section="제재 의결",
+        date="26-04-03",
+        url="https://fsc.go.kr/no010101/2",
+    )
+    sanction_pair = decide_all([fss, fsc_sanction])
+    assert sanction_pair[0].state == "skip"
+    assert sanction_pair[0].rule_id == "R3-enforcement-fss"
+    assert sanction_pair[1].state == "needs_summary"
+
+    alone = decide_all([fss])
+    assert alone[0].state == "no_summary"
+    assert alone[0].rule_id == "R3-enforcement-fss"
+    assert alone[0].marker() == "<!-- no_summary -->"
+    assert decide_one(fss).state == "no_summary"
+
+    other_meeting = _item(
+        "사업보고서 등에 대한 조사·감리결과 조치 - 제18차 금융위원회 조치 의결",
+        agency="금융위원회",
+        section="보도자료",
+        date="25-10-22",
+        url="https://fsc.go.kr/no010101/18",
+    )
+    no_pair = _item(
+        "사업보고서 등에 대한 조사·감리결과 조치",
+        agency="금융감독원",
+        date="25-10-01",
+        url="https://www.fss.or.kr/fss/bbs/B0000188/view.do?nttId=205747",
+    )
+    assert decide_all([no_pair, other_meeting])[0].state == "no_summary"
+
+    different_round = _item(
+        "사업보고서 등에 대한 조사·감리결과 조치 - 제7차 금융위원회 조치 의결",
+        agency="금융위원회",
+        section="제재 의결",
+        date="26-04-03",
+        url="https://fsc.go.kr/no010101/7",
+    )
+    assert decide_all([fss, different_round])[0].state == "no_summary"
+
+    inquiry = _item(
+        "주식회사의 외부감사에 관한 법률 위반혐의에 대한 조사결과 조치",
+        date="16-03-29",
+    )
+    inquiry_fsc = _item(
+        "[보도참고]주식회사의 외부감사에 관한 법률 위반혐의에 대한 조사결과 조치",
+        agency="금융위원회",
+        date="16-03-29",
+        url="https://fsc.go.kr/no010101/72068",
+    )
+    assert decide_all([inquiry, inquiry_fsc])[0].state == "skip"
+    assert decide_all([inquiry, inquiry_fsc])[0].rule_id == "R3-enforcement-fss"
+
+    prefixed = _item("사업보고서 등에 대한 조사,감리결과 조치", date="18-02-08")
+    prefixed_fsc = _item(
+        "[보도참고]제3차 증선위 사업보고서 등에 대한 조사·감리결과 조치",
+        agency="금융위원회",
+        date="18-02-08",
+        url="https://fsc.go.kr/no010101/prefix",
+    )
+    assert decide_all([prefixed, prefixed_fsc])[0].state == "skip"
+
+    statute = _item("외부감사법 위반 등에 대한 감리결과 조치", date="24-06-19")
+    statute_fsc = _item(
+        "[보도참고] 외부감사법 위반 등에 대한 감리결과 조치 - 제12차 증권선물위원회(6.19.) 조치 의결",
+        agency="금융위원회",
+        date="24-06-19",
+        url="https://fsc.go.kr/no010101/statute",
+    )
+    assert decide_all([statute, statute_fsc])[0].state == "skip"
+
+    standard = _item(
+        "외부감사규정 시행세칙상 감리결과 조치양정기준 및 감사인군 구분 세부기준 등을 일부 개정하였습니다",
+        date="23-07-20",
+    )
+    assert decide_one(standard).rule_id != "R3-enforcement-fss"
+    assert decide_one(standard).state == "needs_summary"
+
+
+def test_enforcement_progress_update_stays_link_only_with_fsc_pair():
+    """2017Q1 nttId 13219 stays a link. A progress note is not the sanction to drop."""
+    fss = _item(
+        "대우조선해양 및 안진회계법인 등에 대한 감리결과조치 진행상황",
+        date="17-02-24",
+        url="https://www.fss.or.kr/fss/bbs/B0000188/view.do?nttId=13219",
+    )
+    fsc = _item(
+        "[보도참고]대우조선해양 및 안진회계법인 등에 대한 감리결과 조치 진행상황",
+        agency="금융위원회",
+        date="17-02-24",
+        url="https://fsc.go.kr/no010101/72604",
+    )
+    decisions = decide_all([fss, fsc])
+    assert decisions[0].state == "no_summary"
+    assert decisions[0].rule_id == "R3-enforcement-fss"
+    assert decisions[0].marker() == "<!-- no_summary -->"
+    assert decisions[1].state == "needs_summary"
 
 
 def test_unfair_trading_enforcement_is_not_treated_as_accounting_review():

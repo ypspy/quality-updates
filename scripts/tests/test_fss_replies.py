@@ -1010,10 +1010,15 @@ def _hwpx_bytes() -> bytes:
   </hp:tbl></hp:run></hp:p>
 </hs:sec>
 """
+    # DOS time changes every two seconds. A later call must match the file written earlier.
+    fixed = (2020, 1, 1, 0, 0, 0)
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w") as archive:
-        archive.writestr("Contents/section0.xml", xml)
-        archive.writestr("Contents/header.xml", "<hp:t>머리글은 본문이 아니다</hp:t>")
+        for name, payload in (
+            ("Contents/section0.xml", xml),
+            ("Contents/header.xml", "<hp:t>머리글은 본문이 아니다</hp:t>"),
+        ):
+            archive.writestr(zipfile.ZipInfo(name, date_time=fixed), payload)
     return buffer.getvalue()
 
 
