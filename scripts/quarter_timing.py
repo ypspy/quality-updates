@@ -15,6 +15,7 @@ from __future__ import annotations
 import calendar
 import html
 import re
+import urllib.parse
 from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
@@ -164,7 +165,12 @@ def filename_bounds(name: str) -> tuple[DateToken, DateToken] | None:
 
 def _front_matter_lines(text: str) -> list[str] | None:
     lines = text.splitlines()
-    if not lines or lines[0].strip() != "---":
+    while lines and lines[0].lstrip("\ufeff").strip() == "":
+        del lines[0]
+    if not lines:
+        return None
+    lines[0] = lines[0].lstrip("\ufeff")
+    if lines[0].strip() != "---":
         return None
     for index, line in enumerate(lines[1:], start=1):
         if line.strip() == "---":
@@ -173,7 +179,7 @@ def _front_matter_lines(text: str) -> list[str] | None:
 
 
 def _key_line(body_lines: list[str], key: str) -> int:
-    pattern = re.compile(rf"(^|[{{,])\s*{key}\s*:")
+    pattern = re.compile(rf"(^|[{{,])\s*{re.escape(key)}\s*:")
     for offset, line in enumerate(body_lines):
         if pattern.search(line):
             return offset + 2
@@ -198,7 +204,14 @@ def front_matter_bounds(text: str) -> tuple[DateToken, DateToken]:
 
     Quoted block form and the one-line flow form are both read. Invalid dates
     do not raise. A front matter block that is not YAML becomes an invalid token
-    so the period is not treated as empty.
+    so the period is not treated as empty. Leading blank lines and a UTF-8 BOM
+    are skipped before the opening ``---``.
+
+    Only an exact ``period`` mapping with both ``start`` and ``end`` is a
+    period. A different spelling (``Period``, ``period_start``), a ``period.``
+    / ``period_`` / ``period-`` key other than ``period_label``, or a mapping
+    that is missing either date or carries another key is an invalid token.
+    ``period: null`` stays absent.
     """
     body_lines = _front_matter_lines(text)
     if body_lines is None:
@@ -212,15 +225,40 @@ def front_matter_bounds(text: str) -> tuple[DateToken, DateToken]:
         return DateToken(None, 2, True, "period"), DateToken.absent()
     if not isinstance(meta, dict):
         return DateToken(None, 2, True, "period"), DateToken.absent()
+    misspelled = [key for key in meta if _is_misspelled_period_key(key)]
+    if misspelled:
+        shown = str(misspelled[0])
+        return DateToken(None, _key_line(body_lines, shown), True, shown), DateToken.absent()
     period = meta.get("period")
     if period is None:
         return DateToken.absent(), DateToken.absent()
     if not isinstance(period, dict):
         line = _key_line(body_lines, "period")
         return DateToken(None, line, True, str(period)), DateToken.absent()
+    if set(period) != {"start", "end"}:
+        line = _key_line(body_lines, "period")
+        return DateToken(None, line, True, "period"), DateToken.absent()
     start = _coerce_period_value(period.get("start"), _key_line(body_lines, "start"))
     end = _coerce_period_value(period.get("end"), _key_line(body_lines, "end"))
+    if not start.invalid and not end.invalid and (start.value is None or end.value is None):
+        line = _key_line(body_lines, "period")
+        return DateToken(None, line, True, "period"), DateToken.absent()
     return start, end
+
+
+def _is_misspelled_period_key(key: object) -> bool:
+    """True for a period-shaped key that is not the exact ``period`` field.
+
+    ``period_label`` is the separate display label on every quarter file.
+    """
+    if not isinstance(key, str) or key == "period":
+        return False
+    folded = key.casefold()
+    if folded == "period_label":
+        return False
+    if folded == "period":
+        return True
+    return folded.startswith(("period.", "period_", "period-"))
 
 
 def is_standard_quarter_rel(rel: str) -> bool:
@@ -247,6 +285,26 @@ def iso_dates_in(text: str) -> list[DateToken]:
     return [_date_token(match.group(0), 1) for match in _ISO_DATE.finditer(text)]
 
 
+_DECODE_LIMIT = 8
+_UNSTABLE_LINK = "docs/quality-updates/undecoded-link.md"
+
+
+def _normalize_link_line(line: str) -> tuple[str, bool]:
+    """HTML-unescape and URL-decode until the line stops changing.
+
+    The second value is False when ``_DECODE_LIMIT`` rounds were not enough.
+    ``#`` fragments are split only after this returns.
+    """
+    current = line
+    for _ in range(_DECODE_LIMIT):
+        nxt = urllib.parse.unquote(html.unescape(current))
+        if nxt == current:
+            return current, True
+        current = nxt
+    nxt = urllib.parse.unquote(html.unescape(current))
+    return current, nxt == current
+
+
 def _clean_target(raw: str) -> str:
     token = raw.strip().strip("\"'")
     token = re.split(r"[<>'\"\s]", token, maxsplit=1)[0]
@@ -265,7 +323,9 @@ def quarter_release_blockers(
     Judged from the filename and from ``period`` front matter. ``now`` defaults
     to the current Asia/Seoul time. An exact path in ``data/qu-early-allow.txt``
     skips the early refusal. A start date after the end date is still refused,
-    and a dash or path variant is never an exemption.
+    and a dash or path variant is never an exemption. A string ``period`` or any
+    other unreadable period token is refused as well. The allow list does not
+    hide that token.
     """
     current = as_seoul(now)
     docs = Path(repo_root) / "docs" / "quality-updates"
@@ -292,6 +352,9 @@ def quarter_release_blockers(
                 problems.append(f"{rel}: 시작일이 종료일보다 늦습니다")
         if period_start.value and period_end.value and period_start.value > period_end.value:
             problems.append(f"{rel}: period 시작일이 종료일보다 늦습니다")
+        for token in (period_start, period_end):
+            if token.invalid:
+                problems.append(f"{rel}: period 값이 올바른 날짜가 아닙니다: {token.raw}")
         days = [
             token.value
             for token in (*(bounds or ()), period_start, period_end)
@@ -308,9 +371,14 @@ def iter_doc_targets(source_rel: str, line: str) -> list[str]:
     Exact standard paths stay exact. A suffix, extra directory, missing year
     folder, or other variant is returned unchanged in shape so it cannot inherit
     an allow-list entry for the canonical file. HTML ``href`` values are
-    included, and ``&#47;`` is read as ``/``.
+    included. HTML unescape and URL decoding repeat until the line is stable,
+    including ``%252F`` and ``%26%2347%3B``, and only then are ``#`` fragments
+    removed. A line that is still changing after the decode cap is returned as
+    an undecoded path so the caller can reject it.
     """
-    decoded = html.unescape(line)
+    decoded, stable = _normalize_link_line(line)
+    if not stable:
+        return [_UNSTABLE_LINK]
     raws: list[str] = []
     raws.extend(match.group(1) for match in _PAREN_TARGET.finditer(decoded))
     raws.extend(match.group(1) for match in _YAML_VALUE.finditer(decoded))

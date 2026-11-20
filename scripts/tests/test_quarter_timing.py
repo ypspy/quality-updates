@@ -785,3 +785,347 @@ def test_tab_indented_latest_update_body_is_checked(tmp_path):
     (root / "docs" / "quality-updates" / "index.md").write_text(body, encoding="utf-8")
     errors = quarter_timing_errors(root, NOV_20)
     assert _codes(errors) == ["QUARTER_HIGHLIGHT_TOO_EARLY", "QUARTER_HIGHLIGHT_TOO_EARLY"]
+
+
+_READY_NAME = "2026-07-01_to_2026-09-30.md"
+
+
+def _write_ready_quarter(root: Path, body: str) -> None:
+    (root / "docs" / "quality-updates" / "2026" / _READY_NAME).write_text(body, encoding="utf-8")
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        "---\ntitle: t\nperiod:\n  from: 2026-10-01\n  to: 2026-12-31\n---\n",
+        '---\ntitle: t\nperiod: {from: "2026-10-01", to: "2026-12-31"}\n---\n',
+    ],
+)
+def test_period_without_start_end_keys_is_invalid(tmp_path, body):
+    root = _mini_repo(tmp_path)
+    _write_ready_quarter(root, body)
+    assert _codes(quarter_timing_errors(root, NOV_20)) == ["QUARTER_DATE_INVALID"]
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        "---\ntitle: t\nperiod.start: 2026-10-01\nperiod.end: 2026-12-31\n---\n",
+        '---\ntitle: t\nperiod.start: "2026-10-01"\nperiod.end: "2026-12-31"\n---\n',
+    ],
+)
+def test_toplevel_period_start_end_keys_are_invalid(tmp_path, body):
+    root = _mini_repo(tmp_path)
+    _write_ready_quarter(root, body)
+    assert _codes(quarter_timing_errors(root, NOV_20)) == ["QUARTER_DATE_INVALID"]
+
+
+def test_allow_list_does_not_hide_unreadable_period(tmp_path):
+    root = _mini_repo(tmp_path)
+    _write_ready_quarter(
+        root,
+        "---\nperiod:\n  from: 2026-10-01\n  to: 2026-12-31\n---\n",
+    )
+    (root / "data" / "qu-early-allow.txt").write_text(
+        "# 윤석님 본인의 명시 승인\n"
+        f"docs/quality-updates/2026/{_READY_NAME}\n",
+        encoding="utf-8",
+    )
+    assert _codes(quarter_timing_errors(root, NOV_20)) == ["QUARTER_DATE_INVALID"]
+
+
+def test_bom_front_matter_period_is_not_ignored(tmp_path):
+    root = _mini_repo(tmp_path)
+    _write_ready_quarter(
+        root,
+        "\ufeff---\ntitle: t\nperiod:\n  start: 2026-10-01\n  end: 2026-12-31\n---\n",
+    )
+    errors = quarter_timing_errors(root, NOV_20)
+    codes = _codes(errors)
+    assert "QUARTER_TOO_EARLY" in codes
+    assert "QUARTER_PERIOD_MISMATCH" in codes
+    assert "QUARTER_DATE_INVALID" not in codes
+    early = next(err for _path, err in errors if err.code == "QUARTER_TOO_EARLY")
+    assert "2027-01-05 09:00" in early.message
+
+
+def test_bom_front_matter_matching_ready_period_is_quiet(tmp_path):
+    root = _mini_repo(tmp_path)
+    _write_ready_quarter(
+        root,
+        "\ufeff---\ntitle: t\nperiod:\n  start: 2026-07-01\n  end: 2026-09-30\n---\n",
+    )
+    assert quarter_timing_errors(root, NOV_20) == []
+
+
+def test_early_period_outside_latest_update_is_highlight(tmp_path):
+    prose = (
+        "## 최근 업데이트 하이라이트\n\n"
+        "2026-10-01 ~ 2026-12-31 규제 업데이트가 추가되었습니다.\n\n"
+        '!!! info "Latest Update"\n'
+        "    **2026-07-01 ~ 2026-09-30 규제 업데이트가 추가되었습니다.**\n"
+    )
+    root = _mini_repo(tmp_path)
+    (root / "docs" / "index.md").write_text(prose, encoding="utf-8")
+    (root / "docs" / "quality-updates" / "index.md").write_text(prose, encoding="utf-8")
+    errors = quarter_timing_errors(root, NOV_20)
+    assert _codes(errors) == ["QUARTER_HIGHLIGHT_TOO_EARLY", "QUARTER_HIGHLIGHT_TOO_EARLY"]
+    assert all("2027-01-05 09:00" in err.message for _path, err in errors)
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        "## 최근 업데이트 하이라이트\n\n26. 10. 1. ~ 26. 12. 31.\n",
+        '!!! info "Latest Update"\n    26. 10. 1. ~ 26. 12. 31.\n',
+    ],
+)
+def test_two_digit_year_range_is_too_early(tmp_path, body):
+    root = _mini_repo(tmp_path)
+    (root / "docs" / "index.md").write_text(body, encoding="utf-8")
+    errors = quarter_timing_errors(root, NOV_20)
+    assert _codes(errors) == ["QUARTER_HIGHLIGHT_TOO_EARLY"]
+    assert "2027-01-05 09:00" in errors[0][1].message
+
+
+def test_past_press_dates_outside_latest_update_are_quiet(tmp_path):
+    text = (
+        "## 최근 업데이트 하이라이트\n\n"
+        "본인 인증 서비스 일시 점검 안내(2026. 9. 19.(토) 21:00 ~ 2026. 9 20.(일) 05:00)\n"
+        "2026. 9. 19. ~ 2026. 9. 20. 점검이 끝났다.\n"
+        "26. 7. 8. ~ 26. 7. 9. 조치 의결 보도.\n"
+        "- (26-09-19) [보도자료](https://example.test/press)\n"
+        '!!! info "Latest Update"\n'
+        "    **2026-07-01 ~ 2026-09-30 규제 업데이트가 추가되었습니다.**\n"
+        "    본인 인증 서비스 일시 점검 안내(2026. 9. 19.(토) 21:00 ~ 2026. 9 20.(일) 05:00)\n"
+    )
+    root = _mini_repo(tmp_path)
+    (root / "docs" / "index.md").write_text(text, encoding="utf-8")
+    (root / "docs" / "quality-updates" / "index.md").write_text(text, encoding="utf-8")
+    assert quarter_timing_errors(root, NOV_20) == []
+
+
+def test_encoded_early_links_are_too_early(tmp_path):
+    root = _mini_repo(tmp_path)
+    (root / "mkdocs.yml").write_text(
+        "nav:\n  - 4분기: quality-updates%2F2026%2F2026-10-01_to_2026-12-31.md\n",
+        encoding="utf-8",
+    )
+    (root / "docs" / "index.md").write_text(
+        '<a href="quality-updates&#38;#47;2026&#38;#47;2026-10-01_to_2026-12-31.md">4분기</a>\n',
+        encoding="utf-8",
+    )
+    (root / "docs" / "quality-updates" / "index.md").write_text(
+        '<a href="2026%2F2026-10-01_to_2026-12-31.md">4분기</a>\n',
+        encoding="utf-8",
+    )
+    errors = quarter_timing_errors(root, NOV_20)
+    assert _codes(errors) == [
+        "QUARTER_LINK_TOO_EARLY",
+        "QUARTER_LINK_TOO_EARLY",
+        "QUARTER_LINK_TOO_EARLY",
+    ]
+    assert {path.relative_to(root).as_posix() for path, _err in errors} == {
+        "mkdocs.yml",
+        "docs/index.md",
+        "docs/quality-updates/index.md",
+    }
+
+
+def test_encoded_ready_quarter_link_is_quiet(tmp_path):
+    root = _mini_repo(tmp_path)
+    ready = "2026-07-01_to_2026-09-30.md"
+    (root / "mkdocs.yml").write_text(
+        f"nav:\n  - 3분기: quality-updates%2F2026%2F{ready}\n",
+        encoding="utf-8",
+    )
+    (root / "docs" / "index.md").write_text(
+        f'<a href="quality-updates&#38;#47;2026&#38;#47;{ready}">3분기</a>\n',
+        encoding="utf-8",
+    )
+    (root / "docs" / "quality-updates" / "index.md").write_text(
+        f'<a href="2026%2F{ready}">3분기</a>\n',
+        encoding="utf-8",
+    )
+    assert quarter_timing_errors(root, NOV_20) == []
+
+
+def _join_slash(parts: list[str], kind: str) -> str:
+    slash = {"double": "%252F", "entity": "%26%2347%3B", "triple": "%25252F"}[kind]
+    return slash.join(parts)
+
+
+def _write_encoded_surface(root: Path, surface: str, kind: str, filename: str) -> None:
+    nav_path = _join_slash(["quality-updates", "2026", filename], kind)
+    quarter_path = _join_slash(["2026", filename], kind)
+    if surface == "nav":
+        (root / "mkdocs.yml").write_text(f"nav:\n  - 분기: {nav_path}\n", encoding="utf-8")
+    elif surface == "index-md":
+        (root / "docs" / "index.md").write_text(f"[4분기]({nav_path})\n", encoding="utf-8")
+    elif surface == "index-href":
+        (root / "docs" / "index.md").write_text(f'<a href="{nav_path}">4분기</a>\n', encoding="utf-8")
+    else:
+        (root / "docs" / "quality-updates" / "index.md").write_text(
+            f'<a href="{quarter_path}">4분기</a>\n',
+            encoding="utf-8",
+        )
+
+
+@pytest.mark.parametrize("kind", ["double", "entity", "triple"])
+@pytest.mark.parametrize("surface", ["nav", "index-md", "index-href", "quarter-index"])
+def test_nested_encoded_early_link_is_too_early(tmp_path, kind, surface):
+    root = _mini_repo(tmp_path)
+    _write_encoded_surface(root, surface, kind, Q4_NAME)
+    errors = quarter_timing_errors(root, NOV_20)
+    assert _codes(errors) == ["QUARTER_LINK_TOO_EARLY"]
+    assert "2027-01-05 09:00" in errors[0][1].message
+
+
+@pytest.mark.parametrize("kind", ["double", "entity", "triple"])
+@pytest.mark.parametrize("surface", ["nav", "index-md", "index-href", "quarter-index"])
+def test_nested_encoded_ready_link_is_quiet(tmp_path, kind, surface):
+    root = _mini_repo(tmp_path)
+    _write_encoded_surface(root, surface, kind, "2026-07-01_to_2026-09-30.md")
+    assert quarter_timing_errors(root, NOV_20) == []
+
+
+def test_decode_past_the_cap_is_nonstandard(tmp_path):
+    import urllib.parse
+
+    root = _mini_repo(tmp_path)
+    token = "quality-updates/2026/2026-10-01_to_2026-12-31.md"
+    for _ in range(12):
+        token = urllib.parse.quote(token, safe="")
+    (root / "mkdocs.yml").write_text(f"nav:\n  - 4분기: {token}\n", encoding="utf-8")
+    (root / "docs" / "index.md").write_text(f"[4분기]({token})\n", encoding="utf-8")
+    (root / "docs" / "quality-updates" / "index.md").write_text(
+        f'<a href="{token}">4분기</a>\n',
+        encoding="utf-8",
+    )
+    errors = quarter_timing_errors(root, NOV_20)
+    assert _codes(errors) == [
+        "QUARTER_NONSTANDARD_PATH",
+        "QUARTER_NONSTANDARD_PATH",
+        "QUARTER_NONSTANDARD_PATH",
+    ]
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "'26. 10. 1. ~ '26. 12. 31.",
+        "'26.10.1.~'26.12.31.",
+        "(26-10-01) ~ (26-12-31)",
+        "\u201926. 10. 1. ~ \u201926. 12. 31.",
+    ],
+)
+@pytest.mark.parametrize("inside", [False, True])
+def test_apostrophe_and_paren_year_ranges_are_early(tmp_path, line, inside):
+    root = _mini_repo(tmp_path)
+    if inside:
+        body = f'!!! info "Latest Update"\n    {line}\n'
+    else:
+        body = f"## 최근 업데이트 하이라이트\n\n{line}\n"
+    (root / "docs" / "index.md").write_text(body, encoding="utf-8")
+    errors = quarter_timing_errors(root, NOV_20)
+    assert _codes(errors) == ["QUARTER_HIGHLIGHT_TOO_EARLY"]
+    assert "2027-01-05 09:00" in errors[0][1].message
+
+
+@pytest.mark.parametrize("inside", [False, True])
+def test_apostrophe_ready_quarter_range_is_quiet(tmp_path, inside):
+    root = _mini_repo(tmp_path)
+    line = "'26. 7. 1. ~ '26. 9. 30."
+    if inside:
+        body = f'!!! info "Latest Update"\n    {line}\n'
+    else:
+        body = f"## 최근 업데이트 하이라이트\n\n{line}\n"
+    (root / "docs" / "index.md").write_text(body, encoding="utf-8")
+    assert quarter_timing_errors(root, NOV_20) == []
+
+
+@pytest.mark.parametrize("inside", [False, True])
+def test_underscore_to_early_range_is_highlight(tmp_path, inside):
+    root = _mini_repo(tmp_path)
+    line = "2026-10-01_to_2026-12-31 규제 업데이트가 추가되었습니다."
+    if inside:
+        body = f'!!! info "Latest Update"\n    {line}\n'
+    else:
+        body = line + "\n"
+    (root / "docs" / "index.md").write_text(body, encoding="utf-8")
+    errors = quarter_timing_errors(root, NOV_20)
+    assert _codes(errors) == ["QUARTER_HIGHLIGHT_TOO_EARLY"]
+    assert "2027-01-05 09:00" in errors[0][1].message
+
+
+@pytest.mark.parametrize("inside", [False, True])
+def test_underscore_to_ready_range_is_quiet(tmp_path, inside):
+    root = _mini_repo(tmp_path)
+    line = "2026-07-01_to_2026-09-30 규제 업데이트가 추가되었습니다."
+    if inside:
+        body = f'!!! info "Latest Update"\n    {line}\n'
+    else:
+        body = line + "\n"
+    (root / "docs" / "index.md").write_text(body, encoding="utf-8")
+    (root / "docs" / "quality-updates" / "index.md").write_text(
+        "- **[2014년](2014/2014-10-01_to_2014-12-31.md)** — 1·2·3·4분기 (01–12월)\n"
+        "- **[2026년](2026/2026-07-01_to_2026-09-30.md)** — 1·2·3분기 (01–09월)\n",
+        encoding="utf-8",
+    )
+    assert quarter_timing_errors(root, NOV_20) == []
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        "---\nPeriod: {start: 2026-10-01, end: 2026-12-31}\n---\n",
+        "---\nperiod_start: 2026-10-01\nperiod_end: 2026-12-31\n---\n",
+        "---\nperiod: {start: 2026-07-01, to: 2026-12-31}\n---\n",
+        "---\nperiod:\n  start: 2026-07-01\n---\n",
+    ],
+)
+def test_misspelled_or_partial_period_is_invalid(tmp_path, body):
+    root = _mini_repo(tmp_path)
+    _write_ready_quarter(root, body)
+    assert _codes(quarter_timing_errors(root, NOV_20)) == ["QUARTER_DATE_INVALID"]
+
+
+def test_blank_line_and_bom_before_front_matter_is_read(tmp_path):
+    root = _mini_repo(tmp_path)
+    _write_ready_quarter(
+        root,
+        "\n\ufeff---\nperiod:\n  start: 2026-10-01\n  end: 2026-12-31\n---\n",
+    )
+    errors = quarter_timing_errors(root, NOV_20)
+    codes = _codes(errors)
+    assert "QUARTER_TOO_EARLY" in codes
+    assert "QUARTER_PERIOD_MISMATCH" in codes
+    assert "QUARTER_DATE_INVALID" not in codes
+    early = next(err for _path, err in errors if err.code == "QUARTER_TOO_EARLY")
+    assert "2027-01-05 09:00" in early.message
+
+
+def test_null_period_and_period_label_stay_quiet(tmp_path):
+    root = _mini_repo(tmp_path)
+    _write_ready_quarter(
+        root,
+        "---\ntitle: t\nperiod_label: 2026-Q3\nperiod: null\n---\n",
+    )
+    assert quarter_timing_errors(root, NOV_20) == []
+
+
+def test_ready_period_and_front_matterless_2024_quarters_stay_quiet(tmp_path):
+    root = _mini_repo(tmp_path)
+    _write_ready_quarter(
+        root,
+        "---\ntitle: t\nperiod_label: 2026-Q3\nperiod:\n  start: 2026-07-01\n  end: 2026-09-30\n---\n",
+    )
+    folder = root / "docs" / "quality-updates" / "2024"
+    folder.mkdir()
+    for name in (
+        "2024-01-01_to_2024-03-31.md",
+        "2024-04-01_to_2024-06-30.md",
+        "2024-07-01_to_2024-09-30.md",
+    ):
+        (folder / name).write_text("### 금융감독원\n", encoding="utf-8")
+    assert quarter_timing_errors(root, NOV_20) == []

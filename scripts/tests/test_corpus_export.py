@@ -190,6 +190,154 @@ def test_export_refuses_allow_list_path_variants(tmp_path):
     assert (out / "manifest.json").read_bytes() == before_manifest
 
 
+@pytest.mark.parametrize("dry_run", [False, True])
+@pytest.mark.parametrize(
+    "body",
+    [
+        pytest.param("---\nperiod: '2026-10-01 to 2026-12-31'\n---\n", id="string-period"),
+        pytest.param(
+            "---\nperiod:\n  start: 2026-07-01\n  end: 2026-02-31\n---\n",
+            id="invalid-date-token",
+        ),
+        pytest.param(
+            "---\nperiod:\n  from: 2026-10-01\n  to: 2026-12-31\n---\n",
+            id="from-to-keys",
+        ),
+        pytest.param(
+            "---\nperiod.start: 2026-10-01\nperiod.end: 2026-12-31\n---\n",
+            id="toplevel-period-keys",
+        ),
+        pytest.param(
+            "\ufeff---\nperiod:\n  start: 2026-10-01\n  end: 2026-12-31\n---\n",
+            id="bom-early-period",
+        ),
+    ],
+)
+def test_export_refuses_bad_period_before_writing_jsonl(tmp_path, dry_run, body):
+    root = tmp_path / "repo"
+    quarter = root / "docs" / "quality-updates" / "2026"
+    quarter.mkdir(parents=True)
+    (quarter / "2026-07-01_to_2026-09-30.md").write_text(body, encoding="utf-8")
+    out = tmp_path / "corpus"
+    before_jsonl, before_manifest = _sentinel_corpus(out)
+
+    with pytest.raises(SystemExit, match="2026-07-01_to_2026-09-30"):
+        export_corpus(dry_run=dry_run, strict=False, output_dir=out, root=root, now=NOV_20)
+
+    assert (out / "corpus.jsonl").read_bytes() == before_jsonl
+    assert (out / "manifest.json").read_bytes() == before_manifest
+
+
+@pytest.mark.parametrize("dry_run", [False, True])
+def test_export_allow_list_does_not_hide_invalid_period(tmp_path, dry_run):
+    root = tmp_path / "repo"
+    quarter = root / "docs" / "quality-updates" / "2026"
+    quarter.mkdir(parents=True)
+    name = "2026-10-01_to_2026-12-31.md"
+    (quarter / name).write_text("---\nperiod: 'not-a-mapping'\n---\n", encoding="utf-8")
+    data = root / "data"
+    data.mkdir()
+    (data / "qu-early-allow.txt").write_text(
+        "# 윤석님 본인의 명시 승인\n"
+        f"docs/quality-updates/2026/{name}\n",
+        encoding="utf-8",
+    )
+    out = tmp_path / "corpus"
+    before_jsonl, before_manifest = _sentinel_corpus(out)
+
+    with pytest.raises(SystemExit, match=name):
+        export_corpus(dry_run=dry_run, strict=False, output_dir=out, root=root, now=NOV_20)
+
+    assert (out / "corpus.jsonl").read_bytes() == before_jsonl
+    assert (out / "manifest.json").read_bytes() == before_manifest
+
+
+def _ready_named_quarter(tmp_path: Path, body: str, *, allow: bool) -> tuple[Path, Path, str]:
+    root = tmp_path / "repo"
+    quarter = root / "docs" / "quality-updates" / "2026"
+    quarter.mkdir(parents=True)
+    name = "2026-07-01_to_2026-09-30.md"
+    (quarter / name).write_text(body, encoding="utf-8")
+    if allow:
+        data = root / "data"
+        data.mkdir()
+        (data / "qu-early-allow.txt").write_text(
+            "# 윤석님 본인의 명시 승인\n"
+            f"docs/quality-updates/2026/{name}\n",
+            encoding="utf-8",
+        )
+    return root, tmp_path / "corpus", name
+
+
+@pytest.mark.parametrize("dry_run", [False, True])
+@pytest.mark.parametrize(
+    "body",
+    [
+        pytest.param(
+            "---\nPeriod: {start: 2026-10-01, end: 2026-12-31}\n---\n",
+            id="capital-period",
+        ),
+        pytest.param(
+            "---\nperiod_start: 2026-10-01\nperiod_end: 2026-12-31\n---\n",
+            id="period-start-end-keys",
+        ),
+        pytest.param(
+            "---\nperiod: {start: 2026-07-01, to: 2026-12-31}\n---\n",
+            id="start-and-to",
+        ),
+        pytest.param(
+            "---\nperiod:\n  start: 2026-07-01\n---\n",
+            id="start-without-end",
+        ),
+    ],
+)
+def test_export_refuses_misspelled_period_shapes(tmp_path, dry_run, body):
+    root, out, name = _ready_named_quarter(tmp_path, body, allow=True)
+    before_jsonl, before_manifest = _sentinel_corpus(out)
+
+    with pytest.raises(SystemExit, match=name):
+        export_corpus(dry_run=dry_run, strict=False, output_dir=out, root=root, now=NOV_20)
+
+    assert (out / "corpus.jsonl").read_bytes() == before_jsonl
+    assert (out / "manifest.json").read_bytes() == before_manifest
+
+
+@pytest.mark.parametrize("dry_run", [False, True])
+def test_export_refuses_blank_line_bom_early_period(tmp_path, dry_run):
+    root, out, name = _ready_named_quarter(
+        tmp_path,
+        "\n\ufeff---\nperiod:\n  start: 2026-10-01\n  end: 2026-12-31\n---\n",
+        allow=False,
+    )
+    before_jsonl, before_manifest = _sentinel_corpus(out)
+
+    with pytest.raises(SystemExit, match=name):
+        export_corpus(dry_run=dry_run, strict=False, output_dir=out, root=root, now=NOV_20)
+
+    assert (out / "corpus.jsonl").read_bytes() == before_jsonl
+    assert (out / "manifest.json").read_bytes() == before_manifest
+
+
+def test_export_accepts_ready_period_and_front_matterless_quarters(tmp_path):
+    root = tmp_path / "repo"
+    q3 = root / "docs" / "quality-updates" / "2026"
+    q3.mkdir(parents=True)
+    (q3 / "2026-07-01_to_2026-09-30.md").write_text(
+        "---\nperiod_label: 2026-Q3\nperiod:\n  start: 2026-07-01\n  end: 2026-09-30\n---\n",
+        encoding="utf-8",
+    )
+    older = root / "docs" / "quality-updates" / "2024"
+    older.mkdir()
+    for name in (
+        "2024-01-01_to_2024-03-31.md",
+        "2024-04-01_to_2024-06-30.md",
+        "2024-07-01_to_2024-09-30.md",
+    ):
+        (older / name).write_text("### 금융감독원\n", encoding="utf-8")
+    stats = export_corpus(dry_run=True, strict=False, root=root, now=NOV_20)
+    assert stats["item_count"] == 0
+
+
 def test_export_writes_jsonl(tmp_path):
     out = tmp_path / "corpus"
     stats = export_corpus(dry_run=False, output_dir=out)

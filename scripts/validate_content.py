@@ -319,16 +319,33 @@ _ADMONITION_OPEN = re.compile(r"^[!?]{3}\+?\s*(.*)$")
 _QUOTED_TITLE = re.compile(r"""["'“”‘’](.*?)["'“”‘’]""")
 _EMPH_MARK = re.compile(r"\*\*|__|\*|_")
 _EMPH = r"(?:\*\*|__|\*|_)?"
-_ISO_FLEX = r"\d{4}\s*[.\-/]\s*\d{1,2}\s*[.\-/]\s*\d{1,2}\.?"
+_ISO_FLEX = r"(?<!\d)(?:\d{4}|\d{2})(?!\d)\s*[.\-/]\s*\d{1,2}\s*[.\-/]\s*\d{1,2}\.?"
 _KR_DATE = r"\d{4}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일"
 _DATE_TOKEN = rf"(?:{_ISO_FLEX}|{_KR_DATE})"
-_RANGE_SEP = r"(?:~|～|〜|∼|－|−|–|—|부터|\bto\b|-)"
+_DATE_OPEN = r"['’‘(]?"
+_DATE_CLOSE = r"\)?"
+_RANGE_SEP = r"(?:~|～|〜|∼|－|−|–|—|부터|(?<![A-Za-z])to(?![A-Za-z])|-)"
 _DATE_RANGE = re.compile(
-    rf"{_EMPH}\s*(?P<start>{_DATE_TOKEN})\s*{_EMPH}\s*{_RANGE_SEP}\s*{_EMPH}\s*(?P<end>{_DATE_TOKEN})\s*{_EMPH}",
+    rf"{_EMPH}\s*{_DATE_OPEN}\s*(?P<start>{_DATE_TOKEN})\s*{_DATE_CLOSE}\s*{_EMPH}"
+    rf"\s*{_RANGE_SEP}\s*"
+    rf"{_EMPH}\s*{_DATE_OPEN}\s*(?P<end>{_DATE_TOKEN})\s*{_DATE_CLOSE}\s*{_EMPH}",
     re.IGNORECASE,
 )
 _LONE_DATE = re.compile(_DATE_TOKEN)
+_MD_DEST = re.compile(r"\[[^\]]*\]\(([^)]*)\)")
+_HREF_DEST = re.compile(r"""href\s*=\s*(['"])(.*?)\1""", re.IGNORECASE)
 _HIGHLIGHT_SOURCES = {"docs/index.md", "docs/quality-updates/index.md"}
+
+
+def _link_destination_spans(text: str) -> list[tuple[int, int]]:
+    """Spans of markdown and href targets. A filename there is a link, not prose."""
+    spans = [match.span(1) for match in _MD_DEST.finditer(text)]
+    spans.extend(match.span(2) for match in _HREF_DEST.finditer(text))
+    return spans
+
+
+def _inside_span(spans: list[tuple[int, int]], start: int, end: int) -> bool:
+    return any(opening <= start and end <= closing for opening, closing in spans)
 
 
 def _stamp(moment: datetime) -> str:
@@ -390,6 +407,7 @@ def quarter_timing_errors(
         errors.extend((source, err) for err in _link_timing_errors(root, rel.as_posix(), text, now, allow))
         if rel.as_posix() in _HIGHLIGHT_SOURCES:
             errors.extend((source, err) for err in _latest_update_errors(text, now))
+            errors.extend((source, err) for err in _outside_highlight_errors(text, now))
     return errors
 
 
@@ -662,7 +680,12 @@ def _highlight_date(raw: str) -> date:
     parts = normalized.split("-")
     if len(parts) != 3:
         raise ValueError(raw)
-    return date(int(parts[0]), int(parts[1]), int(parts[2]))
+    year = int(parts[0])
+    if len(parts[0]) == 2:
+        year += 2000
+    elif len(parts[0]) != 4:
+        raise ValueError(raw)
+    return date(year, int(parts[1]), int(parts[2]))
 
 
 def _line_for_offset(block: list[tuple[int, str]], offset: int) -> int:
@@ -679,9 +702,12 @@ def _latest_update_errors(text: str, now: datetime) -> list[ValidationError]:
     errors: list[ValidationError] = []
     for block in _latest_update_blocks(text):
         joined = "\n".join(line for _number, line in block)
+        destinations = _link_destination_spans(joined)
         consumed: list[tuple[int, int]] = []
         for match in _DATE_RANGE.finditer(joined):
             consumed.append(match.span())
+            if _inside_span(destinations, match.start(), match.end()):
+                continue
             line_no = _line_for_offset(block, match.start())
             start_raw = match.group("start")
             end_raw = match.group("end")
@@ -722,6 +748,8 @@ def _latest_update_errors(text: str, now: datetime) -> list[ValidationError]:
         for match in _LONE_DATE.finditer(joined):
             if any(start <= match.start() and match.end() <= end for start, end in consumed):
                 continue
+            if _inside_span(destinations, match.start(), match.end()):
+                continue
             raw_date = match.group(0)
             line_no = _line_for_offset(block, match.start())
             try:
@@ -746,6 +774,58 @@ def _latest_update_errors(text: str, now: datetime) -> list[ValidationError]:
                         "error",
                     )
                 )
+    return errors
+
+
+def _outside_highlight_errors(text: str, now: datetime) -> list[ValidationError]:
+    """Quarter ranges in the two index files that sit outside Latest Update.
+
+    Lone press dates are not ranges. A range whose update instant has passed,
+    including a past-quarter press window, is quiet.
+    """
+    covered = {number for block in _latest_update_blocks(text) for number, _line in block}
+    destinations = _link_destination_spans(text)
+    errors: list[ValidationError] = []
+    for match in _DATE_RANGE.finditer(text):
+        line_no = text.count("\n", 0, match.start()) + 1
+        if line_no in covered or _inside_span(destinations, match.start(), match.end()):
+            continue
+        start_raw = match.group("start")
+        end_raw = match.group("end")
+        try:
+            start_day = _highlight_date(start_raw)
+            end_day = _highlight_date(end_raw)
+        except ValueError:
+            errors.append(
+                ValidationError(
+                    line_no,
+                    "QUARTER_DATE_INVALID",
+                    f"하이라이트 기간이 올바른 날짜가 아닙니다: {start_raw} ~ {end_raw}",
+                    "error",
+                )
+            )
+            continue
+        if start_day > end_day:
+            errors.append(
+                ValidationError(
+                    line_no,
+                    "QUARTER_DATE_ORDER",
+                    "하이라이트 시작일 "
+                    f"{start_day.isoformat()}이 종료일 {end_day.isoformat()}보다 늦습니다.",
+                    "error",
+                )
+            )
+        update_at = governing_update(start_day, end_day)
+        if now < update_at:
+            errors.append(
+                ValidationError(
+                    line_no,
+                    "QUARTER_HIGHLIGHT_TOO_EARLY",
+                    "하이라이트가 갱신일 전 분기를 가리킵니다. "
+                    f"{start_raw} ~ {end_raw} 의 갱신일은 {_stamp(update_at)} KST입니다.",
+                    "error",
+                )
+            )
     return errors
 
 
