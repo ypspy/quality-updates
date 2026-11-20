@@ -488,9 +488,12 @@ def _is_policy_exception_to_exam(folded: str) -> bool:
 
 
 def _enforcement(folded: str) -> bool:
-    return "감리결과" in folded and any(
-        token in folded for token in ("조사", "사업보고서", "감사보고서")
-    )
+    """조사·감리결과 조치. 양정기준·조치기준 개정은 제재 보도가 아니다."""
+    if "조치" not in folded:
+        return False
+    if "양정기준" in folded or "조치기준" in folded:
+        return False
+    return "감리결과" in folded or "조사결과" in folded
 
 
 def _enforcement_out_of_scope(folded: str) -> bool:
@@ -709,7 +712,7 @@ def decide_one(item: Item) -> Decision:
             return _decision(
                 "no_summary",
                 "R3-enforcement-fss",
-                "조사·감리결과 조치는 금융위 쪽에 요약을 두고 금감원은 링크만 유지",
+                "금융위 짝이 없는 조사·감리결과 조치는 링크만 유지",
                 0.9,
             )
         if agency == "금융위원회":
@@ -1001,6 +1004,103 @@ def _event_announcement(folded: str) -> str | None:
     return None
 
 
+# Enforcement titles repeat every meeting, so R13's 21-day title match
+# would treat a later meeting as the same release. A pair is the same
+# meeting within this many days (2026-11-21 윤석님 결정).
+FSS_ENFORCEMENT_PAIR_DAYS = 5
+_MEETING_ROUND_RE = re.compile(
+    r"제\s*(\d+)\s*차(?:\s*임시)?\s*(증권선물위원회|증선위|금융위원회|금융위)?"
+)
+_ENFORCEMENT_TAG_RE = re.compile(r"^[\[\(](?:증선위|보도참고|보도자료)[\]\)]\s*")
+_ENFORCEMENT_ROUND_TAIL_RE = re.compile(r"\s*-\s*제\s*\d+\s*차\b.*$")
+_ENFORCEMENT_ROUND_HEAD_RE = re.compile(
+    r"^제\s*\d+\s*차(?:\s*임시)?\s*(?:증권선물위원회|증선위|금융위원회|금융위)?\s*"
+)
+
+
+def _meeting_round(title: str) -> tuple[int, str] | None:
+    match = _MEETING_ROUND_RE.search(title)
+    if not match:
+        return None
+    body = match.group(2) or ""
+    if "증선" in body or "증권선물" in body:
+        kind = "sfc"
+    elif "금융위" in body:
+        kind = "fsc"
+    else:
+        kind = ""
+    return int(match.group(1)), kind
+
+
+def _rounds_compatible(left: str, right: str) -> bool:
+    """When both titles name a meeting, the number and body must agree."""
+    a = _meeting_round(left)
+    b = _meeting_round(right)
+    if not a or not b:
+        return True
+    if a[0] != b[0]:
+        return False
+    return not (a[1] and b[1] and a[1] != b[1])
+
+
+def _enforcement_stem(title: str) -> str:
+    text = _ENFORCEMENT_TAG_RE.sub("", title.strip())
+    text = _ENFORCEMENT_ROUND_TAIL_RE.sub("", text)
+    text = _ENFORCEMENT_ROUND_HEAD_RE.sub("", text)
+    text = re.sub(r"조치\s*의결.*$", "조치", text)
+    return squash(text)
+
+
+def _same_enforcement_release(left: Item, right: Item) -> bool:
+    if not _dates_close(left.date, right.date, days=FSS_ENFORCEMENT_PAIR_DAYS):
+        return False
+    if not _rounds_compatible(left.title, right.title):
+        return False
+    left_stem = _enforcement_stem(left.title)
+    right_stem = _enforcement_stem(right.title)
+    if min(len(left_stem), len(right_stem)) < 8:
+        return False
+    return left_stem == right_stem or left_stem in right_stem or right_stem in left_stem
+
+
+def _fsc_enforcement_section(section: str) -> bool:
+    return "보도자료" in section or "제재 의결" in section
+
+
+def _has_fsc_enforcement_pair(item: Item, items: list[Item]) -> bool:
+    for other in items:
+        if other is item or other.agency != "금융위원회":
+            continue
+        if not _fsc_enforcement_section(other.section):
+            continue
+        folded = strip_orgs(squash(other.title))
+        if not _enforcement(folded) or _enforcement_out_of_scope(folded):
+            continue
+        if _same_enforcement_release(item, other):
+            return True
+    return False
+
+
+def apply_fss_enforcement_skip(items: list[Item], decisions: list[Decision]) -> list[Decision]:
+    """Drop an FSS enforcement link when the same meeting is on the FSC side.
+
+    보도자료 and 제재 의결 both count. With no pair, the link-only marker stays.
+    """
+    adjusted = list(decisions)
+    for index, (item, decision) in enumerate(zip(items, decisions)):
+        if item.agency != "금융감독원" or decision.rule_id != "R3-enforcement-fss":
+            continue
+        if not _has_fsc_enforcement_pair(item, items):
+            continue
+        adjusted[index] = _decision(
+            "skip",
+            "R3-enforcement-fss",
+            "금융위 짝(날짜 근접·회차, 보도자료 또는 제재 의결)이 있어 금감원 본문에서 제외",
+            0.9,
+        )
+    return adjusted
+
+
 def apply_fss_demotion(items: list[Item], decisions: list[Decision]) -> list[Decision]:
     """When FSC will summarize a near-duplicate press item, keep FSS as a link only."""
     fsc_kept = [
@@ -1038,6 +1138,7 @@ def apply_fss_demotion(items: list[Item], decisions: list[Decision]) -> list[Dec
 
 def decide_all(items: list[Item]) -> list[Decision]:
     base = [decide_one(item) for item in items]
+    base = apply_fss_enforcement_skip(items, base)
     return apply_fss_demotion(items, base)
 
 
