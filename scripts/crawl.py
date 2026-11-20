@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
-"""CLI entry point: python scripts/crawl.py [--year Y --quarter Q] [--start ... --end ...]"""
+"""CLI entry point: python scripts/crawl.py [--year Y --quarter Q] [--start ... --end ...]
+
+With no period flags, the target is the latest calendar quarter whose update
+instant has passed (09:00 Asia/Seoul on the 5th of the month after that quarter
+ends). An explicit period is refused with exit 2 unless --allow-open-quarter is
+set, when the calendar quarter containing its start or its end is not yet due.
+The later of those two update instants is the one that must have passed.
+"""
 
 from __future__ import annotations
 
 import argparse
-import calendar
-import os
 import sys
 from datetime import date, datetime
 from pathlib import Path
@@ -14,21 +19,22 @@ _SCRIPTS_DIR = Path(__file__).resolve().parent
 if str(_SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPTS_DIR))
 
+from quarter_timing import (  # noqa: E402
+    QuarterNotReady,
+    as_seoul,
+    last_ready_quarter,
+    quarter_bounds,
+    quarter_update_at,
+)
+
 
 def repo_root() -> Path:
     return _SCRIPTS_DIR.parent
 
 
 def quarter_dates(year: int, quarter: int) -> tuple[str, str]:
-    if quarter < 1 or quarter > 4:
-        raise ValueError(f"quarter must be 1-4, got {quarter}")
-    start_month = (quarter - 1) * 3 + 1
-    end_month = start_month + 2
-    last_day = calendar.monthrange(year, end_month)[1]
-    return (
-        f"{year:04d}-{start_month:02d}-01",
-        f"{year:04d}-{end_month:02d}-{last_day:02d}",
-    )
+    start, end = quarter_bounds(year, quarter)
+    return start.isoformat(), end.isoformat()
 
 
 def current_quarter(today: date | None = None) -> tuple[int, int]:
@@ -48,7 +54,8 @@ def compute_output_path(start_str: str, end_str: str) -> Path:
     )
 
 
-def resolve_period(args: argparse.Namespace) -> tuple[str, str]:
+def resolve_period(args: argparse.Namespace, now: datetime | None = None) -> tuple[str, str]:
+    now = as_seoul(now)
     if args.start and args.end:
         start = datetime.strptime(args.start, "%Y-%m-%d")
         end = datetime.strptime(args.end, "%Y-%m-%d")
@@ -59,13 +66,31 @@ def resolve_period(args: argparse.Namespace) -> tuple[str, str]:
     year = args.year
     quarter = args.quarter
     if year is None and quarter is None:
-        year, quarter = current_quarter()
+        year, quarter = last_ready_quarter(now)
     elif year is not None and quarter is None:
         raise ValueError("--quarter is required when --year is set")
     elif year is None and quarter is not None:
-        year = date.today().year
+        year = now.year
 
     return quarter_dates(year, quarter)
+
+
+def guard_period(start: str, end: str, now: datetime, allow_open_quarter: bool) -> None:
+    """Refuse a period whose calendar quarter is not yet due.
+
+    Start and end are each mapped to the calendar quarter that contains them.
+    The update instant is 09:00 KST on the 5th of the month after that quarter
+    ends. The later of the two instants must already have passed.
+    """
+    start_date = date.fromisoformat(start)
+    end_date = date.fromisoformat(end)
+    update_at = max(quarter_update_at(start_date), quarter_update_at(end_date))
+    if as_seoul(now) < update_at and not allow_open_quarter:
+        stamp = update_at.strftime("%Y-%m-%d %H:%M")
+        raise QuarterNotReady(
+            f"{start} ~ {end} 갱신일({stamp} KST) 전에는 수집하지 않습니다. "
+            "예외는 --allow-open-quarter 가 있을 때만 허용합니다."
+        )
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -76,14 +101,21 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--end", help="Period end YYYY-MM-DD (overrides --quarter)")
     parser.add_argument("--force", action="store_true", help="Overwrite existing output file")
     parser.add_argument("--dry-run", action="store_true", help="Collect only; do not write file")
+    parser.add_argument(
+        "--allow-open-quarter",
+        action="store_true",
+        help="갱신일(다음 달 5일 09:00 KST) 이전에도 수집한다. 윤석님 명시 승인 때만 사용.",
+    )
     return parser.parse_args(argv)
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: list[str] | None = None, now: datetime | None = None) -> int:
+    now = as_seoul(now)
     try:
         args = parse_args(argv)
-        start_str, end_str = resolve_period(args)
-    except ValueError as exc:
+        start_str, end_str = resolve_period(args, now=now)
+        guard_period(start_str, end_str, now, allow_open_quarter=args.allow_open_quarter)
+    except (ValueError, QuarterNotReady) as exc:
         print(f"[ERROR] {exc}", file=sys.stderr)
         return 2
 
