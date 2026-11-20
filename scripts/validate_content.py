@@ -523,8 +523,8 @@ def _latest_update_errors(text: str, now: datetime) -> list[ValidationError]:
     return errors
 
 
-# 2026년 3분기부터. 이전 분기 문서는 안건 분석 출처를 소급하지 않는다.
-AGENDA_DECISION_SOURCE_FROM = (2026, 3)
+# 2026년 1분기부터. 그 전 분기 문서는 안건 분석 출처를 검사하지 않는다.
+AGENDA_DECISION_SOURCE_FROM = (2026, 1)
 _AGENDA_INFO = re.compile(r'^(\s*)!!! info "안건 분석"\s*$')
 _DECISION_SOURCE = re.compile(
     r"^- \(출처\) \[[^\]\n]+\]"
@@ -562,7 +562,7 @@ def _admonition_body(lines: list[str], start: int) -> list[str]:
 
 
 def validate_agenda_decision_sources(lines: list[str], path: Path) -> list[ValidationError]:
-    """2026 Q3 이후 안건 분석의 첫 불릿은 의결서 첨부 출처다."""
+    """2026 Q1 이후 안건 분석의 첫 불릿은 의결서 첨부 출처다."""
     if not agenda_decision_source_required(path):
         return []
     errors: list[ValidationError] = []

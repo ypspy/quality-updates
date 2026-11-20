@@ -1,4 +1,4 @@
-"""안건 분석 의결서 출처 링크. 2026 Q3부터 필수이고, 그 전 문서는 검사하지 않는다."""
+"""안건 분석 의결서 출처 링크. 2026 Q1부터 필수이고, 그 전 문서는 검사하지 않는다."""
 
 from pathlib import Path
 import sys
@@ -122,10 +122,33 @@ def test_q3_source_link_after_the_summary_fails():
     assert [error.code for error in errors] == ["AGENDA_SOURCE_FORMAT"]
 
 
-def test_quarters_before_2026_q3_are_not_checked():
+def test_q1_agenda_box_without_a_source_link_fails():
+    errors = validate_agenda_decision_sources(_box("- (의결 22) 요약"), Q1)
+    assert [error.code for error in errors] == ["AGENDA_SOURCE_MISSING"]
+
+
+def test_q2_agenda_box_without_a_source_link_fails():
+    errors = validate_agenda_decision_sources(_box("- (제151호) 요약"), Q2)
+    assert [error.code for error in errors] == ["AGENDA_SOURCE_MISSING"]
+
+
+def test_quarters_before_2026_q1_are_not_checked():
     lines = _box("- (의결 48) 요약")
-    for path in (Q1, Q2, Q4_2025):
-        assert validate_agenda_decision_sources(lines, path) == [], path.name
+    assert validate_agenda_decision_sources(lines, Q4_2025) == []
+
+
+def test_2026_q1_document_agenda_boxes_have_decision_sources():
+    text = (REPO / Q1).read_text(encoding="utf-8")
+    errors = validate_agenda_decision_sources(text.splitlines(), Q1)
+    assert errors == []
+    assert text.count('!!! info "안건 분석"') == 9
+
+
+def test_2026_q2_document_agenda_boxes_have_decision_sources():
+    text = (REPO / Q2).read_text(encoding="utf-8")
+    errors = validate_agenda_decision_sources(text.splitlines(), Q2)
+    assert errors == []
+    assert text.count('!!! info "안건 분석"') == 18
 
 
 def test_2026_q3_document_agenda_boxes_have_decision_sources():
@@ -141,4 +164,5 @@ def test_writer_template_requires_the_decision_source_line():
     for text in (skill, guide):
         assert "decision_source_bullet" in text
         assert "2로 고정하지 않는다" in text
-        assert "2026년 3분기" in text
+        assert "2026년 1분기부터 이 줄이 없으면" in text
+        assert "2026년 3분기부터 이 줄이 없으면" not in text
