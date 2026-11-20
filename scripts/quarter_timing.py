@@ -19,7 +19,14 @@ from datetime import date, datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+import yaml
+
 SEOUL = ZoneInfo("Asia/Seoul")
+
+# Pages under docs/quality-updates/ that are not a quarter document.
+APPROVED_NON_QUARTER_PAGES = frozenset({
+    "docs/quality-updates/index.md",
+})
 
 _FILENAME = re.compile(r"^(?P<start>\d{4}-\d{2}-\d{2})_to_(?P<end>\d{4}-\d{2}-\d{2})\.md$")
 _QUARTER_REF = re.compile(
@@ -29,6 +36,31 @@ _QUARTER_REF = re.compile(
 _EXACT_ALLOW = re.compile(
     r"docs/quality-updates/\d{4}/\d{4}-\d{2}-\d{2}_to_\d{4}-\d{2}-\d{2}\.md"
 )
+_EXACT_NAV = re.compile(
+    r"^(?:docs/)?quality-updates/(?P<year>\d{4})/(?P<name>\d{4}-\d{2}-\d{2}_to_\d{4}-\d{2}-\d{2}\.md)$"
+)
+_EXACT_INDEX = re.compile(r"^(?:docs/)?quality-updates/index\.md$")
+_EXACT_REL = re.compile(
+    r"^(?P<year>\d{4})/(?P<name>\d{4}-\d{2}-\d{2}_to_\d{4}-\d{2}-\d{2}\.md)$"
+)
+_PAREN_TARGET = re.compile(r"\(([^()\s]+)\)")
+_YAML_VALUE = re.compile(r":\s*[\"']?(\S+)")
+_BARE_QUARTER = re.compile(r"(?:docs/)?quality-updates/\S+")
+_ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
+
+
+class _NoTimestampLoader(yaml.SafeLoader):
+    """SafeLoader that leaves YYYY-MM-DD as text.
+
+    PyYAML otherwise builds a date and raises ValueError on 2026-02-31, which
+    would hide the invalid token and stop the rest of the file.
+    """
+
+
+_NoTimestampLoader.yaml_implicit_resolvers = {
+    ch: [(tag, regexp) for tag, regexp in resolvers if tag != "tag:yaml.org,2002:timestamp"]
+    for ch, resolvers in yaml.SafeLoader.yaml_implicit_resolvers.items()
+}
 
 
 class QuarterNotReady(Exception):
@@ -128,32 +160,141 @@ def filename_bounds(name: str) -> tuple[DateToken, DateToken] | None:
     return _date_token(match.group("start"), 1), _date_token(match.group("end"), 1)
 
 
-def front_matter_bounds(text: str) -> tuple[DateToken, DateToken]:
-    """``period.start`` and ``period.end`` from YAML front matter. Invalid dates do not raise."""
-    start = DateToken.absent()
-    end = DateToken.absent()
+def _front_matter_lines(text: str) -> list[str] | None:
     lines = text.splitlines()
     if not lines or lines[0].strip() != "---":
-        return start, end
-    in_period = False
-    for index, line in enumerate(lines[1:], start=2):
+        return None
+    for index, line in enumerate(lines[1:], start=1):
         if line.strip() == "---":
-            break
-        if re.match(r"^period:\s*$", line):
-            in_period = True
-            continue
-        if not in_period:
-            continue
-        if line[:1] not in {" ", "\t"}:
-            in_period = False
-            continue
-        start_match = re.match(r"^\s+start:\s*(\d{4}-\d{2}-\d{2})\s*$", line)
-        end_match = re.match(r"^\s+end:\s*(\d{4}-\d{2}-\d{2})\s*$", line)
-        if start_match:
-            start = _date_token(start_match.group(1), index)
-        elif end_match:
-            end = _date_token(end_match.group(1), index)
+            return lines[1:index]
+    return None
+
+
+def _key_line(body_lines: list[str], key: str) -> int:
+    pattern = re.compile(rf"(^|[{{,])\s*{key}\s*:")
+    for offset, line in enumerate(body_lines):
+        if pattern.search(line):
+            return offset + 2
+    return 2
+
+
+def _coerce_period_value(value: object, line: int) -> DateToken:
+    if value is None:
+        return DateToken.absent()
+    if isinstance(value, datetime):
+        value = value.date()
+    if isinstance(value, date):
+        return DateToken(value, line, False, value.isoformat())
+    raw = str(value).strip().strip("\"'")
+    if not raw:
+        return DateToken.absent()
+    return _date_token(raw, line)
+
+
+def front_matter_bounds(text: str) -> tuple[DateToken, DateToken]:
+    """``period.start`` and ``period.end`` from YAML front matter.
+
+    Quoted block form and the one-line flow form are both read. Invalid dates
+    do not raise. A front matter block that is not YAML becomes an invalid token
+    so the period is not treated as empty.
+    """
+    body_lines = _front_matter_lines(text)
+    if body_lines is None:
+        return DateToken.absent(), DateToken.absent()
+    raw = "\n".join(body_lines)
+    if not raw.strip():
+        return DateToken.absent(), DateToken.absent()
+    try:
+        meta = yaml.load(raw, Loader=_NoTimestampLoader) or {}
+    except yaml.YAMLError:
+        return DateToken(None, 2, True, "period"), DateToken.absent()
+    if not isinstance(meta, dict):
+        return DateToken(None, 2, True, "period"), DateToken.absent()
+    period = meta.get("period")
+    if period is None:
+        return DateToken.absent(), DateToken.absent()
+    if not isinstance(period, dict):
+        line = _key_line(body_lines, "period")
+        return DateToken(None, line, True, str(period)), DateToken.absent()
+    start = _coerce_period_value(period.get("start"), _key_line(body_lines, "start"))
+    end = _coerce_period_value(period.get("end"), _key_line(body_lines, "end"))
     return start, end
+
+
+def is_standard_quarter_rel(rel: str) -> bool:
+    """True only for ``docs/quality-updates/YYYY/YYYY-MM-DD_to_YYYY-MM-DD.md``."""
+    return _EXACT_ALLOW.fullmatch(rel.replace("\\", "/")) is not None
+
+
+def nonstandard_quarter_paths(repo_root: Path) -> list[str]:
+    """Markdown under ``docs/quality-updates/`` that is neither standard nor approved."""
+    docs = Path(repo_root) / "docs" / "quality-updates"
+    if not docs.is_dir():
+        return []
+    found: list[str] = []
+    root = Path(repo_root)
+    for path in sorted(docs.rglob("*.md")):
+        rel = path.relative_to(root).as_posix()
+        if rel in APPROVED_NON_QUARTER_PAGES or is_standard_quarter_rel(rel):
+            continue
+        found.append(rel)
+    return found
+
+
+def iso_dates_in(text: str) -> list[DateToken]:
+    return [_date_token(match.group(0), 1) for match in _ISO_DATE.finditer(text)]
+
+
+def _clean_target(raw: str) -> str:
+    token = raw.strip().strip("\"'").replace("\\", "/")
+    token = token.split("#", 1)[0].split("?", 1)[0]
+    return token.rstrip(".,;:\"')")
+
+
+def iter_doc_targets(source_rel: str, line: str) -> list[str]:
+    """Repo-relative quarter-doc targets on one nav or index line.
+
+    Exact standard paths stay exact. A suffix, extra directory, missing year
+    folder, or other variant is returned unchanged in shape so it cannot inherit
+    an allow-list entry for the canonical file.
+    """
+    raws: list[str] = []
+    raws.extend(match.group(1) for match in _PAREN_TARGET.finditer(line))
+    raws.extend(match.group(1) for match in _YAML_VALUE.finditer(line))
+    raws.extend(match.group(0) for match in _BARE_QUARTER.finditer(line))
+    found: list[str] = []
+    for raw in raws:
+        rel = _resolve_doc_target(source_rel, _clean_target(raw))
+        if rel and rel not in found:
+            found.append(rel)
+    return found
+
+
+def _resolve_doc_target(source_rel: str, token: str) -> str | None:
+    if not token or "://" in token:
+        return None
+    quarter_index = source_rel == "docs/quality-updates/index.md"
+    in_scope = "quality-updates/" in token or token.startswith("quality-updates/")
+    if quarter_index and (token.endswith(".md") or ".md" in token) and not token.startswith(("http://", "https://")):
+        in_scope = True
+    if not in_scope:
+        return None
+    if _EXACT_INDEX.fullmatch(token) or (quarter_index and token == "index.md"):
+        return "docs/quality-updates/index.md"
+    nav = _EXACT_NAV.fullmatch(token)
+    if nav:
+        return f"docs/quality-updates/{nav.group('year')}/{nav.group('name')}"
+    if quarter_index:
+        rel = _EXACT_REL.fullmatch(token)
+        if rel:
+            return f"docs/quality-updates/{rel.group('year')}/{rel.group('name')}"
+        if not token.startswith(("docs/", "quality-updates/")):
+            return "docs/quality-updates/" + token.lstrip("/")
+    if token.startswith("docs/"):
+        return token
+    if token.startswith("quality-updates/"):
+        return "docs/" + token
+    return "docs/quality-updates/" + token.lstrip("/")
 
 
 def canonical_quarter_key(year: str, name: str) -> str:

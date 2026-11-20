@@ -127,7 +127,8 @@ def test_main_refuses_early_quarter(tmp_path, monkeypatch, capsys):
     assert code == 2
     err = capsys.readouterr().err
     assert "2027-01-05 09:00" in err
-    assert "--allow-open-quarter" in err
+    assert "윤석님" in err
+    assert "--allow-open-quarter" not in err
 
 
 def test_october_partial_range_uses_q4_update(tmp_path, monkeypatch, capsys):
@@ -138,7 +139,8 @@ def test_october_partial_range_uses_q4_update(tmp_path, monkeypatch, capsys):
     assert code == 2
     err = capsys.readouterr().err
     assert "2027-01-05 09:00" in err
-    assert "--allow-open-quarter" in err
+    assert "윤석님" in err
+    assert "--allow-open-quarter" not in err
 
 
 def test_partial_range_inside_a_ready_quarter_is_allowed():
@@ -167,7 +169,9 @@ def test_start_end_before_update_is_refused(tmp_path, monkeypatch, capsys):
 
     code = main(["--start", "2026-10-01", "--end", "2026-12-31"], now=NOV_20)
     assert code == 2
-    assert "--allow-open-quarter" in capsys.readouterr().err
+    err = capsys.readouterr().err
+    assert "윤석님" in err
+    assert "--allow-open-quarter" not in err
 
 
 def test_existing_file_does_not_skip_the_guard(tmp_path, monkeypatch, capsys):
@@ -182,11 +186,21 @@ def test_existing_file_does_not_skip_the_guard(tmp_path, monkeypatch, capsys):
     assert code == 2
     captured = capsys.readouterr()
     assert "skipping" not in captured.out
-    assert "--allow-open-quarter" in captured.err
+    assert "윤석님" in captured.err
+    assert "--allow-open-quarter" not in captured.err
     assert out.read_text(encoding="utf-8") == "existing"
 
 
-def test_allow_open_quarter_can_see_existing_file(tmp_path, monkeypatch, capsys):
+def _allow_exact(tmp_path, key: str) -> None:
+    data = tmp_path / "data"
+    data.mkdir(parents=True, exist_ok=True)
+    (data / "qu-early-allow.txt").write_text(
+        "# 윤석님 본인의 명시 승인이 있어야 추가한다.\n" + key + "\n",
+        encoding="utf-8",
+    )
+
+
+def test_allow_open_quarter_without_exact_path_still_refuses(tmp_path, monkeypatch, capsys):
     out = tmp_path / "docs/quality-updates/2026/2026-10-01_to_2026-12-31.md"
     out.parent.mkdir(parents=True)
     out.write_text("existing", encoding="utf-8")
@@ -198,8 +212,65 @@ def test_allow_open_quarter_can_see_existing_file(tmp_path, monkeypatch, capsys)
         ["--year", "2026", "--quarter", "4", "--allow-open-quarter"],
         now=NOV_20,
     )
+    assert code == 2
+    err = capsys.readouterr().err
+    assert "윤석님" in err
+    assert "--allow-open-quarter" not in err
+    assert out.read_text(encoding="utf-8") == "existing"
+
+
+def test_allow_open_quarter_with_exact_allow_path_can_see_existing_file(tmp_path, monkeypatch, capsys):
+    out = tmp_path / "docs/quality-updates/2026/2026-10-01_to_2026-12-31.md"
+    out.parent.mkdir(parents=True)
+    out.write_text("existing", encoding="utf-8")
+    _allow_exact(tmp_path, "docs/quality-updates/2026/2026-10-01_to_2026-12-31.md")
+    monkeypatch.setattr("crawl.repo_root", lambda: tmp_path)
+
+    from crawl import main
+
+    code = main(
+        ["--year", "2026", "--quarter", "4", "--allow-open-quarter"],
+        now=NOV_20,
+    )
     assert code == 0
     assert "skipping" in capsys.readouterr().out
+    assert out.read_text(encoding="utf-8") == "existing"
+
+
+def test_allow_list_without_flag_does_not_open_the_quarter(tmp_path, monkeypatch, capsys):
+    out = tmp_path / "docs/quality-updates/2026/2026-10-01_to_2026-12-31.md"
+    out.parent.mkdir(parents=True)
+    out.write_text("existing", encoding="utf-8")
+    _allow_exact(tmp_path, "docs/quality-updates/2026/2026-10-01_to_2026-12-31.md")
+    monkeypatch.setattr("crawl.repo_root", lambda: tmp_path)
+
+    from crawl import main
+
+    code = main(["--year", "2026", "--quarter", "4"], now=NOV_20)
+    assert code == 2
+    assert "--allow-open-quarter" not in capsys.readouterr().err
+
+
+def test_flag_does_not_honor_a_path_variant_allow_entry(tmp_path, monkeypatch, capsys):
+    out = tmp_path / "docs/quality-updates/2026/2026-10-01_to_2026-12-31.md"
+    out.parent.mkdir(parents=True)
+    out.write_text("existing", encoding="utf-8")
+    data = tmp_path / "data"
+    data.mkdir()
+    (data / "qu-early-allow.txt").write_text(
+        "docs/quality-updates/2026/q4/2026-10-01_to_2026-12-31.md\n"
+        "docs/quality-updates/2026/2026-10-01_to_2026-12-31.md.bak\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr("crawl.repo_root", lambda: tmp_path)
+
+    from crawl import main
+
+    code = main(
+        ["--year", "2026", "--quarter", "4", "--allow-open-quarter"],
+        now=NOV_20,
+    )
+    assert code == 2
     assert out.read_text(encoding="utf-8") == "existing"
 
 

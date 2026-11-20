@@ -5,6 +5,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from corpus.parse import parse_corpus_items
@@ -62,6 +64,26 @@ def test_export_dry_run(tmp_path):
     stats = export_corpus(dry_run=True)
     assert stats["item_count"] >= 100
     assert stats["done"] >= 1
+
+
+def test_export_rejects_nonstandard_quarter_markdown(tmp_path):
+    qu = tmp_path / "docs" / "quality-updates"
+    year = qu / "2026"
+    year.mkdir(parents=True)
+    (qu / "index.md").write_text("# 개요\n", encoding="utf-8")
+    (year / "2026Q4.md").write_text("# 4분기\n", encoding="utf-8")
+    nested = year / "q4"
+    nested.mkdir()
+    (nested / "2026-10-01_to_2026-12-31.md").write_text("# nested\n", encoding="utf-8")
+    (qu / "2026-10-01_to_2026-12-31.md").write_text("# bare\n", encoding="utf-8")
+
+    with pytest.raises(SystemExit) as exc:
+        export_corpus(dry_run=True, root=tmp_path)
+    message = str(exc.value)
+    assert "2026/2026Q4.md" in message
+    assert "2026/q4/2026-10-01_to_2026-12-31.md" in message
+    assert "docs/quality-updates/2026-10-01_to_2026-12-31.md" in message
+    assert "index.md" not in message
 
 
 def test_export_writes_jsonl(tmp_path):
