@@ -322,13 +322,30 @@ _EMPH = r"(?:\*\*|__|\*|_)?"
 _ISO_FLEX = r"(?<!\d)(?:\d{4}|\d{2})(?!\d)\s*[.\-/]\s*\d{1,2}\s*[.\-/]\s*\d{1,2}\.?"
 _KR_DATE = r"\d{4}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일"
 _DATE_TOKEN = rf"(?:{_ISO_FLEX}|{_KR_DATE})"
-_RANGE_SEP = r"(?:~|～|〜|∼|－|−|–|—|부터|\bto\b|-)"
+_DATE_OPEN = r"['’‘(]?"
+_DATE_CLOSE = r"\)?"
+_RANGE_SEP = r"(?:~|～|〜|∼|－|−|–|—|부터|(?<![A-Za-z])to(?![A-Za-z])|-)"
 _DATE_RANGE = re.compile(
-    rf"{_EMPH}\s*(?P<start>{_DATE_TOKEN})\s*{_EMPH}\s*{_RANGE_SEP}\s*{_EMPH}\s*(?P<end>{_DATE_TOKEN})\s*{_EMPH}",
+    rf"{_EMPH}\s*{_DATE_OPEN}\s*(?P<start>{_DATE_TOKEN})\s*{_DATE_CLOSE}\s*{_EMPH}"
+    rf"\s*{_RANGE_SEP}\s*"
+    rf"{_EMPH}\s*{_DATE_OPEN}\s*(?P<end>{_DATE_TOKEN})\s*{_DATE_CLOSE}\s*{_EMPH}",
     re.IGNORECASE,
 )
 _LONE_DATE = re.compile(_DATE_TOKEN)
+_MD_DEST = re.compile(r"\[[^\]]*\]\(([^)]*)\)")
+_HREF_DEST = re.compile(r"""href\s*=\s*(['"])(.*?)\1""", re.IGNORECASE)
 _HIGHLIGHT_SOURCES = {"docs/index.md", "docs/quality-updates/index.md"}
+
+
+def _link_destination_spans(text: str) -> list[tuple[int, int]]:
+    """Spans of markdown and href targets. A filename there is a link, not prose."""
+    spans = [match.span(1) for match in _MD_DEST.finditer(text)]
+    spans.extend(match.span(2) for match in _HREF_DEST.finditer(text))
+    return spans
+
+
+def _inside_span(spans: list[tuple[int, int]], start: int, end: int) -> bool:
+    return any(opening <= start and end <= closing for opening, closing in spans)
 
 
 def _stamp(moment: datetime) -> str:
@@ -685,9 +702,12 @@ def _latest_update_errors(text: str, now: datetime) -> list[ValidationError]:
     errors: list[ValidationError] = []
     for block in _latest_update_blocks(text):
         joined = "\n".join(line for _number, line in block)
+        destinations = _link_destination_spans(joined)
         consumed: list[tuple[int, int]] = []
         for match in _DATE_RANGE.finditer(joined):
             consumed.append(match.span())
+            if _inside_span(destinations, match.start(), match.end()):
+                continue
             line_no = _line_for_offset(block, match.start())
             start_raw = match.group("start")
             end_raw = match.group("end")
@@ -728,6 +748,8 @@ def _latest_update_errors(text: str, now: datetime) -> list[ValidationError]:
         for match in _LONE_DATE.finditer(joined):
             if any(start <= match.start() and match.end() <= end for start, end in consumed):
                 continue
+            if _inside_span(destinations, match.start(), match.end()):
+                continue
             raw_date = match.group(0)
             line_no = _line_for_offset(block, match.start())
             try:
@@ -762,10 +784,11 @@ def _outside_highlight_errors(text: str, now: datetime) -> list[ValidationError]
     including a past-quarter press window, is quiet.
     """
     covered = {number for block in _latest_update_blocks(text) for number, _line in block}
+    destinations = _link_destination_spans(text)
     errors: list[ValidationError] = []
     for match in _DATE_RANGE.finditer(text):
         line_no = text.count("\n", 0, match.start()) + 1
-        if line_no in covered:
+        if line_no in covered or _inside_span(destinations, match.start(), match.end()):
             continue
         start_raw = match.group("start")
         end_raw = match.group("end")
