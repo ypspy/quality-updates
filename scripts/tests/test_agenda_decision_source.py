@@ -1,4 +1,4 @@
-"""안건 분석 의결서 출처 링크. 2026 Q3부터 필수이고, 그 전 문서는 검사하지 않는다."""
+"""안건 분석 의결서 출처 링크. 2026 Q1부터 필수이고, 그 전 문서는 검사하지 않는다."""
 
 from pathlib import Path
 import sys
@@ -97,7 +97,7 @@ def test_q3_agenda_box_without_a_source_link_fails():
 
 
 def test_q3_agenda_box_with_the_source_link_passes():
-    bullet = decision_source_bullet(FSC15, "제394호(2026.11.6. 공개)")
+    bullet = decision_source_bullet(FSC15, "의결 제394호(2026.11.6. 공개)")
     assert bullet is not None
     errors = validate_agenda_decision_sources(_box(bullet, "- (제394호) 요약"), Q3)
     assert errors == []
@@ -115,6 +115,37 @@ def test_q3_wrong_source_shape_fails():
         assert [error.code for error in errors] == ["AGENDA_SOURCE_FORMAT"], bullet
 
 
+def test_minutes_wording_and_missing_decision_number_fail():
+    minutes = (
+        "- (출처) [2026년 제16차 증권선물위원회 의사록(공개용)_F]"
+        "(https://www.fsc.go.kr/comm/getFile?srvcId=BBSTY1&upperNo=88144"
+        "&fileTy=ATTACH&fileNo=1) 의결 제267호(2026.11.13. 공개)"
+    )
+    errors = validate_agenda_decision_sources(_box(minutes), Q3)
+    assert [error.code for error in errors] == ["AGENDA_SOURCE_FORMAT"]
+
+    no_number = (
+        "- (출처) [2026년 제13차 증권선물위원회 안건 및 제재안건 의결서]"
+        "(https://www.fsc.go.kr/comm/getFile?srvcId=BBSTY1&upperNo=87654"
+        "&fileTy=ATTACH&fileNo=2)(2026.9.4. 공개)"
+    )
+    errors = validate_agenda_decision_sources(_box(no_number), Q1)
+    assert [error.code for error in errors] == ["AGENDA_SOURCE_FORMAT"]
+
+    bare_number = no_number.replace("(2026.9.4. 공개)", " 제211호(2026.9.4. 공개)")
+    errors = validate_agenda_decision_sources(_box(bare_number), Q2)
+    assert [error.code for error in errors] == ["AGENDA_SOURCE_FORMAT"]
+
+
+def test_public_decision_filename_without_bundle_words_passes():
+    bullet = (
+        "- (출처) [(공개용) 의결 234. 임시금융위원회 안건]"
+        "(https://www.fsc.go.kr/comm/getFile?srvcId=BBSTY1&upperNo=87906"
+        "&fileTy=ATTACH&fileNo=2) 의결 제234호(2026.11.20. 공개)"
+    )
+    assert validate_agenda_decision_sources(_box(bullet), Q1) == []
+
+
 def test_q3_source_link_after_the_summary_fails():
     bullet = decision_source_bullet(SFC5, "의결 제72호(2026.5.8. 공개)")
     assert bullet is not None
@@ -122,10 +153,33 @@ def test_q3_source_link_after_the_summary_fails():
     assert [error.code for error in errors] == ["AGENDA_SOURCE_FORMAT"]
 
 
-def test_quarters_before_2026_q3_are_not_checked():
+def test_q1_agenda_box_without_a_source_link_fails():
+    errors = validate_agenda_decision_sources(_box("- (의결 22) 요약"), Q1)
+    assert [error.code for error in errors] == ["AGENDA_SOURCE_MISSING"]
+
+
+def test_q2_agenda_box_without_a_source_link_fails():
+    errors = validate_agenda_decision_sources(_box("- (제151호) 요약"), Q2)
+    assert [error.code for error in errors] == ["AGENDA_SOURCE_MISSING"]
+
+
+def test_quarters_before_2026_q1_are_not_checked():
     lines = _box("- (의결 48) 요약")
-    for path in (Q1, Q2, Q4_2025):
-        assert validate_agenda_decision_sources(lines, path) == [], path.name
+    assert validate_agenda_decision_sources(lines, Q4_2025) == []
+
+
+def test_2026_q1_document_agenda_boxes_have_decision_sources():
+    text = (REPO / Q1).read_text(encoding="utf-8")
+    errors = validate_agenda_decision_sources(text.splitlines(), Q1)
+    assert errors == []
+    assert text.count('!!! info "안건 분석"') == 9
+
+
+def test_2026_q2_document_agenda_boxes_have_decision_sources():
+    text = (REPO / Q2).read_text(encoding="utf-8")
+    errors = validate_agenda_decision_sources(text.splitlines(), Q2)
+    assert errors == []
+    assert text.count('!!! info "안건 분석"') == 18
 
 
 def test_2026_q3_document_agenda_boxes_have_decision_sources():
@@ -141,4 +195,5 @@ def test_writer_template_requires_the_decision_source_line():
     for text in (skill, guide):
         assert "decision_source_bullet" in text
         assert "2로 고정하지 않는다" in text
-        assert "2026년 3분기" in text
+        assert "2026년 1분기부터 이 줄이 없으면" in text
+        assert "2026년 3분기부터 이 줄이 없으면" not in text
