@@ -691,3 +691,97 @@ def test_html_href_with_reversed_dates_is_date_order(tmp_path):
         encoding="utf-8",
     )
     assert "QUARTER_DATE_ORDER" in _codes(quarter_timing_errors(root, NOV_20))
+
+
+_LATEST_HEADINGS = [
+    '???+ note "Latest Update"',
+    '???+note "Latest Update"',
+    '???+ info "Latest Update"',
+    '!!! info "**Latest Update**"',
+    '!!! info **Latest Update**',
+    '!!! info inline "Latest Update"',
+    '!!! info inline end "Latest Update"',
+]
+
+
+@pytest.mark.parametrize("heading", _LATEST_HEADINGS)
+@pytest.mark.parametrize(
+    "index_rel",
+    ["docs/index.md", "docs/quality-updates/index.md"],
+)
+def test_latest_update_heading_variants_on_both_indexes(tmp_path, heading, index_rel):
+    root = _mini_repo(tmp_path)
+    (root / index_rel).write_text(
+        f"{heading}\n    2026-10-01 ~ 2026-12-31\n",
+        encoding="utf-8",
+    )
+    assert "QUARTER_HIGHLIGHT_TOO_EARLY" in _codes(quarter_timing_errors(root, NOV_20))
+
+
+def test_collapsed_plus_block_after_a_normal_latest_update(tmp_path):
+    root = _mini_repo(tmp_path)
+    (root / "docs" / "index.md").write_text(
+        '!!! info "Latest Update"\n'
+        "    2026-07-01 ~ 2026-09-30\n"
+        "\n"
+        '???+ note "Latest Update"\n'
+        "    2026-10-01 ~ 2026-12-31\n",
+        encoding="utf-8",
+    )
+    (root / "docs" / "quality-updates" / "index.md").write_text(
+        '!!! info "Latest Update"\n'
+        "    2026-07-01 ~ 2026-09-30\n"
+        "\n"
+        '???+info "Latest Update"\n'
+        "    2026-10-01 ~ 2026-12-31\n",
+        encoding="utf-8",
+    )
+    errors = quarter_timing_errors(root, NOV_20)
+    assert _codes(errors).count("QUARTER_HIGHLIGHT_TOO_EARLY") == 2
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "    2026. 10. 1. ~ 2026. 12. 31.",
+        "    2026. 10. 01 ~ 2026. 12. 31",
+        "    2026. 10. 1.부터 2026. 12. 31.까지",
+    ],
+)
+def test_spaced_dot_dates_are_early_highlights(tmp_path, line):
+    root = _mini_repo(tmp_path)
+    (root / "docs" / "index.md").write_text(
+        '!!! info "Latest Update"\n' + line + "\n",
+        encoding="utf-8",
+    )
+    assert _codes(quarter_timing_errors(root, NOV_20)) == ["QUARTER_HIGHLIGHT_TOO_EARLY"]
+
+
+def test_lone_spaced_dot_date_uses_the_same_token(tmp_path):
+    root = _mini_repo(tmp_path)
+    (root / "docs" / "index.md").write_text(
+        '!!! info "Latest Update"\n'
+        "    2026. 10. 1.\n",
+        encoding="utf-8",
+    )
+    assert "QUARTER_DATE_INVALID" in _codes(quarter_timing_errors(root, NOV_20))
+
+
+def test_past_press_title_dot_date_is_not_a_false_positive(tmp_path):
+    root = _mini_repo(tmp_path)
+    (root / "docs" / "index.md").write_text(
+        '!!! info "Latest Update"\n'
+        "    **2026-07-01 ~ 2026-09-30 규제 업데이트가 추가되었습니다.**\n"
+        "    본인 인증 서비스 일시 점검 안내(2026. 9. 19.(토) 21:00 ~ 2026. 9 20.(일) 05:00)\n",
+        encoding="utf-8",
+    )
+    assert quarter_timing_errors(root, NOV_20) == []
+
+
+def test_tab_indented_latest_update_body_is_checked(tmp_path):
+    body = '!!! info "Latest Update"\n\t2026-10-01 ~ 2026-12-31\n'
+    root = _mini_repo(tmp_path)
+    (root / "docs" / "index.md").write_text(body, encoding="utf-8")
+    (root / "docs" / "quality-updates" / "index.md").write_text(body, encoding="utf-8")
+    errors = quarter_timing_errors(root, NOV_20)
+    assert _codes(errors) == ["QUARTER_HIGHLIGHT_TOO_EARLY", "QUARTER_HIGHLIGHT_TOO_EARLY"]

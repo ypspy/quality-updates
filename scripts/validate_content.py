@@ -22,6 +22,7 @@ from quarter_timing import (
     is_standard_quarter_rel,
     iter_doc_targets,
     load_allow_list,
+    quarter_update_at,
 )
 from source_marker_layout import find_unsafe_source_layout
 
@@ -314,12 +315,11 @@ def _read_text(path: Path) -> str | None:
         return None
 
 
-_LATEST_HEADING = re.compile(
-    r"""^[!?]{3}\s+\S+\s+(?:["'“”‘’])?\s*latest\s+update\b""",
-    re.IGNORECASE,
-)
+_ADMONITION_OPEN = re.compile(r"^[!?]{3}\+?\s*(.*)$")
+_QUOTED_TITLE = re.compile(r"""["'“”‘’](.*?)["'“”‘’]""")
+_EMPH_MARK = re.compile(r"\*\*|__|\*|_")
 _EMPH = r"(?:\*\*|__|\*|_)?"
-_ISO_FLEX = r"\d{4}[-/.]\d{1,2}[-/.]\d{1,2}"
+_ISO_FLEX = r"\d{4}\s*[.\-/]\s*\d{1,2}\s*[.\-/]\s*\d{1,2}\.?"
 _KR_DATE = r"\d{4}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일"
 _DATE_TOKEN = rf"(?:{_ISO_FLEX}|{_KR_DATE})"
 _RANGE_SEP = r"(?:~|～|〜|∼|－|−|–|—|부터|\bto\b|-)"
@@ -585,21 +585,56 @@ def _standard_link_errors(
     return errors
 
 
+def _indent_columns(line: str) -> int:
+    """Leading indent after tab stops of width 4, matching Python-Markdown."""
+    expanded = line.expandtabs(4)
+    return len(expanded) - len(expanded.lstrip(" "))
+
+
+def _latest_title(rest: str) -> str:
+    """Title text with emphasis removed. Quoted titles win over the type token."""
+    quoted = _QUOTED_TITLE.search(rest)
+    if quoted:
+        title = quoted.group(1)
+    else:
+        parts = rest.split(None, 1)
+        title = parts[1] if len(parts) > 1 else ""
+        while title:
+            word, _, tail = title.partition(" ")
+            if word.casefold() in {"inline", "end"}:
+                title = tail
+                continue
+            break
+    return re.sub(r"\s+", " ", _EMPH_MARK.sub("", title)).strip()
+
+
+def _is_latest_heading(line: str) -> bool:
+    """True when an admonition title is Latest Update, ignoring case and emphasis.
+
+    Accepts ``!!!``, ``???``, and ``???+`` with the type glued or spaced, plus
+    extra words such as ``inline`` and ``end``.
+    """
+    match = _ADMONITION_OPEN.match(line.strip())
+    if not match or not match.group(1).strip():
+        return False
+    title = _latest_title(match.group(1).strip()).casefold()
+    return title == "latest update" or title.startswith("latest update ")
+
+
 def _latest_update_blocks(text: str) -> list[list[tuple[int, str]]]:
     """Every Latest Update admonition, heading plus body, with 1-based line numbers.
 
-    ``!!!`` and ``???``, every admonition type, and quoted or bare titles are
-    included. A later block is not dropped because an earlier one was found.
+    A later block is not dropped because an earlier one was found.
     """
     lines = text.splitlines()
     blocks: list[list[tuple[int, str]]] = []
     index = 0
     while index < len(lines):
         line = lines[index]
-        if not _LATEST_HEADING.match(line.strip()):
+        if not _is_latest_heading(line):
             index += 1
             continue
-        base_indent = len(line) - len(line.lstrip(" "))
+        base_indent = _indent_columns(line)
         block = [(index + 1, line)]
         index += 1
         while index < len(lines):
@@ -608,8 +643,7 @@ def _latest_update_blocks(text: str) -> list[list[tuple[int, str]]]:
                 block.append((index + 1, nxt))
                 index += 1
                 continue
-            indent = len(nxt) - len(nxt.lstrip(" "))
-            if indent <= base_indent:
+            if _indent_columns(nxt) <= base_indent:
                 break
             block.append((index + 1, nxt))
             index += 1
@@ -623,7 +657,8 @@ def _highlight_date(raw: str) -> date:
         if not match:
             raise ValueError(raw)
         return date(int(match.group(1)), int(match.group(2)), int(match.group(3)))
-    normalized = raw.strip().replace(".", "-").replace("/", "-")
+    normalized = raw.strip().rstrip(".")
+    normalized = re.sub(r"\s+", "", normalized).replace(".", "-").replace("/", "-")
     parts = normalized.split("-")
     if len(parts) != 3:
         raise ValueError(raw)
@@ -687,14 +722,30 @@ def _latest_update_errors(text: str, now: datetime) -> list[ValidationError]:
         for match in _LONE_DATE.finditer(joined):
             if any(start <= match.start() and match.end() <= end for start, end in consumed):
                 continue
-            errors.append(
-                ValidationError(
-                    _line_for_offset(block, match.start()),
-                    "QUARTER_DATE_INVALID",
-                    f"Latest Update에 날짜가 있으나 기간으로 읽지 못했습니다: {match.group(0)}",
-                    "error",
+            raw_date = match.group(0)
+            line_no = _line_for_offset(block, match.start())
+            try:
+                day = _highlight_date(raw_date)
+            except ValueError:
+                errors.append(
+                    ValidationError(
+                        line_no,
+                        "QUARTER_DATE_INVALID",
+                        f"Latest Update에 날짜가 있으나 기간으로 읽지 못했습니다: {raw_date}",
+                        "error",
+                    )
                 )
-            )
+                continue
+            # A press title such as ``2026. 9. 19.`` in an already-ready quarter is not a range.
+            if now < quarter_update_at(day):
+                errors.append(
+                    ValidationError(
+                        line_no,
+                        "QUARTER_DATE_INVALID",
+                        f"Latest Update에 날짜가 있으나 기간으로 읽지 못했습니다: {raw_date}",
+                        "error",
+                    )
+                )
     return errors
 
 

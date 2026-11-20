@@ -255,18 +255,26 @@ def _clean_target(raw: str) -> str:
     return token.rstrip(".,;:\"')")
 
 
-def quarter_release_blockers(repo_root: Path, now: datetime | None = None) -> list[str]:
+def quarter_release_blockers(
+    repo_root: Path,
+    now: datetime | None = None,
+    allow: set[str] | None = None,
+) -> list[str]:
     """Standard quarter files that are early or whose start date is after the end.
 
     Judged from the filename and from ``period`` front matter. ``now`` defaults
-    to the current Asia/Seoul time.
+    to the current Asia/Seoul time. An exact path in ``data/qu-early-allow.txt``
+    skips the early refusal. A start date after the end date is still refused,
+    and a dash or path variant is never an exemption.
     """
     current = as_seoul(now)
     docs = Path(repo_root) / "docs" / "quality-updates"
     if not docs.is_dir():
         return []
-    problems: list[str] = []
     root = Path(repo_root)
+    if allow is None:
+        allow = load_allow_list(root / "data" / "qu-early-allow.txt")
+    problems: list[str] = []
     for path in sorted(docs.rglob("*.md")):
         rel = path.relative_to(root).as_posix()
         if not is_standard_quarter_rel(rel):
@@ -289,7 +297,7 @@ def quarter_release_blockers(repo_root: Path, now: datetime | None = None) -> li
             for token in (*(bounds or ()), period_start, period_end)
             if token.value is not None
         ]
-        if days and current < governing_update(*days):
+        if days and rel not in allow and current < governing_update(*days):
             problems.append(f"{rel}: 갱신일 전")
     return problems
 
