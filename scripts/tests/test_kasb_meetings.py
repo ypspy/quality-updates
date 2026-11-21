@@ -892,21 +892,28 @@ def test_advisory_round_uses_hoe_and_keeps_gi_as_term():
         == "2017-회계기준자문위원회-4회"
     )
     assert kasb_meetings.folder_name(2026, 1) == "2026-회계기준위원회-1회"
+    assert kasb_meetings.folder_name(2020, 0, "회계기준자문위원회") == "2020-회계기준자문위원회-0회"
     assert kasb_meetings.term_from_title("2026년 제1회 회계기준위원회") is None
+    with pytest.raises(ValueError, match="폴더"):
+        kasb_meetings.folder_name(2020, 1, "회계기준 > 회계기준자문위원회")
 
 
 def test_advisory_view_1124_maps_agenda_and_written_report():
     page = kasb_meetings.parse_view_page(_read("view/1124.html"))
-    assert page.title == "2026년 제1회 회계기준자문위원회(KK-IFRS 제1118호 등)"
+    assert page.title == (
+        "2026년 제1회 KK-IFRS 제1118호 등 개정 공개초안 "
+        "‘재무제표에서의 불확실성 공시 – 사례’ 등"
+    )
     assert "KK-IFRS" in page.title
     assert page.date == "2026-05-14"
+    assert page.place == "한국회계기준원 BM Room"
     assert page.category == "회계기준 > 회계기준자문위원회"
     assert page.attachments == []
     assert page.decision_items == [
-        "1) K-IFRS 제1118호 등 개정 공개초안 '재무제표에서의 불확실성 공시 – 사례'",
-        "2) K-IFRS 제1016호 개정 공개초안 '토지 공시지가 주석공시'",
+        "1) K-IFRS 제1118호 등 개정 공개초안 ‘재무제표에서의 불확실성 공시 – 사례’",
+        "2) K-IFRS 제1016호 개정 공개초안 ‘토지 공시지가 주석공시’",
         "3) IASB 공개초안 위험경감회계(ED) 주요 내용 및 예비적 견해",
-        "4) 무형자산 연구 '사업결합으로 취득한 무형자산의 정보유용성'",
+        "4) 무형자산 연구 ‘사업결합으로 취득한 무형자산의 정보유용성’",
     ]
     assert page.report_items == ["1) 지난 회의록 보고"]
     meet = kasb_meetings.parse_meet_page(_read("meet/1124.html"))
@@ -915,6 +922,7 @@ def test_advisory_view_1124_maps_agenda_and_written_report():
 
 def test_advisory_view_1060_keeps_ho_items_and_closed_minutes():
     page = kasb_meetings.parse_view_page(_read("view/1060.html"))
+    assert page.title == "2023년 제2회 회계기준 개정 주요 내용 등"
     assert page.decision_items == [
         "제1호: 회계기준 개정 주요 내용",
         "제2호: IASB의 손익계산서 표시와 공시 기준 개정안",
@@ -943,17 +951,177 @@ def test_advisory_view_847_reads_term_and_numbered_agenda():
     )
 
 
-def test_bare_ho_on_its_own_line_joins_the_next_title():
-    decision, report = kasb_meetings.parse_agenda_sections(
-        "■ 안건\n제1호\n다음 줄 제목\n■ 서면보고\n제1호\n서면 제목\n"
+def _base_parse_agenda_sections(text: str):
+    """f0c4e5c2의 parse_agenda_sections. 회계기준위원회 경로는 이 결과와 같아야 한다."""
+    import re
+
+    section_re = re.compile(r"(의결\s*안건|보고\s*안건)")
+    item_re = re.compile(r"제\s*\d+\s*호\s*\S.*")
+    disclaimer_re = re.compile(r"(이 회의결과는 잠정적인 것으로.*|※\s*해당자료는.*)")
+    cleaned = disclaimer_re.sub("", text or "").replace("\xa0", " ")
+    decision: list[str] = []
+    report: list[str] = []
+    current = None
+    for part in section_re.split(cleaned):
+        compact = re.sub(r"\s+", "", part)
+        if compact == "의결안건":
+            current = decision
+            continue
+        if compact == "보고안건":
+            current = report
+            continue
+        if current is None:
+            continue
+        for chunk in re.split(r"[\n\r]+|·|•", part):
+            line = re.sub(r"\s+", " ", chunk.strip(" \t-:")).strip()
+            if not line:
+                continue
+            if "해당사항 없음" in line and not item_re.search(line):
+                if "해당사항 없음" not in current:
+                    current.append("해당사항 없음")
+                continue
+            match = item_re.search(line)
+            if match:
+                item = re.sub(r"\s+", " ", match.group(0)).strip()
+                if item not in current:
+                    current.append(item)
+    return decision, report
+
+
+def _accounting_body_text(html: str) -> str:
+    from bs4 import BeautifulSoup
+
+    soup = BeautifulSoup(html, "html.parser")
+    node = soup.select_one(".board_view_cont")
+    body = node.get_text("\n", strip=True) if node else ""
+    if body:
+        return body
+    for th in soup.find_all("th"):
+        label = "".join(th.get_text(strip=True).split())
+        if label != "내용":
+            continue
+        td = th.find_next("td")
+        return td.get_text(" ", strip=True) if td else ""
+    return ""
+
+
+def test_accounting_fixtures_match_base_agenda_parser():
+    for name in ("view/1105.html", "view/1106.html", "view/1109.html", "meet/1105.html"):
+        html = _read(name)
+        page = kasb_meetings.parse_view_page(html) if "/view/" in name else kasb_meetings.parse_meet_page(html)
+        decision, report = _base_parse_agenda_sections(_accounting_body_text(html))
+        assert page.decision_items == decision
+        assert page.report_items == report
+
+
+def test_accounting_view_1132_matches_base_parser():
+    from bs4 import BeautifulSoup
+
+    html = _read("view/1132.html")
+    page = kasb_meetings.parse_view_page(html)
+    soup = BeautifulSoup(html, "html.parser")
+    body = soup.select_one(".board_view_cont").get_text("\n", strip=True)
+    decision, report = _base_parse_agenda_sections(body)
+    assert page.title == ""
+    assert page.category == "회계기준 > 회계기준위원회"
+    assert page.decision_items == decision == [
+        "제1119호 제정안 ‘공공에 대한 회계책임이 없는 종속기업: 공시’(K-IFRS 1119 ‘Subsidiaries without Public Accountability: Disclosures’)",
+        "제1028호 개정안 ‘관계기업 및 공동기업에 대한 투자의 공정가치선택권 개정’(Amendments to K-IFRS 1028 ‘Amendments to the Fair Value Option for Investments in Associates and Joint Ventures’)",
+    ]
+    assert page.report_items == report == []
+    assert len(page.decision_items) == 2
+
+
+def test_advisory_view_1123_keeps_the_span_paragraph_and_colon():
+    page = kasb_meetings.parse_view_page(_read("view/1123.html"))
+    assert page.decision_items == [
+        "제1호: 회계기준적용의견서(안) 25-1 '기업회계기준서 제1001호 문단 19에 따른 일탈 적용의 제한'",
+        "제2호: K-IFRS 질의회신 - RPS 공급의무자의 REC 매입계약 회계처리",
+        "제3호: K-IFRS 용어 정비",
+    ]
+    assert page.report_items == ["제1호: 2025년 제1회 회계자문위원회 회의록(비공개)"]
+    assert "제1001호 문단" not in page.decision_items[0] or page.decision_items[0].startswith("제1호:")
+    assert page.decision_items[0].startswith("제1호:")
+    assert "제1001호" in page.decision_items[0]
+
+
+def test_advisory_parenthesized_items_stay_whole_paragraphs():
+    seq_666 = kasb_meetings.parse_view_page(_read("view/666.html"))
+    assert seq_666.decision_items == [
+        "안 건 : (1) 금융상품(예상손실, 분류측정, 위험회피 등) (2) 보험계약 "
+        "(3) 요율규제활동 (4) 비영리조직 회계기준 (5) 재무회계개념체계 "
+        "(6) 일반기업회계기준의 개정 필요성에 대한 의견"
+    ]
+    assert seq_666.report_items == []
+    seq_145 = kasb_meetings.parse_view_page(_read("view/145.html"))
+    assert seq_145.decision_items == [
+        "(1) 기업회계기준서 제1호-제10호에 대한 의견 검토 및 토론",
+        "(2) 중소기업회계특례(안) 및 최종 토론",
+        "(3) 기업회계기준서 공개초안 제01-15호 '지분법' 수정(안)",
+        "(4) 회계기준서 제정현황 및 향후계획",
+        "(5) 국제적 회계현황",
+        "(6) 회계기준적용의견서",
+    ]
+    assert seq_145.decision_items[0].startswith("(1)")
+    assert "제1호-제10호" in seq_145.decision_items[0]
+
+
+def test_advisory_middle_dot_stays_inside_the_paragraph():
+    page = kasb_meetings.parse_view_page(_read("view/652.html"))
+    assert "2. 2016년 회계기준 제정·개정 및 유지 업무" in page.decision_items
+    assert "2. 2016년 회계기준 제정" not in page.decision_items
+    assert page.title.startswith("2015년 제9기 제1회")
+
+
+def test_advisory_appendix_is_not_a_decision_item(tmp_path):
+    page = kasb_meetings.parse_view_page(_read("view/861.html"))
+    assert page.decision_items == [
+        "■ 안 건: 1) 질의회신 공개(안) 2) IASB 공개초안 '일반적 표시와 공시' "
+        "3) IASB 토론서 ‘사업결합 - 공시, 영업권과 손상’ 4) 2020년도 교육계획(안) "
+        "5) K-IFRS 제1116호 ‘리스’ 개정(안)"
+    ]
+    assert page.report_items == []
+    assert page.appendix_items == [
+        "■ 붙 임: 1) 2019년 제2회 회계기준자문위원회 회의록 2) 국제동향 보고"
+    ]
+    row = kasb_meetings.ScheduleRow(
+        seq="861",
+        date="2020-05-21",
+        category="회계기준자문위원회",
+        title=page.title,
+        place=page.place,
+        year=2020,
+        round_no=1,
     )
-    assert decision == ["제1호 다음 줄 제목"]
-    assert report == ["제1호 서면 제목"]
-    spaced, written = kasb_meetings.parse_agenda_sections(
-        "■ 안\u00a0건:\n1) 첫 안건\n■ 서면보고:\n1) 지난 회의록 보고\n"
+    result = kasb_meetings.collect(
+        tmp_path,
+        [row],
+        fetch_view=lambda seq: _read("view/861.html"),
+        fetch_meet=lambda seq: "",
+        fetch_file=lambda file_no, file_seq: (_ for _ in ()).throw(AssertionError("download")),
     )
-    assert spaced == ["1) 첫 안건"]
-    assert written == ["1) 지난 회의록 보고"]
+    assert result["counts"]["meta_only"] == 1
+    record = (tmp_path / "2020-회계기준자문위원회-1회" / "record.md").read_text(encoding="utf-8")
+    assert "## 붙임" in record
+    assert "국제동향 보고" in record
+    meta = kasb_meetings.read_meta(tmp_path / "2020-회계기준자문위원회-1회" / "record.md")
+    assert meta["decision_items"] == page.decision_items
+    assert "붙임" not in " ".join(meta["decision_items"])
+    assert meta["appendix_items"] == page.appendix_items
+
+
+def test_unknown_row_category_is_not_saved_as_accounting_committee():
+    row = kasb_meetings.ScheduleRow(
+        seq="1",
+        date="2020-01-01",
+        category="회계기준 > 회계기준자문위원회",
+        title="2020년 제1회 회계기준자문위원회",
+        place="홀",
+        year=2020,
+        round_no=1,
+    )
+    with pytest.raises(ValueError, match="중분류"):
+        kasb_meetings.build_plan(row, kasb_meetings.ParsedPage(), kasb_meetings.ParsedPage())
 
 
 def test_collect_advisory_record_keeps_section_titles_and_meta_only(tmp_path):

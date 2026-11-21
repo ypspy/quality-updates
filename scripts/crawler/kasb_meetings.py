@@ -45,9 +45,8 @@ _YEAR_ROUND_RE = re.compile(r"(\d{4})\s*년\s*제\s*(\d+)\s*회")
 _YEAR_RE = re.compile(r"(\d{4})\s*년")
 _ROUND_RE = re.compile(r"제\s*(\d+)\s*회")
 _TERM_RE = re.compile(r"제\s*(\d+)\s*기")
+_SECTION_RE = re.compile(r"(의결\s*안건|보고\s*안건)")
 _ITEM_RE = re.compile(r"제\s*\d+\s*호\s*\S.*")
-_NUM_ITEM_RE = re.compile(r"^\d+\s*[.)]\s*\S.*")
-_BARE_HO_RE = re.compile(r"^제\s*\d+\s*호$")
 _DISCLAIMER_RE = re.compile(
     r"(이 회의결과는 잠정적인 것으로.*|※\s*해당자료는.*)",
 )
@@ -87,6 +86,7 @@ class ParsedPage:
     category: str = ""
     decision_items: list[str] = field(default_factory=list)
     report_items: list[str] = field(default_factory=list)
+    appendix_items: list[str] = field(default_factory=list)
     attachments: list[Attachment] = field(default_factory=list)
 
 
@@ -105,6 +105,7 @@ class MeetingPlan:
     report_items: list[str]
     attachments: list[Attachment]
     term: int | None = None
+    appendix_items: list[str] = field(default_factory=list)
     meet_error: str = ""
 
     def line(self) -> str:
@@ -168,9 +169,11 @@ def folder_name(
     round_no: int | None,
     committee: str = COMMITTEE,
 ) -> str:
-    name = canonical_committee(committee) or COMMITTEE
+    name = canonical_committee(committee)
+    if name is None:
+        raise ValueError(f"위원회명을 폴더에 쓸 수 없습니다: {committee}")
     year_text = str(year) if year else "연도미상"
-    round_text = f"{round_no}회" if round_no else "회차미상"
+    round_text = f"{round_no}회" if round_no is not None else "회차미상"
     return f"{year_text}-{name}-{round_text}"
 
 
@@ -242,98 +245,125 @@ def _cell_text(cells: dict, label: str) -> str:
     return node.get_text(" ", strip=True)
 
 
-def _section_kind(fragment: str) -> str | None:
-    compact = re.sub(r"[\s\u00a0■•·]+", "", fragment or "")
-    compact = compact.strip("-:：*")
-    if compact == "의결안건":
-        return "decision"
-    if compact in {"보고안건", "서면보고"}:
-        return "report"
-    if compact == "안건":
-        return "decision"
-    return None
-
-
-def _clean_fragment(fragment: str) -> str:
-    return re.sub(r"\s+", " ", (fragment or "").strip(" \t-:：")).strip()
-
-
-def _extract_item(line: str) -> str | None:
-    if _NUM_ITEM_RE.match(line):
-        return line
-    match = _ITEM_RE.search(line)
-    if match:
-        return re.sub(r"\s+", " ", match.group(0)).strip()
-    return None
-
-
-def _starts_new_item(line: str) -> bool:
-    return bool(_NUM_ITEM_RE.match(line) or _BARE_HO_RE.match(line) or _ITEM_RE.search(line))
-
-
-def _next_item_fragment(parts: list[str], start: int) -> tuple[str, int] | None:
-    cursor = start
-    while cursor < len(parts):
-        if _section_kind(parts[cursor]):
-            return None
-        cleaned = _clean_fragment(parts[cursor])
-        if not cleaned:
-            cursor += 1
-            continue
-        if _starts_new_item(cleaned):
-            return None
-        return cleaned, cursor
-    return None
-
-
-def _append_unique(bucket: list[str], item: str) -> None:
-    if item not in bucket:
-        bucket.append(item)
-
-
 def parse_agenda_sections(text: str) -> tuple[list[str], list[str]]:
-    """의결·보고 안건과 자문 안건·서면보고를 같은 두 목록으로 읽는다.
-
-    자문 「안건」은 decision_items, 「서면보고」는 report_items다.
-    헤더가 없는 번호 항목은 decision_items에 둔다.
-    """
+    """회계기준위원회 본문. 자문위원회 문단에는 쓰지 않는다."""
     cleaned = _DISCLAIMER_RE.sub("", text or "")
     cleaned = cleaned.replace("\xa0", " ")
+    parts = _SECTION_RE.split(cleaned)
     decision: list[str] = []
     report: list[str] = []
     current: list[str] | None = None
-    parts = re.split(r"[\n\r]+|·|•", cleaned)
-    index = 0
-    while index < len(parts):
-        kind = _section_kind(parts[index])
-        if kind == "decision":
+    for part in parts:
+        compact = re.sub(r"\s+", "", part)
+        if compact == "의결안건":
             current = decision
-            index += 1
             continue
-        if kind == "report":
+        if compact == "보고안건":
             current = report
-            index += 1
             continue
-        line = _clean_fragment(parts[index])
-        if not line:
-            index += 1
+        if current is None:
             continue
-        extra = 0
-        if _BARE_HO_RE.match(line):
-            nxt = _next_item_fragment(parts, index + 1)
-            if nxt is not None:
-                line = f"{line} {nxt[0]}"
-                extra = nxt[1] - index
-        target = current if current is not None else decision
-        if "해당사항 없음" in line and not _ITEM_RE.search(line):
-            _append_unique(target, "해당사항 없음")
-            index += 1 + extra
-            continue
-        item = _extract_item(line)
-        if item is not None:
-            _append_unique(target, item)
-        index += 1 + extra
+        chunks = re.split(r"[\n\r]+|·|•", part)
+        for chunk in chunks:
+            line = chunk.strip(" \t-:")
+            line = re.sub(r"\s+", " ", line).strip()
+            if not line:
+                continue
+            if "해당사항 없음" in line and not _ITEM_RE.search(line):
+                if "해당사항 없음" not in current:
+                    current.append("해당사항 없음")
+                continue
+            match = _ITEM_RE.search(line)
+            if match:
+                item = re.sub(r"\s+", " ", match.group(0)).strip()
+                if item not in current:
+                    current.append(item)
     return decision, report
+
+
+def _normalize_paragraph(text: str) -> str:
+    return re.sub(r"\s+", " ", (text or "").replace("\xa0", " ")).strip()
+
+
+def _advisory_paragraphs(node) -> list[str]:
+    if node is None:
+        return []
+    paragraphs = node.find_all("p")
+    if paragraphs:
+        found = []
+        for paragraph in paragraphs:
+            text = _normalize_paragraph(paragraph.get_text(" ", strip=True))
+            if text:
+                found.append(text)
+        return found
+    clone = BeautifulSoup(str(node), "html.parser")
+    for br in clone.find_all("br"):
+        br.replace_with("\n")
+    return [
+        text
+        for line in clone.get_text("\n").splitlines()
+        if (text := _normalize_paragraph(line))
+    ]
+
+
+def _advisory_header_kind(text: str) -> str | None:
+    compact = re.sub(r"[\s\u00a0■•·]+", "", text or "")
+    compact = compact.strip("-:：*")
+    if compact in {"의결안건", "안건"}:
+        return "decision"
+    if compact in {"보고안건", "서면보고"}:
+        return "report"
+    if compact == "붙임":
+        return "appendix"
+    return None
+
+
+_ADVISORY_LEAD_RE = re.compile(
+    r"^\s*(?:[-–—*]\s*)?(?:■\s*)?"
+    r"(의결\s*안건|보고\s*안건|서면\s*보고|안\s*건|붙\s*임)"
+    r"(?:\s*[-–—*]|[\s:：])"
+)
+_ADVISORY_LEAD_KIND = {
+    "의결안건": "decision",
+    "안건": "decision",
+    "보고안건": "report",
+    "서면보고": "report",
+    "붙임": "appendix",
+}
+
+
+def _advisory_lead_kind(text: str) -> str | None:
+    match = _ADVISORY_LEAD_RE.match(text or "")
+    if not match:
+        return None
+    word = re.sub(r"\s+", "", match.group(1))
+    return _ADVISORY_LEAD_KIND.get(word)
+
+
+def parse_advisory_paragraphs(node) -> tuple[list[str], list[str], list[str]]:
+    """자문위 본문을 문단 그대로 나눈다. 붙임은 의결 안건에 넣지 않는다."""
+    decision: list[str] = []
+    report: list[str] = []
+    appendix: list[str] = []
+    buckets = {"decision": decision, "report": report, "appendix": appendix}
+    current = "decision"
+    for paragraph in _advisory_paragraphs(node):
+        if _DISCLAIMER_RE.search(paragraph):
+            continue
+        header = _advisory_header_kind(paragraph)
+        if header:
+            current = header
+            continue
+        lead = _advisory_lead_kind(paragraph)
+        if lead:
+            current = lead
+        buckets[current].append(paragraph)
+    return decision, report, appendix
+
+
+def _is_advisory_category(category: str) -> bool:
+    compact = re.sub(r"\s+", "", category or "")
+    return ADVISORY_COMMITTEE in compact
 
 
 def _attachments_in(node, role: str) -> list[Attachment]:
@@ -360,25 +390,36 @@ def _attachments_in(node, role: str) -> list[Attachment]:
 def _page_from_labels(html: str, *, attachment_role: str, title_labels: tuple[str, ...]) -> ParsedPage:
     soup = BeautifulSoup(html or "", "html.parser")
     cells = _labeled_cells(soup)
+    category = _cell_text(cells, "일정분류")
     body_node = soup.select_one(".board_view_cont")
-    body = body_node.get_text("\n", strip=True) if body_node else ""
-    if not body:
-        body = _cell_text(cells, "내용")
-    decision, report = parse_agenda_sections(body)
+    appendix: list[str] = []
+    if _is_advisory_category(category):
+        source = body_node if body_node is not None and body_node.get_text(strip=True) else cells.get("내용")
+        decision, report, appendix = parse_advisory_paragraphs(source)
+    else:
+        body = body_node.get_text("\n", strip=True) if body_node else ""
+        if not body:
+            body = _cell_text(cells, "내용")
+        decision, report = parse_agenda_sections(body)
     title = ""
     for label in title_labels:
         title = _cell_text(cells, label)
         if title:
             break
     if not title:
-        title = _first_heading(soup)
+        if _is_advisory_category(category):
+            title = _first_heading(soup)
+        else:
+            heading = soup.find(["h3", "h2"])
+            title = heading.get_text(strip=True) if heading else ""
     page = ParsedPage(
         title=title,
         date=first_date(_cell_text(cells, "일시")),
         place=_cell_text(cells, "장소"),
-        category=_cell_text(cells, "일정분류"),
+        category=category,
         decision_items=decision,
         report_items=report,
+        appendix_items=appendix,
         attachments=_attachments_in(cells.get("첨부파일"), attachment_role),
     )
     return page
@@ -462,7 +503,9 @@ def build_plan(row: ScheduleRow, view: ParsedPage, meet: ParsedPage) -> MeetingP
         round_no = row.round_no
     attachments = assign_saved_names([*view.attachments, *meet.attachments])
     status = "saved" if attachments else "meta_only"
-    committee = canonical_committee(row.category) or COMMITTEE
+    committee = canonical_committee(row.category)
+    if committee is None:
+        raise ValueError(f"seq={row.seq} 중분류를 폴더로 쓸 수 없습니다: {row.category}")
     return MeetingPlan(
         seq=row.seq,
         folder=folder_name(year, round_no, committee),
@@ -477,6 +520,7 @@ def build_plan(row: ScheduleRow, view: ParsedPage, meet: ParsedPage) -> MeetingP
         report_items=_prefer(view.report_items, meet.report_items),
         attachments=attachments,
         term=term_from_title(title),
+        appendix_items=_prefer(view.appendix_items, meet.appendix_items),
     )
 
 
@@ -498,6 +542,10 @@ def compose_record(plan: MeetingPlan, fetched_at: str) -> str:
         "meet_url": f"{MEET_URL}?seq={plan.seq}",
         "decision_items": plan.decision_items,
         "report_items": plan.report_items,
+    })
+    if plan.appendix_items:
+        meta["appendix_items"] = plan.appendix_items
+    meta.update({
         "attachments": [
             {
                 "name": item.saved_name,
@@ -517,6 +565,9 @@ def compose_record(plan: MeetingPlan, fetched_at: str) -> str:
     lines.extend(_bullet_lines(plan.decision_items))
     lines.extend(["", "## 보고 안건", ""])
     lines.extend(_bullet_lines(plan.report_items))
+    if plan.appendix_items:
+        lines.extend(["", "## 붙임", ""])
+        lines.extend(_bullet_lines(plan.appendix_items))
     lines.extend(["", "## 첨부", ""])
     if plan.attachments:
         for item in plan.attachments:
