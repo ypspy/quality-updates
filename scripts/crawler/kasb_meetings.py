@@ -5,6 +5,7 @@
 인자가 없으면 안내 후 끝난다. --dry-run은 묶음 HTML만 읽고 소켓을 열지 않는다.
 실사이트 수집은 --live와 함께 --limit 또는 --seq가 있을 때만 가능하다.
 그때 연속 HTTP 사이에는 --delay(기본 0.3초)를 둔다. --dry-run은 간격을 두지 않는다.
+--committee 기본값은 회계기준위원회다. 회계기준자문위원회는 그 값을 줄 때만 모은다.
 """
 from __future__ import annotations
 
@@ -27,6 +28,10 @@ MEET_URL = "https://www.kasb.or.kr/front/board/calmeetView.do"
 DOWNLOAD_URL = "https://www.kasb.or.kr/commonFile/fileDownload.do"
 SITE_CD = "002000000000000"
 COMMITTEE = "회계기준위원회"
+ADVISORY_COMMITTEE = "회계기준자문위원회"
+ALLOWED_COMMITTEES = (COMMITTEE, ADVISORY_COMMITTEE)
+ADVISORY_LIST_CATEGORY = "012005001000"
+ADVISORY_LIST_SUBCATEGORY = "012005001002"
 MAX_LIST_PAGES = 200
 DEFAULT_DELAY = 0.3
 
@@ -37,9 +42,12 @@ _FILE_RE = re.compile(
 )
 _DATE_RE = re.compile(r"(\d{4})-(\d{2})-(\d{2})")
 _YEAR_ROUND_RE = re.compile(r"(\d{4})\s*년\s*제\s*(\d+)\s*회")
+_YEAR_RE = re.compile(r"(\d{4})\s*년")
 _ROUND_RE = re.compile(r"제\s*(\d+)\s*회")
-_SECTION_RE = re.compile(r"(의결\s*안건|보고\s*안건)")
+_TERM_RE = re.compile(r"제\s*(\d+)\s*기")
 _ITEM_RE = re.compile(r"제\s*\d+\s*호\s*\S.*")
+_NUM_ITEM_RE = re.compile(r"^\d+\s*[.)]\s*\S.*")
+_BARE_HO_RE = re.compile(r"^제\s*\d+\s*호$")
 _DISCLAIMER_RE = re.compile(
     r"(이 회의결과는 잠정적인 것으로.*|※\s*해당자료는.*)",
 )
@@ -96,6 +104,7 @@ class MeetingPlan:
     decision_items: list[str]
     report_items: list[str]
     attachments: list[Attachment]
+    term: int | None = None
     meet_error: str = ""
 
     def line(self) -> str:
@@ -114,8 +123,16 @@ def default_fixture_dir() -> Path:
     return Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "kasb_meetings"
 
 
+def canonical_committee(value: str | None) -> str | None:
+    compact = re.sub(r"\s+", "", value or "")
+    for name in ALLOWED_COMMITTEES:
+        if compact == name:
+            return name
+    return None
+
+
 def is_accounting_committee(category: str) -> bool:
-    return re.sub(r"\s+", "", category or "") == COMMITTEE
+    return canonical_committee(category) == COMMITTEE
 
 
 def first_date(value: str | None) -> str | None:
@@ -130,15 +147,31 @@ def year_and_round(title: str, date: str | None) -> tuple[int | None, int | None
     if match:
         return int(match.group(1)), int(match.group(2))
     year = int(date[:4]) if date and len(date) >= 4 and date[:4].isdigit() else None
+    if year is None:
+        year_match = _YEAR_RE.search(title or "")
+        if year_match:
+            year = int(year_match.group(1))
     round_match = _ROUND_RE.search(title or "")
     round_no = int(round_match.group(1)) if round_match else None
     return year, round_no
 
 
-def folder_name(year: int | None, round_no: int | None) -> str:
+def term_from_title(title: str) -> int | None:
+    match = _TERM_RE.search(title or "")
+    if not match:
+        return None
+    return int(match.group(1))
+
+
+def folder_name(
+    year: int | None,
+    round_no: int | None,
+    committee: str = COMMITTEE,
+) -> str:
+    name = canonical_committee(committee) or COMMITTEE
     year_text = str(year) if year else "연도미상"
     round_text = f"{round_no}회" if round_no else "회차미상"
-    return f"{year_text}-{COMMITTEE}-{round_text}"
+    return f"{year_text}-{name}-{round_text}"
 
 
 def parse_schedule_rows(html: str) -> list[ScheduleRow]:
@@ -177,9 +210,19 @@ def parse_schedule_rows(html: str) -> list[ScheduleRow]:
     return rows
 
 
-def parse_list_page(html: str) -> list[ScheduleRow]:
-    """회계기준위원회 행만 돌려준다. 자문·지속가능성·세미나는 빠진다."""
-    return [row for row in parse_schedule_rows(html) if row.is_committee]
+def parse_list_page(html: str, committee: str = COMMITTEE) -> list[ScheduleRow]:
+    """고른 중분류와 공백을 지운 이름이 같은 행만 돌려준다.
+
+    committee를 생략하면 회계기준위원회만 남긴다.
+    """
+    chosen = canonical_committee(committee)
+    if chosen is None:
+        return []
+    return [
+        row
+        for row in parse_schedule_rows(html)
+        if canonical_committee(row.category) == chosen
+    ]
 
 
 def _labeled_cells(soup) -> dict:
@@ -199,38 +242,97 @@ def _cell_text(cells: dict, label: str) -> str:
     return node.get_text(" ", strip=True)
 
 
+def _section_kind(fragment: str) -> str | None:
+    compact = re.sub(r"[\s\u00a0■•·]+", "", fragment or "")
+    compact = compact.strip("-:：*")
+    if compact == "의결안건":
+        return "decision"
+    if compact in {"보고안건", "서면보고"}:
+        return "report"
+    if compact == "안건":
+        return "decision"
+    return None
+
+
+def _clean_fragment(fragment: str) -> str:
+    return re.sub(r"\s+", " ", (fragment or "").strip(" \t-:：")).strip()
+
+
+def _extract_item(line: str) -> str | None:
+    if _NUM_ITEM_RE.match(line):
+        return line
+    match = _ITEM_RE.search(line)
+    if match:
+        return re.sub(r"\s+", " ", match.group(0)).strip()
+    return None
+
+
+def _starts_new_item(line: str) -> bool:
+    return bool(_NUM_ITEM_RE.match(line) or _BARE_HO_RE.match(line) or _ITEM_RE.search(line))
+
+
+def _next_item_fragment(parts: list[str], start: int) -> tuple[str, int] | None:
+    cursor = start
+    while cursor < len(parts):
+        if _section_kind(parts[cursor]):
+            return None
+        cleaned = _clean_fragment(parts[cursor])
+        if not cleaned:
+            cursor += 1
+            continue
+        if _starts_new_item(cleaned):
+            return None
+        return cleaned, cursor
+    return None
+
+
+def _append_unique(bucket: list[str], item: str) -> None:
+    if item not in bucket:
+        bucket.append(item)
+
+
 def parse_agenda_sections(text: str) -> tuple[list[str], list[str]]:
+    """의결·보고 안건과 자문 안건·서면보고를 같은 두 목록으로 읽는다.
+
+    자문 「안건」은 decision_items, 「서면보고」는 report_items다.
+    헤더가 없는 번호 항목은 decision_items에 둔다.
+    """
     cleaned = _DISCLAIMER_RE.sub("", text or "")
     cleaned = cleaned.replace("\xa0", " ")
-    parts = _SECTION_RE.split(cleaned)
     decision: list[str] = []
     report: list[str] = []
     current: list[str] | None = None
-    for part in parts:
-        compact = re.sub(r"\s+", "", part)
-        if compact == "의결안건":
+    parts = re.split(r"[\n\r]+|·|•", cleaned)
+    index = 0
+    while index < len(parts):
+        kind = _section_kind(parts[index])
+        if kind == "decision":
             current = decision
+            index += 1
             continue
-        if compact == "보고안건":
+        if kind == "report":
             current = report
+            index += 1
             continue
-        if current is None:
+        line = _clean_fragment(parts[index])
+        if not line:
+            index += 1
             continue
-        chunks = re.split(r"[\n\r]+|·|•", part)
-        for chunk in chunks:
-            line = chunk.strip(" \t-:")
-            line = re.sub(r"\s+", " ", line).strip()
-            if not line:
-                continue
-            if "해당사항 없음" in line and not _ITEM_RE.search(line):
-                if "해당사항 없음" not in current:
-                    current.append("해당사항 없음")
-                continue
-            match = _ITEM_RE.search(line)
-            if match:
-                item = re.sub(r"\s+", " ", match.group(0)).strip()
-                if item not in current:
-                    current.append(item)
+        extra = 0
+        if _BARE_HO_RE.match(line):
+            nxt = _next_item_fragment(parts, index + 1)
+            if nxt is not None:
+                line = f"{line} {nxt[0]}"
+                extra = nxt[1] - index
+        target = current if current is not None else decision
+        if "해당사항 없음" in line and not _ITEM_RE.search(line):
+            _append_unique(target, "해당사항 없음")
+            index += 1 + extra
+            continue
+        item = _extract_item(line)
+        if item is not None:
+            _append_unique(target, item)
+        index += 1 + extra
     return decision, report
 
 
@@ -269,8 +371,7 @@ def _page_from_labels(html: str, *, attachment_role: str, title_labels: tuple[st
         if title:
             break
     if not title:
-        heading = soup.find(["h3", "h2"])
-        title = heading.get_text(strip=True) if heading else ""
+        title = _first_heading(soup)
     page = ParsedPage(
         title=title,
         date=first_date(_cell_text(cells, "일시")),
@@ -281,6 +382,14 @@ def _page_from_labels(html: str, *, attachment_role: str, title_labels: tuple[st
         attachments=_attachments_in(cells.get("첨부파일"), attachment_role),
     )
     return page
+
+
+def _first_heading(soup) -> str:
+    for tag in soup.find_all(["h2", "h3"]):
+        text = tag.get_text(strip=True)
+        if text:
+            return text
+    return ""
 
 
 def parse_view_page(html: str) -> ParsedPage:
@@ -353,9 +462,10 @@ def build_plan(row: ScheduleRow, view: ParsedPage, meet: ParsedPage) -> MeetingP
         round_no = row.round_no
     attachments = assign_saved_names([*view.attachments, *meet.attachments])
     status = "saved" if attachments else "meta_only"
+    committee = canonical_committee(row.category) or COMMITTEE
     return MeetingPlan(
         seq=row.seq,
-        folder=folder_name(year, round_no),
+        folder=folder_name(year, round_no, committee),
         status=status,
         title=title,
         date=date,
@@ -366,6 +476,7 @@ def build_plan(row: ScheduleRow, view: ParsedPage, meet: ParsedPage) -> MeetingP
         decision_items=_prefer(view.decision_items, meet.decision_items),
         report_items=_prefer(view.report_items, meet.report_items),
         attachments=attachments,
+        term=term_from_title(title),
     )
 
 
@@ -374,6 +485,10 @@ def compose_record(plan: MeetingPlan, fetched_at: str) -> str:
         "seq": plan.seq,
         "year": plan.year,
         "round": plan.round_no,
+    }
+    if plan.term is not None:
+        meta["term"] = plan.term
+    meta.update({
         "title": plan.title,
         "date": plan.date,
         "place": plan.place,
@@ -394,7 +509,7 @@ def compose_record(plan: MeetingPlan, fetched_at: str) -> str:
             for item in plan.attachments
         ],
         "fetched_at": fetched_at,
-    }
+    })
     if plan.meet_error:
         meta["meet_error"] = plan.meet_error
     dumped = yaml.safe_dump(meta, allow_unicode=True, sort_keys=False).strip()
@@ -515,16 +630,18 @@ def gather_rows(
     limit: int | None,
     seqs: set[str] | None,
     scan: dict | None = None,
+    committee: str = COMMITTEE,
 ) -> list[ScheduleRow]:
     """fetch_page(page) -> html. 빈 목록이면 멈추고, limit에 닿으면 다음 쪽을 열지 않는다.
 
-    scan을 주면 complete(다음 쪽을 열지 않고 멈췄으면 False)와 observed(이번 스캔에서 본 회계기준위원회 seq)를 채운다.
+    scan을 주면 complete(다음 쪽을 열지 않고 멈췄으면 False)와 observed(이번 스캔에서 본 선택 위원회 seq)를 채운다.
     limit에 닿아도 그 페이지의 나머지 행은 봐 두고, 다음 페이지는 열지 않는다.
     """
     found: list[ScheduleRow] = []
     seen: set[str] = set()
     observed: set[str] = set()
     wanted = set(seqs) if seqs else None
+    chosen = canonical_committee(committee)
     complete = True
     for page in range(1, MAX_LIST_PAGES + 1):
         rows = parse_schedule_rows(fetch_page(page))
@@ -536,7 +653,7 @@ def gather_rows(
         hit_limit = False
         for row in fresh:
             seen.add(row.seq)
-            if not row.is_committee:
+            if chosen is None or canonical_committee(row.category) != chosen:
                 continue
             observed.add(row.seq)
             if wanted is not None and row.seq not in wanted:
@@ -688,11 +805,12 @@ def dry_run_from_fixtures(
     *,
     limit: int | None,
     seqs: set[str] | None,
+    committee: str = COMMITTEE,
 ) -> dict:
     list_path = fixture_dir / "list.html"
     if not list_path.is_file():
         raise FileNotFoundError(f"fixture list missing: {list_path}")
-    rows = parse_list_page(_read(list_path))
+    rows = parse_list_page(_read(list_path), committee=committee)
 
     def fetch_view(seq: str) -> str:
         path = fixture_dir / "view" / f"{seq}.html"
@@ -771,17 +889,27 @@ def _response_text(response) -> str:
     return response.text
 
 
-def http_fetch_list(session, page: int, start: str, end: str) -> str:
+def http_fetch_list(
+    session,
+    page: int,
+    start: str,
+    end: str,
+    committee: str = COMMITTEE,
+) -> str:
+    data = {
+        "siteCd": SITE_CD,
+        "searchfield": "ALL",
+        "searchword": "",
+        "s_date_start": start,
+        "s_date_end": end,
+        "page": page,
+    }
+    if canonical_committee(committee) == ADVISORY_COMMITTEE:
+        data["category"] = ADVISORY_LIST_CATEGORY
+        data["subCategoryList"] = ADVISORY_LIST_SUBCATEGORY
     response = session.post(
         LIST_URL,
-        data={
-            "siteCd": SITE_CD,
-            "searchfield": "ALL",
-            "searchword": "",
-            "s_date_start": start,
-            "s_date_end": end,
-            "page": page,
-        },
+        data=data,
         timeout=30,
     )
     response.raise_for_status()
@@ -831,13 +959,22 @@ def crawl_live(
     limit: int | None,
     seqs: set[str] | None,
     retry_failed: bool,
+    committee: str = COMMITTEE,
 ) -> dict:
     scan: dict = {}
+    chosen = canonical_committee(committee) or COMMITTEE
+
+    def fetch_page(page: int) -> str:
+        if chosen == ADVISORY_COMMITTEE:
+            return http_fetch_list(session, page, start, end, chosen)
+        return http_fetch_list(session, page, start, end)
+
     rows = gather_rows(
-        lambda page: http_fetch_list(session, page, start, end),
+        fetch_page,
         limit=limit,
         seqs=seqs,
         scan=scan,
+        committee=chosen,
     )
     result = collect(
         dest,
@@ -873,6 +1010,11 @@ def parse_args(argv=None):
         description="회계기준위원회 회의록·의안 수집. 기본은 네트워크를 열지 않는다.",
     )
     parser.add_argument("--dry-run", action="store_true", help="묶음 HTML만 읽고 저장하지 않는다")
+    parser.add_argument(
+        "--committee",
+        default=COMMITTEE,
+        help="모을 중분류. 회계기준위원회(기본) 또는 회계기준자문위원회",
+    )
     parser.add_argument("--limit", type=int, default=None, help="처리할 회의 수")
     parser.add_argument("--seq", action="append", default=None, help="이 seq만. 쉼표로 여러 개")
     parser.add_argument(
@@ -901,6 +1043,13 @@ def parse_args(argv=None):
 def main(argv=None) -> int:
     args = parse_args(argv)
     seqs = _parse_seqs(args.seq)
+    committee = canonical_committee(args.committee)
+    if committee is None:
+        print(
+            "--committee는 회계기준위원회 또는 회계기준자문위원회만 가능합니다.",
+            file=sys.stderr,
+        )
+        return 2
     if args.delay < 0:
         print("--delay는 0 이상이어야 합니다.", file=sys.stderr)
         return 2
@@ -918,7 +1067,12 @@ def main(argv=None) -> int:
             )
             return 2
         try:
-            result = dry_run_from_fixtures(args.fixtures, limit=args.limit, seqs=seqs)
+            result = dry_run_from_fixtures(
+                args.fixtures,
+                limit=args.limit,
+                seqs=seqs,
+                committee=committee,
+            )
         except FileNotFoundError as exc:
             print(str(exc), file=sys.stderr)
             return 2
@@ -937,6 +1091,7 @@ def main(argv=None) -> int:
         limit=args.limit,
         seqs=seqs,
         retry_failed=args.retry_failed,
+        committee=committee,
     )
     for line in result["errors"]:
         print(line)

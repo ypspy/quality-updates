@@ -847,3 +847,233 @@ def test_docs_record_the_live_delay_default():
     assert "요청 간격" not in checklist
     assert "--delay" in guide
     assert "0.3" in guide
+
+
+def test_docs_keep_accounting_default_and_name_advisory_committee():
+    root = Path(kasb_meetings.__file__).resolve().parents[2]
+    collector = (root / "docs/project/kasb-meetings-collector.md").read_text(encoding="utf-8")
+    assert "--committee" in collector
+    assert "회계기준자문위원회" in collector
+    assert "자문위원회와 지속가능성기준위원회는 넣지 않는다" not in collector
+    assert "지속가능성기준위원회" in collector
+
+
+def test_list_filter_follows_the_selected_committee():
+    advisory = kasb_meetings.parse_list_page(
+        _read("list.html"), committee="회계기준자문위원회"
+    )
+    advisory_seqs = [row.seq for row in advisory]
+    assert advisory_seqs == ["9002", "1124", "1060", "847"]
+    assert all(
+        kasb_meetings.canonical_committee(row.category) == "회계기준자문위원회"
+        for row in advisory
+    )
+    assert "1105" not in advisory_seqs
+    default_rows = kasb_meetings.parse_list_page(_read("list.html"))
+    explicit = kasb_meetings.parse_list_page(
+        _read("list.html"), committee="회계기준위원회"
+    )
+    assert [row.seq for row in default_rows] == ["1109", "1106", "1105"]
+    assert [row.seq for row in explicit] == ["1109", "1106", "1105"]
+    spaced = kasb_meetings.parse_list_page(
+        _read("list.html"), committee="회계기준 자문위원회"
+    )
+    assert [row.seq for row in spaced] == advisory_seqs
+
+
+def test_advisory_round_uses_hoe_and_keeps_gi_as_term():
+    title = "2017년 제9기 제4회 회계기준자문위원회"
+    year, round_no = kasb_meetings.year_and_round(title, "2017-11-01")
+    assert year == 2017
+    assert round_no == 4
+    assert kasb_meetings.term_from_title(title) == 9
+    assert (
+        kasb_meetings.folder_name(year, round_no, "회계기준자문위원회")
+        == "2017-회계기준자문위원회-4회"
+    )
+    assert kasb_meetings.folder_name(2026, 1) == "2026-회계기준위원회-1회"
+    assert kasb_meetings.term_from_title("2026년 제1회 회계기준위원회") is None
+
+
+def test_advisory_view_1124_maps_agenda_and_written_report():
+    page = kasb_meetings.parse_view_page(_read("view/1124.html"))
+    assert page.title == "2026년 제1회 회계기준자문위원회(KK-IFRS 제1118호 등)"
+    assert "KK-IFRS" in page.title
+    assert page.date == "2026-05-14"
+    assert page.category == "회계기준 > 회계기준자문위원회"
+    assert page.attachments == []
+    assert page.decision_items == [
+        "1) K-IFRS 제1118호 등 개정 공개초안 '재무제표에서의 불확실성 공시 – 사례'",
+        "2) K-IFRS 제1016호 개정 공개초안 '토지 공시지가 주석공시'",
+        "3) IASB 공개초안 위험경감회계(ED) 주요 내용 및 예비적 견해",
+        "4) 무형자산 연구 '사업결합으로 취득한 무형자산의 정보유용성'",
+    ]
+    assert page.report_items == ["1) 지난 회의록 보고"]
+    meet = kasb_meetings.parse_meet_page(_read("meet/1124.html"))
+    assert meet.attachments == []
+
+
+def test_advisory_view_1060_keeps_ho_items_and_closed_minutes():
+    page = kasb_meetings.parse_view_page(_read("view/1060.html"))
+    assert page.decision_items == [
+        "제1호: 회계기준 개정 주요 내용",
+        "제2호: IASB의 손익계산서 표시와 공시 기준 개정안",
+        "제3호: 재무제표의 기후관련 및 기타 불확실성",
+        "제4호: 회계자문위원회 활성화 방안(안)",
+    ]
+    assert page.report_items == [
+        "제1호: 2023년 제1회 회계자문위원회 회의록(비공개)",
+        "제2호: 국제동향 보고",
+        "제3호: K-IFRS 정규절차 질의회신",
+    ]
+    assert page.attachments == []
+
+
+def test_advisory_view_847_reads_term_and_numbered_agenda():
+    page = kasb_meetings.parse_view_page(_read("view/847.html"))
+    assert page.title == "1999년 제1기 제1회 회계기준자문위원회"
+    assert page.decision_items == ["1. KASB 중단기 Agendas"]
+    assert page.report_items == []
+    assert kasb_meetings.term_from_title(page.title) == 1
+    year, round_no = kasb_meetings.year_and_round(page.title, page.date)
+    assert (year, round_no) == (1999, 1)
+    assert (
+        kasb_meetings.folder_name(year, round_no, "회계기준자문위원회")
+        == "1999-회계기준자문위원회-1회"
+    )
+
+
+def test_bare_ho_on_its_own_line_joins_the_next_title():
+    decision, report = kasb_meetings.parse_agenda_sections(
+        "■ 안건\n제1호\n다음 줄 제목\n■ 서면보고\n제1호\n서면 제목\n"
+    )
+    assert decision == ["제1호 다음 줄 제목"]
+    assert report == ["제1호 서면 제목"]
+    spaced, written = kasb_meetings.parse_agenda_sections(
+        "■ 안\u00a0건:\n1) 첫 안건\n■ 서면보고:\n1) 지난 회의록 보고\n"
+    )
+    assert spaced == ["1) 첫 안건"]
+    assert written == ["1) 지난 회의록 보고"]
+
+
+def test_collect_advisory_record_keeps_section_titles_and_meta_only(tmp_path):
+    rows = {
+        row.seq: row
+        for row in kasb_meetings.parse_list_page(
+            _read("list.html"), committee="회계기준자문위원회"
+        )
+    }
+    def fetch_file(file_no: str, file_seq: str) -> bytes:
+        raise AssertionError("download")
+
+    result = kasb_meetings.collect(
+        tmp_path,
+        [rows["1124"], rows["847"]],
+        fetch_view=lambda seq: _read(f"view/{seq}.html"),
+        fetch_meet=lambda seq: _read(f"meet/{seq}.html") if seq == "1124" else "",
+        fetch_file=fetch_file,
+    )
+    assert result["counts"]["meta_only"] == 2
+    assert result["counts"]["saved"] == 0
+    recent = tmp_path / "2026-회계기준자문위원회-1회"
+    early = tmp_path / "1999-회계기준자문위원회-1회"
+    assert not (tmp_path / "2026-회계기준위원회-1회").exists()
+    assert not (tmp_path / "1999-회계기준위원회-1회").exists()
+    record = (recent / "record.md").read_text(encoding="utf-8")
+    assert "## 의결 안건" in record
+    assert "## 보고 안건" in record
+    assert "■ 안 건" not in record
+    assert "KK-IFRS" in record
+    meta = kasb_meetings.read_meta(recent / "record.md")
+    assert meta["status"] == "meta_only"
+    assert meta["category"] == "회계기준 > 회계기준자문위원회"
+    assert meta["seq"] == "1124"
+    assert "term" not in meta
+    assert meta["decision_items"][0].startswith("1) K-IFRS 제1118호")
+    assert meta["report_items"] == ["1) 지난 회의록 보고"]
+    early_meta = kasb_meetings.read_meta(early / "record.md")
+    assert early_meta["term"] == 1
+    assert early_meta["round"] == 1
+    assert early_meta["year"] == 1999
+    assert early_meta["decision_items"] == ["1. KASB 중단기 Agendas"]
+    assert list((recent / "agenda").iterdir()) == []
+    assert list((recent / "results").iterdir()) == []
+
+
+def test_dry_run_advisory_uses_its_folder_and_does_not_open_a_socket(capsys, monkeypatch):
+    def blocked(*args, **kwargs):
+        raise AssertionError("socket")
+
+    monkeypatch.setattr(socket, "create_connection", blocked)
+    monkeypatch.setattr(socket, "socket", blocked)
+    code = kasb_meetings.main(
+        ["--dry-run", "--committee", "회계기준자문위원회", "--limit", "3"]
+    )
+    out = capsys.readouterr().out
+    assert code == 0
+    assert "dry-run network=no meetings=3" in out
+    assert "folder=2026-회계기준자문위원회-2회" in out
+    assert "folder=2026-회계기준자문위원회-1회" in out
+    assert "folder=2026-회계기준위원회-" not in out
+    assert "seq=1105" not in out
+    assert "seq=1109" not in out
+
+
+def test_unknown_committee_exits_without_a_socket(capsys, monkeypatch):
+    _block_network(monkeypatch)
+    code = kasb_meetings.main(
+        ["--dry-run", "--committee", "세미나", "--limit", "1"]
+    )
+    assert code == 2
+    assert "회계기준자문위원회" in capsys.readouterr().err
+
+
+def test_default_list_post_omits_category_filter():
+    seen = {}
+
+    class Session:
+        def post(self, url, data=None, timeout=None):
+            seen["url"] = url
+            seen["data"] = dict(data)
+            return _Response(200, "<table></table>")
+
+    assert kasb_meetings.http_fetch_list(Session(), 1, "2020-01-01", "2020-12-31")
+    assert seen["url"] == kasb_meetings.LIST_URL
+    assert seen["data"]["page"] == 1
+    assert seen["data"]["s_date_start"] == "2020-01-01"
+    assert "category" not in seen["data"]
+    assert "subCategoryList" not in seen["data"]
+
+
+def test_advisory_list_post_sends_category_filter():
+    seen = {}
+
+    class Session:
+        def post(self, url, data=None, timeout=None):
+            seen["data"] = dict(data)
+            return _Response(200, "<table></table>")
+
+    kasb_meetings.http_fetch_list(
+        Session(), 1, "", "", kasb_meetings.ADVISORY_COMMITTEE
+    )
+    assert seen["data"]["category"] == "012005001000"
+    assert seen["data"]["subCategoryList"] == "012005001002"
+    assert seen["data"]["siteCd"] == kasb_meetings.SITE_CD
+    assert seen["data"]["page"] == 1
+
+
+def test_gather_rows_selects_only_the_requested_committee():
+    pages = {1: _read("list.html")}
+
+    def fetch_page(page: int) -> str:
+        return pages.get(page, "<table><tbody></tbody></table>")
+
+    advisory = kasb_meetings.gather_rows(
+        fetch_page,
+        limit=2,
+        seqs=None,
+        committee="회계기준자문위원회",
+    )
+    assert [row.seq for row in advisory] == ["9002", "1124"]
+    accounting = kasb_meetings.gather_rows(fetch_page, limit=1, seqs=None)
+    assert [row.seq for row in accounting] == ["1109"]
