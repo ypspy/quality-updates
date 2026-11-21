@@ -1035,7 +1035,7 @@ def test_accounting_view_1132_matches_base_parser():
 def test_advisory_view_1123_keeps_the_span_paragraph_and_colon():
     page = kasb_meetings.parse_view_page(_read("view/1123.html"))
     assert page.decision_items == [
-        "제1호: 회계기준적용의견서(안) 25-1 '기업회계기준서 제1001호 문단 19에 따른 일탈 적용의 제한'",
+        "제1호: 회계기준적용의견서(안) 25-1 '기업회계기준서 제1001호 문단 19에 따른 일탈적용의 제한'",
         "제2호: K-IFRS 질의회신 - RPS 공급의무자의 REC 매입계약 회계처리",
         "제3호: K-IFRS 용어 정비",
     ]
@@ -1043,6 +1043,68 @@ def test_advisory_view_1123_keeps_the_span_paragraph_and_colon():
     assert "제1001호 문단" not in page.decision_items[0] or page.decision_items[0].startswith("제1호:")
     assert page.decision_items[0].startswith("제1호:")
     assert "제1001호" in page.decision_items[0]
+
+
+def _br_only_source_lines(html: str) -> list[str]:
+    from bs4 import BeautifulSoup
+
+    node = BeautifulSoup(html, "html.parser").select_one(".board_view_cont")
+    assert node is not None
+    assert node.find("p") is None
+    assert node.find("br") is not None
+    clone = BeautifulSoup(str(node), "html.parser")
+    for br in clone.find_all("br"):
+        br.replace_with("\n")
+    return [
+        text
+        for line in clone.get_text("\n").splitlines()
+        if (text := kasb_meetings._normalize_paragraph(line))
+    ]
+
+
+def test_advisory_br_only_body_drops_headers_and_keeps_source_lines():
+    expected = {
+        "view/975.html": (
+            [
+                "1) 주요 회계기준 개정",
+                "2) 향후 연구과제 소개",
+                "3) 한국회계기준원 비전 2030(안)",
+                "4) 암호자산 해외동향",
+            ],
+            [
+                "1) 2022년 제2회 회계기준자문위원회 회의록",
+                "2) 국제동향 보고",
+                "3) K-IFRS 정규절차 질의회신",
+            ],
+        ),
+        "view/960.html": (
+            [
+                "1) 주요 회계기준 개정",
+                "2) 암호자산 회계이슈",
+                "3) 지속가능성 공시기준 관련 활동",
+            ],
+            [
+                "1) 2022년 제1회 회계기준자문위원회 회의록",
+                "2) 국제동향보고",
+                "3) 중소기업 회계지원센터 출범",
+            ],
+        ),
+    }
+    headers = {"■ 안 건:", "■ 서면보고:"}
+    for name, (decision, report) in expected.items():
+        html = _read(name)
+        source = _br_only_source_lines(html)
+        assert source[0] == "■ 안 건:"
+        assert "■ 서면보고:" in source
+        page = kasb_meetings.parse_view_page(html)
+        assert page.decision_items == decision
+        assert page.report_items == report
+        stored = [*page.decision_items, *page.report_items]
+        assert stored == [line for line in source if line not in headers]
+        assert all(header not in item for item in stored for header in headers)
+    seq_975 = kasb_meetings.parse_view_page(_read("view/975.html"))
+    assert len(seq_975.decision_items) == 4
+    assert len(seq_975.report_items) == 3
 
 
 def test_advisory_parenthesized_items_stay_whole_paragraphs():
