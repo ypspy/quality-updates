@@ -55,12 +55,42 @@ TABLE_SHAS = {
     "58620a6b13bd247b894968040b35e55f3791bcf880eed865b5cd080f44afb73d",
 }
 
-# 회차를 제목에서 찾지 못해 처음부터 「미공개」로 둔 3건.
-UNPUBLISHED_IDS = {"81931", "82248", "82136"}
+# results-23.md + r1-response.md의 26곳 배치. 제재 의결 항목 URL id → 출처 경로.
+EXPECTED_SOURCE_PATHS = {
+    "81975": "downloads/sanctions/2024-증선위-6차/minutes.pdf",
+    "81931": "downloads/sanctions/2024-금융위-5차/minutes.pdf",
+    "81875": "downloads/sanctions/2024-증선위-5차/minutes.pdf",
+    "81816": "downloads/sanctions/2024-증선위-4차/minutes.pdf",
+    "81693": "downloads/sanctions/2024-증선위-3차/minutes.pdf",
+    "82496": "downloads/sanctions/2024-증선위-12차/minutes.pdf",
+    "82374": "downloads/sanctions/2024-금융위-10차/minutes.pdf",
+    "82334": "downloads/sanctions/2024-증선위-10차/minutes.pdf",
+    "82248": "downloads/sanctions/2024-증선위-9차/minutes.pdf",
+    "82136": "downloads/sanctions/2024-금융위-7차/minutes.pdf",
+    "82105": "downloads/sanctions/2024-증선위-7차/minutes.pdf",
+    "82052": "downloads/sanctions/2024-금융위-6차/minutes.pdf",
+    "83067": "downloads/sanctions/2024-증선위-16차/minutes.pdf",
+    "83022": "downloads/sanctions/2024-금융위-15차/minutes.pdf",
+    "82685": "downloads/sanctions/2024-증선위-14차/minutes.pdf",
+    "82651": "downloads/sanctions/2024-금융위-13차/minutes.pdf",
+    "82599": "downloads/sanctions/2024-증선위-13차/minutes.pdf",
+    "83662": "downloads/sanctions/2024-증선위-22차/minutes.pdf",
+    "83585": "downloads/sanctions/2024-금융위-21차/minutes.pdf",
+    "83525": "downloads/sanctions/2024-증선위-21차/minutes.pdf",
+    "83470": "downloads/sanctions/2024-금융위-20차/minutes.pdf",
+    "83438": "downloads/sanctions/2024-증선위-20차/minutes.pdf",
+    "83348": "downloads/sanctions/2024-증선위-19차/minutes.pdf",
+    "83342": "downloads/sanctions/2024-증선위-19차/minutes.pdf",
+    "83244": "downloads/sanctions/2024-증선위-18차/minutes.pdf",
+    "83174": "downloads/sanctions/2024-증선위-17차/minutes.pdf",
+}
 EXTERNAL_AUDIT_ID = "82496"
 KAKAO_ID = "83342"
 BIDENT_ID = "83348"
 URL_ID_RE = re.compile(r"https://(?:www\.)?fsc\.go\.kr/no010101/(\d+)")
+SOURCE_RE = re.compile(
+    r"<!-- source: pdf\|(downloads/sanctions/2024-[^ \t>]+/minutes\.pdf) -->"
+)
 ADMONITION_RE = re.compile(r'!!! (note|info) "([^"]+)"')
 ITEM_RE = re.compile(r"^- \(")
 
@@ -73,6 +103,15 @@ def table_sha(block: list[str]) -> str:
 def url_id(title: str) -> str | None:
     matched = URL_ID_RE.search(title)
     return matched.group(1) if matched else None
+
+
+def item_source_paths(path: Path, item: dict) -> list[str]:
+    """제목과 첫 상자 사이에 있는 의사록 출처 경로."""
+    lines = path.read_text(encoding="utf-8").splitlines()
+    start = item["title_line"]  # 제목 다음 줄 (1-index)
+    end = item["boxes"][0][2] - 1 if item["boxes"] else len(lines)
+    block = "\n".join(lines[start:end])
+    return SOURCE_RE.findall(block)
 
 
 def sanction_items(path: Path) -> list[dict]:
@@ -149,19 +188,25 @@ def test_2024_table_hashes_match_move_baseline():
     assert set(shas) == TABLE_SHAS
 
 
-def test_2024_discussion_is_empty_or_unpublished_only():
-    unpublished = []
+def test_2024_discussion_is_empty():
+    # 출처 주석은 제목과 첫 상자 사이에 있어 위원 논의 본문에는 들어가지 않는다.
     for path, item in all_items():
         body = item["body_by_box"]["위원 논의"]
         text = "\n".join(body).strip()
-        ident = url_id(item["title"])
-        if ident in UNPUBLISHED_IDS:
-            assert text == "- 미공개", (path.name, item["title_line"], text)
-            unpublished.append(ident)
-            continue
-        # 로컬 의사록이 있는 항목은 이 순서 PR에서 첨부하지 않아 비어 있다.
         assert text == "", (path.name, item["title_line"], text)
-    assert set(unpublished) == UNPUBLISHED_IDS
+
+
+def test_2024_minutes_source_paths_locked():
+    found: dict[str, str] = {}
+    for path, item in all_items():
+        ident = url_id(item["title"])
+        assert ident is not None, (path.name, item["title_line"], item["title"])
+        paths = item_source_paths(path, item)
+        expected = EXPECTED_SOURCE_PATHS[ident]
+        assert paths == [expected], (path.name, ident, item["title_line"], paths, expected)
+        found[ident] = paths[0]
+    assert found == EXPECTED_SOURCE_PATHS
+    assert len(found) == 26
 
 
 def test_2024_external_audit_note_title_stays_original():
