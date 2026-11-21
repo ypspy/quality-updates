@@ -452,6 +452,11 @@ def _prune_empty(folder: Path) -> None:
 
 
 def _eligible_block(block: str) -> bool:
+    """의사록 출처 주석을 붙일 수 있는 제재 항목인지.
+
+    `위원 논의` 상자가 없거나, 본문이 비어 있거나 공백·빈 줄뿐인 자리표시이거나,
+    본문에 `미공개`가 있으면 True. 이미 논의 문장이 있으면 False.
+    """
     marker = '!!! note "위원 논의"'
     start = block.find(marker)
     if start < 0:
@@ -460,7 +465,9 @@ def _eligible_block(block: str) -> bool:
     next_note = body.find("!!! note")
     if next_note >= 0:
         body = body[:next_note]
-    return "미공개" in body
+    if "미공개" in body:
+        return True
+    return body.strip() == ""
 
 
 def is_additional_minutes(title: str) -> bool:

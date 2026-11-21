@@ -168,6 +168,37 @@ def test_filled_discussion_does_not_receive_a_minutes_marker():
     assert report == ["skipped discussion 2026 증선위 정기 13"]
 
 
+def _press_discussion_body(body: str) -> str:
+    return PRESS.replace("        - 미공개임\n", body)
+
+
+def test_empty_discussion_placeholder_receives_a_minutes_marker():
+    empty = _press_discussion_body("")
+    updated, report = attach_minutes(empty, [POSTS[0]])
+    assert MINUTES_PDF in updated
+    assert report == ["attached 2026 증선위 정기 13"]
+    _, empty_report = attach_minutes(empty, [])
+    assert empty_report == ["unpublished 2026 증선위 정기 13"]
+    assert "skipped discussion" not in " ".join(empty_report)
+
+
+def test_whitespace_only_discussion_placeholder_receives_a_minutes_marker():
+    spaced = _press_discussion_body("        \n\n    \t  \n")
+    updated, report = attach_minutes(spaced, [POSTS[0]])
+    assert MINUTES_PDF in updated
+    assert report == ["attached 2026 증선위 정기 13"]
+    _, empty_report = attach_minutes(spaced, [])
+    assert empty_report == ["unpublished 2026 증선위 정기 13"]
+
+
+def test_unpublished_discussion_still_receives_a_minutes_marker():
+    marked = _press_discussion_body("        - 미공개\n")
+    updated, report = attach_minutes(marked, [POSTS[0]])
+    assert MINUTES_PDF in updated
+    assert "        - 미공개" in updated
+    assert report == ["attached 2026 증선위 정기 13"]
+
+
 PRESS_WITH_APPENDIX = """### 금융위원회
 
 #### 제재 의결
