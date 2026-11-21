@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import yaml
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString
 
 LIST_URL = "https://www.kasb.or.kr/front/board/calListA.do"
 VIEW_URL = "https://www.kasb.or.kr/front/board/calView.do"
@@ -285,6 +285,17 @@ def _normalize_paragraph(text: str) -> str:
     return re.sub(r"\s+", " ", (text or "").replace("\xa0", " ")).strip()
 
 
+def _advisory_paragraph_text(paragraph) -> str:
+    """인접 텍스트 노드는 붙인다. p 안의 br만 공백 하나로 둔다."""
+    parts: list[str] = []
+    for child in paragraph.descendants:
+        if getattr(child, "name", None) == "br":
+            parts.append(" ")
+        elif type(child) is NavigableString:
+            parts.append(str(child))
+    return _normalize_paragraph("".join(parts))
+
+
 def _advisory_paragraphs(node) -> list[str]:
     if node is None:
         return []
@@ -292,7 +303,7 @@ def _advisory_paragraphs(node) -> list[str]:
     if paragraphs:
         found = []
         for paragraph in paragraphs:
-            text = _normalize_paragraph(paragraph.get_text(" ", strip=True))
+            text = _advisory_paragraph_text(paragraph)
             if text:
                 found.append(text)
         return found
