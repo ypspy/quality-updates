@@ -58,6 +58,9 @@ jobs:
       - name: Validate content
         run: python scripts/validate_content.py --strict
 
+      - name: Lint public body
+        run: python scripts/lint_public_body.py
+
       - name: Export corpus (strict)
         run: python scripts/export_corpus.py --strict
 

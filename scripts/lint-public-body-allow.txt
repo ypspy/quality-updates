@@ -1,0 +1,11 @@
+# 임시 허용 목록. 이 파일들은 오류 대신 경고로만 집계한다.
+# 2단계(2012·2013 재작성)와 3단계(#184·#185 수정)에서 지운다.
+# 2014년 이후·2026은 올리지 않는다.
+docs/quality-updates/2012/2012-01-01_to_2012-03-31.md
+docs/quality-updates/2012/2012-04-01_to_2012-06-30.md
+docs/quality-updates/2012/2012-07-01_to_2012-09-30.md
+docs/quality-updates/2012/2012-10-01_to_2012-12-31.md
+docs/quality-updates/2013/2013-01-01_to_2013-03-31.md
+docs/quality-updates/2013/2013-04-01_to_2013-06-30.md
+docs/quality-updates/2013/2013-07-01_to_2013-09-30.md
+docs/quality-updates/2013/2013-10-01_to_2013-12-31.md

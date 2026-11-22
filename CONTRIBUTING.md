@@ -213,6 +213,7 @@ PR 전 또는 로컬 배포 전에 아래 항목을 확인하면 좋습니다.
 
 - [ ] `mkdocs build --strict` 성공 (경고 없음)
 - [ ] `npm run lint:md` 통과 (실패하면 오류를 모두 고치고 재실행. 규칙 완화·파일 제외 없음)
+- [ ] `python scripts/lint_public_body.py` 통과 (공개 본문 린트. 형식은 `docs-dev/sanctions-format.md`)
 
 ### 탐색·검색
 
