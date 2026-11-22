@@ -20,6 +20,8 @@ DEFAULT_MAX_HEADING_REPEATS = 3
 
 PROCESS_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("process_instruction", re.compile(r"의결서는 로컬에 없다")),
+    ("process_instruction", re.compile(r"의결서 공개본은 미입수")),
+    ("process_instruction", re.compile(r"의결서는?\s*미입수")),
     ("process_instruction", re.compile(r"로컬 폴더가 없어")),
     ("process_instruction", re.compile(r"로컬에 없어 미입수")),
     ("process_instruction", re.compile(r"풀어 만들지 않는다")),

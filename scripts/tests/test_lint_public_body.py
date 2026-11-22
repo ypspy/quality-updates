@@ -26,6 +26,13 @@ def test_process_instruction_is_an_error():
     assert any("의결서는 로컬에 없다" in item.message for item in found)
 
 
+def test_missing_decision_document_phrase_is_an_error():
+    text = "        - (출처) 의결서 공개본은 미입수\n"
+    found = lint_text("a.md", text)
+    assert {item.rule for item in found} >= {"process_instruction"}
+    assert any("의결서 공개본은 미입수" in item.message for item in found)
+
+
 def test_table_instruction_and_summary_phrases():
     text = (
         "- 지적사항·조치 금액·회사 구분은 보도 첨부·본문을 풀어 표로 적지 않는다.\n"
