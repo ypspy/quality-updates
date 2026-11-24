@@ -64,3 +64,12 @@ downloads/sanctions/*
 *.log
 .env
 .env.local
+
+# handover 보강: 최소 비밀·로그·키, 로컬 DB
+.env.*
+logs/
+*.key
+*.pem
+*.db
+*.db-wal
+*.db-shm
