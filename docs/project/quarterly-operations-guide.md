@@ -65,7 +65,7 @@
 
 - **D:** 당일 = 그 시점까지 공개된 제재 자료 입수. 늦게 공개되는 의사록 등은 **다음 분기 루틴의 1d′**에서 직전 분기를 보완한다.
 - **E:** 당일까지 **공개분**만 입수. 미공개분은 이후 루틴에서 같은 방식으로 이어서 받는다.
-- E 실수집(`kasb_meetings --live`)은 기존 승인 원칙을 따른다. 가이드는 칸·명령·링크로만 둔다.
+- E: `scripts/crawler/kasb_meetings.py`는 인자가 없으면 안내 후 끝난다. 실수집은 승인 전이다. 연속 HTTP 간격은 `--delay`(기본 0.3초)이고 `--dry-run`에는 적용하지 않는다. 상세: [kasb-meetings-collector.md](kasb-meetings-collector.md).
 
 ### 3.3 과거분·누적 아카이브
 
@@ -87,8 +87,9 @@
 ## 4. 시점·경로 규칙
 
 - 표준 경로: `docs/quality-updates/YYYY/YYYY-MM-DD_to_YYYY-MM-DD.md`
-- `crawl.py`는 `--year`와 `--quarter`를 명시한다. 갱신일 전 해당 분기는 exit 2.
-- 조기 예외: `data/qu-early-allow.txt`에 표준 경로를 적은 경우만 (윤석님 명시 승인).
+- 분기 문서와 nav·「최신」 링크는 그 분기 다음 달 5일 09:00 KST 이후에만 만든다.
+- `crawl.py`는 `--year`와 `--quarter`를 명시한다. 인자 없는 `crawl.py`는 갱신일이 지난 마지막 분기를 고른다. 명시 기간이 갱신일 전인 달력 분기면 종료 코드 2로 거부한다.
+- 조기 예외는 윤석님 본인의 명시 승인만 인정한다. 승인은 `data/qu-early-allow.txt`의 정확한 표준 경로로만 기록한다.
 - 본문 dated list는 과거→현재. Appendix A는 크롤 수집 순(최신→과거) 유지.
 - 기존 큐레이션본이 있으면 crawl이 덮지 않는다.
 
@@ -142,6 +143,13 @@ cd scripts && python -m crawler.kasb_meetings --dry-run --limit 3
 [editor-curation-workflow.md](editor-curation-workflow.md),
 [sanctions-format.md](../../docs-dev/sanctions-format.md),
 [kasb-meetings-collector.md](kasb-meetings-collector.md).
+
+### 6.1 제재 출처 계약 (요약)
+
+장문 형식은 [sanctions-format.md](../../docs-dev/sanctions-format.md)·writer 스킬을 본다. 가이드에 남기는 계약만:
+
+- 안건 분석 첫 불릿은 `attach_sanction_minutes.decision_source_bullet` 의결서 출처다. fileNo는 2로 고정하지 않는다. 2026년 1분기부터 이 줄이 없으면 `validate_content.py --strict`가 오류다.
+- 위원 논의 의사록 출처는 `attach_sanction_minutes.minutes_source_bullet`가 만든다. fileNo를 하드코딩하지 않는다. PDF가 없고 HWP·HWPX 의사록만 있으면 그 파일을 고른다. 첨부가 없으면 `미공개`. 2026년 1분기부터 출처 줄이 있으면 getFile 주소와 「의사록」 표시 이름이 필요하다.
 
 ---
 
