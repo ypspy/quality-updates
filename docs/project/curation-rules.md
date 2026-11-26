@@ -3,7 +3,7 @@
 회계·감사 규제 업데이트 분기 문서를 사람이 편집기로 고르기 **전에**, 같은 기준으로 마커를 제안하기 위한 규칙이다.  
 구현은 `scripts/auto_curate.py`. 과거 분기와의 숫자는 [curation-backtest.md](curation-backtest.md).
 
-이 문서는 편집기를 대체하지 않는다. 스크립트는 파일을 수정하지 않는다. 스킵·출처의 최종 판단은 전문가(HITL)다.
+이 문서는 편집기를 대체하지 않는다. 스크립트는 파일을 수정하지 않는다. 정규 분기 루틴에서는 Agent가 스킵·출처 마커를 반영하고 draft PR을 열며, 전문가는 최종 머지 결정만 한다. 편집기 수동 경로에서도 같은 마커 규칙을 쓴다.
 
 요약 문장 형식은 [quality-updates-writer 스킬](../../.claude/skills/quality-updates-writer/SKILL.md) REFERENCE C를 따른다. 아래 규칙은 그 선별 기준을 2023–2026 Q1 본문과 Appendix를 대조해 구체화한 것이다. 스킬과 관측이 다르면 그 차이를 적었다.
 

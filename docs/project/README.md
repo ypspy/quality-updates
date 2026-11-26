@@ -171,7 +171,7 @@ python scripts/mcp_server/stdio.py
 # Health: GET /health
 # MCP: POST /mcp  Authorization: Bearer <MCP_API_KEY>
 # Host 허용: RENDER_EXTERNAL_HOSTNAME(Render 주입) + 선택 MCP_ALLOWED_HOSTS
-# 실제 호스트 URL은 HITL이 Render에서 만든 뒤 이 절에 적는다.
+# 실제 호스트 URL은 전문가가 Render에서 만든 뒤 이 절에 적는다.
 ```
 
 설계: [mcp-corpus spec](../superpowers/specs/2026-06-27-mcp-corpus-design.md) · [소비 제품 spec](../superpowers/specs/2026-09-10-consumption-mcp-product-design.md)
