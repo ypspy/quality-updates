@@ -60,6 +60,9 @@ downloads/sanctions/*
 .editor-curation/
 .worktrees/
 
+# 랩탑 로컬 HTML 스냅샷(테스트는 fixtures/fss_reply_*.html 사용)
+scripts/tests/fixtures/summary_bench/
+
 # 기타
 *.log
 .env
