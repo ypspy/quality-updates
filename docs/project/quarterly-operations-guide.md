@@ -234,6 +234,7 @@ PDF가 없는 HWP/HWPX는 `fetch_attachments.py` 보고의 변환 목록이다. 
 
 - [ ] `prepare_deploy` exit 0
 - [ ] validate strict 통과
+- [ ] `python scripts/lint_public_body.py` 통과 (형식: `docs-dev/sanctions-format.md`)
 - [ ] `python scripts/export_corpus.py --strict` 통과
 - [ ] `npm test` 또는 `cd scripts && python -m pytest tests/ -q` 통과
 - [ ] `docs/` Markdown을 수정했으면 `npm run lint:md` 통과
@@ -276,6 +277,7 @@ python scripts/prepare_deploy.py
 
 # 검증
 python scripts/validate_content.py --strict
+python scripts/lint_public_body.py
 python scripts/export_corpus.py --strict
 cd scripts && python -m pytest tests/ -q
 mkdocs build --strict
@@ -353,6 +355,7 @@ npm: `npm run crawl`, `npm run prepare:deploy`, `npm test`, `npm run build:stric
 | G3 | `mkdocs.yml` nav 등록 | HITL |
 | G4 | `prepare_deploy.py` 성공 | Agent 실행, HITL 확인 |
 | G5 | `validate_content --strict` 통과 | 시스템 |
+| G5b | `lint_public_body.py` 통과 | 시스템 |
 | G6 | `pytest` 통과 | 시스템 |
 | G6b | `npm run lint:md` 통과. 실패 시 [CONTRIBUTING.md](../../CONTRIBUTING.md)의 Markdown lint 절차로 고치고 재실행 | Agent |
 | G7 | `mkdocs build --strict` 통과 | Agent/HITL |

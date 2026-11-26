@@ -221,13 +221,13 @@ PR·커밋 봇 식별 규칙(앞방향만): 라벨 `bot:<봇이름>`(클라우�
 - ARF 루틴 3개 일시정지 여부·queue.md 잔여 카드 4개(ARF·W1/C2) — 답 대기 [확인됨 11/26 그록봇].
 
 ## 7. 알려진 문제와 기술 부채
-1. 로컬 pytest 1건 실패 `test_kasb_file_proxy_saves_to_configured_downloads_folder` — 박스 Python 3.13에서 재현(1307 passed / 1 failed, 11/24). CI(3.11) 통과. 원인 미조사 [확인됨 11/26 그록봇: 동일 잔존].
+1. `test_kasb_file_proxy_saves_to_configured_downloads_folder` — 해소됨: 테스트 격리(네트워크 비의존 mock), M0 pytest 0 failed. 지원 Python 문서는 3.11–3.12 [확인됨: plan 2026-11-26].
 2. 린트 임시 허용 `scripts/lint-public-body-allow.txt`에 2012·2013 분기 파일이 경고로만 집계됨(2단계·3단계 후 삭제 예정) [확인됨: 파일 주석].
 3. `lint_public_body.py` 경고 `trailing_dot_host` 2026: 66건 [확인됨]. 2014–2026 `fsc.go.kr./` 1,099건 경고 [추정: `Cabbage.md` §4].
 4. 원격 브랜치 다수가 머지 후 남음(11/26 재집계 약 143 remote ref). 정리는 삭제라서 승인 필요 [확인됨 11/26: `git branch -r`].
 5. 에이전트 규칙: `AGENTS.md`를 원본으로 `.claude/` 병행(사용자 11/26). 이관 보강 PR이 별도 진행 중일 수 있다 [확인됨 11/26: 사용자].
 6. 저장소 루트에 공백 포함 폴더 `FSS Inspection_Grokbot_MINT/`(112M PDF, 364파일) — 처분 blocked. 일상 린트·형식·QU 분기 경로의 스크립트는 이 폴더를 읽지 않는다 [확인됨 11/26: `rg`·`du`].
-7. `README.md`는 "Python 3.8 이상", CI는 3.11 — 지원 버전 불일치 [확인됨].
+7. 지원 Python은 README·AGENTS·CI 기준 **3.11–3.12** (CI 3.11)로 문서 정합 [확인됨: plan 2026-11-26].
 8. `IMPLEMENTATION_LOG.md` "분기 콘텐츠 백필 (2023 Q2, 2024 Q1·Q2 gold standard)" 미체크 [확인됨]. 현재 유효 여부는 [확인 불가].
 9. 저장소 PUBLIC 유지(개인 프로젝트). 비밀값 커밋·PR·이슈 금지 [확인됨 11/26: 사용자].
 10. 과거 PR 작성자가 모두 `ypspy`라 봇별 이력 구분 불가 [추정: `team-ops-5-actions-20261122.md`].
@@ -262,7 +262,7 @@ PR·커밋 봇 식별 규칙(앞방향만): 라벨 `bot:<봇이름>`(클라우�
 
 | 단계 | 목표 | 완료 기준(명령으로 확인) |
 |---|---|---|
-| M0 이관 기반 | Cursor에서 검증·규칙 문서 정착 | AGENTS/TASKS 머지, `validate`/`mkdocs --strict`/`lint:md` rc 0. pytest 1실패는 조사(해소는 별도) |
+| M0 이관 기반 | Cursor에서 검증·규칙 문서 정착 | AGENTS/TASKS 머지, `validate`/`mkdocs --strict`/`lint:md` rc 0. pytest 0 failed(T6), 지원 3.11–3.12 문서 정합 |
 | M1 형식·린트(V-249 허용) | 공개 본문 린트·형식 잔여만 | `lint_public_body` 개선. **2012·2013 재작성·연도 백필은 V-249 해제 전 하지 않음** |
 | M2 백필 재개 | V-249 해제 + 사용자 승인 후 | #184·#185 방침 재확인 → 2009~2000. 지금은 **blocked** |
 | M3 정규 분기 루틴 검증 | 2027-01-05 09:00 KST 이후 | `crawl.py --year 2027 --quarter 1` → 종료 코드 2 |

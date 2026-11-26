@@ -33,6 +33,7 @@ Quality Updates 프로젝트에 기여해 주셔서 감사합니다.
 
 - [이미 열린 이슈](https://github.com/ypspy/quality-updates/issues) 에 동일 내용이 없는지 검색해 주세요.
 - 재현 가능한 버그는 환경(OS, Python 버전, 브라우저)을 명시해 주세요.
+- 지원 Python: 3.11–3.12 (CI는 3.11)
 
 ### 이슈 템플릿 권장 사항
 

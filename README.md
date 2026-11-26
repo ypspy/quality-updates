@@ -14,7 +14,7 @@
 
 ## 로컬에서 보기
 
-- **Python**: 3.8 이상
+- **Python**: 3.11–3.12 (CI는 3.11)
 - **Node.js** (선택): `dev`, `build:strict`, `test`
 
 ```bash

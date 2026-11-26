@@ -17,7 +17,7 @@
 | T3 | `TASKS.md` 신설 | 이 파일 | ready → 이 PR | 사용자 답 9(b) |
 | T4 | #190 HANDOVER 사실 정정 | #189 머지·COMMON 없음·열린 PR·결정 반영. `[추정]`은 그록봇 확인 전 유지 | ready | 사용자 답 3·4 |
 | T5 | 린트·형식 잔여 (`trailing_dot_host` 등) | `lint_public_body` 개선 PR. **연도 본문 재작성 없음** | optional | V-249 허용 |
-| T6 | pytest 1실패 원인 조사 | 3.11 vs 3.13 재현 기록. 수정은 별도 승인 | ready(조사만) | HANDOVER·그록봇 |
+| T6 | pytest 1실패 원인 조사·수정 | 네트워크 비의존 mock으로 M0 pytest 0 failed | done | 스펙 2026-11-26-pipeline-contract-sync |
 
 ---
 
