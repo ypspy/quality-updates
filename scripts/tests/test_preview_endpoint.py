@@ -258,38 +258,27 @@ def test_kasb_file_proxy_rejects_invalid_file_no():
 
 
 def test_kasb_file_proxy_saves_to_configured_downloads_folder(monkeypatch, tmp_path):
-    class FakeResp:
-        status_code = 200
-        headers = {"content-disposition": 'attachment; filename="a.zip"'}
-
-        def iter_content(self, chunk_size=8192):
-            yield b"PK\x03\x04" + b"x" * 20
-
-        def close(self):
-            pass
-
-    calls = {}
-
-    def fake_post(url, **kwargs):
-        calls["url"] = url
-        calls["data"] = kwargs.get("data")
-        return FakeResp()
-
     root = tmp_path
     dl = root / "downloads" / "kasb_test"
     dl.mkdir(parents=True)
+    body = b"PK\x03\x04" + b"x" * 20
+    calls = {}
+
+    def fake_fetch_kasb_bytes(file_no: str, file_seq: str):
+        calls["file_no"] = file_no
+        calls["file_seq"] = file_seq
+        return body, 'attachment; filename="a.zip"'
 
     monkeypatch.setattr(editor_config, "repo_root", lambda: root)
     monkeypatch.setattr(editor_config, "load_config", lambda: {"downloads_folder": "downloads/kasb_test/"})
-    monkeypatch.setattr(page_attachments.requests, "post", fake_post)
+    monkeypatch.setattr(page_attachments, "fetch_kasb_bytes", fake_fetch_kasb_bytes)
 
     client = editor_app.app.test_client()
     resp = client.get("/api/source/kasb_file?fileNo=-99&fileSeq=2")
     assert resp.status_code == 200
     assert resp.get_json().get("ok") is True
     assert "첨부 저장" in (resp.get_json().get("message") or "")
-    assert calls["url"] == editor_app._KASB_DOWNLOAD_POST_URL
-    assert calls["data"] == {"fileNo": "-99", "fileSeq": "2"}
+    assert calls == {"file_no": "-99", "file_seq": "2"}
     saved = list(dl.glob("*.zip"))
     assert len(saved) == 1
     assert saved[0].read_bytes().startswith(b"PK")

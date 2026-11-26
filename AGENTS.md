@@ -190,17 +190,20 @@ python scripts/editor.py
 python scripts/prepare_deploy.py
 ```
 
+지원 Python은 **3.11–3.12**다. CI는 3.11. 로컬 앞문은 [README.md](README.md).
+
 구현·PR 후 최소 검증:
 
 ```bash
 cd scripts && python -m pytest tests/ -q
 python scripts/validate_content.py --strict
+python scripts/lint_public_body.py
 python scripts/export_corpus.py --strict
 mkdocs build --strict
 npm run lint:md
 ```
 
-참고: 박스 Python 3.13에서 `test_kasb_file_proxy_saves_to_configured_downloads_folder` 1건 실패가 보고된 적 있다. CI(Python 3.11)는 통과. 원인 조사는 TASKS.
+참고: `test_kasb_file_proxy_saves_to_configured_downloads_folder` 1건 실패는 해소됨 — 네트워크 비의존 mock, plan 2026-11-26.
 
 ---
 
