@@ -7,7 +7,7 @@
 합의:
 
 - Intent = 정규 분기 체크리스트를 Cursor 기준으로 재작성 (brainstorming B)
-- 범위 = Phase 1–5 + 같은 날 금감원 질의회신 증분
+- 범위 = 분기 입수 **레인 A–E 전부**를 루틴 표에 둔다. 타이밍만 나눈다: **당일(5일 09:00 KST)** = A 본문 Phase 1–5 + B 금감원 질의회신 + C 회계기준원 질의회신. **후속 창** = D 금융위·증선위 제재 안건·의사록(의사록 공개 후, ~8주). **승인·별도 주기** = E 회계기준위·자문위 등 회의록(`kasb_meetings` 등)
 - 협업 = **그록봇 실운영과 동일**: Agent가 수집·**큐레이션**·요약·nav 초안·배포 전처리까지 수행하고 draft PR을 연다. **전문가(사용자)는 최종 배포 전 PR 머지 결정만** 한다 (단계별 큐레이션·요약 검증을 필수로 두지 않음)
 - 산출 = 가이드 본문을 Cursor 실행 중심으로 재구성 (과거 그록 운영 장문 삭제·축소)
 - Automation = 적용 방법 절만 (등록·활성화는 Non-Goal)
@@ -27,7 +27,7 @@
 
 - 가이드 본문의 실행 경로가 Cursor뿐이며, 과거 운영안이 본문의 절반 이상을 차지하지 않는다.
 - 역할: Agent = 큐레이션 포함 실행·draft PR, 전문가 = **최종 배포 전 머지 결정만**.
-- 필수 칸에 Phase 1–5와 `crawl_fss_replies` 증분만 있다.
+- 루틴 표에 레인 A–E가 있고, 당일/후속/승인·별도 주기가 구분된다.
 - Automation 적용 방법 절이 있고, 실등록·활성화 지시/커밋이 없다.
 - AGENTS에서 이 가이드 루틴 절로 가는 한 줄이 있다.
 
@@ -39,10 +39,12 @@
 - V-249 해제, 그록 `qu`/`qu-2`/`fss-b0000291` 재가동
 - 저장소 전역 `HITL` → `전문가` 치환 (별도 spec)
 - 연도 백필·#184·#185·공개 분기 본문·HITL 마커 대량 변경
-- 제재 의사록·Whale·볼트 raw·B0000291 주간을 **당일 필수**로 승격
+- 제재 의사록(D)을 **크롤 당일 필수**로 승격하거나 8주 규칙을 무시하는 것
+- E(회의록) 실수집을 이번 PR에서 **승인 없이** 켜는 것; 가이드에는 칸·링크로만 두고 실행 승인은 기존 원칙
+- Whale·볼트 raw·B0000291 **주간**을 정규 분기 당일 필수로 승격 (루틴 표 밖·별도 주기는 한 줄·링크로만)
 - 크롤러·편집기·CI 코드 변경, 유료 API, Render 설정
 - 별도 `quarterly-routine-checklist.md` 신설 (가이드 SSOT 유지)
-- 제재·요약 **형식 규칙**을 가이드에 장문으로 재서술 (기존 스킬·`docs-dev/sanctions-format.md`·editor 문서로 링크)
+- 제재·요약·회의록 **형식 규칙**을 가이드에 장문으로 재서술 (스킬·`docs-dev/sanctions-format.md`·`kasb-meetings-collector.md`·editor 문서로 링크)
 
 ---
 
@@ -68,7 +70,7 @@
 3. **정규 분기 루틴 — Cursor** — §5 체크리스트 (실행 정본)
 4. **시점·경로 규칙** — 5일 09:00 KST, 표준 경로, early-allow (현행 문장 압축)
 5. **품질 게이트** — 표로 유지·갱신 (`lint_public_body` 포함)
-6. **명령 빠른 참조** — 루틴에 필요한 명령만 (질의회신 증분 포함). 곁가지 장문은 링크
+6. **명령 빠른 참조** — 레인 A–E에 쓰는 명령만. 형식·수집기 장문은 링크
 7. **Automation 적용 방법** — §6 (문서만)
 8. **관련 문서·개정 이력**
 
@@ -85,20 +87,38 @@
 
 ## 5. 실행 체크리스트 (루틴 정본)
 
-각 행: **단계 | 담당 | 핵심 명령·행동 | 완료 신호**
+각 행: **단계 | 레인 | 타이밍 | 담당 | 핵심 | 완료 신호**
+
+### 5.1 당일 — 분기 다음 달 5일 09:00 KST 이후
+
+| # | 단계 | 레인 | 담당 | 핵심 | 완료 신호 |
+|---|------|------|------|------|-----------|
+| 0 | 시점·대상 분기 | A | Agent | 달력으로 `--year`/`--quarter` 확정 | 대상 분기 확정 |
+| 1 | 보도·공지 수집 | A | Agent | `crawl.py --dry-run` 권장 후 `--year/--quarter` | 표준 경로 md |
+| 1b | 금감원 질의회신 | B | Agent | `crawl_fss_replies.py --limit 1` → 전량 | `data/fss-replies/` |
+| 1c | 회계기준원 질의회신 | C | Agent | `crawl_kasb_replies.py` (증분·실패 재시도는 기존 CLI) | `data/kasb-replies/` |
+| 2 | 큐레이션 | A | Agent | 스킵·출처. 전문가 필수 아님 | 마커 반영 |
+| 3 | 요약 | A | Agent | `quality-updates-writer` SUMMARIZE | note 블록 |
+| 4 | nav/index | A | Agent | 갱신일 이후 초안, 자동 머지 없음 | draft PR에 포함 |
+| 5 | 배포 전처리 | A | Agent | `prepare_deploy`, `export_corpus --strict`, 게이트 | CI + corpus · **draft PR** |
+| 5b | 머지·배포 | A | 전문가 | **최종 배포 전 PR 머지 결정만** | Render |
+
+### 5.2 후속 창 — 금융위·증선위 제재 (레인 D)
 
 | # | 단계 | 담당 | 핵심 | 완료 신호 |
 |---|------|------|------|-----------|
-| 0 | 시점·대상 분기 | Agent | 갱신일 이후 달력으로 `--year`/`--quarter` 확정 (예: 2026 Q4 → 2027-01-05 이후) | 대상 분기 확정 |
-| 1 | 수집 | Agent | `crawl.py --dry-run` 권장 후 `crawl.py --year/--quarter` | 표준 경로 md |
-| 1b | 질의회신 증분 | Agent | `crawl_fss_replies.py --limit 1` 시범 → 전량 | `data/fss-replies/` |
-| 2 | 큐레이션 | Agent | 스킵·출처 (`editor`/`auto_curate` 등 기존 수단). **전문가가 필수로 돌리지 않음** | 마커 반영 |
-| 3 | 요약 | Agent | `quality-updates-writer` SUMMARIZE | note 블록 |
-| 4 | nav/index | Agent | `mkdocs.yml`, index 초안 (갱신일 이후). 자동 머지 없음 | draft PR에 포함 |
-| 5 | 배포 전처리 | Agent | `prepare_deploy`, `export_corpus --strict`, 게이트 | CI 초록 + corpus diff · **draft PR** |
-| 5b | 머지·배포 | 전문가 | **최종 배포 전 PR 머지 결정만** | Render |
+| D1 | 안건·의결서 입수 | Agent | 회차 폴더 `downloads/sanctions/...` (안건 ZIP·의결서). 형식·링크는 `docs-dev/sanctions-format.md` 등 | `record.md`·첨부 경로 |
+| D2 | 의사록 연결·요약 | Agent | 의사록 **공개 후** (~8주) `attach_sanction_minutes.py` + writer. **크롤 당일 필수 아님** | 보도/미보도 절·draft PR |
+| D3 | 머지 | 전문가 | 해당 PR 머지 결정만 | main |
 
-당일 필수 아님: `attach_sanction_minutes`, Whale, 볼트 export, B0000291 주간. 의사록 공개 후 창은 관련 문서로만 링크. 전문가가 임의로 본문을 더 보는 것은 막지 않으나, **루틴 필수 칸은 머지 결정뿐이다**.
+### 5.3 승인·별도 주기 — 회의록 (레인 E)
+
+| # | 단계 | 담당 | 핵심 | 완료 신호 |
+|---|------|------|------|-----------|
+| E1 | 회계기준위·자문위 등 | Agent | `kasb_meetings` 등. **실수집은 기존처럼 승인 전**; 가이드는 칸·`kasb-meetings-collector.md` 링크 | dry-run/승인 후 수집물 |
+| E2 | 머지 | 전문가 | 해당 PR 머지 결정만 | main |
+
+루틴 표 밖(한 줄·링크만): Whale, 볼트 raw export, B0000291 **주간**. 전문가가 본문을 더 보는 것은 막지 않으나 **필수 칸의 전문가 역할은 머지 결정뿐이다**.
 
 ---
 
@@ -110,8 +130,8 @@
 |------|------|
 | 수단 | Cursor Automation (또는 동등 예약 Cloud Agent) |
 | 트리거 | 분기 다음 달 5일 09:00 KST **이후** (첫 대상 예: 2027-01-05) |
-| 프롬프트 정본 | 이 가이드의 「정규 분기 루틴 — Cursor」 체크리스트 |
-| 산출 | **draft PR만** (수집·큐레이션·요약·nav·게이트 포함). 커밋·PR 본문에 단계·검증 결과 |
+| 프롬프트 정본 | 이 가이드의 「정규 분기 루틴 — Cursor」 체크리스트 (§5.1 당일; D/E는 조건 충족 시에만) |
+| 산출 | **draft PR만** (당일: A–C·큐레이션·요약·nav·게이트). D/E는 별도 draft PR 가능. 커밋·PR 본문에 레인·단계·검증 결과 |
 | 금지 | 머지, force-push, 비밀값, 볼트 직접 쓰기, early-allow 없는 조기 nav |
 | 전문가 | Automation이 연 draft PR에 대해 **머지 여부만** 결정 |
 | 활성화 조건 | V-249 및 「새 클라우드 에이전트 중지」해제 + 사용자 명시 승인 후 |
@@ -149,7 +169,7 @@
 
 - [ ] 가이드 본문이 Cursor 유일 실행안이다. 과거 그록 운영 장문이 본문을 지배하지 않는다.
 - [ ] 역할: Agent가 큐레이션 포함 실행·draft PR, 전문가 필수 칸 = 최종 머지 결정만.
-- [ ] 체크리스트 범위 = Phase 1–5 + `crawl_fss_replies` 증분.
+- [ ] 체크리스트에 레인 A–E와 당일/후속/승인·별도 주기 구분이 있다.
 - [ ] Automation 적용 방법 절 존재. 실등록·활성화 없음.
 - [ ] AGENTS 한 줄 링크. HITL 전역 개명 없음.
 - [ ] `npm run lint:md` 통과.
