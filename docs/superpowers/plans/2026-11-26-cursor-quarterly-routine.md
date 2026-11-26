@@ -225,7 +225,7 @@ cd scripts && python -m crawler.kasb_meetings --dry-run --limit 3
 
 | 날짜 | 변경 |
 |------|------|
-| 2026-11-26 | Cursor 유일 실행안으로 재작성 (스펙 cursor-quarterly-routine). 그록/HITL 장문 Phase 삭제. Automation은 적용 방법만 |
+| 2026-11-26 | Cursor 유일 실행안으로 재작성 (스펙 cursor-quarterly-routine). 과거 그록 운영·Phase 장문 삭제. Automation은 적용 방법만 |
 ````
 
 - [ ] **Step 3: Strip banned content**

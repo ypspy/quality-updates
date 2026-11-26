@@ -1,412 +1,176 @@
 # 분기 운영 작업지시서
 
-**대상**: Quality Updates 분기별 규제 업데이트 문서 운영  
-**버전**: 2026-11  
-**관련 문서**: [README.md](../../README.md), [CONTRIBUTING.md](../../CONTRIBUTING.md), [editor-curation-workflow.md](editor-curation-workflow.md), [quality-updates-writer 스킬](../../.claude/skills/quality-updates-writer/SKILL.md)
+**대상**: Quality Updates 정규 분기 운영 (Cursor 유일 실행안)
+**버전**: 2026-11
+**관련 문서**: [README.md](../../README.md), [CONTRIBUTING.md](../../CONTRIBUTING.md),
+[editor-curation-workflow.md](editor-curation-workflow.md),
+[quality-updates-writer 스킬](../../.claude/skills/quality-updates-writer/SKILL.md),
+[sanctions-format.md](../../docs-dev/sanctions-format.md),
+[kasb-meetings-collector.md](kasb-meetings-collector.md),
+스펙 [cursor-quarterly-routine-design](../superpowers/specs/2026-11-26-cursor-quarterly-routine-design.md)
 
 ---
 
 ## 1. 목적
 
-금융당국(FSS, FSC, KICPA, KASB) 보도자료·공지를 분기 단위로 수집하고, 전문가 판단으로 선별·요약한 뒤 공개 사이트에 반영한다.
+금융당국(FSS, FSC, KICPA, KASB) 보도·공지·질의회신·제재·회의록 공개분을 분기 단위로 입수·선별·요약한 뒤 공개 사이트에 반영한다.
 
-본 문서는 **단계별 작업**, **Agent(에이전트)와 전문가(HITL)의 역할**, **품질 게이트**를 정의한다.
+본 문서는 **Cursor Agent가 실행**하고 **전문가가 최종 머지만 승인**하는 정규 분기 루틴의 정본이다. 그록봇(`qu` 등) 자동 루틴은 중지되어 있다.
 
 ---
 
-## 2. 역할 정의
+## 2. 역할
 
 | 역할 | 담당 | 책임 |
 |------|------|------|
-| **Agent** | Cursor·Claude 등 AI 에이전트 | 반복·대량 처리: 크롤 실행, 스킬 기반 요약 초안, validate/build, diff 힌트 해석 보조 |
-| **전문가 (HITL)** | 회계·감사 실무 담당자 | 전문 판단: 링크 선별·스킵, 출처 적합성, 요약 사실 검증, 배포 승인 |
-| **시스템** | 스크립트·CI | 규칙 기계 검증: 포맷, markdownlint, pytest, MkDocs strict, skip 쌍 제거 |
+| **Agent** | Cursor | 수집·**큐레이션**·요약·nav 초안·배포 전처리·**draft PR** |
+| **전문가** | 사용자 | **최종 배포 전 `main` 머지 결정만** |
+| **시스템** | 스크립트·CI | 게이트 (validate, lint_public_body, pytest, mkdocs, lint:md, corpus) |
 
 **원칙**
 
-- Agent는 **원문에서 확인된 내용만** 요약한다 (스킬 RIGID 규칙). 추정·보완 금지.
-- HITL은 Agent 산출물을 **그대로 배포하지 않는다**. 큐레이션·요약·nav/index는 반드시 검토한다.
-- `mkdocs.yml`·`docs/index.md`·사이트 구조는 **HITL이 diff 힌트를 검토 후 수동 적용**한다 (자동 패치 없음).
-- 분기 규제 업데이트·제재 의결·질의회신 파이프라인은 Agent와 전문가가 협업한다. 기능 구현·품질관리감리와는 일을 나눈다.
-- 제재 의결의 조사·감리·위탁감리·회계법인·감사인 의안은 품질관리감리(`docs/fss-review/`)와 별도이다.
-- validate/build·markdownlint는 이 파이프라인과 품질관리감리 PR에서 같이 돌린다.
-- 품질관리감리 결과 보도가 분기 규제 문서에 들어갈 때는 서로 알린다.
+- Agent는 원문에서 확인된 내용만 요약한다 (스킬 RIGID). 추정·보완 금지.
+- 전문가에게 단계별 큐레이션·요약 사실 검증을 필수 칸으로 두지 않는다. 필수 칸은 **머지 결정**뿐이다.
 - 파이프라인은 볼트에 직접 쓰지 않는다.
-- 질의회신 seq는 질의회신 식별자이다. 수집 PR이 머지된 뒤 새 seq 목록과 요약을 넘긴다. `data/kasb-replies/{seq}/item.md`를 볼트 `raw/kasb-replies/{seq}.md`로 넣되, 있는 파일은 유지하고 첨부는 저장소에 둔다. `--sibling-rev`는 그 파일을 덮지 않고 `{seq}.{rev}.md`와 `manifest-{rev}.jsonl`만 만든다.
-- 회계기준위원회 회의록·의안은 질의회신과 별도다. 코드는 `scripts/crawler/kasb_meetings.py`이고, 인자가 없으면 안내 후 끝난다. 네트워크는 열지 않는다. 오프라인 확인은 `--dry-run`이다. 실수집은 승인 전이다. 실수집의 연속 HTTP 간격은 `--delay`이고 기본은 0.3초다. `--dry-run`에는 적용하지 않는다. 안내: [kasb-meetings-collector.md](kasb-meetings-collector.md).
-- 금감원 질의회신도 별도다. `data/fss-replies/{board}/{nttId}/item.md`와 `manifest.jsonl`만 git에 두고, 첨부 HWP/HWPX는 `data/fss-replies/.gitignore`로 뺀다. 수집은 `crawl_fss_replies.py`, 본문 추출은 네트워크 없는 `--extract-local`, 실패한 첨부만 나중에 Whale로 둔다. 볼트 복사는 `export_fss_replies_raw.py`이고, `--update-pending`일 때만 대상이 `pending_whale`이고 소스가 갱신된 파일을 덮어쓴다. 증분 수집은 1월·4월·7월·10월 5일 분기 루틴에 포함한다. `--dry-run`은 없고 시범은 `--limit` 소량 라이브다. 명령은 6절이다.
-- 제재는 회차이다. `downloads/sanctions/{회차}/`에 `record.md`와 의사록 PDF가 생기면 경로와 회차 목록을 넘긴다.
-- `export_kasb_replies_raw.py`와 `export_quarterly_raw.py`는 복사 도구이다.
+- 제재·요약·회의록·편집기 마커 **형식**은 이 가이드에 장문으로 두지 않는다. 위 관련 문서·스킬을 본다.
 
 ---
 
-## 3. 전체 흐름
+## 3. 정규 분기 루틴 — Cursor
 
-```mermaid
-flowchart TB
-    subgraph phase1 [Phase 1 — 수집]
-        P1A[Agent: crawl.py 실행]
-        P1H[HITL: 수집 결과·기간 확인]
-    end
-    subgraph phase2 [Phase 2 — 큐레이션]
-        P2H[HITL: editor.py로 스킵·출처 지정]
-    end
-    subgraph phase3 [Phase 3 — 요약]
-        P3A[Agent: quality-updates-writer SUMMARIZE]
-        P3H[HITL: 요약 사실·어조 검토]
-    end
-    subgraph phase4 [Phase 4 — 사이트 반영]
-        P4H[HITL: mkdocs.yml nav, index.md]
-    end
-    subgraph phase5 [Phase 5 — 배포]
-        P5A[Agent: prepare_deploy.py]
-        P5C[Agent: export_corpus.py --strict]
-        P5H[HITL: 힌트·corpus diff 승인]
-        P5B[시스템: mkdocs build --strict, CI, Render]
-    end
-    P1A --> P1H --> P2H --> P3A --> P3H --> P4H --> P5A --> P5C --> P5H --> P5B
-```
+시점: **분기 다음 달 5일 09:00 KST 이후**. 그 전 `crawl.py`는 해당 분기를 종료 코드 2로 거절한다. nav/index 최신 링크도 그 전 금지. 예외는 `data/qu-early-allow.txt` 표준 경로만.
 
----
+### 3.1 당일 체크리스트
 
-## 4. 단계별 작업지시
+각 행: 단계 · 레인 · 담당 · 핵심 · 완료 신호.
 
-### Phase 1 — 수집 (Crawl)
+| # | 단계 | 레인 | 담당 | 핵심 | 완료 신호 |
+|---|------|------|------|------|-----------|
+| 0 | 시점·대상 분기 | A | Agent | 달력으로 `--year`/`--quarter` 확정 | 대상 분기 확정 |
+| 1 | 보도·공지 수집 | A | Agent | `crawl.py --dry-run` 권장 후 `--year/--quarter` | 표준 경로 md |
+| 1b | 금감원 질의회신 | B | Agent | `crawl_fss_replies.py --limit 1` → 전량 | `data/fss-replies/` |
+| 1c | 회계기준원 질의회신 | C | Agent | `crawl_kasb_replies.py` (증분·실패 재시도는 기존 CLI) | `data/kasb-replies/` |
+| 1d | 제재 안건·의사록 (공개분) | D | Agent | 당일까지 공개된 금융위·증선위 안건·의결서·의사록 입수·연결 (`downloads/sanctions`, `attach_sanction_minutes` 등). **미공개 의사록은 당일 강제하지 않음** | 회차 폴더·분기 md 반영 |
+| 1d′ | 직전 분기 D 미공개분 보완 | D | Agent | **이번 루틴에서** 직전 분기 문서의 미공개였던 의사록·안건을 재조회해 보완 | 직전 분기 md/첨부 갱신 |
+| 1e | 회의록 (공개분) | E | Agent | 당일까지 공개된 회계기준위·자문위 등 회의록 입수 (`kasb_meetings` 등). 상세는 [kasb-meetings-collector.md](kasb-meetings-collector.md) | 수집물·draft PR |
+| 2 | 큐레이션 | A | Agent | 스킵·출처. 전문가 필수 아님 | 마커 반영 |
+| 3 | 요약 | A | Agent | `quality-updates-writer` SUMMARIZE (당일 반영된 D·E 공개분 포함) | note 블록 |
+| 4 | nav/index | A | Agent | 갱신일 이후 초안, 자동 머지 없음 | draft PR에 포함 |
+| 5 | 배포 전처리 | A | Agent | `prepare_deploy`, `export_corpus --strict`, 게이트 | CI + corpus · **draft PR** |
+| 5b | 머지·배포 | — | 전문가 | **최종 배포 전 PR 머지 결정만** | Render |
 
-| | Agent | HITL | 시스템 |
-|---|-------|------|--------|
-| **실행** | `python scripts/crawl.py --year YYYY --quarter N` | 대상 연도·분기 지정, `--dry-run` 결과 확인 | 파일 없을 때만 생성 (기존 큐레이션본 보호) |
-| **산출** | `docs/quality-updates/YYYY/YYYY-MM-DD_to_YYYY-MM-DD.md` | — | YAML front matter, 4기관 링크, Appendix A |
-| **정렬** | 본문 dated list는 **과거→현재** (`unified.py`) | — | Appendix A는 크롤 수집 순(최신→과거) **유지** |
-| **검토** | — | 기간·건수 이상 여부, 누락 기관 없는지 샘플 확인 | — |
+루틴 표 밖(한 줄·링크만): Whale, 볼트 raw export, B0000291 **주간**.
 
-분기 문서(`docs/quality-updates/YYYY/YYYY-MM-DD_to_YYYY-MM-DD.md`)는 그 분기가 끝난 다음 달 5일 09:00 KST(1/5·4/5·7/5·10/5) 이후에만 새로 만들거나 내용을 넣는다. 확정 규칙: 윤석님 11/5 「분기 루틴 시점은 '분기 다음 달 5일 9시 KST'」. 그 시점 전에는 그 분기를 `mkdocs.yml` nav, `docs/quality-updates/index.md`, `docs/index.md` 「최신」 링크·하이라이트에 올리지 않는다. `docs/quality-updates/` 아래 `.md`는 그 표준 경로와 `docs/quality-updates/index.md`만 둔다. 다른 이름, 하위 폴더, 연도 폴더가 없는 파일은 오류다. 백필·소급(R3 등) 범위에 진행 중이거나 갱신일 전인 분기가 걸리면 그 분기는 빼고, 해당 항목은 다음 정규 분기 루틴 체크리스트로 넘긴다. 예외는 윤석님 본인의 명시 승인만 인정한다. 승인은 `data/qu-early-allow.txt`의 정확한 표준 경로로만 기록하고, 대시나 경로를 바꾼 줄은 예외가 아니다. `crawl.py`는 `--year`와 `--quarter`를 항상 명시한다. 인자 없는 `crawl.py`는 갱신일이 지난 마지막 분기를 고른다. `--year`/`--quarter` 또는 `--start`/`--end`가 아직 그 시각 전인 달력 분기를 가리키면 종료 코드 2로 거부한다. 거부 문구는 우회 플래그를 안내하지 않는다.
+### 3.2 D·E 타이밍
 
-`조사·감리결과 조치`가 없는 금융위 보도와 금감원·한공회·회계기준원 링크는 `보도자료` 등 기존 제목에 둔다.
+- **D:** 당일 = 그 시점까지 공개된 제재 자료 입수. 늦게 공개되는 의사록 등은 **다음 분기 루틴의 1d′**에서 직전 분기를 보완한다.
+- **E:** 당일까지 **공개분**만 입수. 미공개분은 이후 루틴에서 같은 방식으로 이어서 받는다.
+- E 실수집(`kasb_meetings --live`)은 기존 승인 원칙을 따른다. 가이드는 칸·명령·링크로만 둔다.
 
-**Agent 체크리스트**
+### 3.3 과거분·누적 아카이브
 
-- [ ] 올바른 `--year` / `--quarter` (또는 `--start` / `--end`)
-- [ ] `[WARN] Output exists, skipping` 시 기존 파일 의도 확인
-- [ ] `[DONE]` 경로가 `docs/quality-updates/{연도}/` 인지 확인
-- [ ] 본문 첫·마지막 링크 날짜가 분기 시작·종료 방향과 맞는지 (과거→현재)
+분기마다 “그 분기 DB”를 새로 만들지 않는다. 1b–1e는 **누적 저장소에 키가 있으면 skip**, 없으면(또는 실패 재시도면) 추가한다.
 
-**HITL 체크리스트**
+| 레인 | 누적 위치 | git | skip/증분 |
+|------|-----------|-----|-----------|
+| B | `data/fss-replies/{board}/{nttId}/` + `manifest.jsonl` | `item.md`·manifest만. 첨부 HWP 등은 ignore | 완료 건 skipped |
+| C | `data/kasb-replies/{seq}/` | item·첨부 커밋 | 있으면 재수집 안 함 |
+| D | `downloads/sanctions/{회차}/` | `downloads/` ignore. 사이트는 `docs/quality-updates/` | 회차 폴더·연결 상태 누적; 미공개→다음 분기 보완 |
+| E | `downloads/kasb-meetings/…` + `_state.json` | `downloads/` ignore | 끝난 seq 재수집 안 함 |
 
-- [ ] 분기 기간이 달력 분기와 일치하는지
-- [ ] 본문에 Executive Summary **없음**이 정상 (아직 수집 단계)
-- [ ] Appendix A에 원자료가 포함되었는지
+공개 노출은 아카이브 전체가 아니라 분기 md·corpus 쪽이다. 볼트 `export_*_raw`는 복사본이다.
 
-**금감원 질의회신 증분**
-
-`crawl.py`와 별도다. 1월·4월·7월·10월 5일 분기 루틴에 포함한다.
-시범은 `python scripts/crawl_fss_replies.py --limit 1`이다.
-`crawl_fss_replies.py`에는 `--dry-run` 플래그가 없다.
-`--limit N`은 금감원 사이트에서 N건을 받아 `data/fss-replies/`에 쓰는 소량 라이브다.
-완료되어 건너뛴 항목은 N에 세지 않는다.
-`saved` `skipped` `failed`를 본 뒤 `--limit` 없이 전량을 받는다.
-한 게시판만 보려면 `--board B0000132`(K-IFRS) 또는 `--board B0000133`(일반기업회계기준)을 붙인다.
-기본 `--board`는 `all`이다.
+**후속 (별도 brainstorming):** 레인 간 스키마·보관·gitignore·볼트·`downloads` 이관 규칙을 하나의 아카이브 규격으로 고정하는 작업. 이번 가이드 재작성은 위 As-Is를 **한 표로 적는 것**까지다.
 
 ---
 
-### Phase 2 — 큐레이션 (Editor)
+## 4. 시점·경로 규칙
 
-| | Agent | HITL | 시스템 |
-|---|-------|------|--------|
-| **실행** | — | `python scripts/editor.py` | Flask 로컬 UI |
-| **판단** | — | 링크별 **스킵** / **요약 필요** / **완료** | 마커를 `.md`에 저장 |
-| **출처** | — | PDF·WEB·CLIP·KASB 첨부 연결 | `downloads/` 저장 |
-
-**첨부**
-
-- `fetch_attachments.py`는 skip(`<!-- skip -->`), 링크만(`<!-- no_summary -->`), 이미 요약이 있는 항목을 건너뛴다.
-- 마커가 없는 링크는 `auto_curate.py`와 같은 규칙으로 고른다.
-- 같은 문서가 HWP/HWPX와 PDF로 같이 있으면 PDF만 받는다.
-- PDF가 없는 HWP/HWPX만 보고의 「수동 변환 필요」에 적는다.
-- 보고 기본 경로는 설정된 다운로드 폴더의 `fetch-attachments-report.md`다. 받은 PDF, PDF가 아닌 기타 첨부, 웨일 변환이 필요한 HWP/HWPX, 다운로드 실패 항목이 나뉜다.
-- 편집기 PDF 탭에서는 첨부를 여러 개 더하거나 뺄 수 있다. 「페이지 첨부 모두 연결」은 그 행의 원문 페이지에서 같은 규칙으로 첨부를 받아 항목에 붙인다.
-
-**HITL 전용** — 이 단계는 전문가 판단이 핵심이다.
-
-- [ ] 회계·감사 관련성 없는 보도자료 → **스킵**
-- [ ] 요약 대상 → **요약 필요** + 원문(PDF/WEB) 연결
-- [ ] 이미 요약된 링크 → **완료** 유지
-- [ ] 저장 후 에디터가 `line_index` 갱신됐는지 확인 (연속 저장 시 오적용 방지)
-
-**Agent**
-
-- 이 단계에서 Agent가 `.md`의 스킵·출처를 **임의로 대량 변경하지 않는다**.
-- 사전 제안이 필요하면 `python scripts/auto_curate.py <분기.md>` 로 마커 후보만 출력한다. 콘텐츠에 써 넣지 않는다. 규칙: [curation-rules.md](curation-rules.md).
-- HITL이 지정한 `<!-- source: … -->`만 Phase 3 입력으로 사용한다.
-
-상세 UI·마커 규칙: [editor-curation-workflow.md](editor-curation-workflow.md)
+- 표준 경로: `docs/quality-updates/YYYY/YYYY-MM-DD_to_YYYY-MM-DD.md`
+- `crawl.py`는 `--year`와 `--quarter`를 명시한다. 갱신일 전 해당 분기는 exit 2.
+- 조기 예외: `data/qu-early-allow.txt`에 표준 경로를 적은 경우만 (윤석님 명시 승인).
+- 본문 dated list는 과거→현재. Appendix A는 크롤 수집 순(최신→과거) 유지.
+- 기존 큐레이션본이 있으면 crawl이 덮지 않는다.
 
 ---
 
-### Phase 3 — 요약 (Writer 스킬)
+## 5. 품질 게이트
 
-| | Agent | HITL | 시스템 |
-|---|-------|------|--------|
-| **실행** | `quality-updates-writer` — **SUMMARIZE** (gold-excerpts + md ±80줄 윈도우 + REFERENCE 온디맨드; 재주입 금지) | 요약 대상 링크·우선순위 지시 | 스킬 포맷·gold-excerpts |
-| **Phase 0** | PDF/WEB/CLIP 경로 결정 | 출처 파일 존재·적합성 확인 | `extract_pdf.py` 등 |
-| **Phase 1** | 링크별 `!!! note` 요약 | **사실 관계 최종 검증** | — |
-
-PDF가 없는 HWP/HWPX는 `fetch_attachments.py` 보고의 변환 목록이다. Agent가 네이버 웨일 뷰어 인쇄로 PDF를 저장하고 `pdf` 마커로 연결한다. 저장소 스크립트는 웨일을 실행하지 않는다. 조사·감리결과 조치는 금융위원회 `제재 의결`에 둔다. 의사록은 회의 뒤 약 8주 뒤에 공개되므로, 크롤 당일에는 아래 두 단계를 실행하지 않는다. 의사록이 공개된 분기 파일에서 실행한다. 최종 모양은 2026년 3분기 `제재 의결`과 같다. 공개 본문 형식 기준은 저장소 루트 `docs-dev/sanctions-format.md`이다.
-
-1. `python scripts/attach_sanction_minutes.py <분기.md>`  
-   실명과 의안번호가 하나와만 맞는 의안만 보도 항목에 붙인다. 가려진 이름은 추정하지 않는다. `분기중 미보도 항목`은 만들지도 지우지도 않는다. `위원 논의`가 이미 있으면 의사록 마커는 건너뛴다.
-2. `quality-updates-writer` 요약  
-   그 분기 파일에 나온 회의의 `downloads/sanctions/.../record.md`에서 연결이 `unmatched`인 PDF만 읽는다. 지적과 금액이 같은 회의 보도 한 건과만 맞으면 그 보도 항목에 출처를 붙인다. 기호가 비슷하다는 이유로는 붙이지 않는다. 맞는 보도가 없거나 둘 이상이면 아래 미보도 불릿에 둔다. 실명인데 회사명 칸에 없어 스크립트가 놓친 파일도 여기서 읽는다.
-
-보도 항목은 조치 표 아래에 `!!! info "안건 분석"`, 그 다음에 `!!! note "위원 논의"`를 둔다. 안건 분석에는 의안 번호, 지적, 조치안, 보도 표의 어느 행과 맞는지를 적는다. 위원 질의와 의결은 위원 논의에 둔다. 두 상자를 한 노트로 합치지 않는다. 표의 회사명과 금액은 고치지 않는다. 의사록을 읽지 않았으면 위원 논의는 `미공개` 한 줄만 둔다.
-
-안건 분석의 첫 불릿은 위원 논의 출처와 같은 `- (출처) [이름](주소)`다. `attach_sanction_minutes.decision_source_bullet`가 그 줄을 만든다. 주소는 그 회차 증선위 의결정보(no020102) 또는 금융위 의결정보(no020101) 글에서, 파일명에 `안건`과 `의결서`가 함께 있는 첨부다. 형식은 `https://www.fsc.go.kr/comm/getFile?srvcId=BBSTY1&upperNo=<글번호>&fileTy=ATTACH&fileNo=<n>`이다. fileNo는 그 첨부의 번호다. 2로 고정하지 않는다. 첨부가 없거나 둘 이상이면 링크를 만들지 않는다. 표시 이름에도 `안건`과 `의결서`가 함께 있어야 하고, `의사록`만 있는 이름은 통과하지 않는다. 이름이 `(공개용) 의결 NNN.`으로 시작하면 그 예외를 통과시킨다. 링크 뒤에는 `의결 제N호`가 있어야 하고, 보고 안건은 `보고 제N호`로 적는다. 2026년 1분기부터 이 줄이 없으면 `validate_content.py --strict`가 오류다. 그 전 분기 문서는 검사하지 않는다.
-
-위원 논의의 의사록 출처는 `attach_sanction_minutes.minutes_source_bullet`가 만든다. 표시 이름은 「의사록」을 포함한 회의 이름이다. 주 링크는 그 글 첨부 목록에서 파일명에 「의사록」이 있는 파일의 `https://www.fsc.go.kr/comm/getFile?srvcId=BBSTY1&upperNo=<글번호>&fileTy=ATTACH&fileNo=<n>`이다. fileNo는 그 첨부의 번호다. fileNo를 하드코딩하지 않는다. 같은 줄 끝에는 가운데점(`·`) 앞뒤에 공백을 두고 `[게시물](게시글 URL)`을 붙인다. 의결서 줄에는 이 게시물 병기가 없다. PDF 의사록이 있으면 그 파일을 고르고, PDF가 없고 HWP·HWPX 의사록만 있으면 그 파일을 고른다. 이름에 「의사록」인 첨부가 없으면 링크를 만들지 않고 위원 논의는 `미공개`다. 2026년 1분기부터 출처 줄이 있으면 주 링크가 위 getFile 주소이고 표시 이름에 「의사록」이 있어야 한다. `미공개` 줄은 통과한다. 확장자는 검사하지 않는다. 그 전 분기 문서는 이 검사를 하지 않는다.
-
-미연결 의안은 `제재 의결` 맨 끝에 헤더 없이 `- 분기중 미보도 항목` 불릿 하나로 둔다. 다음 절은 `#### 고시/공고/훈령`이다. 불릿 안에는 안건마다 `!!! info "안건 분석"`을 회의일, 의안번호 순으로 둔다. 첫 불릿은 의결서 출처다. 안건과 제목은 한 줄이다. 이어서 요약, 의결정보다. 요약은 두 문장을 넘기지 않는다. PDF 출처 주석은 그 불릿에 둔다. 같은 의안번호의 안건과 의결서는 한 상자다. 번호가 없는 보고는 파일마다 한 상자다. 미보도 상자에는 조치 표와 `위원 논의`를 만들지 않는다. 다시 요약할 때 안건 분석, 위원 논의, `분기중 미보도 항목`은 지우지 않는다. `record.md`는 고치지 않는다. PDF를 읽을 수 없으면 제목만 쓰고 출처 마커는 쓰지 않는다.
-
-`validate_content.py --strict`는 `record.md`가 있는 회의만 본다. unmatched 경로가 분기 문서 안에 있는지만 확인한다. 보도 항목에 있어도, 미보도 불릿에 있어도 통과한다. 기록이 없으면 그 회의는 건너뛴다.
-
-제목에 `의사록(추가)`인 글은 회차 키가 같으면 같은 회의로 합치고, 합친 의사록 PDF마다 마커를 붙인다. 추가가 아닌 의사록 PDF가 같은 회의에 둘이면 마커를 붙이지 않는다.
-
-같은 글의 안건 ZIP은 받아서 조사·감리·위탁감리·회계법인·감사인 의안의 공개용 안건과 의결서 PDF만 `downloads/sanctions/{연도}-{위원회}-{정기|임시|서면}-{N}차/`에 둔다. `조사`만 있는 파일은 남기지 않고, `조사·감리` 또는 `조사결과`일 때만 본다. `불공정거래`, `시세조종`, `미공개정보`가 들어간 파일과 규정·개정 안건은 남기지 않는다. ZIP 원본은 남기지 않고 주소만 기록한다. 회차 폴더에는 의사록 PDF를 복사하고 `record.md`에 회의일을 적는다. 보도자료에 의안번호가 있으면 그 번호로 잇고, 없으면 같은 회차에서 실명 회사명이 정확히 하나일 때만 잇는다.
-
-제재 안건 HWP는 변환하지 않고 Whale 변환 필요 목록으로만 보고한다.
-
-요약 스킬은 확인한 사실을 `write_quarterly_record.py`로 `data/quarterly-processed/{분기 stem}/`에 남긴다. 파일명은 `{YY-MM-DD}-{제목 앞 40자}.md`다. 같은 경로가 있으면 바이트를 유지한다. 기록 파일은 직접 고치지 않는다. `skip`, `no_summary`, Appendix 항목은 만들지 않는다. 2026년 3분기 항목은 이 명령으로 만들지 않고, 내보내기가 기존 노트에서 만든다. 같은 제목이 둘이면 `--date YY-MM-DD`를 붙인다.
-
-`export_quarterly_raw.py`는 분기 마크다운, 처리 기록, PDF·캡처를 `C:\dev\obsidian-valut\raw`로 복사한다. 저장소 파일은 수정하지 않는다. `--dest`로 목적지를 바꿀 수 있다.
-
-볼트로 보낼 때의 경로는 `raw/sanctions/`이고, 그 복사는 `export_quarterly_raw.py`에 들어가기 전까지 미룬다.
-
-**Agent 체크리스트** (스킬 준수)
-
-- [ ] `reference/gold-excerpts.md` 세션 1회 Read; 분기 md ±80줄 윈도우; REFERENCE 온디맨드; 재주입 금지
-- [ ] 원문 미확인 내용 미포함
-- [ ] 접근 불가 시 `<!-- 원문 접근 불가 -->` 처리
-- [ ] 의사록 공개 뒤 `attach_sanction_minutes.py`를 실행하고, unmatched는 보도 항목 또는 `분기중 미보도 항목`에 둠
-- [ ] 보도 항목은 조치 표, 안건 분석, 위원 논의 순. 표의 회사명과 금액은 유지
-- [ ] 안건 분석 첫 불릿은 `decision_source_bullet` 의결서 출처. fileNo는 2로 고정하지 않는다
-- [ ] 위원 논의 의사록 출처는 `minutes_source_bullet`. 주 링크는 첨부 파일명의 「의사록」 fileNo이고, fileNo를 하드코딩하지 않는다. 같은 줄에 게시물 링크를 남긴다. 첨부가 없으면 `미공개`
-- [ ] 미보도 상자는 안건·제목 한 줄, 요약 두 문장 이내, 의결정보. 조치 표와 위원 논의는 없음
-
-**HITL 체크리스트**
-
-- [ ] 제재·수치·제도명 등 **핵심 사실** 샘플링 대조
-- [ ] 과도한 해석·일반론 없음
-
----
-
-### Phase 4 — 사이트 반영 (Nav / Index)
-
-| | Agent | HITL | 시스템 |
-|---|-------|------|--------|
-| **실행** | diff 힌트 해석 보조 | `mkdocs.yml` nav 수동 추가 | — |
-| **대상** | — | `docs/index.md` Latest Update 링크 | — |
-
-**HITL 체크리스트**
-
-- [ ] `mkdocs.yml` → 규제 업데이트 → 해당 연도 → `N분기 (MM–MM월): quality-updates/...`
-- [ ] `docs/index.md` 바로가기·Latest Update가 새 분기를 가리킴
-- [ ] 로컬 `mkdocs serve`로 사이드바·링크 확인
-
-**Agent**
-
-- nav/index **자동 커밋하지 않음**. HITL 승인 후에만 반영.
-
-갱신일(다음 달 5일 09:00 KST) 전에는 `mkdocs.yml` nav, `docs/quality-updates/index.md`, `docs/index.md` 최신 링크·하이라이트에 그 분기를 올리지 않는다. 표준 경로가 아닌 대상도 오류다.
-
----
-
-### Phase 5 — 배포 전처리·배포
-
-| | Agent | HITL | 시스템 |
-|---|-------|------|--------|
-| **실행** | `python scripts/prepare_deploy.py` | stdout diff 힌트 검토·적용 | skip 제거, validate `--strict` |
-| **코퍼스** | `python scripts/export_corpus.py --strict` | `data/corpus/` JSONL·manifest 커밋 여부 검토 | skip in-memory 제외 |
-| **선행** | `prepare_deploy.py --dry-run` 권장 | 삭제될 skip 쌍 확인 | — |
-| **빌드** | `mkdocs build --strict` | 최종 미리보기 | CI 동일 |
-| **배포** | — | `main` merge·push **승인** | Render 자동 배포 |
-
-**Agent 체크리스트**
-
-- [ ] `prepare_deploy` exit 0
-- [ ] validate strict 통과
-- [ ] `python scripts/lint_public_body.py` 통과 (형식: `docs-dev/sanctions-format.md`)
-- [ ] `python scripts/export_corpus.py --strict` 통과
-- [ ] `npm test` 또는 `cd scripts && python -m pytest tests/ -q` 통과
-- [ ] `docs/` Markdown을 수정했으면 `npm run lint:md` 통과
-
-**HITL 체크리스트**
-
-- [ ] Appendix A 보존 (skip 제거 대상 아님)
-- [ ] 공개 본문에 스킵 링크·마커 잔존 없음
-- [ ] corpus JSONL을 사이트와 같이 커밋할지 결정 (MCP Hosted는 커밋된 JSONL을 읽음)
-- [ ] 배포 후 [quality-updates.onrender.com](https://quality-updates.onrender.com) 샘플 확인
-
----
-
-## 5. 역할 분담 요약표
-
-| 단계 | Agent | HITL | 자동(스크립트/CI) |
-|------|:-----:|:----:|:-----------------:|
-| 1. 수집 | 실행·로그 보고 | 기간·건수 승인 | skip-if-exists |
-| 2. 큐레이션 | — | **주도** | 마커 저장 |
-| 3. 요약 | **주도**(스킬) | **검증·승인** | 포맷 규칙 |
-| 4. nav/index | 힌트 보조 | **주도** | — |
-| 5. 배포 전처리 | 실행 | 힌트·diff 승인 | skip 제거, validate |
-| 6. 배포 | build·test 실행 | **push 승인** | CI, Render |
-
----
-
-## 6. 명령어 빠른 참조
-
-```bash
-# 수집
-python scripts/crawl.py --year 2026 --quarter 2
-python scripts/crawl.py --dry-run
-
-# 큐레이션
-python scripts/editor.py
-
-# 배포 전처리
-python scripts/prepare_deploy.py --dry-run
-python scripts/prepare_deploy.py
-
-# 검증
-python scripts/validate_content.py --strict
-python scripts/lint_public_body.py
-python scripts/export_corpus.py --strict
-cd scripts && python -m pytest tests/ -q
-mkdocs build --strict
-npm run lint:md
-
-# 첨부
-python scripts/fetch_attachments.py docs/quality-updates/2026/2026-07-01_to_2026-09-30.md
-python scripts/fetch_attachments.py <분기.md> --report downloads/fetch-attachments-report.md
-
-# 제재 의결 의사록·처리 기록·raw 복사
-python scripts/attach_sanction_minutes.py <분기.md>
-python scripts/write_quarterly_record.py <분기.md> --title "<링크 제목>"
-python scripts/export_quarterly_raw.py <분기.md>
-
-# 질의회신. 분기 크롤러와 별도다. 원문은 사이트, 분기 문서, MCP 코퍼스에 넣지 않는다.
-python scripts/crawl_kasb_replies.py
-python scripts/crawl_kasb_replies.py --limit 20
-python scripts/crawl_kasb_replies.py --retry-failed
-python scripts/crawl_kasb_replies.py --extract-local
-python scripts/crawl_kasb_replies.py --extract-local --reextract-hwpx
-python scripts/export_kasb_replies_raw.py
-python scripts/export_kasb_replies_raw.py --sibling-rev
-
-# 금감원 질의회신. 분기 크롤러와 별도다. 원문은 사이트, 분기 문서, MCP 코퍼스에 넣지 않는다.
-# 첨부는 git에 넣지 않는다. data/fss-replies/.gitignore는 item.md와 manifest.jsonl만 허용한다.
-# 증분 주기는 1·4·7·10월 5일이다. --dry-run은 없다. 시범은 --limit 1 소량 라이브다.
-python scripts/crawl_fss_replies.py --limit 1
-python scripts/crawl_fss_replies.py --board B0000132 --limit 1
-python scripts/crawl_fss_replies.py
-python scripts/crawl_fss_replies.py --extract-local
-python scripts/export_fss_replies_raw.py
-python scripts/export_fss_replies_raw.py --update-pending
-python scripts/export_fss_replies_raw.py --sibling-rev
-
-# 텍스트 추출·정렬
-python scripts/extract_pdf.py
-python scripts/extract_hwp.py
-python scripts/extract_hwp.py --path "경로/파일.hwp"
-python scripts/reorder_chronological.py docs/quality-updates/2025/2025-01-01_to_2025-03-31.md
-```
-
-`crawl_kasb_replies.py`는 `data/kasb-replies/{seq}/item.md`와 원본 첨부를 저장한다. 이 경로는 gitignore하지 않는다. `item.md`와 첨부가 이미 있으면 다시 받지 않는다. `--retry-failed`는 `failed`, `partial`, `empty`를 디스크의 원본으로 다시 추출하고, 없는 파일만 받는다. `partial`은 파서 이전 `PrvText` 결과일 수 있다. `--extract-local`은 네트워크 없이 `partial` 또는 `failed`인 `.hwp`만 공유 파서(`hwp5html --html`)로 다시 읽는다. `--reextract-hwpx`를 같이 주면 상태가 `ok`인 `.hwpx`도 다시 읽는다. 파서가 실패하면 `PrvText`로 돌아가 `partial`이 되고, 그것도 없으면 `failed`다. 이미 성공한 첨부와 PDF·XLSX는 건드리지 않는다.
-
-`export_kasb_replies_raw.py`는 `item.md`만 복사한다. 기본 목적지는 `C:\dev\obsidian-vault\raw\kasb-replies`이고, `--dest`로 바꿀 수 있다. 같은 `{seq}.md`가 있으면 덮어쓰지 않는다. 첨부 파일은 복사하지 않는다. `--sibling-rev`는 기존 `{seq}.md` 대신 `{seq}.{rev}.md`와 `manifest-{rev}.jsonl`을 쓴다. REV를 생략하면 git HEAD 8자를 쓰고, git이 실패하면 끝낸다.
-
-`crawl_fss_replies.py`는 금감원 질의회신 증분 수집이다. 주기는 1월·4월·7월·10월 5일의 분기 루틴이다. 이 스크립트에는 `--dry-run` 플래그가 없다. 시범은 `--limit N` 소량 라이브다. 이번에 새로 받거나 다시 시도하는 항목을 N건까지 사이트에서 받아 `data/fss-replies/`에 쓴다. 완료되어 건너뛴 항목은 N에 세지 않는다. 새 항목이 없으면 `saved=0`으로 끝난다. 분기마다 `python scripts/crawl_fss_replies.py --limit 1`로 한 건을 확인한 뒤 `--limit` 없이 남은 목록을 받는다. `--board` 기본값은 `all`이고, `B0000132`는 K-IFRS, `B0000133`은 일반기업회계기준이다. 이 단계에서 HWP/HWPX는 `pending_whale`이고 원본 바이트만 남긴다. `--extract-local`은 네트워크 없이 그 로컬 첨부만 읽는다. `.hwp`는 `hwp5html --html`로, `.hwpx`는 ZIP의 `Contents/section*.xml`로 뽑는다. `hwp5txt`는 쓰지 않는다. 이미 파싱한 첨부는 다시 쓰지 않고, 원본은 지우거나 옮기지 않는다. 실패·시간 초과·파일 없음은 `pending_whale`으로 두어 나중에 Whale로 넘긴다. 첨부가 모두 성공하면 항목은 `ok`다.
-
-`export_fss_replies_raw.py`는 `item.md`만 `{board}/{nttId}.md`로 복사한다. 기본 목적지는 `C:\dev\obsidian-vault\raw\fss-replies`이고, 대상이 있으면 건너뛴다. 첨부는 복사하지 않는다. `--update-pending`은 대상 `extract_status`가 `pending_whale`이고 소스 `extract_status`가 더 이상 `pending_whale`이 아닐 때만 덮어쓴다. 대상만 있는 파일은 지우지 않는다. `--sibling-rev`는 기존 `{nttId}.md` 대신 `{nttId}.{rev}.md`와 `manifest-{rev}.jsonl`을 쓰고, `--update-pending`과 함께 쓰면 오류다.
-
-### 품질관리감리 B0000291 주간 감지
-
-```bash
-# 목록(list.do)만 읽는다. 첨부와 view.do 본문은 받지 않는다.
-python scripts/watch_fss_b0000291.py --init --dry-run --report /tmp/b291.json  # 기준선 미리 보기(--report만 씀)
-python scripts/watch_fss_b0000291.py --init                              # 기준선: 알리지 않고 known을 채움
-python scripts/watch_fss_b0000291.py --dry-run --report /tmp/b291.json   # 기준선이 있을 때 파일을 쓰지 않고 확인
-python scripts/watch_fss_b0000291.py                                     # 주간 실행
-python scripts/watch_fss_b0000291.py --init --force                      # 기준선을 다시 만듦(새 글을 알리지 않고 흡수)
-```
-
-`watch_fss_b0000291.py`는 탭 01(개선권고사항, `menuNo=200620`)과 02(이행 여부 확인 탭, `menuNo=200621`)의 목록을 `pageUnit=300`으로 읽는다. 탭마다 최대 `--max-pages`(기본 2)쪽까지 읽는다. 새 글은 상태에 없는 `nttId`다. 상태는 `downloads/fss-review/B0000291/_list-state.json`에 두고 git에 넣지 않는다. #117 수집기의 `_state.json`(숨은 2022년 글 탐색)과는 다른 파일이다. 정상 실행일 때만 상태와 `_weekly/YYYY-MM-DD.json`을 쓴다. 쓰기 순서는 `--report` → `_weekly/YYYY-MM-DD.json` → `runs.jsonl` → 상태 파일이고, 상태가 마지막이다. 보고나 상태 쓰기가 실패하면 종료 코드 7이고 상태는 그대로여서 다음 실행이 같은 새 글을 다시 잡는다. 기준선(상태 파일의 `last_ok_ct`)이 없으면 `--init` 없는 실행은 `--dry-run`이어도 목록을 읽기 전에 멈추고 종료 코드 6을 낸다(모든 글을 새 글로 알리지 않도록). `--tabs`의 탭이 기준선에 없을 때도 같다. 기준선이 이미 있으면 `--init`은 `--force` 없이는 거부한다. 구문 분석에 실패하면 받은 HTML을 `_weekly/YYYY-MM-DD-{탭}.html`에 남기고 상태는 바꾸지 않는다. 재시도는 #117 `fetch_bytes`와 같다(5xx·연결 오류 최대 5회, 403은 2회). 종료 코드는 0 새 글 없음, 10 새 글 또는 변경, 20 경고(사라짐·총건수 감소·건수 불일치), 2 접속 실패, 3 403, 4 구문 분석 실패, 5 상태 파일 오류, 6 기준선 없음 또는 `--force` 없는 재 `--init`, 7 보고·상태 쓰기 실패다. 결과의 `notify`(마지막 줄 `notify=yes|no`)는 새 글·변경, 경고, 8일 넘은 공백, 실패일 때만 `yes`다. 조용한 주는 Vegetable에게 알리지 않고 로컬에만 남긴다. dry-run이 아니면 실행마다(실패 포함) `_weekly/runs.jsonl`에 한 줄을 덧붙인다.
-
-운영 순서(D19): 코드 PR 머지(윤석님 결정) → 라이브 `--dry-run` 1회 → `--init` 기준선 → 둘 다 성공한 뒤에만 월요일 7:30 AM CT 루틴 등록. 기준선은 2026-11-16에 이 기준선 거부 규칙이 들어가기 전의 main(`01603cc5`)에서 `--dry-run`과 `--init`으로 만들었다. 앞으로 기준선을 새로 만들 때 미리 보기는 `--init --dry-run`이다. 새 글의 첨부 입수(`crawl_fss_b0000291.py --seed`)는 미리 승인하지 않고 새 글이 생길 때마다 윤석님께 여쭌다.
-
-npm: `npm run crawl`, `npm run prepare:deploy`, `npm test`, `npm run build:strict`, `npm run lint:md`
-
----
-
-## 7. 품질 게이트 (배포 전 필수)
-
-| # | 게이트 | 담당 |
+| # | 게이트 | 비고 |
 |---|--------|------|
-| G1 | HITL 큐레이션 완료 (요약 필요 링크에 source 연결) | HITL |
-| G2 | HITL 요약 사실 검토 완료 | HITL |
-| G3 | `mkdocs.yml` nav 등록 | HITL |
-| G4 | `prepare_deploy.py` 성공 | Agent 실행, HITL 확인 |
-| G5 | `validate_content --strict` 통과 | 시스템 |
-| G5b | `lint_public_body.py` 통과 | 시스템 |
-| G6 | `pytest` 통과 | 시스템 |
-| G6b | `npm run lint:md` 통과. 실패 시 [CONTRIBUTING.md](../../CONTRIBUTING.md)의 Markdown lint 절차로 고치고 재실행 | Agent |
-| G7 | `mkdocs build --strict` 통과 | Agent/HITL |
-| G7b | `export_corpus.py --strict` 통과 | 시스템 |
-| G8 | `main` push 승인 | HITL |
+| G1 | draft PR (Agent) | 자동 머지 없음 |
+| G2 | `python scripts/validate_content.py --strict` | |
+| G3 | `python scripts/lint_public_body.py` | |
+| G4 | `cd scripts && python -m pytest tests/ -q` | |
+| G5 | `mkdocs build --strict` | |
+| G6 | `npm run lint:md` | `docs/` 변경 시 |
+| G7 | `python scripts/export_corpus.py --strict` | corpus diff를 PR에 포함 |
+| G8 | 전문가 머지 승인 → Render | 필수 칸 = 머지 결정만 |
 
-**G1~G3 미충족 시 배포 금지.**
+Python 문서·로컬: 3.11–3.12. CI: 3.11.
 
 ---
 
-## 8. 예외·에스컬레이션
+## 6. 명령 빠른 참조
 
-| 상황 | 처리 |
-|------|------|
-| 크롤러 기관별 수집 실패 | Agent 재실행; 지속 실패 시 HITL이 해당 기관 수동 보완 |
-| 원문(PDF/HWP) 접근 불가 | Agent: OCR fallback → 실패 시 HITL이 수동 확보 |
-| Agent 요약과 원문 불일치 | HITL이 수정 지시 후 Agent 재작성 |
-| validate strict 실패 | Agent가 포맷 수정; 내용 변경 없이 들여쓰기·날짜 형식만 |
-| `npm run lint:md` 실패 | Agent가 보고된 줄만 수정하고 재실행. 규칙 비활성화, 파일 제외, 줄 끝 공백 일괄 삭제는 하지 않음 |
-| nav 힌트와 실제 레이블 불일치 | HITL이 기존 nav 관례에 맞게 수동 조정 |
+```bash
+# A — 보도·공지
+python scripts/crawl.py --year YYYY --quarter N
+python scripts/editor.py
+# 또는 제안만: python scripts/auto_curate.py …
+# 요약: quality-updates-writer 스킬 SUMMARIZE
+python scripts/prepare_deploy.py
+python scripts/export_corpus.py --strict
+
+# B — 금감원 질의회신
+python scripts/crawl_fss_replies.py --limit 1
+python scripts/crawl_fss_replies.py
+
+# C — 회계기준원 질의회신
+python scripts/crawl_kasb_replies.py
+
+# D — 제재 안건·의사록 (공개분)
+python scripts/attach_sanction_minutes.py <분기.md>
+# 형식: docs-dev/sanctions-format.md
+
+# E — 회의록 (공개분; 실수집은 기존 승인)
+cd scripts && python -m crawler.kasb_meetings --dry-run --limit 3
+# 승인 후: --live --limit N
+```
+
+형식·마커 상세: [quality-updates-writer](../../.claude/skills/quality-updates-writer/SKILL.md),
+[editor-curation-workflow.md](editor-curation-workflow.md),
+[sanctions-format.md](../../docs-dev/sanctions-format.md),
+[kasb-meetings-collector.md](kasb-meetings-collector.md).
 
 ---
 
-## 9. 관련 파일
+## 7. Automation 적용 방법 (미등록)
 
-| 경로 | 용도 |
+이 절은 **적용 방법만** 적는다. 이 작업(또는 구현 PR)에서 Automation을 **생성·활성화하지 않는다**.
+
+| 항목 | 내용 |
 |------|------|
-| `scripts/crawl.py` | 분기 수집 CLI |
-| `scripts/editor.py` | 큐레이션 UI |
-| `.claude/skills/quality-updates-writer/SKILL.md` | 요약·스킵 제거 규칙 |
-| `scripts/prepare_deploy.py` | 배포 전처리 |
-| `scripts/validate_content.py` | 콘텐츠 스키마 검증 |
-| `scripts/export_corpus.py` | MCP 코퍼스 JSONL (skip 제외) |
-| `scripts/mcp_server/` | 읽기 전용 MCP (stdio + HTTP) |
-| `mkdocs.yml` | 사이트 탐색 |
-| `docs/quality-updates/` | 분기 문서 소스 |
+| 수단 | Cursor Automation (또는 동등 예약 Cloud Agent) |
+| 트리거 | 분기 다음 달 5일 09:00 KST **이후** (첫 대상 예: 2027-01-05) |
+| 프롬프트 정본 | 이 가이드의 「정규 분기 루틴 — Cursor」 체크리스트 (A–E 당일 공개분 + D 직전 미공개 보완) |
+| 산출 | **draft PR만** (당일 공개분·큐레이션·요약·nav·게이트; D 1d′ 보완 포함 가능). 커밋·PR 본문에 레인·단계·검증 결과 |
+| 금지 | 머지, force-push, 비밀값, 볼트 직접 쓰기, early-allow 없는 조기 nav |
+| 전문가 | Automation이 연 draft PR에 대해 **머지 여부만** 결정 |
+| 활성화 조건 | V-249 및 「새 클라우드 에이전트 중지」해제 + 사용자 명시 승인 후 |
 
 ---
 
-## 10. 개정 이력
+## 8. 관련 문서·개정 이력
 
-| 날짜 | 내용 |
+| 문서·경로 | 용도 |
+|-----------|------|
+| [AGENTS.md](../../AGENTS.md) | Agent 허브·분기 라우팅 |
+| [editor-curation-workflow.md](editor-curation-workflow.md) | 마커·skip·prepare_deploy |
+| [curation-rules.md](curation-rules.md) | 큐레이션 규칙 제안 |
+| `scripts/crawl.py` 등 | 레인 A–E 수집 CLI |
+| [pipeline-contract-sync](../superpowers/specs/2026-11-26-pipeline-contract-sync-design.md) | 게이트·exit·Python 계약 |
+
+| 날짜 | 변경 |
 |------|------|
-| 2026-11-20 | 표준 경로가 아닌 분기 문서·nav·index 대상은 오류다. 따옴표와 한 줄 period도 읽고, 시작일이 종료일보다 늦으면 오류다. 조기 수집은 허용 목록의 정확한 경로가 있을 때만 진행한다 |
-| 2026-11-20 | 분기 문서와 nav·최신 링크는 다음 달 5일 09:00 KST 이후에만 만든다. 인자 없는 `crawl.py`는 갱신일이 지난 마지막 분기를 고르고, 명시 기간이 이르면 종료 코드 2 |
-| 2026-11-20 | 갱신일은 종료일이 속한 달력 분기 기준으로 계산한다. 파일명과 front matter period가 다르면 오류 |
-| 2026-11-19 | 금감원 질의회신 증분 주기(1·4·7·10월 5일)와 --limit 소량 라이브 시범을 2절·Phase 1·6절에 적음 |
-| 2026-11-16 | 6절에 품질관리감리 B0000291 주간 감지(`watch_fss_b0000291.py`) 추가 |
-| 2026-11-16 | B0000291 감지기: 상태를 보고 뒤에 쓰고(종료 코드 7), 기준선 없이 실행하면 거부(종료 코드 6, `--init --force`) |
-| 2026-11-12 | 금감원 질의회신 `--extract-local`과 export `--update-pending`을 2절·6절에 추가 |
-| 2026-11-12 | KASB 질의회신 오프라인 HWP 파서, `--extract-local`, FSS/KASB export `--sibling-rev` |
-| 2026-11-07 | README에만 있던 첨부·제재 의결·질의회신·추출 명령을 해당 Phase와 6절로 옮김 |
-| 2026-09-10 | Phase 5에 corpus export. 소비는 사이트+MCP. 렌즈 스킬 제거 |
-| 2026-06-25 | 초판 — 크롤러 통합·prepare_deploy 반영, Agent/HITL 역할 분담 |
+| 2026-11-26 | Cursor 유일 실행안으로 재작성 (스펙 cursor-quarterly-routine). 과거 그록 운영·Phase 장문 삭제. Automation은 적용 방법만 |
