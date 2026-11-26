@@ -12,6 +12,7 @@ Agent 진입·프롬프트: [AGENTS.md](../../AGENTS.md)
 
 | 날짜 | 파일 | 요약 |
 |------|------|------|
+| 2026-11-26 | [expert-rename-design.md](specs/2026-11-26-expert-rename-design.md) | 런타임 허브 HITL→전문가 개명; 역할은 분기 가이드와 정합 |
 | 2026-11-26 | [cursor-quarterly-routine-design.md](specs/2026-11-26-cursor-quarterly-routine-design.md) | Cursor 유일 정규 분기 루틴으로 운영 가이드 재작성; Automation은 적용 방법만 |
 | 2026-11-26 | [pipeline-contract-sync-design.md](specs/2026-11-26-pipeline-contract-sync-design.md) | M0 게이트 우선으로 파이프라인 계약 동기화(Python 3.11–3.12, 검증 목록 정합) |
 | 2026-11-12 | [fss-review-finding-prose-design.md](specs/2026-11-12-fss-review-finding-prose-design.md) | 품질관리감리 원문은 끊긴 문장만 잇고, 섞인 지적만 에이전트가 나눈다 |
