@@ -73,7 +73,7 @@ V-249(린트·형식 기준 PR 외 연도 작업 및 새 클라우드 에이전�
 | **분기 보도자료 요약** | [.claude/skills/quality-updates-writer/SKILL.md](.claude/skills/quality-updates-writer/SKILL.md) | SUMMARIZE / SKIP_REMOVAL — SUMMARIZE: gold-excerpts + md ±80줄 윈도우 + REFERENCE 온디맨드; 재주입 금지. [상세](docs/superpowers/specs/2026-07-23-summarize-slim-design.md) |
 | **다른 Agent 소비 (MCP, 읽기 전용)** | [문서 지도 MCP 절](docs/project/README.md#mcp-코퍼스) · [mcp-corpus spec](docs/superpowers/specs/2026-06-27-mcp-corpus-design.md) | `export_corpus.py` → stdio/HTTP. 인용 계약. 코퍼스 쓰기는 생산 레인만. |
 | **분기 파이프라인 전체** | [docs/project/quarterly-operations-guide.md](docs/project/quarterly-operations-guide.md) | 가이드 「정규 분기 루틴 — Cursor」 — Agent 실행(큐레이션 포함)·draft PR → 전문가 머지 |
-| **큐레이션·편집기** | [docs/project/editor-curation-workflow.md](docs/project/editor-curation-workflow.md) | HITL 주도; Agent는 마커 임의 변경 금지 |
+| **큐레이션·편집기** | [docs/project/editor-curation-workflow.md](docs/project/editor-curation-workflow.md) | 정규 루틴은 Agent 큐레이션; 마커 무단 대량 변경 금지 |
 | **큐레이션 사전 제안** | [docs/project/curation-rules.md](docs/project/curation-rules.md) | `scripts/auto_curate.py`는 마커를 출력만 한다. 본문에 대량으로 쓰지 않음 |
 | **프로젝트 점검·보완 기획** | 이 파일 + `/brainstorming` | 평가 → 2~3안 → **spec 승인** → plan → 구현 |
 | **승인된 기능 구현** | `docs/superpowers/specs/YYYY-MM-DD-*-design.md` | [plan](docs/superpowers/plans/) + Subagent-Driven |
@@ -142,7 +142,7 @@ Agent 담당: crawl·질의회신·제재/회의록 공개분 입수·큐레이�
 
 - **V-249**: 린트·형식 기준 PR만. 나머지 연도 작업·새 클라우드 에이전트 중지. 해제 조건은 §0.
 - **분기 요약 포맷**: `quality-updates-writer` 스킬 없이 링크별 note 블록 형식을 임의로 바꾸지 않는다.
-- **HITL 큐레이션**: `<!-- skip -->`, `<!-- source: … -->`를 사용자 지시 없이 대량 변경하지 않는다.
+- **큐레이션 마커**: `<!-- skip -->`, `<!-- source: … -->`를 사용자 지시 없이 대량 변경하지 않는다.
 - **분기 시점**: 분기 문서(`docs/quality-updates/YYYY/YYYY-MM-DD_to_YYYY-MM-DD.md`)와 `mkdocs.yml` nav·`docs/quality-updates/index.md`·`docs/index.md` 최신 링크는 그 분기 다음 달 5일 09:00 KST(1/5·4/5·7/5·10/5) 이후에만 만든다. 그 전에 걸린 백필 항목은 다음 정규 분기 루틴으로 넘긴다. 예외는 윤석님 명시 승인만이며, 허용 경로는 `data/qu-early-allow.txt`에 적는다. `crawl.py`는 `--year`와 `--quarter`를 명시한다. (V-222: 갱신일 전 분기 수행 금지)
 - **기획 → 구현**: `/brainstorming`으로 spec이 승인되기 전 코드·대규모 리팩터를 시작하지 않는다.
 - **커밋**: 사용자가 요청할 때만. `quality-updates-writer`는 RIGID 스킬이다.
@@ -222,7 +222,7 @@ npm run lint:md
 
 - V-249 해제 없이 연도 백필·#184·#185 재개·새 클라우드 에이전트
 - 품질관리감리 자동 파이프라인·백필 (장기 목표 「지금 하지 않는 것」)
-- HITL 마커 대량 변경, 요약 포맷 임의 변경
+- 큐레이션 마커 대량 변경, 요약 포맷 임의 변경
 - 비밀값 기록·커밋
 - 사용자 승인 전 커밋·머지·force-push
 - Grok 루틴 재가동 (당분간 중지)

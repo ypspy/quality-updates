@@ -39,7 +39,7 @@ Excerpt ID ↔ `covers` tags (Task 1 큐레이션과 일치).
 | Facts | 수치·기한·대상 누락·왜곡 없음 |
 | Tone-detail | gold 수준 (과소/과다 아님) |
 
-**Pass 조건:** 대조 대상 링크 **전 건** 3축 Pass (HITL이 명시한 Minor만 허용).  
+**Pass 조건:** 대조 대상 링크 **전 건** 3축 Pass (전문가가 명시한 Minor만 허용).  
 **Fail:** 발췌 보강 후 재대조. Excerpt-only 금지.
 
 ---
