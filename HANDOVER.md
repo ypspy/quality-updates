@@ -269,7 +269,7 @@ PR·커밋 봇 식별 규칙(앞방향만): 라벨 `bot:<봇이름>`(클라우�
 | M4 정리 | 머지된 원격 브랜치 정리(승인 후) | PUBLIC 유지는 결정됨. 브랜치 삭제는 별도 승인 |
 
 ## 11. 봇들이 루틴 업무 외에 맡을 수 있었던 후보 작업 (제안, 근거가 있는 것만)
-- Cabbage: 로컬 실패 테스트 `test_kasb_file_proxy_saves_to_configured_downloads_folder` 원인 조사(Python 버전 차이 여부) — 근거 7절 1.
+- Cabbage: `test_kasb_file_proxy_saves_to_configured_downloads_folder` — 해소됨(§7.1, Task 1·plan 2026-11-26); 조사 후보 아님.
 - Cabbage: `trailing_dot_host` 66건·`fsc.go.kr./` 경고 일괄 정리 PR — 근거 7절 3.
 - Mint: 2012 배포본 진단(`/workspace/reviews/qu-2012-deployed-diagnosis.md`)을 기준으로 2012 재작성 검수표 미리 작성 — 근거 6.2.
 - Kale: 회계기준자문위원회 50건·품질관리감리 위키 반입 설계 문서(실행은 승인 후) — 근거 `Kale.md` §5.
