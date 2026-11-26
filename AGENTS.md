@@ -72,7 +72,7 @@ V-249(린트·형식 기준 PR 외 연도 작업 및 새 클라우드 에이전�
 |--------------|--------------|----------|
 | **분기 보도자료 요약** | [.claude/skills/quality-updates-writer/SKILL.md](.claude/skills/quality-updates-writer/SKILL.md) | SUMMARIZE / SKIP_REMOVAL — SUMMARIZE: gold-excerpts + md ±80줄 윈도우 + REFERENCE 온디맨드; 재주입 금지. [상세](docs/superpowers/specs/2026-07-23-summarize-slim-design.md) |
 | **다른 Agent 소비 (MCP, 읽기 전용)** | [문서 지도 MCP 절](docs/project/README.md#mcp-코퍼스) · [mcp-corpus spec](docs/superpowers/specs/2026-06-27-mcp-corpus-design.md) | `export_corpus.py` → stdio/HTTP. 인용 계약. 코퍼스 쓰기는 생산 레인만. |
-| **분기 파이프라인 전체** | [docs/project/quarterly-operations-guide.md](docs/project/quarterly-operations-guide.md) | crawl → editor → skill → prepare_deploy |
+| **분기 파이프라인 전체** | [docs/project/quarterly-operations-guide.md](docs/project/quarterly-operations-guide.md) | 가이드 「정규 분기 루틴 — Cursor」 — Agent 실행(큐레이션 포함)·draft PR → 전문가 머지 |
 | **큐레이션·편집기** | [docs/project/editor-curation-workflow.md](docs/project/editor-curation-workflow.md) | HITL 주도; Agent는 마커 임의 변경 금지 |
 | **큐레이션 사전 제안** | [docs/project/curation-rules.md](docs/project/curation-rules.md) | `scripts/auto_curate.py`는 마커를 출력만 한다. 본문에 대량으로 쓰지 않음 |
 | **프로젝트 점검·보완 기획** | 이 파일 + `/brainstorming` | 평가 → 2~3안 → **spec 승인** → plan → 구현 |
@@ -131,8 +131,8 @@ V-249(린트·형식 기준 PR 외 연도 작업 및 새 클라우드 에이전�
 @docs/project/quarterly-operations-guide.md 기준으로 [YYYY QN] 분기 운영을 진행해줘.
 
 분기 규제·제재 의결·질의회신 파이프라인은 Agent와 전문가가 협업한다.
-Agent 담당: crawl.py 실행, prepare_deploy, validate/build
-HITL 담당: editor 큐레이션, 요약 검증, nav/index, push 승인
+Agent 담당: crawl·질의회신·제재/회의록 공개분 입수·큐레이션·요약·nav 초안·prepare_deploy·draft PR
+전문가 담당: 최종 배포 전 main 머지 승인만
 분기 문서와 nav·index 최신 링크는 그 분기 다음 달 5일 09:00 KST 이후에만 만든다.
 ```
 
