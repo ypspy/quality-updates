@@ -11,7 +11,7 @@
 
 ## 1. 프로젝트 목적과 현재 상태
 
-Quality Updates는 금융위·금감원·회계기준원 등의 회계·감사 규제 자료를 분기별로 정리해 https://quality-updates.onrender.com 에 공개하는 MkDocs 사이트(팀 조직상 Product A)이다 [확인됨: `README.md`, `mkdocs.yml` `site_url`, HTTP 200]. 팀 목표 문서에는 "Quality Updates 생산 파이프라인을 완성하고 안정화한다"가 첫 목표로 적혀 있다 [추정: `/workspace/reports/team-diagnosis-20261122.md` §1]. `main`에 #187–#198이 들어갔다 [확인됨 11/27]. `docs/quality-updates/`에 2012~2026 연도 폴더가 있고 2013(#177)·2012(#183)는 머지, 2011(#184)·2010(#185)은 draft·**보류**이다. **V-249 전체 해제**(2026-11-27, X=2M 비캐시 Tokens, AGENTS.md §0). 분기 운영 정본은 Cursor 가이드·Automation 프롬프트이며 Automation UI는 **등록·Enable**(파일럿 전, T16 done). 다음 정규 분기 루틴 첫 실행은 2027-01-05 09:00 KST이다 [추정: `Cabbage.md` §2].
+Quality Updates는 금융위·금감원·회계기준원 등의 회계·감사 규제 자료를 분기별로 정리해 https://quality-updates.onrender.com 에 공개하는 MkDocs 사이트(팀 조직상 Product A)이다 [확인됨: `README.md`, `mkdocs.yml` `site_url`, HTTP 200]. 팀 목표 문서에는 "Quality Updates 생산 파이프라인을 완성하고 안정화한다"가 첫 목표로 적혀 있다 [추정: `/workspace/reports/team-diagnosis-20261122.md` §1]. `main`에 #187–#205가 들어갔다 [확인됨 11/27]. `docs/quality-updates/`에 2012~2026 연도 폴더가 있고 2013(#177)·2012(#183)는 머지, 2011(#184)·2010(#185) draft는 **폐기**(닫힘, T9)이다. **V-249 전체 해제**(2026-11-27, X=2M 비캐시 Tokens, AGENTS.md §0). 분기 운영 정본은 Cursor 가이드·Automation 프롬프트이며 Automation UI는 **등록·Enable**(파일럿 전, T16 done). 다음 정규 분기 루틴 첫 실행은 2027-01-05 09:00 KST이다 [추정: `Cabbage.md` §2].
 
 ## 2. 자료 위치 지도
 
@@ -190,7 +190,7 @@ PR·커밋 봇 식별 규칙(앞방향만): 라벨 `bot:<봇이름>`(클라우�
 ## 5. 결정 기록
 
 - `DECISIONS.md`: #188로 원판이 `main`에 들어간 뒤, #189(`3d55bcce`)에서 **이 프로젝트 결정(1절)만** 남겼다. 공통·미분류·`COMMON_DECISIONS.md`는 제외(의도적). 필요 시 원문 대화에서 다시 인용한다 [확인됨 11/26].
-- 사용자 장기 목표(2026-11-26): ① QU 자동 파이프라인·백필 마무리(유효, V-205) ② 추출기·③ 학술 후 확장은 이 저장소 비대상(폐기). 저장소 PUBLIC 유지(비밀값 금지). GrokBot은 **deprecated**(2026-11-27, 앞으로 사용 안 함) · Cursor Automation 이관(T13). #184·#185 보류. AGENTS.md를 원본으로 `.claude/` 병행 [확인됨 11/26·11/27].
+- 사용자 장기 목표(2026-11-26): ① QU 자동 파이프라인·백필 마무리(유효, V-205) ② 추출기·③ 학술 후 확장은 이 저장소 비대상(폐기). 저장소 PUBLIC 유지(비밀값 금지). GrokBot은 **deprecated**(2026-11-27, 앞으로 사용 안 함) · Cursor Automation 이관(T13). #184·#185 **폐기**(T9 done). AGENTS.md를 원본으로 `.claude/` 병행 [확인됨 11/26·11/27].
 - **V-249 전체 해제**(2026-11-27): 목표 B. 한도 **X = 2,000,000 비캐시 Tokens**(1파). 파일럿 #196–#198 + 사용량 표 + 사용자 `ok`. 세부 AGENTS.md §0 [확인됨 11/27].
 - 에이전트 규칙·작업 큐는 AGENTS.md·TASKS.md가 원본이다.
 
@@ -200,13 +200,13 @@ PR·커밋 봇 식별 규칙(앞방향만): 라벨 `bot:<봇이름>`(클라우�
 | PR | 브랜치 | 상태 |
 |---|---|---|
 | #190 HANDOVER 갱신·정정 | `handover-update-20261125` | ready. 이 문서. 머지 금지·윤석님 검토 대기 |
-| #185 2010년 분기 페이지 신설(Mint 분류 반영) | `cursor/qu-bf2000-2010-quarters` | draft. **보류**(사용자 11/26) |
-| #184 2011년 분기 페이지 신설 | `cursor/qu-bf2000-2011-quarters` | draft. **보류**(사용자 11/26) |
+| #185 2010년 분기 페이지 신설 | `cursor/qu-bf2000-2010-quarters` | **closed**(폐기, T9, 2026-11-27) |
+| #184 2011년 분기 페이지 신설 | `cursor/qu-bf2000-2011-quarters` | **closed**(폐기, T9, 2026-11-27) |
 - #189는 머지됨(더 이상 열림 아님) [확인됨 11/26].
 - 열린 이슈 0건 [확인됨 11/26].
 
 ### 6.2 미완료 작업
-- 2013→2000 연도 백필: V-249 **해제됨** — 연도 **한 건씩**, 1파 한도 X=2M Tokens(AGENTS §0). #184·#185는 **별도 보류**(T9). 2009~2000 PR 미착수 [확인됨 11/27]. Mint 분류표는 `/workspace/handoff/qu-bf-<연도>/` — 2013·2012 머지 반영, 2011·2010은 draft PR에 상자, 2009~2000은 표만 [확인됨 11/26 그록봇: `Mint.md`·핸드오프].
+- 2013→2000 연도 백필: V-249 **해제됨** — 연도 **한 건씩**, 1파 한도 X=2M Tokens(AGENTS §0). #184·#185 **폐기**(T9). 2011·2010은 T10 신규. 2009~2000 PR 미착수 [확인됨 11/27]. Mint 분류표는 `/workspace/handoff/qu-bf-<연도>/` — 2013·2012 머지 반영, 2011·2010·2009~2000은 표/핸드오프 참고 [확인됨 11/26 그록봇: `Mint.md`·핸드오프].
 - 제재 원본 969폴더 정본: 박스 `/workspace/qu-collect/downloads/sanctions/`(969폴더·1,709파일·약 451MiB). Kale 복사본 `/workspace/handoff/kale-fsc-sfc-sanctions-969-20261121/`. 저장소에는 없음(`downloads/` gitignore). 랩탑에는 전체 트리 없음(회차 19개만) [확인됨 11/26 그록봇].
 - 2012 배포본 제재 절에 작성 지시·공정 문구가 공개 본문에 남아 있음 [추정: `/workspace/reviews/qu-2012-deployed-diagnosis.md`].
 - 2012 Q1 견본(커밋 안 함) `/workspace/reviews/qu-format-lint/sample-2012q1/` [추정: `Cabbage.md` §4].
@@ -216,7 +216,7 @@ PR·커밋 봇 식별 규칙(앞방향만): 라벨 `bot:<봇이름>`(클라우�
 
 ### 6.3 막힌 지점
 - 연도 백필·새 클라우드 에이전트: V-249 해제(X=2M). Automation UI는 이미 Enable(T16 done) [확인됨 11/27].
-- #184·#185: 보류(T9) [확인됨 11/26].
+- #184·#185: **폐기 완료**(T9 done) [확인됨 11/27].
 - `FSS Inspection_Grokbot_MINT/` 처분: 용량·에이전트 읽기 필요성 보고 후 결정. 그 전까지 blocked [확인됨 11/26].
 - 미보도 항목 (가)/(나) 처리, record.md 날짜에 대한 윤석님 답 대기 [추정: `Cabbage.md` §4].
 - F004 주간: 랩탑 `DartF004Weekly` 11/21 `loader_missing` 실패 [확인됨 11/25]. Mint 주간 재확인은 그록봇이 이번에 돌리지 않음 [확인됨 11/26 그록봇].
@@ -266,7 +266,7 @@ PR·커밋 봇 식별 규칙(앞방향만): 라벨 `bot:<봇이름>`(클라우�
 |---|---|---|
 | M0 이관 기반 | Cursor에서 검증·규칙 문서 정착 | **done** (#191·#192). AGENTS/TASKS, pytest T6, 3.11–3.12 문서 정합 |
 | M1 형식·린트 | 공개 본문 린트·형식 잔여 | `lint_public_body` 도구 개선(#197/T5). 연도 대량 재작성은 M2 |
-| M2 백필 재개 | V-249 해제됨(X=2M) | 연도 한 건씩. #184·#185는 T9 방침 후. 2009~2000 |
+| M2 백필 재개 | V-249 해제됨(X=2M) · T9 폐기 완료 | 연도 한 건씩(T10). 2011·2010 신규 → 2009~2000 |
 | M3 정규 분기 루틴 | Automation Activate로 첫 실행(T11 **ready**) | 가이드·프롬프트 **done** (#193·#195). Enable·Slack·이관(T13·T16·T20). 시점 V-031·V-222는 실행 조건(큐 blocked 아님) |
 | M4 정리 | 머지된 원격 브랜치 정리(승인 후) | PUBLIC 유지는 결정됨. 브랜치 삭제는 별도 승인 |
 
@@ -278,7 +278,7 @@ PR·커밋 봇 식별 규칙(앞방향만): 라벨 `bot:<봇이름>`(클라우�
 - Vegetable: 머지된 원격 브랜치 목록 작성(삭제는 승인 후), 봇 라벨 생성안 — 근거 7절 4·10.
 
 ## 12. 다음에 바로 할 일 5개
-1. 백필은 연도 한 건씩·1파 한도 X=2M 안 (#184·#185는 T9 방침 후).
+1. 백필은 연도 한 건씩·1파 한도 X=2M 안(T10; 2011·2010부터 DoD 신규).
 2. Automation 프롬프트 UI↔정본 일치 점검(가이드 §7.1, 필요 시만).
 3. `lint_public_body` 잔여(T5) — 도구/허용목록.
 4. `FSS Inspection_Grokbot_MINT/` 처분 결정(T7).
@@ -294,6 +294,5 @@ PR·커밋 봇 식별 규칙(앞방향만): 라벨 `bot:<봇이름>`(클라우�
 
 ## 내게 확인이 필요한 질문 (미결만)
 1. `FSS Inspection_Grokbot_MINT/` — 유지 / 저장소 밖 이전 / gitignore? (에이전트 읽기 필요성 보고 후)
-2. #184·#185 방침(T9) — 유지·머지·닫기
-3. 랩탑 트리를 `main`에 맞출지 (`fix/sanction-kale-handoff-format` 유지 여부)
-4. ARF 루틴 3개 일시정지 여부 (queue.md 잔여)
+2. 랩탑 트리를 `main`에 맞출지 (`fix/sanction-kale-handoff-format` 유지 여부)
+3. ARF 루틴 3개 일시정지 여부 (queue.md 잔여)
