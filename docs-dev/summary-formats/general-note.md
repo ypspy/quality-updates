@@ -60,12 +60,15 @@
 
 ## 4. DoD Pass/Fail
 
+어미(합니다체)는 [README 공통 Format](README.md#공통-리뷰-3축)만 본다.
+
 | 검사 항목 | Pass | Fail |
 |-----------|------|------|
-| **Format** | `!!! note "주요 내용"`, 4+4 들여쓰기, 블록 내 접두어 일관 | B1 혼용, 잘못된 admonition·들여쓰기, note 안 URL |
+| **Format** | `!!! note "주요 내용"`, 4+4 들여쓰기, 블록 내 접두어 일관 | note 제목이 `"주요 내용"`이 아님, 잘못된 admonition·들여쓰기 |
 | **Facts** | 수치·날짜·대상이 PDF/원문과 일치 | 추정·반올림·원문 없는 사실 |
 | **Tone-detail** | 3~7 불릿(예외 범위 준수), 증류 수준이 앵커와 동급 | 원문 장문 재현, 1~2 불릿 과소 또는 장황 과다 |
 | **A/B 일관성** | 블록 전체가 A 또는 B 중 하나 | 동일 note에 `(…)` 와 `**…**:` 혼재 |
+| **note 본문 URL** | note·info 본문에 URL 없음 (`??? info` nested-info 안은 허용) | nested-info 밖 note/info 본문에 `https://` |
 
 ---
 
