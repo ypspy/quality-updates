@@ -1,89 +1,39 @@
-# Task 4 Report: README six-section replacement
+# Task 4 report — SKILL + project README + superpowers index
 
-## Summary
+## Status
 
-Replaced `README.md` with the verbatim six-section front door from `.superpowers/sdd/task-4-brief.md`. Staged and committed **only** `README.md`. Left `docs/index.md` and `mkdocs.yml` unstaged per instructions.
+**Complete**
 
-## Commands and output
+## Commits
 
-### Branch and status
+| SHA | Message |
+|-----|---------|
+| (see `git log -1 --oneline` on branch) | `docs: point writer skill and SSOT map at summary-formats DoD` |
 
-```text
-$ cd C:\dev\quality-updates; git branch --show-current; git status -sb
-docs/readme-front-door
-## docs/readme-front-door
- M docs/index.md
- M mkdocs.yml
-```
+### Changed files
 
-### Step 1 — long sections still in README (expected: three matches)
+- `.claude/skills/quality-updates-writer/SKILL.md` — Q3-first full-gold list, Excerpt-only unchanged, `docs-dev/summary-formats/` DoD callout, REFERENCE E KASB → Q3 + `kasb-schedule.md`, footer 패턴 예시 Q3-first
+- `docs/project/README.md` — SSOT 요약 포맷 row → `docs-dev/summary-formats/README.md` + SKILL workflow
+- `docs-dev/summary-formats/*.md` — trailing newlines (Task 1 minor)
+- `docs/superpowers/README.md` — **unchanged** (spec/plan rows already present from plan commit; no duplication)
 
-```text
-$ rg -n "^## 프로젝트 구조|^## MCP 코퍼스|^## 회계기준원" README.md
-124:## 회계기준원 질의회신 아카이브
-257:## 프로젝트 구조
-373:## MCP 코퍼스 (다른 Agent)
-```
+## Verification (brief acceptance)
 
-### Step 3 — line count and `##` headings
+| Check | Result |
+|-------|--------|
+| SKILL lists `2026-07-01_to_2026-09-30` first in 전문 gold | Yes (header + 패턴 예시 + REFERENCE E) |
+| Excerpt-only + 재주입 금지 preserved | Yes (lines 8–9, §4, §4b/§4c untouched) |
+| `docs-dev/summary-formats/` linked in SKILL | Yes (header DoD + kasb-schedule) |
+| `docs/superpowers/README.md` index | Pre-existing rows for `2026-11-27-summary-format-dod-*` |
+| `npm run lint:md` | Pass (after `docs/project/README.md` edit) |
+| AGENTS.md | Not modified |
+| `docs/quality-updates/**` | Not modified |
 
-```text
-$ (Get-Content README.md).Count; rg -n "^## " README.md
-79
-8:## 기능
-15:## 로컬에서 보기
-54:## 분기 운영
-63:## 배포
-71:## 기여
-76:## 라이선스·저작권
-```
+## Concerns
 
-### Step 3 — forbidden-pattern search (expected: no matches)
+- BOILERPLATE 섹션의 `참고 템플릿`은 여전히 2023 Q2 경로만 가리킴. SUMMARIZE full-gold 목록과 별도 용도라 brief 범위 밖으로 두었음. 추후 SSOT 통일이 필요하면 별도 태스크.
+- REFERENCE E KASB 예시에 `kasb-schedule.md` 링크 추가로 DoD family와 SKILL REFERENCE 교차 참조가 생김. 의도된 정합.
 
-```text
-$ rg -n "glightbox|bashrc|fetch_attachments|프로젝트 구조" README.md; echo "exit=$LASTEXITCODE"
+## Report path
 
-exit=1
-```
-
-(Empty matches; ripgrep exit code 1 means no matches.)
-
-### Markdown lint (`README.md` only path arg)
-
-```text
-$ npm run lint:md -- README.md 2>&1
-
-> quality-updates@0.1.0 lint:md
-> markdownlint "docs/**/*.md" -c .markdownlint.json README.md
-```
-
-Exit code: 0.
-
-### Commit
-
-```text
-$ git add -- README.md; git status -sb; git commit -m @"
-docs: README를 소개와 설치 앞문으로 줄인다
-
-"@
-## docs/readme-front-door
-M  README.md
- M docs/index.md
- M mkdocs.yml
-error: failed to delete '.git/worktrees/feat-consumption-mcp-product': Permission denied
-[docs/readme-front-door c8d42c6] docs: README를 소개와 설치 앞문으로 줄인다
- 1 file changed, 17 insertions(+), 372 deletions(-)
-
-$ git log -1 --format="%H %s"; git status -sb
-c8d42c684994ea5c505b037e6c0e57100bdf526d docs: README를 소개와 설치 앞문으로 줄인다
-## docs/readme-front-door
- M docs/index.md
- M mkdocs.yml
-```
-
-## Self-review
-
-- **Brief adherence:** Content matches the replacement block in the task brief (six `##` headings: 기능, 로컬에서 보기, 분기 운영, 배포, 기여, 라이선스·저작권). Line count **79** (≤ 150).
-- **Verification:** Forbidden-pattern `rg` returned no lines; `npm run lint:md -- README.md` passed.
-- **Scope:** Only `README.md` was committed; `docs/index.md` and `mkdocs.yml` remain modified and unstaged.
-- **Concern:** Git printed `error: failed to delete '.git/worktrees/feat-consumption-mcp-product': Permission denied` during `git commit`, but the commit **succeeded** (`c8d42c6`). May warrant local investigation if it recurs.
+`/agent/repos/quality-updates/.superpowers/sdd/task-4-report.md`
