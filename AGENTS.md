@@ -18,7 +18,7 @@ Cursor·Claude 등 **AI 에이전트**가 이 저장소에서 작업할 때의 �
 
 1. Quality Updates — 규제 업데이트 항목의 **자동 파이프라인과 백필을 마무리**한다.
    - 상태: 유효 (V-205, 2026-11-18)
-   - 완료 기준: ① 자동 파이프라인이 사람 개입 없이 4회 연속 완료 ② 백필 대상 연도 2025년부터 2000년까지 완료 ③ 백필 형태는 2026년 3분기 골드셋을 따른다
+   - 완료 기준: ① 자동 파이프라인이 사람 개입 없이 4회 연속 완료 ② 백필 대상 연도 2025년부터 2000년까지 완료 ③ 백필 형태는 2026년 3분기 골드셋을 따른다 — 형식·리뷰 DoD: [`docs-dev/summary-formats/`](docs-dev/summary-formats/) (제재는 [`docs-dev/sanctions-format.md`](docs-dev/sanctions-format.md))
 
 이 저장소 작업 대상이 **아닌** 것(폐기·타 저장소): 추출기 완성(disclosure-extractor), 학술 연구 후 업무·공개 확장(dart-wrapper).
 
