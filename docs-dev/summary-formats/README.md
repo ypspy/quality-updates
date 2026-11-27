@@ -2,6 +2,8 @@
 
 이 디렉터리는 분기 페이지 링크별 `!!! note` / `!!! info` 요약의 **작성·리뷰 Pass/Fail** 기준이다. 모범 전체는 `docs/quality-updates/2026/2026-07-01_to_2026-09-30.md`이나, **SUMMARIZE 세션마다 Q3 전문을 매번 로드하지 않는다.** verbatim 표본은 `.claude/skills/quality-updates-writer/reference/gold-excerpts.md`를 쓰고, 이 파일들은 규칙·리뷰 체크리스트 SSOT다.
 
+**완결성**(백필 누락·큐레이션 누락)은 형식과 별축이다 → [completeness.md](completeness.md).
+
 저장소 루트 `docs-dev/`에 두어 MkDocs 사이트에 올리지 않는다. 설계 배경은 [docs/superpowers/specs/2026-11-27-summary-format-dod-design.md](../../docs/superpowers/specs/2026-11-27-summary-format-dod-design.md).
 
 ---
@@ -42,6 +44,7 @@ Q3 본문(Appendix 이전)에 note가 있는 절만 포함한다.
 
 ## 리뷰 사용법
 
-1. 변경된 링크가 있는 PR·백필 초안에서 위 표로 **family**를 확정한다.
-2. 해당 family DoD 파일의 **DoD Pass/Fail** 절만 연다(장문 스킬·Q3 전문 전체 로드는 피한다).
-3. **독립 리뷰 세션**은 AGENTS.md §6.3에 따라 코드 수정·푸시·PR 댓글 없이 3축 + family 전용 행에 대해 Pass/Fail만 기록한다.
+1. 백필·분기 PR에서는 먼저 [completeness.md](completeness.md)로 분기 파일·요약 완결·큐레이션 누락을 본다.
+2. 변경된 링크가 있는 초안에서 위 표로 **family**를 확정한다.
+3. 해당 family DoD 파일의 **DoD Pass/Fail** 절만 연다(장문 스킬·Q3 전문 전체 로드는 피한다).
+4. **독립 리뷰 세션**은 AGENTS.md §6.3에 따라 코드 수정·푸시·PR 댓글 없이 완결성 + 3축 + family 전용 행에 대해 Pass/Fail만 기록한다.
