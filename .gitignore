@@ -76,3 +76,6 @@ logs/
 *.db
 *.db-wal
 *.db-shm
+
+# SDD scratch (local progress/briefs/reports)
+.superpowers/sdd/
