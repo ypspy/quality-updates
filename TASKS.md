@@ -16,10 +16,10 @@
 | T2 | `AGENTS.md` 보강 | 장기 목표, V-249 해제 문안, 머지 4항목, 하지 말 것 | done | #191 |
 | T3 | `TASKS.md` 신설 | 이 파일 | done | #191 |
 | T4 | #190 HANDOVER 사실 정정 | #189 머지·COMMON 없음·열린 PR·결정 반영 | done | #190 |
-| T5 | 린트·형식 잔여 (`trailing_dot_host` 등) | `lint_public_body` **도구** 개선 PR. **연도 본문 재작성 없음** | optional · 파일럿2 후보 | V-249 허용 |
+| T5 | 린트·형식 잔여 (`trailing_dot_host` 등) | `lint_public_body` **도구** 개선(요약·경고 계약). **연도 본문 재작성 없음** | ready → #197 | 파일럿2 |
 | T6 | pytest 1실패 원인 조사·수정 | 네트워크 비의존 mock으로 M0 pytest 0 failed | done | 스펙 2026-11-26-pipeline-contract-sync |
 | T15 | 분기 Automation 프롬프트·§7 문서 | `quarterly-automation-prompt.md` + 가이드 §7 UI 체크리스트 | done | #195 |
-| T17 | V-249 파일럿 1 (문서 정합) | HANDOVER·TASKS를 #191–#195·해제 목표 B에 맞춤 | ready → 이 PR | AGENTS §0 파일럿 |
+| T17 | V-249 파일럿 1 (문서 정합) | HANDOVER·TASKS를 #191–#195·해제 목표 B에 맞춤 | done | #196 |
 
 ---
 
