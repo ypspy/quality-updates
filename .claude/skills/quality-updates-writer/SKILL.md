@@ -6,7 +6,8 @@ description: 한국 금융 규제 당국(FSS, FSC, KICPA, KASB)의 분기별 규
 > **RIGID SKILL** — 이 스킬의 모든 규칙은 엄격히 따른다. 포맷·표 스키마·들여쓰기 규칙을 임의로 변형하지 않는다.
 
 > **SUMMARIZE 기준 (Excerpt-only):** 기본 `.claude/skills/quality-updates-writer/reference/gold-excerpts.md` (세션 1회). 전문 gold 읽기 의무 없음(선택 참고). **재주입 금지.**
-> **전문 gold (선택 참고):** `docs/quality-updates/2023/2023-04-01_to_2023-06-30.md`, `docs/quality-updates/2025/2025-10-01_to_2025-12-31.md`
+> **전문 gold (선택 참고):** `docs/quality-updates/2026/2026-07-01_to_2026-09-30.md`, `docs/quality-updates/2025/2025-10-01_to_2025-12-31.md`, `docs/quality-updates/2023/2023-04-01_to_2023-06-30.md`
+> **형식 DoD (작성·리뷰):** `docs-dev/summary-formats/` (제재는 `docs-dev/sanctions-format.md`)
 
 # 에이전트 지침: Quality Updates – 회계·감사 규제 동향 요약
 
@@ -445,7 +446,7 @@ Type A/B 표와 **별도 링크**에 대해 `!!! note "주요 내용"` 작성. �
 - **줄 배치**: `□ 의결 안건` 다음 빈 줄 1개 → 의결 불릿 → 빈 줄 1개 → `□ 보고 안건` → 빈 줄 1개 → 보고 불릿
 - **볼드**: 의결·보고 안건 내 제도명에 볼드 사용 안 함
 - 해당 없으면 `해당사항 없음`
-- 기준 예시: `2025-10-01_to_2025-12-31.md` 내 회계기준위원회 요약 블록 참조
+- 기준 예시: `docs/quality-updates/2026/2026-07-01_to_2026-09-30.md` 내 회계기준위원회·지속가능성기준위원회 요약 블록 참조 (`docs-dev/summary-formats/kasb-schedule.md`)
 
 ---
 
@@ -509,4 +510,4 @@ Type A/B 표와 **별도 링크**에 대해 `!!! note "주요 내용"` 작성. �
 
 ---
 
-> 패턴 예시는 `reference/gold-excerpts.md` 우선. 전문 gold(`2023-04-01_to_2023-06-30.md`, `2025-10-01_to_2025-12-31.md`)는 선택 참고.
+> 패턴 예시는 `reference/gold-excerpts.md` 우선. 전문 gold(`2026-07-01_to_2026-09-30.md`, `2025-10-01_to_2025-12-31.md`, `2023-04-01_to_2023-06-30.md`)는 선택 참고.

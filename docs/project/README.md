@@ -65,7 +65,7 @@ README·CONTRIBUTING·AGENTS.md의 운영·큐레이션 요약은 위 문서를 
 |------|------|
 | 분기 운영 | `docs/project/quarterly-operations-guide.md` |
 | 편집기 | `docs/project/editor-curation-workflow.md` |
-| 요약 포맷 | `.claude/skills/quality-updates-writer/SKILL.md` (Phase 1 링크 note) |
+| 요약 포맷 | `docs-dev/summary-formats/README.md` (형식·DoD); 워크플로는 `.claude/skills/quality-updates-writer/SKILL.md` |
 | 소비 (사람) | 공개 MkDocs 사이트 |
 | 소비 (다른 Agent) | `scripts/mcp_server/` (stdio + HTTP), `data/corpus/` |
 | MCP 코퍼스 export | `scripts/export_corpus.py` → `data/corpus/` |
