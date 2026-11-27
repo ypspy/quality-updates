@@ -2,7 +2,7 @@
 
 Cursor Automation(또는 동등 예약 Cloud Agent) **본문에 붙여 넣는** 정본이다.  
 운영 체크리스트 SSOT: [quarterly-operations-guide.md](quarterly-operations-guide.md) 「정규 분기 루틴 — Cursor」.  
-등록·활성화 절차: 같은 가이드 §7. **이 파일만으로 Automation을 켜지 않는다.**
+UI 상태·재설정: 같은 가이드 §7 (**이미 Enable**). 에이전트는 이 파일만으로 Automation을 켜거나 끄지 않는다.
 
 ---
 
