@@ -33,12 +33,15 @@ Q3 본문(Appendix 이전)에 note가 있는 절만 포함한다.
 ## 공통 리뷰 3축
 
 `gold-excerpts-checklist`와 동일. family별 DoD 표에도 이 세 축을 반복한다.
+과거 Format 감사에서 나온 Fail 사유는 **건수·연도 없이** 아래 공통 축과 각 family **DoD Pass/Fail** Fail 열에 규범으로만 반영한다.
 
 | 축 | Pass | Fail 예 |
 |----|------|---------|
-| **Format** | note 문법·들여쓰기·접두어 혼용 없음·family 스키마 준수 | style-A/B 혼용, 표 열 누락, □ 헤더 누락 |
+| **Format** | note 문법·들여쓰기·접두어 혼용 없음·family 스키마 준수·음슴체(`~함`/`~임`/`~예정`) | style-A/B 혼용, 표 열 누락, □ 헤더 누락, **합니다체·입니다체·됩니다체**(`합니다`/`입니다`/`됩니다`/`있습니다`) |
 | **Facts** | 수치·기한·대상·금액이 원문과 일치, 추정 없음 | 반올림·추정·원문에 없는 칸 채움 |
 | **Tone-detail** | 불릿 밀도·증류 수준이 Q3 앵커와 동급 | 원문 재현, 과소·과다 |
+
+공통 Format의 어미 Fail은 **전 family**에 적용한다. family 표에 어미 행을 중복하지 않는다.
 
 ---
 
@@ -47,4 +50,4 @@ Q3 본문(Appendix 이전)에 note가 있는 절만 포함한다.
 1. 백필·분기 PR에서는 먼저 [completeness.md](completeness.md)로 분기 파일·요약 완결·큐레이션 누락을 본다.
 2. 변경된 링크가 있는 초안에서 위 표로 **family**를 확정한다.
 3. 해당 family DoD 파일의 **DoD Pass/Fail** 절만 연다(장문 스킬·Q3 전문 전체 로드는 피한다).
-4. **독립 리뷰 세션**은 AGENTS.md §6.3에 따라 코드 수정·푸시·PR 댓글 없이 완결성 + 3축 + family 전용 행에 대해 Pass/Fail만 기록한다.
+4. **독립 리뷰 세션**은 AGENTS.md §6.3에 따라 코드 수정·푸시·PR 댓글 없이 완결성 + 공통 3축(어미 포함) + family 전용 행에 대해 Pass/Fail만 기록한다.
