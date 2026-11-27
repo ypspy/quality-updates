@@ -153,19 +153,30 @@ cd scripts && python -m crawler.kasb_meetings --dry-run --limit 3
 
 ---
 
-## 7. Automation 적용 방법 (미등록)
+## 7. Automation 적용 방법 (문서 정본 · UI 미등록)
 
-이 절은 **적용 방법만** 적는다. 이 작업(또는 구현 PR)에서 Automation을 **생성·활성화하지 않는다**.
+**상태:** 저장소에 프롬프트 정본은 있다. Cursor UI에서 Automation은 **아직 만들지 않았고 enable하지 않는다.**  
+에이전트는 Automation을 생성·활성화할 수 없다. 등록은 사용자가 [cursor.com/automations](https://cursor.com/automations)에서 한다.
 
 | 항목 | 내용 |
 |------|------|
 | 수단 | Cursor Automation (또는 동등 예약 Cloud Agent) |
-| 트리거 | 분기 다음 달 5일 09:00 KST **이후** (첫 대상 예: 2027-01-05) |
-| 프롬프트 정본 | 이 가이드의 「정규 분기 루틴 — Cursor」 체크리스트 (A–E 당일 공개분 + D 직전 미공개 보완) |
-| 산출 | **draft PR만** (당일 공개분·큐레이션·요약·nav·게이트; D 1d′ 보완 포함 가능). 커밋·PR 본문에 레인·단계·검증 결과 |
+| 프롬프트 정본 | [quarterly-automation-prompt.md](quarterly-automation-prompt.md) (본문은 가이드 §3 체크리스트를 따른다) |
+| 트리거 | cron `0 0 5 1,4,7,10 *` (UTC) ≈ 1/5·4/5·7/5·10/5 09:00 KST. 첫 대상 예: 2027-01-05 |
+| 산출 | **draft PR만**. 커밋·PR 본문에 레인·단계·검증 결과 |
 | 금지 | 머지, force-push, 비밀값, 볼트 직접 쓰기, early-allow 없는 조기 nav |
 | 전문가 | Automation이 연 draft PR에 대해 **머지 여부만** 결정 |
-| 활성화 조건 | V-249 및 「새 클라우드 에이전트 중지」해제 + 사용자 명시 승인 후 |
+| 활성화 조건 | **V-249 전체 해제**(파일럿 3회·한도 X·명시 승인) 후. 예외 해제(Automation만)가 아님 |
+
+### 7.1 사용자 UI 등록 체크리스트 (해제 승인 후)
+
+1. V-249가 AGENTS.md §0 기준으로 해제됐는지 확인한다.
+2. [cursor.com/automations/new](https://cursor.com/automations/new) (또는 `/automate`)를 연다.
+3. Trigger = Scheduled, cron `0 0 5 1,4,7,10 *` (UTC).
+4. Repository = `ypspy/quality-updates`, base branch `main`.
+5. Prompt = [quarterly-automation-prompt.md](quarterly-automation-prompt.md) 펜스 안 텍스트 전체.
+6. Pull request 생성 유지. draft만. 머지 도구 사용 안 함.
+7. Save 후 **Enable**은 해제 승인 직후에만. 등록 후 이 절 상태 문장을 「등록됨」으로 고친다.
 
 ---
 
@@ -178,7 +189,10 @@ cd scripts && python -m crawler.kasb_meetings --dry-run --limit 3
 | [curation-rules.md](curation-rules.md) | 큐레이션 규칙 제안 |
 | `scripts/crawl.py` 등 | 레인 A–E 수집 CLI |
 | [pipeline-contract-sync](../superpowers/specs/2026-11-26-pipeline-contract-sync-design.md) | 게이트·exit·Python 계약 |
+| [quarterly-automation-prompt.md](quarterly-automation-prompt.md) | Automation 실행 프롬프트 정본 |
+| [quarterly-automation-docs](../superpowers/specs/2026-11-27-quarterly-automation-docs-design.md) | Automation 문서·V-249 전체 해제 목표 |
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-11-27 | Automation 프롬프트 정본·UI 등록 체크리스트 추가. enable은 V-249 전체 해제 후 |
 | 2026-11-26 | Cursor 유일 실행안으로 재작성 (스펙 cursor-quarterly-routine). 과거 그록 운영·Phase 장문 삭제. Automation은 적용 방법만 |
