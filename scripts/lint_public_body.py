@@ -385,6 +385,17 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
         print(format_year_rule_counts(other_warnings), file=sys.stderr)
+    trailing = [item for item in warnings if item.rule == "trailing_dot_host"]
+    if trailing:
+        by_year = count_by_year_rule(trailing)
+        year_bits = ", ".join(
+            f"{year}={sum(rules.values())}" for year, rules in sorted(by_year.items())
+        )
+        print(
+            f"lint_public_body: trailing_dot_host summary "
+            f"({len(trailing)} warning(s); {year_bits})",
+            file=sys.stderr,
+        )
     if errors:
         print(f"lint_public_body: {len(errors)} error(s)", file=sys.stderr)
         return 1

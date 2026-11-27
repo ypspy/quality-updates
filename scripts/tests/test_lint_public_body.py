@@ -94,10 +94,19 @@ def test_descriptive_summary_is_not_process_or_mechanical():
     assert rules(text) == []
 
 
-def test_trailing_dot_host_is_an_error():
+def test_trailing_dot_host_is_detected():
     text = "- [예고](https://fsc.go.kr./po040301/view?noticeId=4160)\n"
     found = lint_text("a.md", text)
     assert [item.rule for item in found] == ["trailing_dot_host"]
+
+
+def test_trailing_dot_host_partitions_as_warning():
+    """연도 본문을 고치지 않는 동안 trailing_dot_host는 종료 코드 0(경고)이다."""
+    text = "- [예고](https://fsc.go.kr./po040301/view?noticeId=4160)\n"
+    found = lint_text("docs/quality-updates/2026/x.md", text)
+    errors, warnings = partition_findings(found, allowed=set())
+    assert errors == []
+    assert [item.rule for item in warnings] == ["trailing_dot_host"]
 
 
 def test_normal_host_is_ok():
