@@ -26,7 +26,7 @@ Cursor·Claude 등 **AI 에이전트**가 이 저장소에서 작업할 때의 �
 
 - #184·#185 재개 — **별도 보류**(T9). V-249 해제와 무관하게 사용자 방침이 필요하다
 - 품질관리감리 항목의 자동 파이프라인과 백필
-- Grok Bot 루틴(`qu`, `qu-2`, `fss-b0000291` 등) 재가동 — **금지**. 정규 분기는 Cursor Automation으로 이관 완료(T13·T15·T16·T20)
+- Grok Bot(`qu`, `qu-2`, `fss-b0000291` 등) — **deprecated**. 앞으로 사용·재가동하지 않는다. 정규 분기는 Cursor Automation만(T13·T15·T16·T20)
 - 한도 **X를 넘는** 작업·한도 상향(사용자 승인 전)
 
 ### 지금 해도 되는 것
@@ -215,7 +215,7 @@ npm run lint:md
 - 큐레이션 마커 대량 변경, 요약 포맷 임의 변경
 - 비밀값 기록·커밋
 - 사용자 승인 전 커밋·머지·force-push
-- Grok 루틴 재가동 (이관 완료 · 재가동 금지)
+- Grok Bot 사용·재가동 (deprecated · Cursor Automation으로 대체)
 - `FSS Inspection_Grokbot_MINT/` 처분(삭제·gitignore·이전) — 사용자 결정 전 blocked
 - 사용량 수치를 추정해 적기
 

@@ -31,7 +31,7 @@
 | T8 | V-249 **전체** 해제 | **done** | 파일럿 #196–#198 + X=2M Tokens + 사용자 `ok` 2026-11-27 |
 | T19 | 2026 Q3 요약 형식·완결성 DoD | **done** | #201 스펙 · #202 family DoD·excerpts · #203 Format Fail 반영 · #204 완결성 DoD. **본문 재작성은 T10** (감사만 함) |
 | T20 | QU 분기 Automation Slack 알림 | **done** | 사용자 붙임 2026-11-27 (에이전트 bc-01a20b0b). Automation `a821548c-e9f8-11f1-a83f-1254d1a6b4db` Enable 유지. 에이전트는 Automation 재설정하지 않음(AGENTS §0) |
-| T13 | Grok 루틴 → Cursor Automation 이관 | **done** | 사용자 확인 2026-11-27. 후속은 T15·T16·T20(QU Quarterly Routine). `qu`/`qu-2`/`fss-b0000291` **재가동 안 함**(AGENTS §0·§7) |
+| T13 | Grok Bot deprecated · Cursor Automation 이관 | **done** | 사용자 2026-11-27: GrokBot **deprecated**, 앞으로 사용 안 함. 후속 T15·T16·T20만. `qu`/`qu-2`/`fss-b0000291` 사용·재가동 금지(AGENTS §0·§7) |
 
 ---
 

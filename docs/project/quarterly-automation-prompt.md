@@ -29,7 +29,7 @@ Never:
 - Commit secrets, tokens, or env values (repo is PUBLIC).
 - Write directly to the Obsidian vault.
 - Bypass quarter timing / early-allow rules for nav or crawl.
-- Re-enable Grok bots (qu, qu-2, fss-b0000291).
+- Use or re-enable deprecated GrokBot routines (qu, qu-2, fss-b0000291).
 - Bulk-edit curation markers outside the routine need; follow AGENTS.md.
 
 Role: you curate and open the draft PR. The human expert only decides whether to merge for deploy.
