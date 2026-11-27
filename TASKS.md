@@ -19,6 +19,7 @@
 | T5 | 린트·형식 잔여 (`trailing_dot_host` 등) | `lint_public_body` 개선 PR. **연도 본문 재작성 없음** | optional | V-249 허용 |
 | T6 | pytest 1실패 원인 조사·수정 | 네트워크 비의존 mock으로 M0 pytest 0 failed | done | 스펙 2026-11-26-pipeline-contract-sync |
 | T15 | 분기 Automation 프롬프트·§7 문서 | `quarterly-automation-prompt.md` + 가이드 §7 UI 체크리스트 | done | 사용자 B/1, 스펙 2026-11-27-quarterly-automation-docs |
+| T18 | 입수 아카이브 문서 SSOT (범위 1) | `docs/project/intake-archive.md` + 가이드 §3.3 링크 | ready → 파일럿3 PR | 사용자 옵션 1, 스펙 intake-archive-ssot |
 
 ---
 
