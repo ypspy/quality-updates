@@ -45,12 +45,14 @@ verbatim: `gold-excerpts.md` legislative 발췌. 경로: `docs/quality-updates/2
 
 ## 4. DoD Pass/Fail
 
+어미(합니다체)는 [README 공통 Format](README.md#공통-리뷰-3축)만 본다.
+
 | 검사 항목 | Pass | Fail |
 |-----------|------|------|
-| **Format** | style-A 괄호만, note 문법·들여쓰기 준수 | style-B 혼입, admonition 오류 |
+| **Format** | style-A 괄호만, note 문법·들여쓰기 준수 | style-B(`**주제**:`) 혼입, admonition 오류 |
 | **Facts** | 시행일·기한·조문 요지가 원문과 일치 | 추정 일정, 잘못된 규정명 |
 | **Tone-detail** | 불릿 밀도·증류가 Q3 legislative 앵커와 동급 | 원문 조문 나열식 과다 또는 1~2줄 과소 |
-| **의견 제출 기한** | 기한·마감일이 **볼드**로 표시 | 기한이 일반 문장만 있거나 누락 |
+| **의견 제출 기한** | 기한·마감일이 **볼드**(`**…**`)로 표시 | 기한이 일반 문장만 있거나 볼드 없음·누락 |
 | **법령·규정명** | 개정 대상 명칭이 원문과 동일하게 서술됨 | 규정명 누락·축약 오류 |
 
 ---
