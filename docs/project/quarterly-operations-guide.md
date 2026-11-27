@@ -71,6 +71,8 @@
 
 분기마다 “그 분기 DB”를 새로 만들지 않는다. 1b–1e는 **누적 저장소에 키가 있으면 skip**, 없으면(또는 실패 재시도면) 추가한다.
 
+**정본:** [intake-archive.md](intake-archive.md) (레인 B–E 경로·키·git·볼트·상세 링크).
+
 | 레인 | 누적 위치 | git | skip/증분 |
 |------|-----------|-----|-----------|
 | B | `data/fss-replies/{board}/{nttId}/` + `manifest.jsonl` | `item.md`·manifest만. 첨부 HWP 등은 ignore | 완료 건 skipped |
@@ -80,7 +82,7 @@
 
 공개 노출은 아카이브 전체가 아니라 분기 md·corpus 쪽이다. 볼트 `export_*_raw`는 복사본이다.
 
-**후속 (별도 brainstorming):** 레인 간 스키마·보관·gitignore·볼트·`downloads` 이관 규칙을 하나의 아카이브 규격으로 고정하는 작업. 이번 가이드 재작성은 위 As-Is를 **한 표로 적는 것**까지다.
+**후속:** gitignore 정합(옵션 2), 볼트·박스 이관 계약(옵션 3) — [intake-archive.md](intake-archive.md) §4.
 
 ---
 
@@ -191,9 +193,10 @@ cd scripts && python -m crawler.kasb_meetings --dry-run --limit 3
 | `scripts/crawl.py` 등 | 레인 A–E 수집 CLI |
 | [pipeline-contract-sync](../superpowers/specs/2026-11-26-pipeline-contract-sync-design.md) | 게이트·exit·Python 계약 |
 | [quarterly-automation-prompt.md](quarterly-automation-prompt.md) | Automation 실행 프롬프트 정본 |
+| [intake-archive.md](intake-archive.md) | 입수 아카이브 B–E SSOT |
 | [quarterly-automation-docs](../superpowers/specs/2026-11-27-quarterly-automation-docs-design.md) | Automation 문서·V-249 전체 해제 목표 |
 
 | 날짜 | 변경 |
 |------|------|
-| 2026-11-27 | V-249 전체 해제(X=2M Tokens) 반영. UI Enable은 §7.1(T16). 같은 날 앞서 Automation 프롬프트·체크리스트 추가 |
+| 2026-11-27 | V-249 전체 해제(X=2M Tokens). UI Enable은 §7.1(T16). 입수 아카이브 SSOT(`intake-archive.md`) 링크. Automation 프롬프트·체크리스트 |
 | 2026-11-26 | Cursor 유일 실행안으로 재작성 (스펙 cursor-quarterly-routine). 과거 그록 운영·Phase 장문 삭제. Automation은 적용 방법만 |

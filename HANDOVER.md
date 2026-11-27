@@ -3,7 +3,7 @@
 - 작성: 2026-11-24 CET(UTC+1), 조율 담당(Mr. Vegetable) executor. 기준 브랜치 `handover` @ `c8826001` (base `main` `150cdca5`).
 - 갱신: 2026-11-25 KST(UTC+9), 조율 담당(Mr. Vegetable) executor. 갱신 브랜치 `handover-update-20261125`(base `main` `67fc396a`). LAPTOP-YS가 응답해 2.2절을 읽기 전용 점검 결과로 바꾸고, 11/24 이후 바뀐 PR·봇 상태를 반영했다. 이번 갱신에서 새로 확인한 것은 [확인됨 11/25]로 적었다. 그 밖의 [확인됨]은 11/24 작성 때 확인한 값이다.
 - 정정: 2026-11-26 KST, Cursor 이관 에이전트. #189 머지·`COMMON_DECISIONS.md` 제외·열린 PR·사용자 결정·그록봇 읽기 전용 확인(11/26 07:15~07:22 KST)을 반영한다. 새로 확인한 것은 [확인됨 11/26]·[확인됨 11/26 그록봇]. `[추정]`은 그록봇이 재확인하지 않은 항목에 유지한다. 머지는 윤석님 검토·승인 후.
-- 갱신: 2026-11-27 UTC, Cursor. `main`에 #191–#196 머지. **V-249 전체 해제**(X=2M 비캐시 Tokens, AGENTS.md §0). Automation UI Enable은 T16(사용자 §7.1). [확인됨 11/27]
+- 갱신: 2026-11-27 UTC, Cursor. `main`에 #191–#198 머지. **V-249 전체 해제**(X=2M 비캐시 Tokens, AGENTS.md §0). Automation UI Enable은 T16(사용자 §7.1). [확인됨 11/27]
 - 11/24 초안은 quality-updates #187, dart-wrapper #21, disclosure-extractor #14로 각 기본 브랜치에 squash 머지됐다(2026-11-24 12:35~12:36 KST). 이 갱신본은 별도 PR(#190)이다.
 - 표기: [확인됨] 이번 작성에서 직접 확인 / [추정] 기록·봇 보고에 있으나 이번에 재확인 안 함 / [확인 불가] 근거를 찾지 못함 / [접근 불가] 접근 경로 없음(11/24 작성 당시 LAPTOP-YS 오프라인 등).
 - 비밀값(토큰·키·비밀번호·환경변수 값)은 적지 않았다. 이름만 적었다.
@@ -11,7 +11,7 @@
 
 ## 1. 프로젝트 목적과 현재 상태
 
-Quality Updates는 금융위·금감원·회계기준원 등의 회계·감사 규제 자료를 분기별로 정리해 https://quality-updates.onrender.com 에 공개하는 MkDocs 사이트(팀 조직상 Product A)이다 [확인됨: `README.md`, `mkdocs.yml` `site_url`, HTTP 200]. 팀 목표 문서에는 "Quality Updates 생산 파이프라인을 완성하고 안정화한다"가 첫 목표로 적혀 있다 [추정: `/workspace/reports/team-diagnosis-20261122.md` §1]. `main`에 #187–#196이 들어갔다 [확인됨 11/27]. `docs/quality-updates/`에 2012~2026 연도 폴더가 있고 2013(#177)·2012(#183)는 머지, 2011(#184)·2010(#185)은 draft·**보류**이다. **V-249 전체 해제**(2026-11-27, X=2M 비캐시 Tokens, AGENTS.md §0). 분기 운영 정본은 Cursor 가이드·Automation 프롬프트이며 Automation UI는 **미등록**(T16). 다음 정규 분기 루틴 첫 실행은 2027-01-05 09:00 KST이다 [추정: `Cabbage.md` §2].
+Quality Updates는 금융위·금감원·회계기준원 등의 회계·감사 규제 자료를 분기별로 정리해 https://quality-updates.onrender.com 에 공개하는 MkDocs 사이트(팀 조직상 Product A)이다 [확인됨: `README.md`, `mkdocs.yml` `site_url`, HTTP 200]. 팀 목표 문서에는 "Quality Updates 생산 파이프라인을 완성하고 안정화한다"가 첫 목표로 적혀 있다 [추정: `/workspace/reports/team-diagnosis-20261122.md` §1]. `main`에 #187–#198이 들어갔다 [확인됨 11/27]. `docs/quality-updates/`에 2012~2026 연도 폴더가 있고 2013(#177)·2012(#183)는 머지, 2011(#184)·2010(#185)은 draft·**보류**이다. **V-249 전체 해제**(2026-11-27, X=2M 비캐시 Tokens, AGENTS.md §0). 분기 운영 정본은 Cursor 가이드·Automation 프롬프트이며 Automation UI는 **미등록**(T16). 다음 정규 분기 루틴 첫 실행은 2027-01-05 09:00 KST이다 [추정: `Cabbage.md` §2].
 
 ## 2. 자료 위치 지도
 
@@ -281,8 +281,8 @@ PR·커밋 봇 식별 규칙(앞방향만): 라벨 `bot:<봇이름>`(클라우�
 1. T16 Automation UI 등록·Enable(가이드 §7.1).
 2. 백필은 연도 한 건씩·1파 한도 X=2M 안 (#184·#185는 T9 방침 후).
 3. `lint_public_body` 잔여(T5) — 도구/허용목록.
-4. 입수 아카이브 SSOT(#198) 머지 여부.
-5. `FSS Inspection_Grokbot_MINT/` 처분 결정(T7).
+4. `FSS Inspection_Grokbot_MINT/` 처분 결정(T7).
+5. (선택) 한도 2차 상향 — 전체 2000년대 백필 전에.
 
 ## 이 문서만으로 이어받기 어려운 부분
 - Render 대시보드(서비스 설정, 환경변수 등록 여부, MCP HTTP 서버 배포 여부) — [접근 불가].

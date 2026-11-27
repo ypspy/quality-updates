@@ -12,6 +12,7 @@ Agent 진입·프롬프트: [AGENTS.md](../../AGENTS.md)
 
 | 날짜 | 파일 | 요약 |
 |------|------|------|
+| 2026-11-27 | [intake-archive-ssot-design.md](specs/2026-11-27-intake-archive-ssot-design.md) | 입수 아카이브 B–E 문서 SSOT (범위 1 · gitignore/볼트 후속) |
 | 2026-11-27 | [quarterly-automation-docs-design.md](specs/2026-11-27-quarterly-automation-docs-design.md) | 분기 Automation 프롬프트·UI 등록 문서; V-249 전체 해제 목표(파일럿 전) |
 | 2026-11-26 | [expert-rename-design.md](specs/2026-11-26-expert-rename-design.md) | 런타임 허브 HITL→전문가 개명; 역할은 분기 가이드와 정합 |
 | 2026-11-26 | [cursor-quarterly-routine-design.md](specs/2026-11-26-cursor-quarterly-routine-design.md) | Cursor 유일 정규 분기 루틴으로 운영 가이드 재작성; Automation은 적용 방법만 |
@@ -52,6 +53,7 @@ Agent 진입·프롬프트: [AGENTS.md](../../AGENTS.md)
 
 | 날짜 | 파일 | 요약 |
 |------|------|------|
+| 2026-11-27 | [intake-archive-ssot.md](plans/2026-11-27-intake-archive-ssot.md) | 입수 아카이브 B–E 문서 SSOT |
 | 2026-11-27 | [quarterly-automation-docs.md](plans/2026-11-27-quarterly-automation-docs.md) | 분기 Automation 프롬프트·§7 문서 |
 | 2026-11-26 | [expert-rename.md](plans/2026-11-26-expert-rename.md) | 런타임 허브 HITL→전문가 개명 |
 | 2026-11-26 | [cursor-quarterly-routine.md](plans/2026-11-26-cursor-quarterly-routine.md) | Cursor 유일 분기 루틴으로 운영 가이드 재작성 |
