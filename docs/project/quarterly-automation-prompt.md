@@ -46,4 +46,4 @@ Read AGENTS.md and the quarterly-operations-guide before starting. Prefer existi
 | 첫 enable 대상 | 2027-01-05 이후 (그 전 enable해도 crawl이 해당 분기를 거절할 수 있음) |
 | Repository | `ypspy/quality-updates`, base `main` |
 | PR | draft만 (Cursor 기본에 맞춤). 머지·ready 전환 금지 |
-| Enable | V-249 해제됨 — 사용자가 [가이드 §7.1](quarterly-operations-guide.md)로 등록·Enable (T16) |
+| Enable | **이미 활성**(파일럿 전). 재설정·프롬프트 갱신은 [가이드 §7.1](quarterly-operations-guide.md) |

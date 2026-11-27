@@ -155,11 +155,11 @@ cd scripts && python -m crawler.kasb_meetings --dry-run --limit 3
 
 ---
 
-## 7. Automation 적용 방법 (문서 정본 · UI 미등록)
+## 7. Automation 적용 방법 (문서 정본 · **등록됨·활성**)
 
-**상태:** 저장소에 프롬프트 정본은 있다. Cursor UI에서 Automation은 **아직 만들지 않았고 enable하지 않는다.**  
-**V-249는 2026-11-27 전체 해제됨**(한도 X=2,000,000 비캐시 Tokens — AGENTS.md §0). Enable은 아래 §7.1을 사용자가 수행한 뒤에만.  
-에이전트는 Automation을 생성·활성화할 수 없다. 등록은 사용자가 [cursor.com/automations](https://cursor.com/automations)에서 한다.
+**상태:** 저장소에 프롬프트 정본이 있다. Cursor UI Automation은 **V-249 파일럿 전에 사용자가 이미 등록·Enable**했다 (2026-11-27 확인).  
+**V-249는 2026-11-27 전체 해제됨**(한도 X=2,000,000 비캐시 Tokens — AGENTS.md §0).  
+에이전트는 Automation을 생성·비활성·재설정하지 않는다. 변경은 사용자가 [cursor.com/automations](https://cursor.com/automations)에서 한다.
 
 | 항목 | 내용 |
 |------|------|
@@ -169,17 +169,19 @@ cd scripts && python -m crawler.kasb_meetings --dry-run --limit 3
 | 산출 | **draft PR만**. 커밋·PR 본문에 레인·단계·검증 결과 |
 | 금지 | 머지, force-push, 비밀값, 볼트 직접 쓰기, early-allow 없는 조기 nav |
 | 전문가 | Automation이 연 draft PR에 대해 **머지 여부만** 결정 |
-| 활성화 조건 | V-249 **해제됨**(2026-11-27). UI 등록·Enable은 사용자 §7.1 (T16) |
+| UI 상태 | **등록됨·Enable**(파일럿 전). T16 done |
 
-### 7.1 사용자 UI 등록 체크리스트
+### 7.1 사용자 UI 등록 체크리스트 (재등록·점검용)
 
-1. V-249가 AGENTS.md §0 기준으로 해제·한도 X가 적혀 있는지 확인한다.
-2. [cursor.com/automations/new](https://cursor.com/automations/new) (또는 `/automate`)를 연다.
+이미 Enable된 경우 아래는 재설정·프롬프트 갱신 때만 쓴다.
+
+1. V-249·한도 X가 AGENTS.md §0과 맞는지 확인한다.
+2. [cursor.com/automations](https://cursor.com/automations)에서 해당 Automation을 연다 (신규면 `/new`).
 3. Trigger = Scheduled, cron `0 0 5 1,4,7,10 *` (UTC).
 4. Repository = `ypspy/quality-updates`, base branch `main`.
 5. Prompt = [quarterly-automation-prompt.md](quarterly-automation-prompt.md) 펜스 안 텍스트 전체.
 6. Pull request 생성 유지. draft만. 머지 도구 사용 안 함.
-7. Save 후 **Enable**. 등록 후 이 절 상태 문장을 「등록됨」으로 고친다.
+7. Enable 유지. 프롬프트를 바꿨으면 저장소 정본과 UI 본문이 같은지 확인한다.
 
 ---
 
@@ -198,5 +200,5 @@ cd scripts && python -m crawler.kasb_meetings --dry-run --limit 3
 
 | 날짜 | 변경 |
 |------|------|
-| 2026-11-27 | V-249 전체 해제(X=2M Tokens). UI Enable은 §7.1(T16). 입수 아카이브 SSOT(`intake-archive.md`) 링크. Automation 프롬프트·체크리스트 |
+| 2026-11-27 | Automation UI **등록됨·활성**(파일럿 전 Enable)으로 상태 정정. V-249 전체 해제(X=2M). 입수 아카이브 SSOT 링크 |
 | 2026-11-26 | Cursor 유일 실행안으로 재작성 (스펙 cursor-quarterly-routine). 과거 그록 운영·Phase 장문 삭제. Automation은 적용 방법만 |
