@@ -31,6 +31,7 @@
 | T8 | V-249 **전체** 해제 | **done** | 파일럿 #196–#198 + X=2M Tokens + 사용자 `ok` 2026-11-27 |
 | T19 | 2026 Q3 요약 형식·완결성 DoD | **done** | #201 스펙 · #202 family DoD·excerpts · #203 Format Fail 반영 · #204 완결성 DoD. **본문 재작성은 T10** (감사만 함) |
 | T20 | QU 분기 Automation Slack 알림 | **done** | 사용자 붙임 2026-11-27 (에이전트 bc-01a20b0b). Automation `a821548c-e9f8-11f1-a83f-1254d1a6b4db` Enable 유지. 에이전트는 Automation 재설정하지 않음(AGENTS §0) |
+| T13 | Grok 루틴 → Cursor Automation 이관 | **done** | 사용자 확인 2026-11-27. 후속은 T15·T16·T20(QU Quarterly Routine). `qu`/`qu-2`/`fss-b0000291` **재가동 안 함**(AGENTS §0·§7) |
 
 ---
 
@@ -40,9 +41,8 @@
 |----|------|-----------|------|------|
 | T7 | `FSS Inspection_Grokbot_MINT/` 처분 | 용량·에이전트 읽기 필요성 보고 후 사용자 결정 → 유지/이전/gitignore | **blocked** | 사용자 답 1. 용량 112M·364파일. 일상 경로 스크립트는 이 폴더를 읽지 않음 |
 | T9 | #184·#185 처리 | 사용자 방침 후 | **blocked**(보류) | 사용자 답 2(d). V-249와 별개 |
-| T11 | 정규 분기 루틴 **첫 실행 검증** | 2027-01-05 09:00 KST 이후. Automation 기동 또는 동등 실행 → `crawl.py --year 2027 --quarter 1` 등 가이드 §3 · draft PR. (프롬프트·Enable·Slack은 T15·T16·T20으로 **이미 준비**) | **blocked**(일자) | V-031, V-222 |
+| T11 | 정규 분기 루틴 **첫 실행 검증** | 2027-01-05 09:00 KST 이후. Automation 기동 또는 동등 실행 → `crawl.py --year 2027 --quarter 1` 등 가이드 §3 · draft PR. (이관·프롬프트·Enable·Slack은 T13·T15·T16·T20으로 **이미 준비**) | **blocked**(일자) | V-031, V-222 |
 | T12 | 장기 목표 1 완료 | 무인 파이프라인 4회 + 2025→2000 백필 + 2026Q3 골드셋 **형태 적용** | **blocked**(장기) | V-205. 형태 **기준**(DoD)은 T19 done. 적용·백필·무인 4회는 미완 |
-| T13 | Grok 루틴 | 재개 지시 | **paused** | 사용자 답 7(c) |
 | T14 | 품질관리감리 자동 파이프라인·백필 | — | **blocked**(비대상) | 장기 목표 「지금 하지 않는 것」 |
 
 ---
