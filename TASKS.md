@@ -18,6 +18,7 @@
 | T4 | #190 HANDOVER 사실 정정 | #189 머지·COMMON 없음·열린 PR·결정 반영. `[추정]`은 그록봇 확인 전 유지 | ready | 사용자 답 3·4 |
 | T5 | 린트·형식 잔여 (`trailing_dot_host` 등) | `lint_public_body` 개선 PR. **연도 본문 재작성 없음** | optional | V-249 허용 |
 | T6 | pytest 1실패 원인 조사·수정 | 네트워크 비의존 mock으로 M0 pytest 0 failed | done | 스펙 2026-11-26-pipeline-contract-sync |
+| T15 | 분기 Automation 프롬프트·§7 문서 | `quarterly-automation-prompt.md` + 가이드 §7 UI 체크리스트 | done | 사용자 B/1, 스펙 2026-11-27-quarterly-automation-docs |
 
 ---
 
@@ -26,7 +27,8 @@
 | ID | 목표 | 완료 기준 | 상태 | 근거 |
 |----|------|-----------|------|------|
 | T7 | `FSS Inspection_Grokbot_MINT/` 처분 | 용량·에이전트 읽기 필요성 보고 후 사용자 결정 → 유지/이전/gitignore | **blocked** | 사용자 답 1. 용량 112M·364파일. 일상(린트·형식·QU 분기) 경로에서 스크립트가 이 폴더를 읽지 않음. fss-review 원문 작업·스펙만 경로를 언급. 품질관리감리 자동 파이프라인은 「지금 하지 않는 것」 |
-| T8 | V-249 해제(연도 백필·새 클라우드 에이전트) | AGENTS.md §0 파일럿 3회 + 표 보고 + 사용자 수치(X) + 명시 승인 | **blocked** | V-249. X·한도 단위 비움 |
+| T8 | V-249 **전체** 해제(연도 백필·새 클라우드 에이전트·Automation enable) | AGENTS.md §0 파일럿 3회 + 표 보고 + 사용자 수치(X) + 명시 승인 | **blocked** | V-249. 목표 B(2026-11-27). X·한도 단위 비움 |
+| T16 | Automation UI 등록·enable | cursor.com/automations에 프롬프트·cron 등록 후 enable | **blocked** | T8 해제 후. 가이드 §7.1 |
 | T9 | #184·#185 처리 | 사용자 방침 후 | **blocked**(보류) | 사용자 답 2(d) |
 | T10 | 백필 재개(2012·2013 재작성 → 2009~2000) | T8 해제 후 | **blocked** | V-249, 장기 목표 1 |
 | T11 | 정규 분기 루틴 검증 | 2027-01-05 09:00 KST 이후. `crawl.py --year 2027 --quarter 1` → 종료 코드 2 | **blocked**(일자) | V-031, V-222 |

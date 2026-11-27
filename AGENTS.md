@@ -37,6 +37,10 @@ Cursor·Claude 등 **AI 에이전트**가 이 저장소에서 작업할 때의 �
 
 ### V-249 해제 조건 (blocked: 파일럿 후 결정)
 
+**해제 목표 (2026-11-27):** 사용자는 **전체 해제(B)** 를 선택했다 (Automation만 예외가 아님).
+중지는 **아직 유효**하다. 아래 파일럿·한도 X·명시 승인 전에는 연도 백필·새 클라우드 에이전트·Automation enable을 하지 않는다.
+분기 Automation **프롬프트 정본**은 [docs/project/quarterly-automation-prompt.md](docs/project/quarterly-automation-prompt.md), 등록 절차는 [분기 운영 가이드](docs/project/quarterly-operations-guide.md) §7.
+
 V-249(린트·형식 기준 PR 외 연도 작업 및 새 클라우드 에이전트 중지)는
 아래 절차와 조건을 모두 충족한 뒤에만 해제를 검토한다.
 해제 여부는 사용자만 결정하며, 에이전트는 스스로 해제하지 않는다.
