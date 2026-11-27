@@ -41,6 +41,7 @@
 ### Task 1: summary-formats README + four family docs
 
 **Files:**
+
 - Create: `docs-dev/summary-formats/README.md`
 - Create: `docs-dev/summary-formats/general-note.md`
 - Create: `docs-dev/summary-formats/legislative.md`
@@ -48,12 +49,15 @@
 - Create: `docs-dev/summary-formats/kasb-schedule.md`
 
 **Interfaces:**
+
 - Consumes: Spec §4–§6; Q3 path `docs/quality-updates/2026/2026-07-01_to_2026-09-30.md`
+
 - Produces: Family docs with sections 목적·범위 / 필수 구조 / 모범 앵커 / DoD Pass·Fail / 비범위; README mapping table
 
 - [ ] **Step 1: Create `README.md`**
 
 Include:
+
 1. Purpose: writing + review DoD for Q3-shaped notes; MkDocs-unpublished (`docs-dev/`).
 2. Economics note: agents use `gold-excerpts` in SUMMARIZE; these files are rules/review — not a substitute for loading the full Q3 md every session.
 3. Mapping table (every Q3 section that has notes):
@@ -138,10 +142,13 @@ git commit -m "docs: add summary-formats family DoD index and rules"
 ### Task 2: sanctions-format Pass/Fail section
 
 **Files:**
+
 - Modify: `docs-dev/sanctions-format.md` (append after §6; do not rewrite §1–§6)
 
 **Interfaces:**
+
 - Consumes: Spec §5.2 sanctions; existing lint rules in §5
+
 - Produces: `## 7. 리뷰 Pass/Fail (DoD)`
 
 - [ ] **Step 1: Append §7**
@@ -188,11 +195,14 @@ git commit -m "docs: add Pass/Fail DoD section to sanctions-format"
 ### Task 3: gold-excerpts + checklist → Q3
 
 **Files:**
+
 - Modify: `.claude/skills/quality-updates-writer/reference/gold-excerpts.md`
 - Modify: `.claude/skills/quality-updates-writer/reference/gold-excerpts-checklist.md`
 
 **Interfaces:**
+
 - Consumes: Q3 note blocks (verbatim copy, edit nothing); Task 1 family IDs
+
 - Produces: Excerpt-only session gold with Q3-first full-gold pointer; checklist covers aligned
 
 - [ ] **Step 1: Rewrite excerpts header**
@@ -265,13 +275,16 @@ git commit -m "docs: refresh gold-excerpts to 2026 Q3 family anchors"
 ### Task 4: SKILL + project README + superpowers index
 
 **Files:**
+
 - Modify: `.claude/skills/quality-updates-writer/SKILL.md`
 - Modify: `docs/project/README.md`
 - Modify: `docs/superpowers/README.md`
 - Do **not** modify `AGENTS.md` unless user explicitly OK’d the one-line link in this PR conversation.
 
 **Interfaces:**
+
 - Consumes: Task 1–3 paths
+
 - Produces: Cross-links; Q3-first optional full gold; no full-Q3 mandatory Read
 
 - [ ] **Step 1: Patch SKILL.md header / gold paths**
@@ -313,6 +326,7 @@ git commit -m "docs: point writer skill and SSOT map at summary-formats DoD"
 ### Task 5: Verify + PR
 
 **Files:**
+
 - Test: lint/commands below; no pytest required (docs-only)
 - PR body: scope, economics note, secrets none
 
@@ -363,6 +377,7 @@ git push -u origin HEAD
 PR title: `docs: 2026 Q3 summary-format DoD + gold-excerpts align`
 
 PR body must include:
+
 - Scope: `docs-dev/summary-formats/*`, sanctions Pass/Fail, gold-excerpts/checklist, SKILL, project/superpowers README
 - Non-scope: no `docs/quality-updates` edits; no lint expansion; AGENTS.md unchanged unless approved
 - Economics: Excerpt-only retained; full Q3 not mandatory session gold
