@@ -3,6 +3,7 @@
 - 작성: 2026-11-24 CET(UTC+1), 조율 담당(Mr. Vegetable) executor. 기준 브랜치 `handover` @ `c8826001` (base `main` `150cdca5`).
 - 갱신: 2026-11-25 KST(UTC+9), 조율 담당(Mr. Vegetable) executor. 갱신 브랜치 `handover-update-20261125`(base `main` `67fc396a`). LAPTOP-YS가 응답해 2.2절을 읽기 전용 점검 결과로 바꾸고, 11/24 이후 바뀐 PR·봇 상태를 반영했다. 이번 갱신에서 새로 확인한 것은 [확인됨 11/25]로 적었다. 그 밖의 [확인됨]은 11/24 작성 때 확인한 값이다.
 - 정정: 2026-11-26 KST, Cursor 이관 에이전트. #189 머지·`COMMON_DECISIONS.md` 제외·열린 PR·사용자 결정·그록봇 읽기 전용 확인(11/26 07:15~07:22 KST)을 반영한다. 새로 확인한 것은 [확인됨 11/26]·[확인됨 11/26 그록봇]. `[추정]`은 그록봇이 재확인하지 않은 항목에 유지한다. 머지는 윤석님 검토·승인 후.
+- 갱신: 2026-11-27 UTC, Cursor. `main`에 #191(AGENTS·TASKS)·#192(M0)·#193(분기 Cursor 루틴)·#194(전문가 개명)·#195(Automation 프롬프트 문서) 머지. V-249는 **전체 해제 목표(B)** 이나 중지는 유지; 파일럿 3회 진행 중. Automation UI enable은 해제 후(T16). [확인됨 11/27]
 - 11/24 초안은 quality-updates #187, dart-wrapper #21, disclosure-extractor #14로 각 기본 브랜치에 squash 머지됐다(2026-11-24 12:35~12:36 KST). 이 갱신본은 별도 PR(#190)이다.
 - 표기: [확인됨] 이번 작성에서 직접 확인 / [추정] 기록·봇 보고에 있으나 이번에 재확인 안 함 / [확인 불가] 근거를 찾지 못함 / [접근 불가] 접근 경로 없음(11/24 작성 당시 LAPTOP-YS 오프라인 등).
 - 비밀값(토큰·키·비밀번호·환경변수 값)은 적지 않았다. 이름만 적었다.
@@ -10,7 +11,7 @@
 
 ## 1. 프로젝트 목적과 현재 상태
 
-Quality Updates는 금융위·금감원·회계기준원 등의 회계·감사 규제 자료를 분기별로 정리해 https://quality-updates.onrender.com 에 공개하는 MkDocs 사이트(팀 조직상 Product A)이다 [확인됨: `README.md`, `mkdocs.yml` `site_url`, HTTP 200]. 팀 목표 문서에는 "Quality Updates 생산 파이프라인을 완성하고 안정화한다"가 첫 목표로 적혀 있다 [추정: `/workspace/reports/team-diagnosis-20261122.md` §1]. `150cdca5`(#186) 이후 `main`에 #187(HANDOVER)·#188(DECISIONS 원판)·#189(DECISIONS 1절만, `3d55bcce`)가 들어갔다. 현재 `origin/main` `3d55bcce` CI는 성공이다 [확인됨 11/26: `git log origin/main`, `gh run list`]. `docs/quality-updates/`에 2012~2026 연도 폴더가 있고 2013(#177)·2012(#183)는 머지, 2011(#184)·2010(#185)은 draft로 열려 있다 [확인됨]. V-249 원문 「린트·형식 기준 PR만 하고 나머지 연도 작업과 새 클라우드 에이전트는 멈춰」로 연도 백필·새 클라우드 에이전트는 중지, 린트·형식 PR만 허용이다 [확인됨 11/26: 사용자 원문]. 사용자는 중지를 유지하고 #184·#185는 보류로 두었다 [확인됨 11/26]. 다음 정규 분기 루틴 첫 실행은 2027-01-05 09:00 KST이다 [추정: `Cabbage.md` §2].
+Quality Updates는 금융위·금감원·회계기준원 등의 회계·감사 규제 자료를 분기별로 정리해 https://quality-updates.onrender.com 에 공개하는 MkDocs 사이트(팀 조직상 Product A)이다 [확인됨: `README.md`, `mkdocs.yml` `site_url`, HTTP 200]. 팀 목표 문서에는 "Quality Updates 생산 파이프라인을 완성하고 안정화한다"가 첫 목표로 적혀 있다 [추정: `/workspace/reports/team-diagnosis-20261122.md` §1]. `150cdca5`(#186) 이후 `main`에 #187(HANDOVER)·#188(DECISIONS 원판)·#189(DECISIONS 1절만, `3d55bcce`)가 들어갔다. 현재 `origin/main` 선두는 `#195` 머지 이후이다 [확인됨 11/27: `git log origin/main`]. `docs/quality-updates/`에 2012~2026 연도 폴더가 있고 2013(#177)·2012(#183)는 머지, 2011(#184)·2010(#185)은 draft로 열려 있다 [확인됨]. V-249는 연도 백필·새 클라우드 에이전트 중지·린트·형식 PR만 허용을 유지한다 [확인됨 11/26]. 사용자는 전체 해제(B)를 목표로 했으나 파일럿·한도 X·명시 승인 전이라 중지는 유효하다 [확인됨 11/27]. #184·#185는 보류. 분기 운영 정본은 Cursor 가이드·Automation 프롬프트 문서이며, Automation은 **미등록**. 다음 정규 분기 루틴 첫 실행은 2027-01-05 09:00 KST이다 [추정: `Cabbage.md` §2].
 
 ## 2. 자료 위치 지도
 
@@ -262,25 +263,25 @@ PR·커밋 봇 식별 규칙(앞방향만): 라벨 `bot:<봇이름>`(클라우�
 
 | 단계 | 목표 | 완료 기준(명령으로 확인) |
 |---|---|---|
-| M0 이관 기반 | Cursor에서 검증·규칙 문서 정착 | AGENTS/TASKS 머지, `validate`/`mkdocs --strict`/`lint:md` rc 0. pytest 0 failed(T6), 지원 3.11–3.12 문서 정합 |
-| M1 형식·린트(V-249 허용) | 공개 본문 린트·형식 잔여만 | `lint_public_body` 개선. **2012·2013 재작성·연도 백필은 V-249 해제 전 하지 않음** |
+| M0 이관 기반 | Cursor에서 검증·규칙 문서 정착 | **done** (#191·#192). AGENTS/TASKS, pytest T6, 3.11–3.12 문서 정합 |
+| M1 형식·린트(V-249 허용) | 공개 본문 린트·형식 잔여만 | `lint_public_body` 도구 개선(T5). **연도 본문 재작성·백필은 해제 전 금지** |
 | M2 백필 재개 | V-249 해제 + 사용자 승인 후 | #184·#185 방침 재확인 → 2009~2000. 지금은 **blocked** |
-| M3 정규 분기 루틴 검증 | 2027-01-05 09:00 KST 이후 | `crawl.py --year 2027 --quarter 1` → 종료 코드 2 |
+| M3 정규 분기 루틴 | 가이드·Automation 문서 → 2027-01-05 검증 | 가이드·프롬프트 **done** (#193·#195). Automation enable은 T16. `crawl.py --year 2027 --quarter 1` → exit 2는 당일 이후 |
 | M4 정리 | 머지된 원격 브랜치 정리(승인 후) | PUBLIC 유지는 결정됨. 브랜치 삭제는 별도 승인 |
 
 ## 11. 봇들이 루틴 업무 외에 맡을 수 있었던 후보 작업 (제안, 근거가 있는 것만)
 - Cabbage: `test_kasb_file_proxy_saves_to_configured_downloads_folder` — 해소됨(§7.1, Task 1·plan 2026-11-26); 조사 후보 아님.
-- Cabbage: `trailing_dot_host` 66건·`fsc.go.kr./` 경고 일괄 정리 PR — 근거 7절 3.
-- Mint: 2012 배포본 진단(`/workspace/reviews/qu-2012-deployed-diagnosis.md`)을 기준으로 2012 재작성 검수표 미리 작성 — 근거 6.2.
+- Cabbage: `trailing_dot_host` 경고 — **연도 본문 일괄 수정은 V-249 금지**. 도구/허용목록 개선만 T5.
+- Mint: 2012 배포본 진단(`/workspace/reviews/qu-2012-deployed-diagnosis.md`)을 기준으로 2012 재작성 검수표 미리 작성 — 근거 6.2. (해제 전 실행 금지)
 - Kale: 회계기준자문위원회 50건·품질관리감리 위키 반입 설계 문서(실행은 승인 후) — 근거 `Kale.md` §5.
 - Vegetable: 머지된 원격 브랜치 목록 작성(삭제는 승인 후), 봇 라벨 생성안 — 근거 7절 4·10.
 
 ## 12. 다음에 바로 할 일 5개
-1. 윤석님이 이 PR(#190) 머지 여부를 결정.
-2. AGENTS.md·TASKS.md 이관 규칙 PR을 검토·머지(Cursor 레인).
-3. Cursor에서 `main` M0 검증 명령 실행 루틴 유지 — pytest T6 실패는 §7.1에서 해소됨.
-4. `FSS Inspection_Grokbot_MINT/` 처분 결정(용량·에이전트 읽기 보고 후).
-5. V-249 해제 파일럿(3회) 시점을 사용자가 정하기 전까지 중지 유지.
+1. V-249 파일럿 3회 완료 → 사용량 표 → 한도 X → **명시 승인**으로 전체 해제(B).
+2. 해제 후 Automation UI 등록·enable (가이드 §7.1, T16).
+3. 파일럿 2: `lint_public_body` 도구 개선(T5, 연도 본문 비수정).
+4. 파일럿 3(중간): 입수 아카이브 규격화 brainstorming → spec.
+5. `FSS Inspection_Grokbot_MINT/` 처분 결정(T7).
 
 ## 이 문서만으로 이어받기 어려운 부분
 - Render 대시보드(서비스 설정, 환경변수 등록 여부, MCP HTTP 서버 배포 여부) — [접근 불가].
@@ -288,9 +289,10 @@ PR·커밋 봇 식별 규칙(앞방향만): 라벨 `bot:<봇이름>`(클라우�
 - Grok 루틴은 플랫폼에 등록되어 있으며 사용자는 당분간 중지를 택했다 [확인됨 11/26]. Cursor로 자동 이관되지 않는다.
 - Mint 분류표·원문 입수본·제재 969 정본은 봇 박스에만 있다 [확인됨 11/26 그록봇].
 - 랩탑 `C:\dev\quality-updates`는 `fix/sanction-kale-handoff-format` @ `4cfc3561`, untracked `summary_bench/` HTML 4개. main과 다르다 [확인됨 11/26 그록봇].
+- Cursor 사용량 수치는 에이전트가 읽지 못한다. 파일럿 전후 값은 사용자가 알려 줘야 한다 [확인됨 11/27].
 
 ## 내게 확인이 필요한 질문 (미결만)
 1. `FSS Inspection_Grokbot_MINT/` — 유지 / 저장소 밖 이전 / gitignore? (에이전트 읽기 필요성 보고 후)
-2. V-249 해제 파일럿 3회를 언제 돌릴지, 한도 단위·X 수치
+2. V-249 파일럿 각 회 **전후 사용량** 수치와, 해제 시 한도 단위·X
 3. 랩탑 트리를 `main`에 맞출지 (`fix/sanction-kale-handoff-format` 유지 여부)
 4. ARF 루틴 3개 일시정지 여부 (queue.md 잔여)

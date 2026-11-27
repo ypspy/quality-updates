@@ -12,14 +12,15 @@
 
 | ID | 목표 | 완료 기준 | 상태 | 근거 |
 |----|------|-----------|------|------|
-| T1 | `.gitignore`·`.env.example` 점검 | summary_bench ignore, PUBLIC·값 금지 주석, 코드 env 이름과 일치 | ready → 이 PR | 사용자 답 9(c) |
-| T2 | `AGENTS.md` 보강 | 장기 목표, V-249 해제 문안, 머지 4항목, 하지 말 것 | ready → 이 PR | 사용자 답 6·5 |
-| T3 | `TASKS.md` 신설 | 이 파일 | ready → 이 PR | 사용자 답 9(b) |
-| T4 | #190 HANDOVER 사실 정정 | #189 머지·COMMON 없음·열린 PR·결정 반영. `[추정]`은 그록봇 확인 전 유지 | ready | 사용자 답 3·4 |
-| T5 | 린트·형식 잔여 (`trailing_dot_host` 등) | `lint_public_body` 개선 PR. **연도 본문 재작성 없음** | optional | V-249 허용 |
+| T1 | `.gitignore`·`.env.example` 점검 | summary_bench ignore, PUBLIC·값 금지 주석, 코드 env 이름과 일치 | done | #191 |
+| T2 | `AGENTS.md` 보강 | 장기 목표, V-249 해제 문안, 머지 4항목, 하지 말 것 | done | #191 |
+| T3 | `TASKS.md` 신설 | 이 파일 | done | #191 |
+| T4 | #190 HANDOVER 사실 정정 | #189 머지·COMMON 없음·열린 PR·결정 반영 | done | #190 |
+| T5 | 린트·형식 잔여 (`trailing_dot_host` 등) | `lint_public_body` **도구** 개선(요약·경고 계약). **연도 본문 재작성 없음** | done | #197 |
 | T6 | pytest 1실패 원인 조사·수정 | 네트워크 비의존 mock으로 M0 pytest 0 failed | done | 스펙 2026-11-26-pipeline-contract-sync |
-| T15 | 분기 Automation 프롬프트·§7 문서 | `quarterly-automation-prompt.md` + 가이드 §7 UI 체크리스트 | done | 사용자 B/1, 스펙 2026-11-27-quarterly-automation-docs |
-| T18 | 입수 아카이브 문서 SSOT (범위 1) | `docs/project/intake-archive.md` + 가이드 §3.3 링크 | ready → 파일럿3 PR | 사용자 옵션 1, 스펙 intake-archive-ssot |
+| T15 | 분기 Automation 프롬프트·§7 문서 | `quarterly-automation-prompt.md` + 가이드 §7 UI 체크리스트 | done | #195 |
+| T17 | V-249 파일럿 1 (문서 정합) | HANDOVER·TASKS를 #191–#195·해제 목표 B에 맞춤 | done | #196 |
+| T18 | 입수 아카이브 문서 SSOT (범위 1) | `docs/project/intake-archive.md` + 가이드 §3.3 링크 | ready → #198 | 파일럿3 · 스펙 intake-archive-ssot |
 
 ---
 
