@@ -30,7 +30,7 @@ Quality Updates **저장소 운영·개발·Agent**용 문서 목록입니다.
 | 문서 | 용도 |
 |------|------|
 | [quarterly-operations-guide.md](quarterly-operations-guide.md) | **분기 파이프라인** — Cursor 유일 루틴(A–E), Agent 실행·전문가 머지, 품질 게이트 |
-| [quarterly-automation-prompt.md](quarterly-automation-prompt.md) | **Automation 프롬프트** — UI 붙여넣기 정본. enable은 V-249 해제 후 |
+| [quarterly-automation-prompt.md](quarterly-automation-prompt.md) | **Automation 프롬프트** — UI 붙여넣기 정본. UI는 등록·Enable됨(파일럿 전) |
 | [intake-archive.md](intake-archive.md) | **입수 아카이브 B–E** — 경로·키·git·볼트 As-Is SSOT |
 | [editor-curation-workflow.md](editor-curation-workflow.md) | **편집기** — 마커, skip, prepare_deploy |
 | [curation-rules.md](curation-rules.md) | **큐레이션 규칙** — 스킵·링크만·요약·출처 제안. 편집기를 대체하지 않음 |

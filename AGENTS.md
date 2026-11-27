@@ -32,7 +32,6 @@ Cursor·Claude 등 **AI 에이전트**가 이 저장소에서 작업할 때의 �
 ### 지금 해도 되는 것
 
 - **연도 백필·연도 본문 재작성·새 클라우드 에이전트** — 아래 V-249 한도 안에서, **연도 PR은 한 건씩**
-- **Automation UI 등록·Enable** — 사용자만 ([가이드 §7.1](docs/project/quarterly-operations-guide.md))
 - 린트·형식 기준 PR
 - 이관 문서·에이전트 규칙·TASKS·검증·원인 조사
 - 사용자가 명시한 그 밖의 작업
@@ -50,9 +49,9 @@ Cursor·Claude 등 **AI 에이전트**가 이 저장소에서 작업할 때의 �
 | 3 | 중간 · 아카이브 docs | ~109,147 | #198 |
 
 - 파일럿 최대 = **259,764**. 식: `예상 소모 = N × 최대 × 1.5` (1파 N≈5 ≈ 1.95M → X=2M).
-- 1파 범위: Automation 등록·enable + 연도 PR 소수. 전체 2000년대 백필은 2차 한도(사용자 상향) 전제.
+- 1파 범위: 연도 PR 소수(한 건씩). 전체 2000년대 백필은 2차 한도(사용자 상향) 전제.
+- **분기 Automation:** UI **등록·Enable 완료**(파일럿 전). 프롬프트 정본 [quarterly-automation-prompt.md](docs/project/quarterly-automation-prompt.md). 에이전트는 Automation을 끄거나 재설정하지 않는다.
 - 에이전트는 한도를 **스스로 올리거나 무시하지 않는다**. X 소진·상향·2차 파는 사용자 승인만.
-- 분기 Automation 프롬프트 정본: [quarterly-automation-prompt.md](docs/project/quarterly-automation-prompt.md). UI Enable은 가이드 §7.1.
 
 ---
 

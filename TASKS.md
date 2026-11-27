@@ -12,7 +12,6 @@
 
 | ID | 목표 | 완료 기준 | 상태 | 근거 |
 |----|------|-----------|------|------|
-| T16 | Automation UI 등록·enable | cursor.com/automations에 프롬프트·cron 등록 후 enable | **ready** | T8 해제. 가이드 §7.1. 사용자 UI만 |
 | T10 | 백필 재개(2012·2013 재작성 → 2009~2000) | 연도 **한 건씩** draft PR. 1파 한도 X=2M Tokens 안 | **ready** | T8 해제. #184·#185는 T9 |
 | T5 | 린트·형식 잔여 (`trailing_dot_host` 등) | 추가 경고 정리. 연도 본문 대량 재작성은 별도 연도 PR | optional | #197 도구 개선 완료 |
 
@@ -26,6 +25,7 @@
 | T5 도구 | `lint_public_body` trailing_dot 요약 | done | #197 |
 | T6 | pytest 1실패 mock 격리 | done | 스펙 pipeline-contract-sync |
 | T15 | 분기 Automation 프롬프트·§7 문서 | done | #195 |
+| T16 | Automation UI 등록·enable | **done** | 파일럿 **전** Enable. 사용자 확인 2026-11-27 |
 | T17 | V-249 파일럿 1 (문서 정합) | done | #196 |
 | T18 | 입수 아카이브 문서 SSOT (범위 1) | done | #198 |
 | T8 | V-249 **전체** 해제 | **done** | 파일럿 #196–#198 + X=2M Tokens + 사용자 `ok` 2026-11-27 |
