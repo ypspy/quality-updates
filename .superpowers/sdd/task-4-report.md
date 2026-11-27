@@ -8,7 +8,7 @@
 
 | SHA | Message |
 |-----|---------|
-| (see `git log -1 --oneline` on branch) | `docs: point writer skill and SSOT map at summary-formats DoD` |
+| `f180aaa4` | `docs: point writer skill and SSOT map at summary-formats DoD` |
 
 ### Changed files
 
